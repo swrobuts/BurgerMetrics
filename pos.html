@@ -3,558 +3,597 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BurgerMetrics POS Terminal</title>
+<title>BurgerMetrics POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Barcode+39&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#eef0f2;--white:#fff;--dark:#2d3436;--accent:#e17055;--green:#00b894;
-  --red:#d63031;--blue:#0984e3;--purple:#6c5ce7;--yellow:#fdcb6e;--orange:#e17055;
-  --gray:#636e72;--light-gray:#dfe6e9;--shadow:0 2px 8px rgba(0,0,0,.12);
-  --cat-burger:#d63031;--cat-sides:#e17055;--cat-drinks:#0984e3;
-  --cat-dessert:#6c5ce7;--cat-breakfast:#f9ca24;--cat-extras:#00b894;--cat-quick:#2d3436;
+  --bg:#f0f2f5;--white:#ffffff;--dark:#1a1d21;--text:#374151;--text-light:#6b7280;
+  --border:#e5e7eb;--border-hover:#d1d5db;
+  --green:#2d9f6f;--green-hover:#258a5e;--red:#dc4b4b;
+  --cat-burger:#d4564e;--cat-sides:#e8a84c;--cat-drinks:#5b8db8;
+  --cat-dessert:#9b7bb8;--cat-breakfast:#d4a843;--cat-extras:#6ba389;--cat-quick:#6b7280;
+  --header-bg:#2d3436;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);
+  --radius:8px;--radius-lg:12px;
 }
-html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#636e72;}
-.terminal-frame{
-  max-width:1400px;margin:18px auto;background:#23272a;border-radius:18px;
-  box-shadow:0 8px 40px rgba(0,0,0,.45);padding:10px 10px 14px;position:relative;
-}
-.terminal-bezel{display:flex;align-items:center;gap:8px;padding:4px 12px 8px;}
-.terminal-dot{width:12px;height:12px;border-radius:50%;}
-.terminal-dot.r{background:#ff5f56;}.terminal-dot.y{background:#ffbd2e;}.terminal-dot.g{background:#27c93f;}
-.terminal-label{color:#999;font-size:11px;margin-left:auto;letter-spacing:1px;text-transform:uppercase;}
-.terminal-screen{background:var(--bg);border-radius:10px;overflow:hidden;min-height:calc(100vh - 80px);}
-/* === STATUSBAR (Zeile 1) === */
-.pos-statusbar{
-  background:#1e2729;color:#a0adb3;display:flex;align-items:center;
-  padding:0 16px;height:36px;font-size:11px;
-  border-bottom:1px solid #3a4a52;
-}
-.pos-statusbar .logo{font-weight:800;font-size:13px;color:#cfd9db;letter-spacing:-.3px;}
-.pos-statusbar .logo span{color:var(--accent);}
-.status-center{margin:0 auto;display:flex;gap:6px;align-items:center;color:#8395a0;}
-.status-center .sep{opacity:.4;}
-.status-right{display:flex;gap:12px;align-items:center;}
-.status-right .rev-label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;opacity:.7;}
-.status-right .rev-val{font-weight:700;color:var(--green);font-size:12px;}
-.status-right .clock{color:#8395a0;font-variant-numeric:tabular-nums;}
-.view-toggle{display:flex;border-radius:4px;overflow:hidden;border:1px solid #4a5d6a;margin-left:8px;flex-shrink:0;}
-.view-toggle a,.view-toggle span{
-  padding:4px 10px;font-size:10px;font-weight:700;text-decoration:none;
-  letter-spacing:.3px;transition:.15s;cursor:pointer;
-}
-.view-toggle .vt-active{background:#4a5d6a;color:#fff;}
-.view-toggle .vt-link{background:transparent;color:#6b8290;}
-.view-toggle .vt-link:hover{background:#2d3a44;color:#b0c4ce;}
-/* === TOOLBAR (Zeile 2) === */
-.pos-toolbar{
-  background:#374955;display:flex;align-items:center;gap:6px;
-  padding:0 10px;height:56px;
-  border-bottom:1px solid #4a5d6a;
-}
-.toolbar-toggle{display:flex;gap:2px;flex-shrink:0;}
-.toolbar-toggle-btn{
-  border:none;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;
-  cursor:pointer;transition:.15s;background:#2d3a44;color:#8ea1ab;min-height:40px;
-}
-.toolbar-toggle-btn.active{background:var(--accent);color:#fff;}
-.toolbar-toggle-btn:hover:not(.active){background:#3d4e58;}
-.toolbar-cats{display:flex;gap:3px;flex:1;margin:0 8px;}
-.toolbar-cat{
-  flex:1;padding:8px 4px;border:none;border-radius:6px;cursor:pointer;
-  font-size:12px;font-weight:700;color:#fff;text-align:center;transition:.15s;
-  text-shadow:0 1px 2px rgba(0,0,0,.2);min-height:40px;
-}
-.toolbar-cat:hover{filter:brightness(1.15);}
-.toolbar-cat.active{box-shadow:0 2px 10px rgba(0,0,0,.3);transform:translateY(-1px);}
-.toolbar-cat[data-cat="quick"]{background:#4a5d6a;}
-.toolbar-cat[data-cat="burger"]{background:var(--cat-burger);}
-.toolbar-cat[data-cat="sides"]{background:var(--cat-sides);}
-.toolbar-cat[data-cat="drinks"]{background:var(--cat-drinks);}
-.toolbar-cat[data-cat="dessert"]{background:var(--cat-dessert);}
-.toolbar-cat[data-cat="breakfast"]{background:var(--cat-breakfast);color:#333;text-shadow:none;}
-.toolbar-cat[data-cat="extras"]{background:var(--cat-extras);}
-/* toolbar-dash removed — data view toggle now in statusbar */
-.pos-main{display:flex;height:calc(100vh - 186px);min-height:460px;}
-.pos-left{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.pos-right{width:400px;background:var(--white);border-left:2px solid var(--light-gray);display:flex;flex-direction:column;}
-/* cat-tabs now in toolbar, old standalone styles removed */
-.product-grid{
-  flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  grid-auto-rows:minmax(90px,120px);gap:8px;padding:10px;
-  overflow-y:auto;align-content:start;
-}
-.product-btn{
-  width:100%;aspect-ratio:1.2;border:none;border-radius:10px;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:12px;font-weight:700;color:#fff;
-  text-shadow:0 1px 2px rgba(0,0,0,.18);transition:filter .12s;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
-.product-btn:hover{filter:brightness(1.12);}
-.product-btn:active{filter:brightness(.88);}
-.product-btn .price{font-size:20px;margin-top:8px;font-weight:900;}
-.product-btn .name{font-size:15px;font-weight:700;text-align:center;line-height:1.2;}
-.product-btn.cat-burger{background:var(--cat-burger);}
-.product-btn.cat-sides{background:var(--cat-sides);}
-.product-btn.cat-drinks{background:var(--cat-drinks);}
-.product-btn.cat-dessert{background:var(--cat-dessert);}
-.product-btn.cat-breakfast{background:var(--cat-breakfast);color:#333;text-shadow:none;}
-.product-btn.cat-extras{background:var(--cat-extras);}
-.product-btn.cat-quick{background:var(--dark);}
-.order-header{
-  background:var(--dark);color:#fff;padding:10px 14px;display:flex;
-  justify-content:space-between;align-items:center;font-weight:700;font-size:14px;
-}
-.order-type-btns{display:flex;gap:4px;}
-.order-type-btn{
-  border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;
-  cursor:pointer;transition:.15s;background:#444;color:#ccc;
-}
-.order-type-btn.active{background:var(--accent);color:#fff;}
-.order-num{font-size:12px;color:#b2bec3;}
-.table-select{display:none;margin:0 14px;padding:6px;}
-.table-select.show{display:block;}
-.table-select select{width:100%;padding:6px;border-radius:6px;border:1px solid var(--light-gray);font-size:13px;}
-.order-items{flex:1;overflow-y:auto;padding:6px 10px;}
-.order-item{
-  display:flex;align-items:center;gap:6px;padding:7px 4px;
-  border-bottom:1px solid var(--light-gray);font-size:13px;
-}
-.order-item .qty-controls{display:flex;align-items:center;gap:2px;}
-.order-item .qty-btn{
-  width:44px;height:44px;border:none;border-radius:8px;font-size:20px;
-  font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.1s;
-}
-.order-item .qty-btn.minus{background:#ffeaa7;color:#2d3436;}
-.order-item .qty-btn.plus{background:var(--green);color:#fff;}
-.order-item .qty-btn:active{transform:scale(.9);}
-.order-item .qty{font-weight:700;min-width:22px;text-align:center;}
-.order-item .item-name{flex:1;font-weight:600;}
-.order-item .item-price{font-weight:700;min-width:55px;text-align:right;}
-.order-item .remove-btn{
-  width:44px;height:44px;border:none;border-radius:8px;background:var(--red);
-  color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.1s;flex-shrink:0;
-}
-.order-item .remove-btn:active{transform:scale(.9);}
-.order-summary{background:#f8f9fa;padding:12px 16px;border-top:2px solid var(--light-gray);}
-.summary-row{display:flex;justify-content:space-between;font-size:14px;margin:4px 0;color:var(--gray);}
-.summary-row.total{font-size:32px;font-weight:900;color:#fff;margin-top:8px;padding:12px 16px;border-radius:10px;background:var(--dark);letter-spacing:-.5px;}
-.summary-row.discount{color:var(--red);}
-.inline-pay-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px;}
-.inline-pay-btn{
-  min-height:64px;border:2px solid var(--light-gray);border-radius:10px;
-  background:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:border-color .15s,background .15s;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.inline-pay-btn:last-child{grid-column:1/-1;}
-.inline-pay-btn:hover{border-color:var(--accent);background:#fff5f0;}
-.inline-pay-btn.selected{border-color:var(--accent);background:#fff0e8;border-width:3px;}
-.inline-pay-btn:active{background:#ffe0d0;}
-.inline-bezahlen-btn{
-  width:100%;min-height:64px;margin-top:8px;border:none;border-radius:10px;
-  background:var(--green);color:#fff;font-size:20px;font-weight:800;
-  cursor:pointer;transition:filter .15s;letter-spacing:.5px;
-  box-shadow:0 3px 12px rgba(0,184,148,.3);
-}
-.inline-bezahlen-btn:hover{filter:brightness(1.1);}
-.inline-bezahlen-btn:active{filter:brightness(.9);}
-.extras-trigger{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:12px 14px;min-height:48px;background:#e8f4fd;
-  border-bottom:2px solid #c5dff0;
-  cursor:pointer;font-size:14px;font-weight:700;color:var(--blue);transition:.15s;
-}
-.extras-trigger:hover{background:#d4ecfb;}
-.extras-trigger:active{background:#c0e2f7;}
-.extras-trigger.has-extras{background:#e6f9f0;border-color:#a8e6cf;color:var(--green);}
-.extras-status{font-size:12px;color:var(--green);font-weight:700;padding:6px 14px;display:none;background:#e6f9f0;border-bottom:1px solid #c3edd8;}
-/* hidden in modal now */
-.customer-card-row,.coupon-row{display:flex;gap:6px;padding:10px 0;align-items:center;}
-.customer-card-row input,.coupon-row input{flex:1;padding:10px 12px;border:1px solid var(--light-gray);border-radius:6px;font-size:14px;min-height:44px;}
-.customer-card-row button,.coupon-row button{padding:10px 16px;border:none;border-radius:6px;color:#fff;font-size:13px;cursor:pointer;font-weight:700;min-height:44px;}
-.customer-card-row button{background:var(--blue);}
-.coupon-row button{background:var(--purple);}
-.coupon-msg{font-size:12px;padding:4px 0;font-weight:600;display:none;}
-.fn-bar{
-  display:flex;gap:3px;padding:6px 8px;background:#fff;border-top:2px solid var(--light-gray);flex-shrink:0;
-}
-.fn-btn{
-  flex:1;padding:10px 4px;border:none;border-radius:8px;cursor:pointer;
-  font-size:13px;font-weight:700;text-align:center;transition:.12s;
-  background:var(--dark);color:#dfe6e9;min-height:52px;
-}
-.fn-btn:hover{background:#444;}
-.fn-btn:active{filter:brightness(.8);}
-.fn-btn .fn-key{display:block;font-size:10px;color:#999;margin-bottom:2px;}
-.modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
-  z-index:1000;align-items:center;justify-content:center;
-}
-.modal-overlay.show{display:flex;}
-.modal{
-  background:#fff;border-radius:16px;padding:24px;min-width:360px;max-width:520px;
-  width:90%;box-shadow:0 12px 60px rgba(0,0,0,.3);max-height:85vh;overflow-y:auto;
-}
-.modal h2{font-size:18px;margin-bottom:14px;color:var(--dark);}
-.modal-close{float:right;background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);}
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0;}
-.numpad button{
-  padding:16px;font-size:20px;font-weight:700;border:none;border-radius:10px;
-  background:#f0f0f0;cursor:pointer;transition:.1s;min-height:52px;
-}
-.numpad button:hover{background:#e0e0e0;}
-.numpad button:active{transform:scale(.95);}
-.numpad .num-clear{background:#ffeaa7;}.numpad .num-enter{background:var(--green);color:#fff;}
-.pay-display{font-size:28px;font-weight:800;text-align:right;padding:12px;background:#f8f9fa;border-radius:10px;margin-bottom:8px;min-height:52px;}
-.change-display{font-size:20px;text-align:center;color:var(--green);font-weight:700;margin:8px 0;min-height:30px;}
-.pay-method-btns{display:flex;gap:6px;margin-bottom:10px;}
-.pay-method-btn{
-  flex:1;padding:16px;border:2px solid var(--light-gray);border-radius:10px;
-  font-size:15px;font-weight:700;cursor:pointer;text-align:center;background:#fff;transition:.15s;min-height:56px;
-}
-.pay-method-btn.active{border-color:var(--accent);background:#fff5f0;}
-.pay-method-btn:hover{border-color:var(--accent);}
-.split-section{display:none;margin:8px 0;padding:10px;background:#f8f9fa;border-radius:8px;}
-.split-section.show{display:block;}
-.split-row{display:flex;justify-content:space-between;align-items:center;margin:4px 0;font-size:14px;}
-.split-row input{width:100px;padding:6px;border:1px solid var(--light-gray);border-radius:6px;text-align:right;font-size:14px;font-weight:700;}
-.pin-display{
-  font-size:32px;letter-spacing:12px;text-align:center;padding:14px;
-  background:#f8f9fa;border-radius:10px;margin-bottom:10px;min-height:58px;
-}
-.receipt-modal .modal{max-width:360px;padding:0;overflow:hidden;border-radius:4px;}
-.receipt{
-  background:#fffef8;font-family:'Courier New','Lucida Console',monospace;
-  padding:28px 22px 36px;position:relative;font-size:11.5px;line-height:1.7;
-  box-shadow:2px 4px 16px rgba(0,0,0,.10),inset 0 0 60px rgba(0,0,0,.02);
-  border-left:1px solid #e8e4d8;border-right:1px solid #e8e4d8;
-}
-.receipt::before{
-  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.018) 27px,rgba(0,0,0,.018) 28px);
-  pointer-events:none;
-}
-.receipt::after{
-  content:'';position:absolute;bottom:-12px;left:0;right:0;height:12px;
-  background:linear-gradient(135deg,#fffef8 33.33%,transparent 33.33%),linear-gradient(225deg,#fffef8 33.33%,transparent 33.33%);
-  background-size:12px 12px;
-}
-.receipt .r-center{text-align:center;}
-.receipt .r-line{border:none;border-top:1px dashed #aaa;margin:8px 0;}
-.receipt .r-row{display:flex;justify-content:space-between;padding:1px 0;}
-.receipt .r-bold{font-weight:700;}
-.receipt .r-big{font-size:15px;font-weight:700;letter-spacing:.5px;}
-.receipt .barcode{
-  text-align:center;margin:12px auto 0;font-family:'Libre Barcode 39',monospace;
-  font-size:38px;letter-spacing:1px;max-width:90%;overflow:hidden;
-  word-break:break-all;line-height:1;
-}
-.manager-badge{
-  display:none;position:fixed;top:60px;right:18px;background:var(--red);
-  color:#fff;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;
-  z-index:500;box-shadow:var(--shadow);
-}
-.manager-badge.show{display:block;}
-.cash-drawer{
-  display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:420px;height:60px;background:linear-gradient(#555,#333);border-radius:8px 8px 0 0;
-  z-index:2000;box-shadow:0 -4px 20px rgba(0,0,0,.4);transition:transform .5s cubic-bezier(.17,.67,.35,1.2);
-  border:2px solid #666;
-}
-.cash-drawer.open{display:block;animation:drawerOpen .6s ease-out;}
-@keyframes drawerOpen{0%{transform:translateX(-50%) translateY(100%);}60%{transform:translateX(-50%) translateY(-10px);}100%{transform:translateX(-50%) translateY(0);}}
-.cash-drawer-inner{display:flex;gap:3px;padding:8px 12px;justify-content:center;}
-.cash-slot{width:50px;height:36px;background:#2a2a2a;border-radius:3px;border:1px solid #555;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:9px;font-weight:700;}
-.discount-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:10px 0;}
-.discount-btn{
-  padding:14px;border:2px solid var(--light-gray);border-radius:10px;
-  font-size:16px;font-weight:700;cursor:pointer;background:#fff;transition:.15s;
-}
-.discount-btn:hover{border-color:var(--accent);background:#fff5f0;}
-.discount-btn.active{border-color:var(--accent);background:#fff5f0;}
-.discount-custom{display:flex;gap:6px;margin:8px 0;align-items:center;}
-.discount-custom input{flex:1;padding:10px;border:1px solid var(--light-gray);border-radius:8px;font-size:16px;font-weight:700;}
-.discount-custom select{padding:10px;border:1px solid var(--light-gray);border-radius:8px;font-size:14px;}
-.history-list{max-height:400px;overflow-y:auto;}
-.history-item{
-  padding:10px;border-bottom:1px solid var(--light-gray);cursor:pointer;transition:.1s;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.history-item:hover{background:#f0f0f0;}
-.history-item .hi-time{font-size:12px;color:var(--gray);}
-.history-item .hi-total{font-weight:700;font-size:15px;}
-.history-item .hi-items{font-size:11px;color:var(--gray);}
-.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0;}
-.report-card{background:#f8f9fa;border-radius:10px;padding:14px;text-align:center;}
-.report-card .rc-val{font-size:24px;font-weight:800;color:var(--dark);}
-.report-card .rc-label{font-size:11px;color:var(--gray);margin-top:2px;}
-.top-list{counter-reset:rank;}
-.top-item{
-  display:flex;align-items:center;gap:10px;padding:8px 4px;
-  border-bottom:1px solid var(--light-gray);
-}
-.top-item::before{counter-increment:rank;content:counter(rank);font-size:18px;font-weight:800;color:var(--accent);min-width:28px;text-align:center;}
-.top-item .ti-name{flex:1;font-weight:600;}
-.top-item .ti-qty{font-weight:700;color:var(--gray);}
-.top-item .ti-rev{font-weight:700;color:var(--green);}
-.confirm-btns{display:flex;gap:8px;margin-top:14px;}
-.confirm-btns button{
-  flex:1;padding:12px;border:none;border-radius:8px;font-size:14px;
-  font-weight:700;cursor:pointer;transition:.1s;
-}
-.btn-yes{background:var(--green);color:#fff;}
-.btn-no{background:var(--red);color:#fff;}
-.btn-action{background:var(--accent);color:#fff;}
-.btn-gray{background:var(--light-gray);color:var(--dark);}
-.btn-yes:hover,.btn-no:hover,.btn-action:hover{filter:brightness(1.1);}
-.toast{
-  position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-100px);
-  background:var(--dark);color:#fff;padding:10px 24px;border-radius:10px;
-  font-size:14px;font-weight:600;z-index:3000;transition:.4s;opacity:0;
-  box-shadow:0 6px 24px rgba(0,0,0,.3);
-}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
-.toast.success{background:var(--green);}
-.toast.error{background:var(--red);}
-@media(max-width:900px){
-  .pos-right{width:280px;}
-  .product-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}
-  .toolbar-cat{font-size:10px;padding:6px 2px;}
-}
-@media(max-width:650px){
-  .pos-main{flex-direction:column;}
-  .pos-right{width:100%;height:50%;}
-  .fn-bar{flex-wrap:wrap;}
-  .fn-btn{min-width:calc(25% - 3px);}
-}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.4}
+
+/* === HEADER === */
+.header{height:48px;background:var(--header-bg);display:flex;align-items:center;padding:0 16px;gap:16px;color:#fff;z-index:100}
+.header-logo{font-size:16px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
+.header-logo span{color:var(--green);font-weight:400}
+.header-spacer{flex:1}
+.header-info{display:flex;align-items:center;gap:20px;font-size:13px;color:#cbd5e1}
+.header-info .revenue{display:flex;align-items:center;gap:6px}
+.header-info .revenue .label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+.header-info .revenue .value{font-weight:600;color:#4ade80;font-size:14px}
+.header-info .staff{display:flex;align-items:center;gap:6px}
+.header-info .staff-icon{width:24px;height:24px;border-radius:50%;background:#475569;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#e2e8f0}
+.header-info .clock{font-variant-numeric:tabular-nums;font-weight:500;font-size:14px;color:#e2e8f0}
+.header-link{color:#94a3b8;text-decoration:none;font-size:12px;padding:4px 10px;border:1px solid #475569;border-radius:6px;transition:all .15s}
+.header-link:hover{color:#e2e8f0;border-color:#64748b;background:rgba(255,255,255,.05)}
+
+/* === MAIN LAYOUT === */
+.main{display:flex;height:calc(100vh - 48px - 44px);overflow:hidden}
+
+/* === CATEGORY SIDEBAR === */
+.sidebar{width:88px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:8px 0;overflow-y:auto;flex-shrink:0}
+.cat-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;cursor:pointer;border:none;background:none;font-size:11px;font-weight:500;color:var(--text-light);transition:all .15s;border-left:3px solid transparent;position:relative}
+.cat-btn:hover{background:rgba(0,0,0,.03);color:var(--text)}
+.cat-btn.active{background:rgba(0,0,0,.04);color:var(--text);font-weight:600;border-left-color:var(--green)}
+.cat-btn .cat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .15s}
+.cat-btn.active .cat-icon{transform:scale(1.05)}
+.cat-btn[data-cat="quick"] .cat-icon{background:#f3f4f6;color:var(--cat-quick)}
+.cat-btn[data-cat="burger"] .cat-icon{background:#fde8e8;color:var(--cat-burger)}
+.cat-btn[data-cat="sides"] .cat-icon{background:#fef3e2;color:var(--cat-sides)}
+.cat-btn[data-cat="drinks"] .cat-icon{background:#e8f1f8;color:var(--cat-drinks)}
+.cat-btn[data-cat="dessert"] .cat-icon{background:#f3eef8;color:var(--cat-dessert)}
+.cat-btn[data-cat="breakfast"] .cat-icon{background:#fdf6e3;color:var(--cat-breakfast)}
+.cat-btn[data-cat="extras"] .cat-icon{background:#e8f5f0;color:var(--cat-extras)}
+
+/* === PRODUCT GRID === */
+.grid-area{flex:1;overflow-y:auto;padding:16px;background:var(--bg)}
+.grid-area::-webkit-scrollbar{width:6px}
+.grid-area::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;align-content:start}
+.product-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100px;position:relative;transition:box-shadow .15s;user-select:none}
+.product-card:hover{box-shadow:var(--shadow-md)}
+.product-card:active{background:#f9fafb}
+.product-card .cat-dot{position:absolute;top:8px;left:8px;width:8px;height:8px;border-radius:50%}
+.product-card .cart-badge{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.5);transition:all .2s}
+.product-card .cart-badge.show{opacity:1;transform:scale(1)}
+.product-card .p-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.2}
+.product-card .p-price{font-size:15px;font-weight:700;color:var(--dark)}
+
+/* === ORDER PANEL === */
+.order-panel{width:350px;background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.order-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:between;gap:8px}
+.order-title{font-size:15px;font-weight:700;color:var(--dark);flex:1}
+.order-count{background:var(--bg);color:var(--text-light);font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px}
+.order-clear{background:none;border:1px solid var(--border);color:var(--text-light);font-size:12px;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s}
+.order-clear:hover{border-color:var(--red);color:var(--red);background:#fef2f2}
+
+/* Service mode toggle */
+.service-toggle{display:flex;padding:8px 16px;gap:6px;border-bottom:1px solid var(--border)}
+.svc-btn{flex:1;padding:6px;border:1px solid var(--border);background:var(--white);border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;text-align:center;color:var(--text-light);transition:all .15s}
+.svc-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.table-select{margin-left:4px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--white);color:var(--text);display:none}
+.table-select.show{display:inline-block}
+
+/* Order items */
+.order-items{flex:1;overflow-y:auto;padding:8px 0}
+.order-items::-webkit-scrollbar{width:5px}
+.order-items::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.order-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-light);font-size:13px;gap:8px}
+.order-empty .empty-icon{font-size:32px;opacity:.4}
+.order-item{display:flex;align-items:center;padding:8px 16px;gap:8px;border-bottom:1px solid #f3f4f6;transition:background .1s}
+.order-item:hover{background:#f9fafb}
+.order-item .item-info{flex:1;min-width:0}
+.order-item .item-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-item .item-price{font-size:12px;color:var(--text-light)}
+.qty-ctrl{display:flex;align-items:center;gap:4px}
+.qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--text);transition:all .15s}
+.qty-btn:hover{background:var(--bg);border-color:var(--border-hover)}
+.qty-val{width:20px;text-align:center;font-size:13px;font-weight:600}
+.item-total{font-size:13px;font-weight:600;min-width:50px;text-align:right}
+.item-remove{background:none;border:none;color:#d1d5db;cursor:pointer;font-size:16px;padding:2px;transition:color .15s;line-height:1}
+.item-remove:hover{color:var(--red)}
+
+/* Order footer */
+.order-footer{border-top:1px solid var(--border);padding:12px 16px}
+.order-subtotals{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;font-size:13px}
+.order-subtotals .row{display:flex;justify-content:space-between;color:var(--text-light)}
+.order-subtotals .row.discount{color:var(--red)}
+.order-subtotals .row.bonus{color:var(--green)}
+.order-total{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:2px solid var(--dark);margin-bottom:12px}
+.order-total .total-label{font-size:16px;font-weight:700;color:var(--dark)}
+.order-total .total-value{font-size:28px;font-weight:700;color:var(--dark)}
+
+/* Extras button */
+.extras-trigger{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;margin-bottom:8px;border:1px dashed var(--border);border-radius:var(--radius);cursor:pointer;font-size:12px;color:var(--text-light);transition:all .15s;background:transparent}
+.extras-trigger:hover{border-color:var(--green);color:var(--green);background:#f0fdf4}
+.extras-trigger.has-extras{border-color:var(--green);color:var(--green);background:#f0fdf4;border-style:solid}
+.extras-status{font-size:11px;color:var(--green);padding:0 0 6px;text-align:center}
+
+/* Payment methods */
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.pay-method-btn{padding:8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;font-size:12px;font-weight:500;text-align:center;color:var(--text);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pay-method-btn .pm-icon{font-size:16px}
+.pay-method-btn:hover{border-color:var(--green);background:#f0fdf4}
+.pay-method-btn.active{border-color:var(--green);background:#f0fdf4;color:var(--green)}
+
+/* PAY button */
+.pay-btn{width:100%;height:56px;border:none;border-radius:var(--radius-lg);background:var(--green);color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.3px}
+.pay-btn:hover{background:var(--green-hover)}
+.pay-btn:disabled{background:#d1d5db;cursor:not-allowed}
+
+/* === FUNCTION BAR === */
+.funcbar{height:44px;background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 8px;gap:4px}
+.func-btn{flex:1;height:34px;border:1px solid var(--border);border-radius:6px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--text-light);transition:all .15s;white-space:nowrap;padding:0 6px}
+.func-btn:hover{background:var(--bg);border-color:var(--border-hover);color:var(--text)}
+.func-btn .fkey{font-size:10px;font-weight:600;color:#9ca3af;background:#f3f4f6;padding:1px 4px;border-radius:3px}
+.func-btn .ficon{font-size:13px}
+
+/* === MODALS === */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal{background:var(--white);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,.2);max-width:90vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:16px;font-weight:700;color:var(--dark)}
+.modal-close{width:32px;height:32px;border:none;background:#f3f4f6;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text-light);transition:all .15s}
+.modal-close:hover{background:#e5e7eb;color:var(--text)}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+
+/* === PAYMENT MODAL === */
+.pay-modal{width:440px}
+.pay-modal .method-tabs{display:flex;gap:4px;margin-bottom:16px}
+.pay-modal .method-tab{flex:1;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;text-align:center;font-size:13px;font-weight:500;color:var(--text-light);transition:all .15s}
+.pay-modal .method-tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.pay-display{background:var(--bg);border-radius:var(--radius);padding:16px;margin-bottom:16px;text-align:right}
+.pay-display .pay-label{font-size:12px;color:var(--text-light);margin-bottom:4px}
+.pay-display .pay-amount{font-size:32px;font-weight:700;color:var(--dark);font-variant-numeric:tabular-nums}
+.pay-display .pay-change{font-size:14px;color:var(--green);font-weight:600;margin-top:4px}
+.pay-display .pay-total-ref{font-size:13px;color:var(--text-light);margin-top:4px}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.numpad button{height:52px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);font-size:20px;font-weight:600;cursor:pointer;color:var(--text);transition:all .12s}
+.numpad button:hover{background:var(--bg)}
+.numpad button:active{background:#e5e7eb}
+.numpad button.num-clear{color:var(--red);font-size:14px;font-weight:700}
+.quick-amounts{display:flex;gap:6px;margin-bottom:16px}
+.quick-amounts button{flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;color:var(--text);transition:all .12s}
+.quick-amounts button:hover{background:var(--bg);border-color:var(--border-hover)}
+.split-info{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:13px;display:none}
+.split-info .split-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.split-info .split-row:last-child{margin-bottom:0;font-weight:600}
+.pay-confirm-btn{width:100%;height:52px;border:none;border-radius:var(--radius-lg);background:var(--green);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s}
+.pay-confirm-btn:hover{background:var(--green-hover)}
+.pay-confirm-btn:disabled{background:#d1d5db;cursor:not-allowed}
+
+/* === PIN MODAL === */
+.pin-modal{width:320px}
+.pin-display{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
+.pin-dot{width:40px;height:48px;border:2px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--dark)}
+.pin-dot.filled{border-color:var(--dark);background:#f9fafb}
+.pin-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pin-numpad button{height:52px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);font-size:20px;font-weight:600;cursor:pointer;color:var(--text);transition:all .12s}
+.pin-numpad button:hover{background:var(--bg)}
+.pin-numpad button.pin-clear{font-size:14px;color:var(--red)}
+
+/* === DISCOUNT MODAL === */
+.discount-modal{width:380px}
+.discount-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.discount-presets button{padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);font-size:14px;font-weight:600;cursor:pointer;color:var(--text);transition:all .15s}
+.discount-presets button:hover{border-color:var(--green);color:var(--green);background:#f0fdf4}
+.discount-custom{display:flex;gap:8px;align-items:center}
+.discount-custom input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;color:var(--text);outline:none}
+.discount-custom input:focus{border-color:var(--green)}
+.discount-custom select{padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;background:var(--white);color:var(--text);cursor:pointer}
+.discount-custom button{padding:10px 16px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+
+/* === STORNO MODAL === */
+.storno-modal{width:380px}
+.storno-modal .storno-msg{text-align:center;padding:20px 0;font-size:14px;color:var(--text)}
+.storno-modal .storno-msg .warn-icon{font-size:40px;display:block;margin-bottom:12px}
+.storno-actions{display:flex;gap:8px}
+.storno-actions button{flex:1;padding:12px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none}
+.storno-actions .cancel-btn{background:#f3f4f6;color:var(--text)}
+.storno-actions .confirm-btn{background:var(--red);color:#fff}
+
+/* === RECEIPT MODAL === */
+.receipt-modal{width:360px}
+.receipt{background:#fffef8;padding:24px 20px 32px;font-family:'Courier New','Lucida Console',monospace;font-size:12px;line-height:1.5;color:#333;position:relative;border:1px solid #e5e7eb;border-radius:4px}
+.receipt::after{content:'';position:absolute;bottom:-8px;left:0;right:0;height:8px;background:linear-gradient(135deg,#fffef8 33.33%,transparent 33.33%) -8px 0,linear-gradient(225deg,#fffef8 33.33%,transparent 33.33%) -8px 0;background-size:16px 16px;background-position:left bottom}
+.receipt .r-center{text-align:center}
+.receipt .r-bold{font-weight:bold}
+.receipt .r-line{border-bottom:1px dashed #999;margin:8px 0}
+.receipt .r-row{display:flex;justify-content:space-between}
+.receipt .r-big{font-size:16px;font-weight:bold}
+.receipt .r-barcode{font-family:'Libre Barcode 39',cursive;font-size:40px;text-align:center;margin-top:12px;letter-spacing:2px}
+
+/* === HISTORY MODAL === */
+.history-modal{width:500px;max-height:80vh}
+.history-list{max-height:400px;overflow-y:auto}
+.history-item{padding:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.history-item:hover{background:var(--bg)}
+.history-item .h-left{flex:1;min-width:0}
+.history-item .h-order{font-weight:600;font-size:13px}
+.history-item .h-time{font-size:12px;color:var(--text-light)}
+.history-item .h-items{font-size:12px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.history-item .h-total{font-weight:700;font-size:14px;white-space:nowrap}
+
+/* === DAY CLOSE MODAL === */
+.dayclose-modal{width:560px}
+.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.report-card{background:var(--bg);border-radius:var(--radius);padding:16px;text-align:center}
+.report-card .rc-label{font-size:12px;color:var(--text-light);margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px}
+.report-card .rc-value{font-size:22px;font-weight:700;color:var(--dark)}
+.report-footer{text-align:center;font-size:12px;color:var(--text-light);padding-top:12px;border-top:1px solid var(--border)}
+
+/* === TOP SELLER MODAL === */
+.topseller-modal{width:440px}
+.top-list{counter-reset:rank}
+.top-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6}
+.top-item::before{counter-increment:rank;content:counter(rank);width:28px;height:28px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green);flex-shrink:0}
+.top-item .ts-name{flex:1;font-weight:500;font-size:13px}
+.top-item .ts-qty{font-size:12px;color:var(--text-light);margin-right:12px}
+.top-item .ts-rev{font-weight:600;font-size:13px}
+
+/* === EXTRAS MODAL === */
+.extras-modal{width:400px}
+.extras-section{margin-bottom:20px}
+.extras-section h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px}
+.extras-input-row{display:flex;gap:8px}
+.extras-input-row input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;outline:none}
+.extras-input-row input:focus{border-color:var(--green)}
+.extras-input-row button{padding:10px 16px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.extras-result{margin-top:8px;padding:8px 12px;border-radius:6px;font-size:13px;display:none}
+.extras-result.show{display:block}
+.extras-result.success{background:#f0fdf4;color:var(--green);border:1px solid #bbf7d0}
+.extras-result.error{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
+
+/* === CASH DRAWER === */
+.cash-drawer{position:fixed;bottom:-200px;left:50%;transform:translateX(-50%);width:420px;background:linear-gradient(180deg,#e8e0d4,#d4c9b8);border-radius:12px 12px 0 0;padding:16px;box-shadow:0 -4px 20px rgba(0,0,0,.2);transition:bottom .4s ease;z-index:900;border:2px solid #bbb0a0;border-bottom:none}
+.cash-drawer.open{bottom:0}
+.drawer-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.drawer-slot{background:#f5f0e8;border:1px solid #ccc2b2;border-radius:6px;padding:12px 8px;text-align:center;font-size:11px;font-weight:600;color:#6b5e50}
+.drawer-slot .denomination{font-size:16px;display:block;margin-bottom:2px;color:#4a3f35}
+
+/* === TOAST === */
+.toast{position:fixed;top:-60px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:var(--radius);font-size:13px;font-weight:500;color:#fff;z-index:2000;transition:top .3s ease;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast.show{top:60px}
+.toast.default{background:var(--dark)}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+
+/* === MANAGER BADGE === */
+.manager-badge{position:fixed;top:52px;right:12px;background:var(--red);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:0 0 6px 6px;z-index:200;display:none;letter-spacing:.3px}
+.manager-badge.show{display:block}
+
+/* === EMPTY STATES === */
+.empty-state{text-align:center;padding:32px;color:var(--text-light);font-size:13px}
+.empty-state .empty-icon{font-size:28px;margin-bottom:8px;opacity:.5}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="terminal-frame">
-  <div class="terminal-bezel">
-    <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
-    <span class="terminal-label">BurgerMetrics POS v2.0</span>
-  </div>
-  <div class="terminal-screen">
-    <!-- STATUSBAR -->
-    <div class="pos-statusbar">
-      <div class="logo">Burger<span>Metrics</span> POS</div>
-      <div class="status-center">
-        <span id="cashierName">Kasse 1</span>
-        <span class="sep">&#183;</span>
-        <span>Max M.</span>
-      </div>
-      <div class="status-right">
-        <span><span class="rev-label">Tagesumsatz: </span><span class="rev-val" id="dayRevenue">0,00 &#8364;</span></span>
-        <span class="sep">&#183;</span>
-        <span class="clock" id="clock">--:--</span>
-        <div class="view-toggle">
-          <span class="vt-active">POS</span>
-          <a href="dashboard.html" class="vt-link">Data View</a>
-        </div>
-      </div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">BurgerMetrics <span>POS</span></div>
+  <div class="header-spacer"></div>
+  <div class="header-info">
+    <div class="revenue">
+      <span class="label">Tagesumsatz</span>
+      <span class="value" id="hdrRevenue">0,00 €</span>
     </div>
-    <!-- TOOLBAR -->
-    <div class="pos-toolbar">
-      <div class="toolbar-toggle">
-        <button class="toolbar-toggle-btn active" data-type="counter" onclick="setOrderType('counter')">Mitnehmen</button>
-        <button class="toolbar-toggle-btn" data-type="dine" onclick="setOrderType('dine')">Im Haus</button>
-      </div>
-      <div class="toolbar-cats" id="catTabs">
-        <button class="toolbar-cat active" data-cat="quick">&#9733; Schnell</button>
-        <button class="toolbar-cat" data-cat="burger">Burger</button>
-        <button class="toolbar-cat" data-cat="sides">Beilagen</button>
-        <button class="toolbar-cat" data-cat="drinks">Getr&#228;nke</button>
-        <button class="toolbar-cat" data-cat="dessert">Dessert</button>
-        <button class="toolbar-cat" data-cat="breakfast">Fr&#252;hst&#252;ck</button>
-        <button class="toolbar-cat" data-cat="extras">Extras</button>
-      </div>
+    <div class="staff">
+      <div class="staff-icon">MM</div>
+      <span>Max M. · Kasse 1</span>
     </div>
-    <div class="pos-main">
-      <div class="pos-left">
-        <div class="product-grid" id="productGrid"></div>
-        <div class="fn-bar">
-          <button class="fn-btn" onclick="doStorno()"><span class="fn-key">F1</span>Storno</button>
-          <button class="fn-btn" onclick="doDiscount()"><span class="fn-key">F2</span>Rabatt</button>
-          <button class="fn-btn" onclick="doManager()"><span class="fn-key">F3</span>Manager</button>
-          <button class="fn-btn" onclick="openDrawer()"><span class="fn-key">F4</span>Kasse</button>
-          <button class="fn-btn" onclick="printReceipt()"><span class="fn-key">F5</span>Bon</button>
-          <button class="fn-btn" onclick="doDayClose()"><span class="fn-key">F6</span>Tagesab.</button>
-          <button class="fn-btn" onclick="showHistory()"><span class="fn-key">F7</span>Historie</button>
-          <button class="fn-btn" onclick="showTopSellers()"><span class="fn-key">F8</span>Top-Seller</button>
-        </div>
-      </div>
-      <div class="pos-right">
-        <div class="order-header">
-          <div>
-            <span>Bestellung</span>
-            <span class="order-num" id="orderNum">#001</span>
-          </div>
-        </div>
-        <div class="table-select" id="tableSelect">
-          <select id="tableNum" onchange="state.tableNum=this.value">
-            <option value="">Tisch w&#228;hlen...</option>
-          </select>
-        </div>
-        <div class="extras-trigger" onclick="openModal('extrasModal')">&#127915; Kundenkarte / Gutschein</div>
-        <div class="extras-status" id="extrasStatus"></div>
-        <div class="order-items" id="orderItems">
-          <div style="text-align:center;color:#b2bec3;padding:40px 10px;font-size:13px;">Produkt antippen um hinzuzuf&#252;gen</div>
-        </div>
-        <div class="order-summary" id="orderSummary">
-          <div class="summary-row"><span>Zwischensumme</span><span id="subtotal">0,00 &#8364;</span></div>
-          <div class="summary-row" id="discountRow" style="display:none"><span>Rabatt</span><span id="discountAmt">0,00 &#8364;</span></div>
-          <div class="summary-row"><span>MwSt. (19%)</span><span id="taxAmt">0,00 &#8364;</span></div>
-          <div class="summary-row total"><span>GESAMT</span><span id="totalAmt">0,00 &#8364;</span></div>
-          <div class="inline-pay-methods">
-            <button class="inline-pay-btn" data-method="cash" onclick="quickPay('cash')">&#128181; Bar</button>
-            <button class="inline-pay-btn" data-method="card" onclick="quickPay('card')">&#128179; EC</button>
-            <button class="inline-pay-btn" data-method="credit" onclick="quickPay('card')">&#128179; Kredit</button>
-            <button class="inline-pay-btn" data-method="split" onclick="quickPay('split')">&#9986; Split</button>
-          </div>
-          <button class="inline-bezahlen-btn" onclick="openPayment()">BEZAHLEN</button>
-        </div>
-      </div>
-    </div>
+    <span class="clock" id="hdrClock">00:00:00</span>
+    <a href="dashboard.html" class="header-link" id="dashLink">📊 Dashboard</a>
   </div>
 </div>
-<div class="manager-badge" id="managerBadge">&#128273; Manager-Modus</div>
-<div class="cash-drawer" id="cashDrawer">
-  <div class="cash-drawer-inner">
-    <div class="cash-slot">5&#8364;</div><div class="cash-slot">10&#8364;</div>
-    <div class="cash-slot">20&#8364;</div><div class="cash-slot">50&#8364;</div>
-    <div class="cash-slot">100&#8364;</div><div class="cash-slot">M&#252;nzen</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar" id="catSidebar">
+    <button class="cat-btn active" data-cat="quick"><div class="cat-icon">⭐</div>Schnell</button>
+    <button class="cat-btn" data-cat="burger"><div class="cat-icon">🍔</div>Burger</button>
+    <button class="cat-btn" data-cat="sides"><div class="cat-icon">🍟</div>Beilagen</button>
+    <button class="cat-btn" data-cat="drinks"><div class="cat-icon">🥤</div>Getränke</button>
+    <button class="cat-btn" data-cat="dessert"><div class="cat-icon">🍨</div>Dessert</button>
+    <button class="cat-btn" data-cat="breakfast"><div class="cat-icon">🥞</div>Frühstück</button>
+    <button class="cat-btn" data-cat="extras"><div class="cat-icon">➕</div>Extras</button>
   </div>
-</div>
-<div class="toast" id="toast"></div>
-<div class="modal-overlay" id="payModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('payModal')">&times;</button>
-    <h2>Zahlung</h2>
-    <div class="pay-method-btns">
-      <div class="pay-method-btn active" data-method="cash" onclick="setPayMethod('cash')">&#128181; Bar</div>
-      <div class="pay-method-btn" data-method="card" onclick="setPayMethod('card')">&#128179; Karte</div>
-      <div class="pay-method-btn" data-method="split" onclick="setPayMethod('split')">&#9986; Split</div>
-    </div>
-    <div id="payTotal" style="text-align:center;font-size:22px;font-weight:800;margin:6px 0;">0,00 &#8364;</div>
-    <div class="split-section" id="splitSection">
-      <div class="split-row"><span>Bar:</span><input type="number" id="splitCash" step="0.01" min="0" oninput="calcSplit()"> &#8364;</div>
-      <div class="split-row"><span>Karte:</span><span id="splitCard">0,00 &#8364;</span></div>
-    </div>
-    <div id="cashSection">
-      <div class="pay-display" id="payDisplay">0,00</div>
-      <div class="change-display" id="changeDisplay"></div>
-      <div class="numpad" id="numpad">
-        <button onclick="numpadInput('7')">7</button><button onclick="numpadInput('8')">8</button><button onclick="numpadInput('9')">9</button>
-        <button onclick="numpadInput('4')">4</button><button onclick="numpadInput('5')">5</button><button onclick="numpadInput('6')">6</button>
-        <button onclick="numpadInput('1')">1</button><button onclick="numpadInput('2')">2</button><button onclick="numpadInput('3')">3</button>
-        <button class="num-clear" onclick="numpadInput('C')">C</button><button onclick="numpadInput('0')">0</button><button onclick="numpadInput('.')">.</button>
-        <button onclick="numpadInput('10')" style="font-size:14px;">10&#8364;</button>
-        <button onclick="numpadInput('20')" style="font-size:14px;">20&#8364;</button>
-        <button onclick="numpadInput('50')" style="font-size:14px;">50&#8364;</button>
-      </div>
-      <button class="btn-action" style="width:100%;padding:14px;font-size:16px;border:none;border-radius:10px;cursor:pointer;margin-top:6px;" onclick="processPayment()">Zahlung abschlie&#223;en</button>
-    </div>
+
+  <!-- Product Grid -->
+  <div class="grid-area">
+    <div class="product-grid" id="productGrid"></div>
   </div>
-</div>
-<div class="modal-overlay" id="pinModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('pinModal')">&times;</button>
-    <h2>Manager-Login</h2>
-    <div class="pin-display" id="pinDisplay">____</div>
-    <div class="numpad">
-      <button onclick="pinInput('1')">1</button><button onclick="pinInput('2')">2</button><button onclick="pinInput('3')">3</button>
-      <button onclick="pinInput('4')">4</button><button onclick="pinInput('5')">5</button><button onclick="pinInput('6')">6</button>
-      <button onclick="pinInput('7')">7</button><button onclick="pinInput('8')">8</button><button onclick="pinInput('9')">9</button>
-      <button class="num-clear" onclick="pinInput('C')">C</button><button onclick="pinInput('0')">0</button>
-      <button class="num-enter" onclick="pinInput('OK')">OK</button>
+
+  <!-- Order Panel -->
+  <div class="order-panel">
+    <div class="order-header">
+      <span class="order-title">Bestellung</span>
+      <span class="order-count" id="orderCount">0</span>
+      <button class="order-clear" id="clearOrderBtn">Leeren</button>
     </div>
-  </div>
-</div>
-<div class="modal-overlay" id="discountModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('discountModal')">&times;</button>
-    <h2>Rabatt gew&#228;hren</h2>
-    <div class="discount-btns">
-      <button class="discount-btn" onclick="applyDiscountPct(5)">5%</button>
-      <button class="discount-btn" onclick="applyDiscountPct(10)">10%</button>
-      <button class="discount-btn" onclick="applyDiscountPct(15)">15%</button>
-      <button class="discount-btn" onclick="applyDiscountPct(20)">20%</button>
-    </div>
-    <div class="discount-custom">
-      <input type="number" id="discountCustomVal" placeholder="Betrag" step="0.01" min="0">
-      <select id="discountCustomType">
-        <option value="pct">%</option>
-        <option value="fixed">&#8364;</option>
+    <div class="service-toggle">
+      <button class="svc-btn active" data-type="counter">Mitnehmen</button>
+      <button class="svc-btn" data-type="dine">Im Haus</button>
+      <select class="table-select" id="tableSelect">
+        <option value="">Tisch...</option>
       </select>
-      <button class="btn-action" onclick="applyCustomDiscount()" style="padding:10px 18px;border:none;border-radius:8px;cursor:pointer;">OK</button>
+    </div>
+    <div class="order-items" id="orderItems">
+      <div class="order-empty" id="orderEmpty">
+        <span class="empty-icon">🛒</span>
+        <span>Produkt antippen<br>um hinzuzufügen</span>
+      </div>
+    </div>
+    <div class="order-footer">
+      <div class="order-subtotals" id="orderSubtotals">
+        <div class="row"><span>Zwischensumme</span><span id="subtotalVal">0,00 €</span></div>
+      </div>
+      <div class="order-total">
+        <span class="total-label">GESAMT</span>
+        <span class="total-value" id="totalVal">0,00 €</span>
+      </div>
+      <div class="extras-trigger" id="extrasTrigger" onclick="openModal('extrasModal')">
+        🏷️ Kundenkarte / Gutschein
+      </div>
+      <div class="extras-status" id="extrasStatus"></div>
+      <div class="pay-methods" id="payMethods">
+        <button class="pay-method-btn" onclick="quickPay('cash')"><span class="pm-icon">💵</span>Bar</button>
+        <button class="pay-method-btn" onclick="quickPay('card')"><span class="pm-icon">💳</span>EC</button>
+        <button class="pay-method-btn" onclick="quickPay('card')"><span class="pm-icon">💳</span>Kredit</button>
+        <button class="pay-method-btn" onclick="openPayModal('split')"><span class="pm-icon">✂️</span>Split</button>
+      </div>
+      <button class="pay-btn" id="payBtn" onclick="openPayModal('cash')" disabled>BEZAHLEN</button>
     </div>
   </div>
 </div>
+
+<!-- FUNCTION BAR -->
+<div class="funcbar">
+  <button class="func-btn" onclick="handleStorno()"><span class="fkey">F1</span><span class="ficon">🚫</span>Storno</button>
+  <button class="func-btn" onclick="handleDiscount()"><span class="fkey">F2</span><span class="ficon">%</span>Rabatt</button>
+  <button class="func-btn" onclick="handleManager()"><span class="fkey">F3</span><span class="ficon">👤</span>Manager</button>
+  <button class="func-btn" onclick="handleDrawer()"><span class="fkey">F4</span><span class="ficon">🗃️</span>Kasse</button>
+  <button class="func-btn" onclick="reprintReceipt()"><span class="fkey">F5</span><span class="ficon">🧾</span>Bon</button>
+  <button class="func-btn" onclick="handleDayClose()"><span class="fkey">F6</span><span class="ficon">📋</span>Abschluss</button>
+  <button class="func-btn" onclick="openModal('historyModal')"><span class="fkey">F7</span><span class="ficon">📜</span>Historie</button>
+  <button class="func-btn" onclick="openModal('topSellerModal');renderTopSellers()"><span class="fkey">F8</span><span class="ficon">🏆</span>Top-Seller</button>
+</div>
+
+<!-- MANAGER BADGE -->
+<div class="manager-badge" id="managerBadge">🔑 Manager-Modus</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- CASH DRAWER -->
+<div class="cash-drawer" id="cashDrawer">
+  <div class="drawer-slots">
+    <div class="drawer-slot"><span class="denomination">5 €</span>Scheine</div>
+    <div class="drawer-slot"><span class="denomination">10 €</span>Scheine</div>
+    <div class="drawer-slot"><span class="denomination">20 €</span>Scheine</div>
+    <div class="drawer-slot"><span class="denomination">50 €</span>Scheine</div>
+    <div class="drawer-slot"><span class="denomination">100 €</span>Scheine</div>
+    <div class="drawer-slot"><span class="denomination">🪙</span>Münzen</div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal pay-modal">
+    <div class="modal-header">
+      <h3>Zahlung</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="method-tabs">
+        <button class="method-tab active" onclick="setPayMethod('cash')">💵 Bar</button>
+        <button class="method-tab" onclick="setPayMethod('card')">💳 Karte</button>
+        <button class="method-tab" onclick="setPayMethod('split')">✂️ Split</button>
+      </div>
+      <div class="pay-display">
+        <div class="pay-label">Betrag</div>
+        <div class="pay-amount" id="payAmountDisplay">0,00 €</div>
+        <div class="pay-change" id="payChangeDisplay"></div>
+        <div class="pay-total-ref" id="payTotalRef"></div>
+      </div>
+      <div id="numpadArea">
+        <div class="numpad" id="numpad">
+          <button onclick="numpadInput('7')">7</button>
+          <button onclick="numpadInput('8')">8</button>
+          <button onclick="numpadInput('9')">9</button>
+          <button onclick="numpadInput('4')">4</button>
+          <button onclick="numpadInput('5')">5</button>
+          <button onclick="numpadInput('6')">6</button>
+          <button onclick="numpadInput('1')">1</button>
+          <button onclick="numpadInput('2')">2</button>
+          <button onclick="numpadInput('3')">3</button>
+          <button onclick="numpadInput('0')">0</button>
+          <button onclick="numpadInput('.')">.</button>
+          <button class="num-clear" onclick="numpadInput('C')">CLEAR</button>
+        </div>
+        <div class="quick-amounts">
+          <button onclick="numpadSet(10)">10 €</button>
+          <button onclick="numpadSet(20)">20 €</button>
+          <button onclick="numpadSet(50)">50 €</button>
+        </div>
+      </div>
+      <div class="split-info" id="splitInfo">
+        <div class="split-row"><span>Gesamt:</span><span id="splitTotal"></span></div>
+        <div class="split-row"><span>Bar:</span><span id="splitCash"></span></div>
+        <div class="split-row"><span>Karte:</span><span id="splitCard"></span></div>
+      </div>
+      <button class="pay-confirm-btn" id="payConfirmBtn" onclick="confirmPayment()" disabled>Bezahlen</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal pin-modal">
+    <div class="modal-header">
+      <h3>Manager-Anmeldung</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pin-display" id="pinDisplay">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-numpad">
+        <button onclick="pinInput('1')">1</button>
+        <button onclick="pinInput('2')">2</button>
+        <button onclick="pinInput('3')">3</button>
+        <button onclick="pinInput('4')">4</button>
+        <button onclick="pinInput('5')">5</button>
+        <button onclick="pinInput('6')">6</button>
+        <button onclick="pinInput('7')">7</button>
+        <button onclick="pinInput('8')">8</button>
+        <button onclick="pinInput('9')">9</button>
+        <button class="pin-clear" onclick="pinInput('C')">✕</button>
+        <button onclick="pinInput('0')">0</button>
+        <button onclick="pinInput('C')">⌫</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Discount Modal -->
+<div class="modal-overlay" id="discountModal">
+  <div class="modal discount-modal">
+    <div class="modal-header">
+      <h3>Rabatt</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="discount-presets">
+        <button onclick="applyPresetDiscount(5)">5%</button>
+        <button onclick="applyPresetDiscount(10)">10%</button>
+        <button onclick="applyPresetDiscount(15)">15%</button>
+        <button onclick="applyPresetDiscount(20)">20%</button>
+      </div>
+      <div class="discount-custom">
+        <input type="number" id="discountInput" placeholder="Wert" min="0" step="0.01">
+        <select id="discountType">
+          <option value="pct">%</option>
+          <option value="fixed">€</option>
+        </select>
+        <button onclick="applyCustomDiscount()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Storno Modal -->
 <div class="modal-overlay" id="stornoModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('stornoModal')">&times;</button>
-    <h2>Gesamte Bestellung stornieren?</h2>
-    <p style="color:var(--gray);margin-bottom:14px;">Alle Artikel werden entfernt.</p>
-    <div class="confirm-btns">
-      <button class="btn-no" onclick="closeModal('stornoModal')">Abbrechen</button>
-      <button class="btn-yes" onclick="confirmStorno()">Ja, stornieren</button>
+  <div class="modal storno-modal">
+    <div class="modal-header">
+      <h3>Storno</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="storno-msg">
+        <span class="warn-icon">⚠️</span>
+        Gesamte Bestellung stornieren?<br>Alle Artikel werden entfernt.
+      </div>
+      <div class="storno-actions">
+        <button class="cancel-btn" onclick="closeAllModals()">Abbrechen</button>
+        <button class="confirm-btn" onclick="confirmStorno()">Stornieren</button>
+      </div>
     </div>
   </div>
 </div>
-<div class="modal-overlay receipt-modal" id="receiptModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('receiptModal')">&times;</button>
-    <div class="receipt" id="receiptContent"></div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal receipt-modal">
+    <div class="modal-header">
+      <h3>Bon</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="receipt" id="receiptContent"></div>
+    </div>
   </div>
 </div>
+
+<!-- History Modal -->
 <div class="modal-overlay" id="historyModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
-    <h2>Transaktionshistorie</h2>
-    <div class="history-list" id="historyList"></div>
+  <div class="modal history-modal">
+    <div class="modal-header">
+      <h3>Transaktionen</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
   </div>
 </div>
+
+<!-- Day Close Modal -->
 <div class="modal-overlay" id="dayCloseModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('dayCloseModal')">&times;</button>
-    <h2>Tagesabschluss</h2>
-    <div id="dayCloseContent"></div>
+  <div class="modal dayclose-modal">
+    <div class="modal-header">
+      <h3>Tagesabschluss</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body" id="dayCloseContent"></div>
   </div>
 </div>
+
+<!-- Top Seller Modal -->
 <div class="modal-overlay" id="topSellerModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('topSellerModal')">&times;</button>
-    <h2>Top-Seller Ranking</h2>
-    <div class="top-list" id="topSellerList"></div>
+  <div class="modal topseller-modal">
+    <div class="modal-header">
+      <h3>Top-Seller</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="top-list" id="topSellerList"></div>
+    </div>
   </div>
 </div>
+
+<!-- Extras Modal -->
 <div class="modal-overlay" id="extrasModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal('extrasModal')">&times;</button>
-    <h2>Kundenkarte &amp; Gutschein</h2>
-    <div style="margin-bottom:14px;">
-      <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:4px;">Kundenkarte</label>
-      <div class="customer-card-row">
-        <input type="text" id="cardInput" placeholder="Kartennummer eingeben (z.B. 1001)">
-        <button onclick="scanCard()">Scannen</button>
-      </div>
-      <div id="customerPoints" style="font-size:12px;color:var(--green);font-weight:600;margin-top:4px;display:none;"></div>
+  <div class="modal extras-modal">
+    <div class="modal-header">
+      <h3>Kundenkarte & Gutschein</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
     </div>
-    <div>
-      <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:4px;">Gutschein-Code</label>
-      <div class="coupon-row">
-        <input type="text" id="couponInput" placeholder="Code eingeben (z.B. BURGER10)">
-        <button onclick="applyCoupon()">Einl&#246;sen</button>
+    <div class="modal-body">
+      <div class="extras-section">
+        <h4>🏷️ Kundenkarte</h4>
+        <div class="extras-input-row">
+          <input type="text" id="cardInput" placeholder="Kartennummer eingeben">
+          <button onclick="scanCard()">Scannen</button>
+        </div>
+        <div class="extras-result" id="cardResult"></div>
       </div>
-      <div id="couponMsg" style="font-size:12px;font-weight:600;margin-top:4px;display:none;"></div>
+      <div class="extras-section">
+        <h4>🎟️ Gutschein-Code</h4>
+        <div class="extras-input-row">
+          <input type="text" id="couponInput" placeholder="Code eingeben">
+          <button onclick="applyCoupon()">Einlösen</button>
+        </div>
+        <div class="extras-result" id="couponResult"></div>
+      </div>
     </div>
   </div>
 </div>
+
 <script>
-// ===== PRODUCTS =====
-const products = [
+// ===== DATA =====
+const PRODUCTS = [
   {id:1,name:'Classic Burger',price:4.99,cat:'burger',quick:true},
   {id:2,name:'Cheeseburger',price:5.49,cat:'burger',quick:true},
   {id:3,name:'Double Burger',price:7.99,cat:'burger'},
@@ -590,19 +629,24 @@ const products = [
   {id:52,name:'Cheese Dip',price:0.80,cat:'extras'}
 ];
 
-// ===== CUSTOMER DB =====
-const customers = {
+const CAT_COLORS = {
+  burger:'#d4564e',sides:'#e8a84c',drinks:'#5b8db8',
+  dessert:'#9b7bb8',breakfast:'#d4a843',extras:'#6ba389',quick:'#6b7280'
+};
+
+const CUSTOMERS = {
   '1001':{name:'Max Mustermann',points:42},
   '1002':{name:'Anna Schmidt',points:78},
   '1003':{name:'Tim Weber',points:15}
 };
 
-// ===== COUPONS =====
-const coupons = {
+const COUPONS = {
   'BURGER10':{type:'pct',value:10,desc:'10% Rabatt'},
-  'WELCOME5':{type:'fixed',value:5,desc:'5\u20ac Rabatt'},
+  'WELCOME5':{type:'fixed',value:5,desc:'5 € Rabatt'},
   'FREEDELIVERY':{type:'info',value:0,desc:'Gratis Lieferung'}
 };
+
+const MANAGER_PIN = '1234';
 
 // ===== STATE =====
 const state = {
@@ -619,210 +663,487 @@ const state = {
   pinBuffer:'',
   transactions:[],
   dayRevenue:0,
-  activeCat:'quick'
+  activeCat:'quick',
+  lastReceipt:null
 };
 
-// ===== HELPERS =====
-function fmt(n){return n.toFixed(2).replace('.',',')+' \u20ac';}
+// ===== UTILITY =====
+function fmt(n){return n.toFixed(2).replace('.',',') + ' €';}
 function fmtNum(n){return n.toFixed(2).replace('.',',');}
-function showToast(msg,type){
+function now(){const d=new Date();return d.toLocaleString('de-DE');}
+function timeStr(){const d=new Date();return [d.getHours(),d.getMinutes(),d.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');}
+function dateStr(){return new Date().toLocaleDateString('de-DE');}
+function pad3(n){return String(n).padStart(3,'0');}
+
+function showToast(msg,type='default'){
   const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast '+(type||'')+' show';
-  setTimeout(()=>t.classList.remove('show'),2200);
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2200);
 }
-function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+// ===== MODAL HELPERS =====
 function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function closeAllModals(){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show'));state.pinBuffer='';renderPinDots();}
 
-// ===== CLOCK =====
-function updateClock(){
-  const d=new Date();
-  document.getElementById('clock').textContent=
-    d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0');
-  var dd=document.getElementById('dateDisplay');
-  if(dd) dd.textContent=d.getDate().toString().padStart(2,'0')+'.'+
-    (d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getFullYear();
-}
-setInterval(updateClock,1000);updateClock();
-
-// ===== TABLE SELECT =====
-(function(){
-  const sel=document.getElementById('tableNum');
-  for(let i=1;i<=20;i++){const o=document.createElement('option');o.value=i;o.textContent='Tisch '+i;sel.appendChild(o);}
-})();
-
-// ===== CATEGORY TABS =====
-document.getElementById('catTabs').addEventListener('click',function(e){
-  const btn=e.target.closest('.toolbar-cat');if(!btn)return;
-  document.querySelectorAll('.toolbar-cat').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  state.activeCat=btn.dataset.cat;
+// ===== CATEGORY SWITCHING =====
+function setCategory(cat){
+  state.activeCat=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.cat===cat);
+  });
   renderProducts();
-});
+}
 
-// ===== RENDER PRODUCTS =====
+// ===== PRODUCT RENDERING =====
 function renderProducts(){
   const grid=document.getElementById('productGrid');
-  grid.innerHTML='';
-  const list=state.activeCat==='quick'
-    ? products.filter(p=>p.quick)
-    : products.filter(p=>p.cat===state.activeCat);
-  list.forEach(p=>{
-    const btn=document.createElement('button');
-    btn.className='product-btn cat-'+p.cat;
-    btn.innerHTML='<span class="name">'+p.name+'</span><span class="price">'+fmt(p.price)+'</span>';
-    btn.onclick=()=>addToOrder(p);
-    grid.appendChild(btn);
-  });
+  const cat=state.activeCat;
+  const items=cat==='quick'?PRODUCTS.filter(p=>p.quick):PRODUCTS.filter(p=>p.cat===cat);
+  grid.innerHTML=items.map(p=>{
+    const inCart=state.order.find(o=>o.id===p.id);
+    const qty=inCart?inCart.qty:0;
+    return `<div class="product-card" onclick="addToOrder(${p.id})">
+      <span class="cat-dot" style="background:${CAT_COLORS[p.cat]}"></span>
+      <span class="cart-badge ${qty?'show':''}">${qty}</span>
+      <span class="p-name">${p.name}</span>
+      <span class="p-price">${fmt(p.price)}</span>
+    </div>`;
+  }).join('');
 }
 
 // ===== ORDER MANAGEMENT =====
-function addToOrder(product){
-  const existing=state.order.find(i=>i.id===product.id);
+function addToOrder(id){
+  const p=PRODUCTS.find(x=>x.id===id);
+  if(!p)return;
+  const existing=state.order.find(x=>x.id===id);
   if(existing){existing.qty++;}
-  else{state.order.push({...product,qty:1});}
-  renderOrder();
-  showToast(product.name+' hinzugef\u00fcgt','success');
+  else{state.order.push({id:p.id,name:p.name,price:p.price,qty:1});}
+  renderOrder();renderProducts();
 }
 
-function changeQty(id,delta){
-  const item=state.order.find(i=>i.id===id);
-  if(!item)return;
-  item.qty+=delta;
-  if(item.qty<=0)state.order=state.order.filter(i=>i.id!==id);
-  renderOrder();
+function removeFromOrder(idx){
+  state.order.splice(idx,1);
+  renderOrder();renderProducts();
 }
 
-function removeItem(id){
-  state.order=state.order.filter(i=>i.id!==id);
-  renderOrder();
-  showToast('Artikel entfernt');
+function changeQty(idx,delta){
+  state.order[idx].qty+=delta;
+  if(state.order[idx].qty<=0)state.order.splice(idx,1);
+  renderOrder();renderProducts();
 }
 
-function getSubtotal(){return state.order.reduce((s,i)=>s+i.price*i.qty,0);}
+function clearOrder(){
+  state.order=[];
+  state.discount={type:null,value:0};
+  state.customerCard=null;
+  state.coupon=null;
+  document.getElementById('cardInput').value='';
+  document.getElementById('couponInput').value='';
+  document.getElementById('cardResult').className='extras-result';
+  document.getElementById('couponResult').className='extras-result';
+  document.getElementById('extrasTrigger').classList.remove('has-extras');
+  document.getElementById('extrasStatus').textContent='';
+  renderOrder();renderProducts();
+}
 
-function getDiscountAmount(){
-  const sub=getSubtotal();
+function getSubtotal(){
+  return state.order.reduce((s,i)=>s+i.price*i.qty,0);
+}
+
+function getDiscountAmount(subtotal){
+  // Coupon takes priority
   if(state.coupon){
-    if(state.coupon.type==='pct')return sub*(state.coupon.value/100);
-    if(state.coupon.type==='fixed')return Math.min(state.coupon.value,sub);
+    if(state.coupon.type==='pct')return subtotal*state.coupon.value/100;
+    if(state.coupon.type==='fixed')return Math.min(state.coupon.value,subtotal);
+    return 0;
   }
-  if(state.discount.type==='pct')return sub*(state.discount.value/100);
-  if(state.discount.type==='fixed')return Math.min(state.discount.value,sub);
+  if(state.discount.type==='pct')return subtotal*state.discount.value/100;
+  if(state.discount.type==='fixed')return Math.min(state.discount.value,subtotal);
   return 0;
+}
+
+function getCardBonus(){
+  if(!state.customerCard)return 0;
+  const c=CUSTOMERS[state.customerCard];
+  return(c&&c.points>=50)?5:0;
 }
 
 function getTotal(){
   const sub=getSubtotal();
-  const disc=getDiscountAmount();
-  let total=sub-disc;
-  // Customer card points redemption
-  if(state.customerCard && customers[state.customerCard] && customers[state.customerCard].points>=50){
-    total=Math.max(0,total-5);
-  }
-  return Math.max(0,total);
+  const disc=getDiscountAmount(sub);
+  const bonus=getCardBonus();
+  return Math.max(0,sub-disc-bonus);
+}
+
+function getTotalItems(){
+  return state.order.reduce((s,i)=>s+i.qty,0);
 }
 
 function renderOrder(){
-  const container=document.getElementById('orderItems');
+  const itemsEl=document.getElementById('orderItems');
+  const emptyEl=document.getElementById('orderEmpty');
+  const countEl=document.getElementById('orderCount');
+  const subtotalEl=document.getElementById('subtotalVal');
+  const totalEl=document.getElementById('totalVal');
+  const payBtn=document.getElementById('payBtn');
+  const subsEl=document.getElementById('orderSubtotals');
+
+  const totalItems=getTotalItems();
+  countEl.textContent=totalItems;
+
   if(state.order.length===0){
-    container.innerHTML='<div style="text-align:center;color:#b2bec3;padding:40px 10px;font-size:13px;">Produkt antippen um hinzuzuf\u00fcgen</div>';
-  } else {
-    container.innerHTML=state.order.map(item=>`
-      <div class="order-item">
-        <div class="qty-controls">
-          <button class="qty-btn minus" onclick="changeQty(${item.id},-1)">\u2212</button>
-          <span class="qty">${item.qty}</span>
-          <button class="qty-btn plus" onclick="changeQty(${item.id},1)">+</button>
-        </div>
-        <span class="item-name">${item.name}</span>
-        <span class="item-price">${fmt(item.price*item.qty)}</span>
-        <button class="remove-btn" onclick="removeItem(${item.id})">\u00d7</button>
+    emptyEl.style.display='flex';
+    itemsEl.querySelectorAll('.order-item').forEach(e=>e.remove());
+    subsEl.innerHTML=`<div class="row"><span>Zwischensumme</span><span id="subtotalVal">0,00 €</span></div>`;
+    totalEl.textContent='0,00 €';
+    payBtn.disabled=true;
+    return;
+  }
+
+  emptyEl.style.display='none';
+  // Render items
+  const html=state.order.map((item,idx)=>`
+    <div class="order-item">
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
+        <span class="qty-val">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
       </div>
-    `).join('');
-  }
-  // Update summary
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-price">${fmt(item.price)}</div>
+      </div>
+      <span class="item-total">${fmt(item.price*item.qty)}</span>
+      <button class="item-remove" onclick="removeFromOrder(${idx})">✕</button>
+    </div>
+  `).join('');
+  // Replace items (keep empty el)
+  itemsEl.querySelectorAll('.order-item').forEach(e=>e.remove());
+  emptyEl.insertAdjacentHTML('afterend',html);
+
+  // Subtotals
   const sub=getSubtotal();
-  const disc=getDiscountAmount();
+  const disc=getDiscountAmount(sub);
+  const bonus=getCardBonus();
   const total=getTotal();
-  const tax=total*0.19/1.19;
-  document.getElementById('subtotal').textContent=fmt(sub);
-  const dRow=document.getElementById('discountRow');
-  if(disc>0){dRow.style.display='flex';document.getElementById('discountAmt').textContent='-'+fmt(disc);}
-  else{dRow.style.display='none';}
-  document.getElementById('taxAmt').textContent=fmt(tax);
-  document.getElementById('totalAmt').textContent=fmt(total);
-  document.getElementById('orderNum').textContent='#'+state.orderNum.toString().padStart(3,'0');
-}
 
-// ===== ORDER TYPE =====
-function setOrderType(type){
-  state.orderType=type;
-  document.querySelectorAll('.toolbar-toggle-btn').forEach(b=>{
-    b.classList.toggle('active',b.dataset.type===type);
-  });
-  document.querySelectorAll('.order-type-btn').forEach(b=>{
-    b.classList.toggle('active',b.dataset.type===type);
-  });
-  document.getElementById('tableSelect').classList.toggle('show',type==='dine');
-}
-
-// ===== CUSTOMER CARD =====
-function updateExtrasStatus(){
-  var parts=[];
-  if(state.customerCard&&customers[state.customerCard]){
-    var c=customers[state.customerCard];
-    parts.push('\u2705 '+c.name+' ('+c.points+' Pkt)');
+  let subHtml=`<div class="row"><span>Zwischensumme</span><span>${fmt(sub)}</span></div>`;
+  if(disc>0){
+    const lbl=state.coupon?state.coupon.desc:'Rabatt';
+    subHtml+=`<div class="row discount"><span>${lbl}</span><span>-${fmt(disc)}</span></div>`;
   }
-  if(state.coupon) parts.push('\u2705 '+state.coupon.desc);
-  var el=document.getElementById('extrasStatus');
-  var trigger=document.querySelector('.extras-trigger');
-  if(parts.length){
-    el.textContent=parts.join(' \u00b7 ');el.style.display='block';
-    if(trigger) trigger.classList.add('has-extras');
+  if(bonus>0){
+    subHtml+=`<div class="row bonus"><span>Kundenbonus</span><span>-${fmt(bonus)}</span></div>`;
+  }
+  subsEl.innerHTML=subHtml;
+  totalEl.textContent=fmt(total);
+  payBtn.disabled=false;
+}
+
+// ===== SERVICE MODE =====
+document.querySelectorAll('.svc-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.svc-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.orderType=btn.dataset.type;
+    const ts=document.getElementById('tableSelect');
+    if(btn.dataset.type==='dine'){ts.classList.add('show');}
+    else{ts.classList.remove('show');state.tableNum='';}
+  });
+});
+
+// Populate table select
+(function(){
+  const sel=document.getElementById('tableSelect');
+  for(let i=1;i<=20;i++){
+    const o=document.createElement('option');o.value=i;o.textContent='Tisch '+i;sel.appendChild(o);
+  }
+  sel.addEventListener('change',()=>{state.tableNum=sel.value;});
+})();
+
+// ===== CATEGORY SIDEBAR EVENTS =====
+document.querySelectorAll('.cat-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>setCategory(btn.dataset.cat));
+});
+
+// ===== CLEAR ORDER BUTTON =====
+document.getElementById('clearOrderBtn').addEventListener('click',()=>{
+  if(state.order.length===0)return;
+  handleStorno();
+});
+
+// ===== CLOCK =====
+function updateClock(){
+  document.getElementById('hdrClock').textContent=timeStr();
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ===== HEADER REVENUE =====
+function updateHeaderRevenue(){
+  document.getElementById('hdrRevenue').textContent=fmt(state.dayRevenue);
+}
+
+// ===== PAYMENT MODAL =====
+function openPayModal(method){
+  if(state.order.length===0){showToast('Keine Artikel in der Bestellung','error');return;}
+  state.payInput='';
+  state.payMethod=method||'cash';
+  updatePayModal();
+  openModal('payModal');
+}
+
+function setPayMethod(m){
+  state.payMethod=m;
+  state.payInput='';
+  updatePayModal();
+}
+
+function updatePayModal(){
+  // Tabs
+  document.querySelectorAll('.method-tab').forEach(t=>{
+    const m=t.textContent.includes('Bar')?'cash':t.textContent.includes('Karte')?'card':'split';
+    t.classList.toggle('active',m===state.payMethod);
+  });
+  const total=getTotal();
+  const numpadArea=document.getElementById('numpadArea');
+  const splitInfo=document.getElementById('splitInfo');
+  const confirmBtn=document.getElementById('payConfirmBtn');
+  const amountDisp=document.getElementById('payAmountDisplay');
+  const changeDisp=document.getElementById('payChangeDisplay');
+  const totalRef=document.getElementById('payTotalRef');
+
+  totalRef.textContent='Zu zahlen: '+fmt(total);
+
+  if(state.payMethod==='card'){
+    numpadArea.style.display='none';
+    splitInfo.style.display='none';
+    amountDisp.textContent=fmt(total);
+    changeDisp.textContent='';
+    confirmBtn.disabled=false;
+    confirmBtn.textContent='Kartenzahlung '+fmt(total);
+  } else if(state.payMethod==='split'){
+    numpadArea.style.display='block';
+    splitInfo.style.display='block';
+    const cashAmt=parseFloat(state.payInput)||0;
+    const cardAmt=Math.max(0,total-cashAmt);
+    amountDisp.textContent=state.payInput?fmtNum(parseFloat(state.payInput))+' €':'0,00 €';
+    changeDisp.textContent='';
+    document.getElementById('splitTotal').textContent=fmt(total);
+    document.getElementById('splitCash').textContent=fmt(cashAmt);
+    document.getElementById('splitCard').textContent=fmt(cardAmt);
+    confirmBtn.disabled=cashAmt<=0||cashAmt>=total;
+    confirmBtn.textContent='Split-Zahlung bestätigen';
   } else {
-    el.style.display='none';
-    if(trigger) trigger.classList.remove('has-extras');
+    // Cash
+    numpadArea.style.display='block';
+    splitInfo.style.display='none';
+    const entered=parseFloat(state.payInput)||0;
+    amountDisp.textContent=state.payInput?fmtNum(entered)+' €':'0,00 €';
+    if(entered>=total&&total>0){
+      changeDisp.textContent='Rückgeld: '+fmt(entered-total);
+      confirmBtn.disabled=false;
+    } else {
+      changeDisp.textContent='';
+      confirmBtn.disabled=true;
+    }
+    confirmBtn.textContent='Bar bezahlen';
   }
 }
 
-function scanCard(){
-  const id=document.getElementById('cardInput').value.trim();
-  if(!id){showToast('Kartennummer eingeben','error');return;}
-  const c=customers[id];
-  if(!c){showToast('Karte nicht gefunden','error');state.customerCard=null;document.getElementById('customerPoints').style.display='none';updateExtrasStatus();return;}
-  state.customerCard=id;
-  const ptsEl=document.getElementById('customerPoints');
-  let msg='\u2705 '+c.name+' \u2014 '+c.points+' Punkte';
-  if(c.points>=50)msg+=' (5\u20ac Bonus wird abgezogen!)';
-  ptsEl.textContent=msg;ptsEl.style.display='block';
-  updateExtrasStatus();
-  renderOrder();
-  showToast('Kunde: '+c.name,'success');
-}
-
-// ===== COUPONS =====
-function applyCoupon(){
-  const code=document.getElementById('couponInput').value.trim().toUpperCase();
-  if(!code){showToast('Code eingeben','error');return;}
-  const c=coupons[code];
-  const msgEl=document.getElementById('couponMsg');
-  if(!c){msgEl.textContent='\u274c Ung\u00fcltiger Code';msgEl.style.color='var(--red)';msgEl.style.display='block';return;}
-  if(c.type==='info'){
-    msgEl.textContent='\u2705 '+c.desc+' (wird bei Lieferung angewendet)';
-    msgEl.style.color='var(--green)';msgEl.style.display='block';
-    updateExtrasStatus();
-    showToast(c.desc,'success');return;
+function numpadInput(key){
+  if(key==='C'){state.payInput='';}
+  else if(key==='.'){
+    if(!state.payInput.includes('.'))state.payInput+=state.payInput?'.':'0.';
+  } else {
+    // Limit to 2 decimal places
+    if(state.payInput.includes('.')&&state.payInput.split('.')[1].length>=2)return;
+    state.payInput+=key;
   }
-  state.coupon=c;
-  msgEl.textContent='\u2705 '+c.desc+' angewendet!';
-  msgEl.style.color='var(--green)';msgEl.style.display='block';
-  updateExtrasStatus();
-  renderOrder();
-  showToast(c.desc+' aktiviert!','success');
+  updatePayModal();
 }
 
-// ===== MANAGER =====
-function doManager(){
+function numpadSet(val){
+  state.payInput=val.toFixed(2);
+  updatePayModal();
+}
+
+function quickPay(method){
+  if(state.order.length===0){showToast('Keine Artikel in der Bestellung','error');return;}
+  if(method==='card'){
+    // Instant card payment
+    processPayment('card',getTotal(),0);
+  } else {
+    openPayModal('cash');
+  }
+}
+
+function confirmPayment(){
+  const total=getTotal();
+  if(state.payMethod==='card'){
+    processPayment('card',total,0);
+  } else if(state.payMethod==='split'){
+    const cashAmt=parseFloat(state.payInput)||0;
+    const cardAmt=total-cashAmt;
+    processPayment('split',total,0,cashAmt,cardAmt);
+  } else {
+    const entered=parseFloat(state.payInput)||0;
+    if(entered<total)return;
+    processPayment('cash',entered,entered-total);
+  }
+}
+
+function processPayment(method,paid,change,splitCash,splitCard){
+  const total=getTotal();
+  const sub=getSubtotal();
+  const disc=getDiscountAmount(sub);
+  const bonus=getCardBonus();
+  const tax=total*0.19/1.19;
+  const net=total-tax;
+
+  // Build transaction
+  const tx={
+    orderNum:state.orderNum,
+    time:now(),
+    items:state.order.map(i=>({...i})),
+    subtotal:sub,
+    discount:disc,
+    bonus:bonus,
+    total:total,
+    tax:tax,
+    net:net,
+    method:method,
+    paid:paid,
+    change:change||0,
+    splitCash:splitCash||0,
+    splitCard:splitCard||0,
+    orderType:state.orderType,
+    tableNum:state.tableNum,
+    customerCard:state.customerCard,
+    coupon:state.coupon?{...state.coupon}:null,
+    discountInfo:state.discount.type?{...state.discount}:null
+  };
+
+  state.transactions.push(tx);
+  state.dayRevenue+=total;
+  updateHeaderRevenue();
+
+  // Loyalty points
+  if(state.customerCard&&CUSTOMERS[state.customerCard]){
+    const c=CUSTOMERS[state.customerCard];
+    const earned=Math.floor(total);
+    c.points+=earned;
+    if(c.points>=50)c.points-=50;
+  }
+
+  // Generate receipt
+  state.lastReceipt=generateReceipt(tx);
+
+  // Show receipt
+  document.getElementById('receiptContent').innerHTML=state.lastReceipt;
+  closeAllModals();
+  openModal('receiptModal');
+
+  // Open drawer for cash/split
+  if(method==='cash'||method==='split')openCashDrawer();
+
+  // Toast
+  const methodLabel=method==='cash'?'Bar':method==='card'?'Karte':'Split';
+  showToast(`Zahlung ${fmt(total)} (${methodLabel}) ✓`,'success');
+
+  // Reset order
+  state.orderNum++;
+  state.order=[];
+  state.discount={type:null,value:0};
+  state.customerCard=null;
+  state.coupon=null;
+  state.payInput='';
+  document.getElementById('cardInput').value='';
+  document.getElementById('couponInput').value='';
+  document.getElementById('cardResult').className='extras-result';
+  document.getElementById('couponResult').className='extras-result';
+  document.getElementById('extrasTrigger').classList.remove('has-extras');
+  document.getElementById('extrasStatus').textContent='';
+  renderOrder();renderProducts();
+}
+
+// ===== RECEIPT =====
+function generateReceipt(tx){
+  const orderPad=pad3(tx.orderNum);
+  let items=tx.items.map(i=>{
+    const nameStr=`${i.qty}x ${i.name}`;
+    const priceStr=fmtNum(i.price*i.qty);
+    return `<div class="r-row"><span>${nameStr}</span><span>${priceStr}</span></div>`;
+  }).join('');
+
+  let typeStr=tx.orderType==='dine'?`Im Haus (Tisch ${tx.tableNum})`:'Mitnehmen';
+  let customerLine=tx.customerCard?`<div>Kunde: ${tx.customerCard}</div>`:'';
+  let discountLine=tx.discount>0?`<div class="r-row"><span>${tx.coupon?tx.coupon.desc:'Rabatt'}</span><span>-${fmtNum(tx.discount)}</span></div>`:'';
+  let bonusLine=tx.bonus>0?`<div class="r-row"><span>Kundenbonus</span><span>-${fmtNum(tx.bonus)}</span></div>`:'';
+
+  let payLine=`<div class="r-row"><span>Zahlart</span><span>${tx.method==='cash'?'Bar':tx.method==='card'?'Karte':'Split'}</span></div>`;
+  let paidLine='';
+  if(tx.method==='cash'){
+    paidLine=`<div class="r-row"><span>Gegeben</span><span>${fmtNum(tx.paid)}</span></div>
+    <div class="r-row"><span>Rückgeld</span><span>${fmtNum(tx.change)}</span></div>`;
+  } else if(tx.method==='split'){
+    paidLine=`<div class="r-row"><span>Bar</span><span>${fmtNum(tx.splitCash)}</span></div>
+    <div class="r-row"><span>Karte</span><span>${fmtNum(tx.splitCard)}</span></div>`;
+  }
+
+  const barcode='*'+String(tx.orderNum).padStart(6,'0')+'*';
+
+  return `
+    <div class="r-center r-bold">BURGERMETRICS</div>
+    <div class="r-center">Musterstraße 42 · 12345 Berlin</div>
+    <div class="r-center">Tel: 030-1234567 · USt-ID: DE123456789</div>
+    <div class="r-line"></div>
+    <div class="r-row"><span>Bon #${orderPad}</span><span>${tx.time}</span></div>
+    <div>Typ: ${typeStr}</div>
+    ${customerLine}
+    <div class="r-line"></div>
+    ${items}
+    <div class="r-line"></div>
+    <div class="r-row"><span>Zwischensumme</span><span>${fmtNum(tx.subtotal)}</span></div>
+    ${discountLine}${bonusLine}
+    <div class="r-row"><span>Netto</span><span>${fmtNum(tx.net)}</span></div>
+    <div class="r-row"><span>MwSt. 19%</span><span>${fmtNum(tx.tax)}</span></div>
+    <div class="r-line"></div>
+    <div class="r-row r-big"><span>GESAMT</span><span>${fmtNum(tx.total)} €</span></div>
+    <div class="r-line"></div>
+    ${payLine}${paidLine}
+    <div class="r-line"></div>
+    <div class="r-center">Vielen Dank für Ihren Einkauf!</div>
+    <div class="r-center" style="font-size:11px;color:#888">Powered by BurgerMetrics POS</div>
+    <div class="r-barcode">${barcode}</div>
+  `;
+}
+
+function reprintReceipt(){
+  if(!state.lastReceipt){showToast('Kein letzter Bon vorhanden','error');return;}
+  document.getElementById('receiptContent').innerHTML=state.lastReceipt;
+  openModal('receiptModal');
+}
+
+// ===== CASH DRAWER =====
+function openCashDrawer(){
+  const d=document.getElementById('cashDrawer');
+  d.classList.add('open');
+  setTimeout(()=>d.classList.remove('open'),3000);
+}
+
+function handleDrawer(){
+  if(state.managerMode||state.order.length>0||state.transactions.length>0){
+    openCashDrawer();
+  } else {
+    showToast('Kassenöffnung nicht möglich','error');
+  }
+}
+
+// ===== MANAGER / PIN =====
+function handleManager(){
   if(state.managerMode){
     state.managerMode=false;
     document.getElementById('managerBadge').classList.remove('show');
@@ -830,373 +1151,254 @@ function doManager(){
     return;
   }
   state.pinBuffer='';
-  document.getElementById('pinDisplay').textContent='____';
+  renderPinDots();
   openModal('pinModal');
 }
 
 function pinInput(key){
-  if(key==='C'){state.pinBuffer='';document.getElementById('pinDisplay').textContent='____';return;}
-  if(key==='OK'){
-    if(state.pinBuffer==='1234'){
-      state.managerMode=true;
-      document.getElementById('managerBadge').classList.add('show');
-      closeModal('pinModal');
-      showToast('Manager-Modus aktiviert','success');
-    } else {
-      showToast('Falscher PIN!','error');
-      state.pinBuffer='';document.getElementById('pinDisplay').textContent='____';
-    }
-    return;
-  }
-  if(state.pinBuffer.length<4){
-    state.pinBuffer+=key;
-    document.getElementById('pinDisplay').textContent=
-      '\u2022'.repeat(state.pinBuffer.length)+'_'.repeat(4-state.pinBuffer.length);
+  if(key==='C'){state.pinBuffer='';renderPinDots();return;}
+  if(state.pinBuffer.length>=4)return;
+  state.pinBuffer+=key;
+  renderPinDots();
+  if(state.pinBuffer.length===4){
+    setTimeout(()=>{
+      if(state.pinBuffer===MANAGER_PIN){
+        state.managerMode=true;
+        document.getElementById('managerBadge').classList.add('show');
+        closeAllModals();
+        showToast('Manager-Modus aktiviert','success');
+      } else {
+        showToast('Falscher PIN','error');
+        state.pinBuffer='';
+        renderPinDots();
+      }
+    },200);
   }
 }
 
+function renderPinDots(){
+  const dots=document.querySelectorAll('#pinDisplay .pin-dot');
+  dots.forEach((d,i)=>{
+    d.classList.toggle('filled',i<state.pinBuffer.length);
+    d.textContent=i<state.pinBuffer.length?'●':'';
+  });
+}
+
 // ===== DISCOUNT =====
-function doDiscount(){
-  if(!state.managerMode){showToast('Manager-Login erforderlich (F3)','error');return;}
+function handleDiscount(){
+  if(!state.managerMode){showToast('Manager-Modus erforderlich','error');return;}
   if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
   openModal('discountModal');
 }
 
-function applyDiscountPct(pct){
+function applyPresetDiscount(pct){
   state.discount={type:'pct',value:pct};
-  closeModal('discountModal');
+  closeAllModals();
   renderOrder();
-  showToast(pct+'% Rabatt angewendet','success');
+  showToast(`${pct}% Rabatt angewendet`,'success');
 }
 
 function applyCustomDiscount(){
-  const val=parseFloat(document.getElementById('discountCustomVal').value);
-  const type=document.getElementById('discountCustomType').value;
-  if(isNaN(val)||val<=0){showToast('G\u00fcltigen Betrag eingeben','error');return;}
-  state.discount={type:type==='pct'?'pct':'fixed',value:val};
-  closeModal('discountModal');
+  const val=parseFloat(document.getElementById('discountInput').value);
+  const type=document.getElementById('discountType').value;
+  if(!val||val<=0){showToast('Ungültiger Wert','error');return;}
+  state.discount={type:type,value:val};
+  closeAllModals();
   renderOrder();
-  showToast('Rabatt angewendet','success');
+  const label=type==='pct'?val+'%':fmt(val);
+  showToast(`Rabatt ${label} angewendet`,'success');
 }
 
 // ===== STORNO =====
-function doStorno(){
-  if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
+function handleStorno(){
+  if(state.order.length===0){showToast('Keine Bestellung zum Stornieren','error');return;}
   openModal('stornoModal');
 }
 
 function confirmStorno(){
-  state.order=[];
-  state.discount={type:null,value:0};
-  state.coupon=null;
-  state.customerCard=null;
-  document.getElementById('customerPoints').style.display='none';
-  document.getElementById('couponMsg').style.display='none';
-  document.getElementById('cardInput').value='';
-  document.getElementById('couponInput').value='';
-  updateExtrasStatus();
-  closeModal('stornoModal');
-  renderOrder();
-  showToast('Bestellung storniert','error');
+  clearOrder();
+  closeAllModals();
+  showToast('Bestellung storniert','success');
 }
 
-// ===== PAYMENT =====
-function quickPay(method){
-  if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
-  if(method==='card'){
-    finishPayment('karte',getTotal(),0);
+// ===== LOYALTY CARD =====
+function scanCard(){
+  const id=document.getElementById('cardInput').value.trim();
+  const res=document.getElementById('cardResult');
+  if(!id){res.className='extras-result show error';res.textContent='Bitte Kartennummer eingeben';return;}
+  const c=CUSTOMERS[id];
+  if(!c){res.className='extras-result show error';res.textContent='Karte nicht gefunden';return;}
+  state.customerCard=id;
+  let msg=`✓ ${c.name} — ${c.points} Punkte`;
+  if(c.points>=50)msg+=' (5 € Bonus aktiv!)';
+  res.className='extras-result show success';
+  res.textContent=msg;
+  updateExtrasIndicator();
+  renderOrder();
+}
+
+// ===== COUPONS =====
+function applyCoupon(){
+  const code=document.getElementById('couponInput').value.trim().toUpperCase();
+  const res=document.getElementById('couponResult');
+  if(!code){res.className='extras-result show error';res.textContent='Bitte Code eingeben';return;}
+  const cp=COUPONS[code];
+  if(!cp){res.className='extras-result show error';res.textContent='Ungültiger Code';return;}
+  if(cp.type==='info'){
+    res.className='extras-result show success';
+    res.textContent='✓ '+cp.desc+' — wird bei Lieferung angewendet';
     return;
   }
-  // For cash and split, open the full payment modal with the method pre-selected
-  openPayment();
-  setPayMethod(method);
-}
-
-function openPayment(){
-  if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
-  state.payInput='';state.payMethod='cash';
-  document.getElementById('payDisplay').textContent='0,00';
-  document.getElementById('changeDisplay').textContent='';
-  document.getElementById('payTotal').textContent=fmt(getTotal());
-  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.toggle('active',b.dataset.method==='cash'));
-  document.getElementById('splitSection').classList.remove('show');
-  document.getElementById('cashSection').style.display='block';
-  document.getElementById('splitCash').value='';
-  document.getElementById('splitCard').textContent='0,00 \u20ac';
-  openModal('payModal');
-}
-
-function setPayMethod(method){
-  state.payMethod=method;
-  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.toggle('active',b.dataset.method===method));
-  document.getElementById('splitSection').classList.toggle('show',method==='split');
-  if(method==='card'){
-    document.getElementById('cashSection').style.display='none';
-  } else {
-    document.getElementById('cashSection').style.display='block';
-  }
-}
-
-function calcSplit(){
-  const total=getTotal();
-  const cash=parseFloat(document.getElementById('splitCash').value)||0;
-  const card=Math.max(0,total-cash);
-  document.getElementById('splitCard').textContent=fmt(card);
-}
-
-function numpadInput(key){
-  if(key==='C'){state.payInput='';document.getElementById('payDisplay').textContent='0,00';document.getElementById('changeDisplay').textContent='';return;}
-  if(key==='10'||key==='20'||key==='50'){
-    const current=parseFloat(state.payInput)||0;
-    state.payInput=(current+parseInt(key)).toFixed(2);
-  } else {
-    if(key==='.'&&state.payInput.includes('.'))return;
-    state.payInput+=key;
-  }
-  const val=parseFloat(state.payInput)||0;
-  document.getElementById('payDisplay').textContent=fmtNum(val);
-  const total=getTotal();
-  if(val>=total){
-    document.getElementById('changeDisplay').textContent='R\u00fcckgeld: '+fmt(val-total);
-  } else {
-    document.getElementById('changeDisplay').textContent='';
-  }
-}
-
-function processPayment(){
-  const total=getTotal();
-  if(total<=0){showToast('Kein Betrag','error');return;}
-
-  if(state.payMethod==='cash'){
-    const paid=parseFloat(state.payInput)||0;
-    if(paid<total){showToast('Betrag zu gering! Fehlen: '+fmt(total-paid),'error');return;}
-    finishPayment('bar',paid,paid-total);
-  } else if(state.payMethod==='card'){
-    finishPayment('karte',total,0);
-  } else if(state.payMethod==='split'){
-    const cashPart=parseFloat(document.getElementById('splitCash').value)||0;
-    const cardPart=total-cashPart;
-    if(cashPart<0||cardPart<0){showToast('Ung\u00fcltige Aufteilung','error');return;}
-    finishPayment('split (Bar: '+fmt(cashPart)+' / Karte: '+fmt(cardPart)+')',total,0);
-  }
-}
-
-function finishPayment(method,paid,change){
-  const total=getTotal();
-  const sub=getSubtotal();
-  const disc=getDiscountAmount();
-
-  // Award loyalty points (1 per euro)
-  if(state.customerCard && customers[state.customerCard]){
-    const pts=Math.floor(total);
-    customers[state.customerCard].points+=pts;
-    if(customers[state.customerCard].points>=50)customers[state.customerCard].points-=50;
-  }
-
-  // Save transaction
-  const tx={
-    id:state.orderNum,
-    time:new Date().toLocaleTimeString('de-DE'),
-    date:new Date().toLocaleDateString('de-DE'),
-    items:[...state.order],
-    subtotal:sub,
-    discount:disc,
-    total:total,
-    method:method,
-    paid:paid,
-    change:change,
-    type:state.orderType,
-    table:state.tableNum,
-    customer:state.customerCard
-  };
-  state.transactions.push(tx);
-  state.dayRevenue+=total;
-  document.getElementById('dayRevenue').textContent=fmt(state.dayRevenue);
-
-  // Show receipt
-  showReceiptFromTx(tx);
-
-  // Open cash drawer for cash payments
-  if(method==='bar'||state.payMethod==='split') openDrawer();
-
-  // Reset
-  closeModal('payModal');
-  state.order=[];
-  state.orderNum++;
-  state.discount={type:null,value:0};
-  state.coupon=null;
-  state.customerCard=null;
-  state.tableNum='';
-  document.getElementById('customerPoints').style.display='none';
-  document.getElementById('couponMsg').style.display='none';
-  document.getElementById('cardInput').value='';
-  document.getElementById('couponInput').value='';
-  document.getElementById('tableNum').value='';
-  document.getElementById('tableSelect').classList.remove('show');
-  updateExtrasStatus();
+  state.coupon={...cp,code:code};
+  res.className='extras-result show success';
+  res.textContent='✓ '+cp.desc+' angewendet';
+  updateExtrasIndicator();
   renderOrder();
-  showToast('Zahlung erfolgreich! '+fmt(total),'success');
 }
 
-// ===== CASH DRAWER =====
-function openDrawer(){
-  if(!state.managerMode && state.order.length===0 && state.transactions.length===0){
-    showToast('Manager-Login erforderlich (F3)','error');return;
+function updateExtrasIndicator(){
+  const trigger=document.getElementById('extrasTrigger');
+  const status=document.getElementById('extrasStatus');
+  const hasCard=!!state.customerCard;
+  const hasCoupon=!!state.coupon;
+  if(hasCard||hasCoupon){
+    trigger.classList.add('has-extras');
+    let parts=[];
+    if(hasCard)parts.push('Karte: '+state.customerCard);
+    if(hasCoupon)parts.push('Gutschein: '+state.coupon.code);
+    status.textContent=parts.join(' | ');
+  } else {
+    trigger.classList.remove('has-extras');
+    status.textContent='';
   }
-  const d=document.getElementById('cashDrawer');
-  d.className='cash-drawer open';
-  setTimeout(()=>{d.className='cash-drawer';},3000);
-}
-
-// ===== RECEIPT =====
-function printReceipt(){
-  if(state.transactions.length===0){showToast('Keine Transaktion vorhanden','error');return;}
-  const tx=state.transactions[state.transactions.length-1];
-  showReceiptFromTx(tx);
-}
-
-function showReceiptFromTx(tx){
-  const bc='*'+tx.id.toString().padStart(6,'0')+'*';
-  let html='<div class="r-center r-bold" style="font-size:16px;">BURGERMETRICS</div>';
-  html+='<div class="r-center" style="font-size:10px;">Musterstra\u00dfe 42 \u00b7 12345 Berlin</div>';
-  html+='<div class="r-center" style="font-size:10px;">Tel: 030-1234567 \u00b7 USt-ID: DE123456789</div>';
-  html+='<div class="r-line"></div>';
-  html+='<div class="r-row"><span>Bon #'+tx.id.toString().padStart(3,'0')+'</span><span>'+tx.date+' '+tx.time+'</span></div>';
-  html+='<div style="font-size:10px;">Typ: '+(tx.type==='dine'?'Im Haus'+(tx.table?' (Tisch '+tx.table+')':''):'Mitnehmen')+'</div>';
-  if(tx.customer)html+='<div style="font-size:10px;">Kunde: '+tx.customer+'</div>';
-  html+='<div class="r-line"></div>';
-  tx.items.forEach(function(item){
-    html+='<div class="r-row"><span>'+item.qty+'x '+item.name+'</span><span>'+fmt(item.price*item.qty)+'</span></div>';
-  });
-  html+='<div class="r-line"></div>';
-  html+='<div class="r-row"><span>Zwischensumme</span><span>'+fmt(tx.subtotal)+'</span></div>';
-  if(tx.discount>0){
-    html+='<div class="r-row" style="color:#d63031;"><span>Rabatt</span><span>-'+fmt(tx.discount)+'</span></div>';
-  }
-  var tax=tx.total*0.19/1.19;
-  var net=tx.total-tax;
-  html+='<div class="r-row"><span>Netto</span><span>'+fmt(net)+'</span></div>';
-  html+='<div class="r-row"><span>MwSt. 19%</span><span>'+fmt(tax)+'</span></div>';
-  html+='<div class="r-line"></div>';
-  html+='<div class="r-row r-big"><span>GESAMT</span><span>'+fmt(tx.total)+'</span></div>';
-  html+='<div class="r-line"></div>';
-  html+='<div class="r-row"><span>Zahlart</span><span>'+tx.method+'</span></div>';
-  if(tx.method==='bar'){
-    html+='<div class="r-row"><span>Gegeben</span><span>'+fmt(tx.paid)+'</span></div>';
-    html+='<div class="r-row"><span>R\u00fcckgeld</span><span>'+fmt(tx.change)+'</span></div>';
-  }
-  html+='<div class="r-line"></div>';
-  html+='<div class="r-center" style="font-size:10px;">Vielen Dank f\u00fcr Ihren Einkauf!</div>';
-  html+='<div class="r-center" style="font-size:10px;">Powered by BurgerMetrics POS</div>';
-  html+='<div class="barcode">'+bc+'</div>';
-  document.getElementById('receiptContent').innerHTML=html;
-  openModal('receiptModal');
 }
 
 // ===== HISTORY =====
-function showHistory(){
-  var list=document.getElementById('historyList');
+function renderHistory(){
+  const list=document.getElementById('historyList');
   if(state.transactions.length===0){
-    list.innerHTML='<div style="text-align:center;color:#b2bec3;padding:30px;">Keine Transaktionen</div>';
-    openModal('historyModal');return;
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">📜</div>Keine Transaktionen</div>';
+    return;
   }
-  var html='';
-  for(var i=state.transactions.length-1;i>=0;i--){
-    var tx=state.transactions[i];
-    var itemsStr=tx.items.map(function(it){return it.qty+'x '+it.name;}).join(', ');
-    html+='<div class="history-item" data-idx="'+i+'" onclick="viewHistoryTx('+i+')">';
-    html+='<div><div class="hi-time">#'+tx.id.toString().padStart(3,'0')+' \u2014 '+tx.time+'</div>';
-    html+='<div class="hi-items">'+itemsStr+'</div></div>';
-    html+='<div class="hi-total">'+fmt(tx.total)+'</div></div>';
-  }
-  list.innerHTML=html;
-  openModal('historyModal');
+  list.innerHTML=state.transactions.slice().reverse().map((tx,i)=>{
+    const summary=tx.items.map(it=>`${it.qty}x ${it.name}`).join(', ');
+    return `<div class="history-item" onclick="showHistoryReceipt(${state.transactions.length-1-i})">
+      <div class="h-left">
+        <div class="h-order">Bon #${pad3(tx.orderNum)}</div>
+        <div class="h-time">${tx.time}</div>
+        <div class="h-items">${summary}</div>
+      </div>
+      <div class="h-total">${fmt(tx.total)}</div>
+    </div>`;
+  }).join('');
 }
 
-function viewHistoryTx(idx){
+function showHistoryReceipt(idx){
+  const tx=state.transactions[idx];
+  if(!tx)return;
+  document.getElementById('receiptContent').innerHTML=generateReceipt(tx);
   closeModal('historyModal');
-  showReceiptFromTx(state.transactions[idx]);
+  openModal('receiptModal');
 }
 
-// ===== DAY CLOSE =====
-function doDayClose(){
-  if(!state.managerMode){showToast('Manager-Login erforderlich (F3)','error');return;}
-  var txs=state.transactions;
-  var totalRev=0,totalItems=0,cashTotal=0,cardTotal=0,totalDisc=0;
-  for(var i=0;i<txs.length;i++){
-    totalRev+=txs[i].total;
-    totalDisc+=txs[i].discount;
-    for(var j=0;j<txs[i].items.length;j++) totalItems+=txs[i].items[j].qty;
-    if(txs[i].method==='bar') cashTotal+=txs[i].total;
-    else if(txs[i].method==='karte') cardTotal+=txs[i].total;
-  }
-  var splitTotal=totalRev-cashTotal-cardTotal;
-  var avgOrder=txs.length?totalRev/txs.length:0;
-  var tax=totalRev*0.19/1.19;
-  var html='<div class="report-grid">';
-  html+='<div class="report-card"><div class="rc-val">'+fmt(totalRev)+'</div><div class="rc-label">Gesamtumsatz</div></div>';
-  html+='<div class="report-card"><div class="rc-val">'+txs.length+'</div><div class="rc-label">Transaktionen</div></div>';
-  html+='<div class="report-card"><div class="rc-val">'+totalItems+'</div><div class="rc-label">Artikel verkauft</div></div>';
-  html+='<div class="report-card"><div class="rc-val">'+fmt(avgOrder)+'</div><div class="rc-label">\u00d8 Bon-Wert</div></div>';
-  html+='<div class="report-card"><div class="rc-val">'+fmt(cashTotal)+'</div><div class="rc-label">Barzahlung</div></div>';
-  html+='<div class="report-card"><div class="rc-val">'+fmt(cardTotal)+'</div><div class="rc-label">Kartenzahlung</div></div>';
-  html+='<div class="report-card"><div class="rc-val">'+fmt(splitTotal)+'</div><div class="rc-label">Split-Zahlung</div></div>';
-  html+='<div class="report-card"><div class="rc-val">'+fmt(totalDisc)+'</div><div class="rc-label">Rabatte gesamt</div></div>';
-  html+='</div>';
-  html+='<div style="margin-top:10px;padding:10px;background:#f8f9fa;border-radius:8px;">';
-  html+='<div style="display:flex;justify-content:space-between;margin:4px 0;"><span>MwSt. (19%)</span><span style="font-weight:700;">'+fmt(tax)+'</span></div>';
-  html+='<div style="display:flex;justify-content:space-between;margin:4px 0;"><span>Netto</span><span style="font-weight:700;">'+fmt(totalRev-tax)+'</span></div>';
-  html+='</div>';
-  html+='<div style="text-align:center;margin-top:14px;color:var(--gray);font-size:12px;">Abschluss: '+new Date().toLocaleString('de-DE')+'</div>';
-  document.getElementById('dayCloseContent').innerHTML=html;
+// Render history when modal opens
+const historyObserver=new MutationObserver(()=>{
+  if(document.getElementById('historyModal').classList.contains('show'))renderHistory();
+});
+historyObserver.observe(document.getElementById('historyModal'),{attributes:true,attributeFilter:['class']});
+
+// ===== DAY CLOSE / SHIFT REPORT =====
+function handleDayClose(){
+  if(!state.managerMode){showToast('Manager-Modus erforderlich','error');return;}
+  renderDayClose();
   openModal('dayCloseModal');
 }
 
+function renderDayClose(){
+  const txs=state.transactions;
+  const totalRev=txs.reduce((s,t)=>s+t.total,0);
+  const txCount=txs.length;
+  const totalItems=txs.reduce((s,t)=>s+t.items.reduce((a,i)=>a+i.qty,0),0);
+  const avgOrder=txCount>0?totalRev/txCount:0;
+  const cashTotal=txs.filter(t=>t.method==='cash').reduce((s,t)=>s+t.total,0);
+  const cardTotal=txs.filter(t=>t.method==='card').reduce((s,t)=>s+t.total,0);
+  const splitTotal=totalRev-cashTotal-cardTotal;
+  const totalDisc=txs.reduce((s,t)=>s+t.discount+t.bonus,0);
+  const totalTax=txs.reduce((s,t)=>s+t.tax,0);
+  const totalNet=txs.reduce((s,t)=>s+t.net,0);
+
+  document.getElementById('dayCloseContent').innerHTML=`
+    <div class="report-grid">
+      <div class="report-card"><div class="rc-label">Gesamtumsatz</div><div class="rc-value">${fmt(totalRev)}</div></div>
+      <div class="report-card"><div class="rc-label">Transaktionen</div><div class="rc-value">${txCount}</div></div>
+      <div class="report-card"><div class="rc-label">Artikel verkauft</div><div class="rc-value">${totalItems}</div></div>
+      <div class="report-card"><div class="rc-label">Ø Bon-Wert</div><div class="rc-value">${fmt(avgOrder)}</div></div>
+      <div class="report-card"><div class="rc-label">Barzahlung</div><div class="rc-value">${fmt(cashTotal)}</div></div>
+      <div class="report-card"><div class="rc-label">Kartenzahlung</div><div class="rc-value">${fmt(cardTotal)}</div></div>
+      <div class="report-card"><div class="rc-label">Split-Zahlung</div><div class="rc-value">${fmt(splitTotal)}</div></div>
+      <div class="report-card"><div class="rc-label">Rabatte gesamt</div><div class="rc-value">${fmt(totalDisc)}</div></div>
+    </div>
+    <div class="report-grid" style="grid-template-columns:1fr 1fr;margin-bottom:0">
+      <div class="report-card"><div class="rc-label">MwSt. 19%</div><div class="rc-value">${fmt(totalTax)}</div></div>
+      <div class="report-card"><div class="rc-label">Netto</div><div class="rc-value">${fmt(totalNet)}</div></div>
+    </div>
+    <div class="report-footer">Abschluss: ${new Date().toLocaleString('de-DE')}</div>
+  `;
+}
+
 // ===== TOP SELLERS =====
-function showTopSellers(){
-  var sales={};
-  state.transactions.forEach(function(tx){
-    tx.items.forEach(function(item){
-      if(!sales[item.name])sales[item.name]={qty:0,rev:0};
-      sales[item.name].qty+=item.qty;
-      sales[item.name].rev+=item.price*item.qty;
+function renderTopSellers(){
+  const list=document.getElementById('topSellerList');
+  if(state.transactions.length===0){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div>Noch keine Verkäufe</div>';
+    return;
+  }
+  // Aggregate
+  const map={};
+  state.transactions.forEach(tx=>{
+    tx.items.forEach(i=>{
+      if(!map[i.id])map[i.id]={name:i.name,qty:0,rev:0,price:i.price};
+      map[i.id].qty+=i.qty;
+      map[i.id].rev+=i.price*i.qty;
     });
   });
-  var sorted=Object.entries(sales).sort(function(a,b){return b[1].qty-a[1].qty;});
-  var list=document.getElementById('topSellerList');
-  if(sorted.length===0){
-    list.innerHTML='<div style="text-align:center;color:#b2bec3;padding:30px;">Noch keine Verk\u00e4ufe</div>';
-  } else {
-    var html='';
-    sorted.slice(0,10).forEach(function(entry){
-      html+='<div class="top-item"><span class="ti-name">'+entry[0]+'</span>';
-      html+='<span class="ti-qty">'+entry[1].qty+'x</span>';
-      html+='<span class="ti-rev">'+fmt(entry[1].rev)+'</span></div>';
-    });
-    list.innerHTML=html;
-  }
-  openModal('topSellerModal');
+  const sorted=Object.values(map).sort((a,b)=>b.qty-a.qty).slice(0,10);
+  list.innerHTML=sorted.map(p=>`
+    <div class="top-item">
+      <span class="ts-name">${p.name}</span>
+      <span class="ts-qty">${p.qty}x</span>
+      <span class="ts-rev">${fmt(p.rev)}</span>
+    </div>
+  `).join('');
 }
 
 // ===== KEYBOARD SHORTCUTS =====
-document.addEventListener('keydown',function(e){
-  if(e.key==='F1'){e.preventDefault();doStorno();}
-  if(e.key==='F2'){e.preventDefault();doDiscount();}
-  if(e.key==='F3'){e.preventDefault();doManager();}
-  if(e.key==='F4'){e.preventDefault();openDrawer();}
-  if(e.key==='F5'){e.preventDefault();printReceipt();}
-  if(e.key==='F6'){e.preventDefault();doDayClose();}
-  if(e.key==='F7'){e.preventDefault();showHistory();}
-  if(e.key==='F8'){e.preventDefault();showTopSellers();}
-  if(e.key==='F12'){e.preventDefault();openPayment();}
-  if(e.key==='Escape'){
-    document.querySelectorAll('.modal-overlay.show').forEach(function(m){m.classList.remove('show');});
+document.addEventListener('keydown',e=>{
+  // Don't trigger in input fields
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA')return;
+
+  switch(e.key){
+    case 'F1':e.preventDefault();handleStorno();break;
+    case 'F2':e.preventDefault();handleDiscount();break;
+    case 'F3':e.preventDefault();handleManager();break;
+    case 'F4':e.preventDefault();handleDrawer();break;
+    case 'F5':e.preventDefault();reprintReceipt();break;
+    case 'F6':e.preventDefault();handleDayClose();break;
+    case 'F7':e.preventDefault();openModal('historyModal');break;
+    case 'F8':e.preventDefault();openModal('topSellerModal');renderTopSellers();break;
+    case 'F12':e.preventDefault();openPayModal('cash');break;
+    case 'Escape':e.preventDefault();closeAllModals();break;
   }
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{
+    if(e.target===overlay)closeAllModals();
+  });
 });
 
 // ===== INIT =====
 renderProducts();
 renderOrder();
-</script>
-</body>
-</html>
+</script></body></html>
