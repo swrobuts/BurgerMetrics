@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BurgerMetrics — Start</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --red: #B91C1C;
+  --red-dark: #991B1B;
+  --gold: #D97706;
+  --gold-dark: #B45309;
+  --blue: #5b7a9d;
+  --blue-dark: #4a6580;
+  --charcoal: #1C1917;
+  --charcoal-light: #292524;
+  --stone: #44403C;
+  --stone-light: #78716C;
+  --cream: #FFFBEB;
+  --border: rgba(255,255,255,.07);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--charcoal);
+  color: #e7e5e4;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+}
+
+/* ── Header ── */
+.header {
+  padding: 48px 40px 0;
+  text-align: center;
+}
+.header-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--stone-light);
+  margin-bottom: 16px;
+}
+.header-eyebrow::before,
+.header-eyebrow::after {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--stone);
+}
+.logo-wrap {
+  position: relative;
+  display: inline-block;
+}
+.logo {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 8vw, 80px);
+  letter-spacing: 4px;
+  color: #fff;
+  line-height: 1;
+  position: relative;
+}
+.logo-accent {
+  color: var(--red);
+}
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.72em;
+  background: var(--gold);
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.tagline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--stone-light);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.sub-heading {
+  font-size: 13px;
+  color: rgba(255,255,255,.35);
+  margin-top: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* ── Stats strip ── */
+.stats-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 28px auto 0;
+  max-width: 600px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.stat-item {
+  flex: 1;
+  padding: 8px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold);
+  display: block;
+}
+.stat-lbl {
+  font-size: 9px;
+  color: var(--stone-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-top: 1px;
+}
+
+/* ── Cards ── */
+.cards-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1020px;
+  width: 100%;
+}
+
+.card {
+  background: var(--charcoal-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px 28px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 8px 8px 0 0;
+}
+.card-red::before   { background: var(--red); }
+.card-gold::before  { background: var(--gold); }
+.card-blue::before  { background: var(--blue); }
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .2s ease;
+  pointer-events: none;
+}
+.card-red::after   { background: radial-gradient(circle at 50% 0%, rgba(185,28,28,.08) 0%, transparent 70%); }
+.card-gold::after  { background: radial-gradient(circle at 50% 0%, rgba(217,119,6,.08) 0%, transparent 70%); }
+.card-blue::after  { background: radial-gradient(circle at 50% 0%, rgba(91,122,157,.08) 0%, transparent 70%); }
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,255,255,.12);
+}
+.card-red:hover   { box-shadow: 0 12px 40px rgba(185,28,28,.2),  0 2px 8px rgba(0,0,0,.3); }
+.card-gold:hover  { box-shadow: 0 12px 40px rgba(217,119,6,.2),   0 2px 8px rgba(0,0,0,.3); }
+.card-blue:hover  { box-shadow: 0 12px 40px rgba(91,122,157,.2),  0 2px 8px rgba(0,0,0,.3); }
+.card:hover::after { opacity: 1; }
+.card:active { transform: translateY(-1px); }
+
+.card-key {
+  position: absolute;
+  top: 14px; right: 14px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255,255,255,.2);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 3px;
+  padding: 2px 6px;
+  letter-spacing: 1px;
+}
+
+.card-icon {
+  font-size: 28px;
+  margin-bottom: 18px;
+  line-height: 1;
+}
+.card-red   .card-icon { color: var(--red); }
+.card-gold  .card-icon { color: var(--gold); }
+.card-blue  .card-icon { color: var(--blue); }
+
+.card-subtitle {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--stone-light);
+  margin-bottom: 6px;
+}
+.card-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 2px;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+.card-desc {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: rgba(255,255,255,.5);
+  flex: 1;
+  margin-bottom: 20px;
+}
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  align-self: flex-start;
+  margin-top: auto;
+}
+.card-red  .card-badge { background: rgba(185,28,28,.15); color: #fca5a5; border: 1px solid rgba(185,28,28,.3); }
+.card-gold .card-badge { background: rgba(217,119,6,.15); color: #fcd34d; border: 1px solid rgba(217,119,6,.3); }
+.card-blue .card-badge { background: rgba(91,122,157,.15); color: #93c5fd; border: 1px solid rgba(91,122,157,.3); }
+
+.card-arrow {
+  position: absolute;
+  bottom: 20px; right: 20px;
+  font-size: 14px;
+  color: rgba(255,255,255,.15);
+  transition: color .2s, transform .2s;
+}
+.card:hover .card-arrow { color: rgba(255,255,255,.4); transform: translate(2px,-2px); }
+
+/* ── Info strip ── */
+.info-strip {
+  text-align: center;
+  padding: 0 24px 12px;
+}
+.info-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,.2);
+  letter-spacing: 1px;
+}
+kbd {
+  display: inline-block;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(255,255,255,.35);
+  margin: 0 2px;
+}
+
+/* ── Footer ── */
+footer {
+  padding: 16px 24px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+.footer-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255,255,255,.15);
+  letter-spacing: 0.5px;
+}
+.footer-text a { color: rgba(255,255,255,.25); text-decoration: none; }
+.footer-dot { margin: 0 8px; opacity: .3; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .header { padding: 32px 20px 0; }
+  .cards-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .cards-section { padding: 28px 20px; }
+  .stats-strip { max-width: 100%; }
+  .stat-val { font-size: 11px; }
+}
+@media (max-width: 480px) {
+  .stats-strip { flex-wrap: wrap; }
+  .stat-item { min-width: 50%; border-bottom: 1px solid var(--border); }
+  .stat-item:nth-child(2n) { border-right: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Business Intelligence Lernumgebung</div>
+  <div class="logo-wrap">
+    <div class="logo">Burger<span class="logo-accent">Metrics</span><span class="cursor"></span></div>
+  </div>
+  <div class="tagline">Flame-Grilled Since 2017 &nbsp;·&nbsp; Würzburg</div>
+  <div class="sub-heading">Wählen Sie Ihre Perspektive</div>
+
+  <div class="stats-strip">
+    <div class="stat-item">
+      <span class="stat-val">8</span>
+      <span class="stat-lbl">Filialen</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">25.000</span>
+      <span class="stat-lbl">Kunden</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">€14,52M</span>
+      <span class="stat-lbl">Gesamtumsatz</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">754.513</span>
+      <span class="stat-lbl">Bestellungen</span>
+    </div>
+  </div>
+</div>
+
+<div class="cards-section">
+  <div class="cards-grid">
+
+    <a class="card card-red" href="pos.html">
+      <span class="card-key">[ 1 ]</span>
+      <div class="card-icon"><i class="fa-solid fa-cash-register"></i></div>
+      <div class="card-subtitle">Kassensystem</div>
+      <div class="card-title">POS Terminal</div>
+      <p class="card-desc">Simuliertes Kassensystem für den Filialverkauf — erleben Sie den Verkaufsprozess aus Sicht des Kassierers. Artikel buchen, Zahlungen abwickeln, Bons drucken.</p>
+      <span class="card-badge"><i class="fa-solid fa-circle" style="font-size:6px"></i> Counter · Drive-Through</span>
+      <i class="card-arrow fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+
+    <a class="card card-gold" href="index.html">
+      <span class="card-key">[ 2 ]</span>
+      <div class="card-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+      <div class="card-subtitle">Bestellportal</div>
+      <div class="card-title">Online Shop</div>
+      <p class="card-desc">Bestellen Sie wie ein Kunde — vollständiges Online-Bestellsystem mit Menü, Warenkorb, Filialkarte und Checkout-Prozess. App & Delivery-Kanal.</p>
+      <span class="card-badge"><i class="fa-solid fa-circle" style="font-size:6px"></i> App · Delivery</span>
+      <i class="card-arrow fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+
+    <a class="card card-blue" href="dashboard.html">
+      <span class="card-key">[ 3 ]</span>
+      <div class="card-icon"><i class="fa-solid fa-chart-mixed"></i></div>
+      <div class="card-subtitle">Analyse & Reporting</div>
+      <div class="card-title">BI Dashboard</div>
+      <p class="card-desc">Vollständige Business Intelligence Plattform — 12 Analyse-Tabs, Zeitreihen 2017–2026, RFM-Segmentierung, Preissimulation, Kanalanalyse & Management Summary.</p>
+      <span class="card-badge"><i class="fa-solid fa-circle" style="font-size:6px"></i> Analytics · Data Mining</span>
+      <i class="card-arrow fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+
+  </div>
+</div>
+
+<div class="info-strip">
+  <span class="info-text">Tastaturkürzel: <kbd>1</kbd> POS &nbsp; <kbd>2</kbd> Shop &nbsp; <kbd>3</kbd> Dashboard</span>
+</div>
+
+<footer>
+  <p class="footer-text">
+    BurgerMetrics &mdash; Fiktives Unternehmen für den BI-Kurs an der BBW / THWS Würzburg
+    <span class="footer-dot">·</span>
+    Sommersemester 2026
+    <span class="footer-dot">·</span>
+    Alle Daten sind simuliert
+  </p>
+</footer>
+
+<script>
+document.addEventListener('keydown', e => {
+  if (e.key === '1') location.href = 'pos.html';
+  if (e.key === '2') location.href = 'index.html';
+  if (e.key === '3') location.href = 'dashboard.html';
+});
+</script>
+</body>
+</html>

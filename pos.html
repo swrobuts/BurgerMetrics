@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BurgerMetrics POS Terminal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#eef0f2;--white:#fff;--dark:#2d3436;--accent:#e17055;--green:#00b894;
+  --red:#d63031;--blue:#0984e3;--purple:#6c5ce7;--yellow:#fdcb6e;--orange:#e17055;
+  --gray:#636e72;--light-gray:#dfe6e9;--shadow:0 2px 8px rgba(0,0,0,.12);
+  --cat-burger:#d63031;--cat-sides:#e17055;--cat-drinks:#0984e3;
+  --cat-dessert:#6c5ce7;--cat-breakfast:#f9ca24;--cat-extras:#00b894;--cat-quick:#2d3436;
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#636e72;}
+.terminal-frame{
+  max-width:1400px;margin:18px auto;background:#23272a;border-radius:18px;
+  box-shadow:0 8px 40px rgba(0,0,0,.45);padding:10px 10px 14px;position:relative;
+}
+.terminal-bezel{display:flex;align-items:center;gap:8px;padding:4px 12px 8px;}
+.terminal-dot{width:12px;height:12px;border-radius:50%;}
+.terminal-dot.r{background:#ff5f56;}.terminal-dot.y{background:#ffbd2e;}.terminal-dot.g{background:#27c93f;}
+.terminal-label{color:#999;font-size:11px;margin-left:auto;letter-spacing:1px;text-transform:uppercase;}
+.terminal-screen{background:var(--bg);border-radius:10px;overflow:hidden;min-height:calc(100vh - 80px);}
+.pos-header{
+  background:var(--dark);color:#fff;display:flex;align-items:center;
+  padding:0 18px;height:48px;gap:14px;
+}
+.pos-header .logo{font-weight:800;font-size:17px;letter-spacing:-.5px;}
+.pos-header .logo span{color:var(--accent);}
+.header-info{display:flex;gap:18px;margin-left:auto;align-items:center;font-size:13px;}
+.header-info .rev{background:var(--green);color:#fff;padding:3px 12px;border-radius:20px;font-weight:700;font-size:13px;}
+.header-info .clock{color:#b2bec3;}
+.header-info .cashier{color:#dfe6e9;}
+.header-link{
+  color:#fff;text-decoration:none;font-size:13px;font-weight:700;
+  background:var(--accent);padding:6px 16px;border-radius:8px;transition:.2s;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(225,112,85,.3);
+}
+.header-link:hover{background:#d35400;transform:translateY(-1px);box-shadow:0 4px 12px rgba(225,112,85,.4);}
+.header-link svg{width:16px;height:16px;fill:currentColor;}
+.pos-main{display:flex;height:calc(100vh - 140px);min-height:520px;}
+.pos-left{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.pos-right{width:340px;background:var(--white);border-left:2px solid var(--light-gray);display:flex;flex-direction:column;}
+.cat-tabs{display:flex;gap:3px;padding:6px 8px;background:#fff;border-bottom:2px solid var(--light-gray);flex-shrink:0;}
+.cat-tab{
+  flex:1;padding:14px 6px;border:none;border-radius:8px;cursor:pointer;
+  font-size:14px;font-weight:700;color:#fff;text-align:center;transition:.15s;
+  text-shadow:0 1px 2px rgba(0,0,0,.2);min-height:54px;
+}
+.cat-tab:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.cat-tab.active{box-shadow:0 3px 12px rgba(0,0,0,.25);transform:translateY(-2px);}
+.cat-tab[data-cat="quick"]{background:var(--cat-quick);}
+.cat-tab[data-cat="burger"]{background:var(--cat-burger);}
+.cat-tab[data-cat="sides"]{background:var(--cat-sides);}
+.cat-tab[data-cat="drinks"]{background:var(--cat-drinks);}
+.cat-tab[data-cat="dessert"]{background:var(--cat-dessert);}
+.cat-tab[data-cat="breakfast"]{background:var(--cat-breakfast);color:#333;text-shadow:none;}
+.cat-tab[data-cat="extras"]{background:var(--cat-extras);}
+.product-grid{
+  flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:8px;padding:10px;overflow-y:auto;align-content:start;
+}
+.product-btn{
+  min-height:110px;border:none;border-radius:12px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:12px 8px;font-weight:700;font-size:14px;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.18);transition:.12s;position:relative;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.product-btn:hover{transform:scale(1.04);box-shadow:0 4px 14px rgba(0,0,0,.18);}
+.product-btn:active{transform:scale(.97);}
+.product-btn .price{font-size:17px;margin-top:6px;font-weight:800;}
+.product-btn .name{font-size:12.5px;text-align:center;line-height:1.3;}
+.product-btn.cat-burger{background:var(--cat-burger);}
+.product-btn.cat-sides{background:var(--cat-sides);}
+.product-btn.cat-drinks{background:var(--cat-drinks);}
+.product-btn.cat-dessert{background:var(--cat-dessert);}
+.product-btn.cat-breakfast{background:var(--cat-breakfast);color:#333;text-shadow:none;}
+.product-btn.cat-extras{background:var(--cat-extras);}
+.product-btn.cat-quick{background:var(--dark);}
+.order-header{
+  background:var(--dark);color:#fff;padding:10px 14px;display:flex;
+  justify-content:space-between;align-items:center;font-weight:700;font-size:14px;
+}
+.order-type-btns{display:flex;gap:4px;}
+.order-type-btn{
+  border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:.15s;background:#444;color:#ccc;
+}
+.order-type-btn.active{background:var(--accent);color:#fff;}
+.order-num{font-size:12px;color:#b2bec3;}
+.table-select{display:none;margin:0 14px;padding:6px;}
+.table-select.show{display:block;}
+.table-select select{width:100%;padding:6px;border-radius:6px;border:1px solid var(--light-gray);font-size:13px;}
+.order-items{flex:1;overflow-y:auto;padding:6px 10px;}
+.order-item{
+  display:flex;align-items:center;gap:6px;padding:7px 4px;
+  border-bottom:1px solid var(--light-gray);font-size:13px;
+}
+.order-item .qty-controls{display:flex;align-items:center;gap:2px;}
+.order-item .qty-btn{
+  width:30px;height:30px;border:none;border-radius:6px;font-size:16px;
+  font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.1s;
+}
+.order-item .qty-btn.minus{background:#ffeaa7;color:#2d3436;}
+.order-item .qty-btn.plus{background:var(--green);color:#fff;}
+.order-item .qty-btn:active{transform:scale(.9);}
+.order-item .qty{font-weight:700;min-width:22px;text-align:center;}
+.order-item .item-name{flex:1;font-weight:600;}
+.order-item .item-price{font-weight:700;min-width:55px;text-align:right;}
+.order-item .remove-btn{
+  width:28px;height:28px;border:none;border-radius:6px;background:var(--red);
+  color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.1s;
+}
+.order-item .remove-btn:active{transform:scale(.9);}
+.order-summary{background:#f8f9fa;padding:10px 14px;border-top:2px solid var(--light-gray);}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;margin:3px 0;color:var(--gray);}
+.summary-row.total{font-size:18px;font-weight:800;color:var(--dark);margin-top:6px;padding-top:6px;border-top:2px solid var(--dark);}
+.summary-row.discount{color:var(--red);}
+.customer-card-row{display:flex;gap:4px;padding:6px 14px;background:#f0f0f0;align-items:center;}
+.customer-card-row input{flex:1;padding:5px 8px;border:1px solid var(--light-gray);border-radius:4px;font-size:12px;}
+.customer-card-row button{padding:5px 10px;border:none;border-radius:4px;background:var(--blue);color:#fff;font-size:12px;cursor:pointer;font-weight:600;}
+.customer-points{font-size:11px;color:var(--green);padding:2px 14px;font-weight:600;display:none;}
+.coupon-row{display:flex;gap:4px;padding:6px 14px;background:#f0f0f0;align-items:center;border-top:1px solid var(--light-gray);}
+.coupon-row input{flex:1;padding:5px 8px;border:1px solid var(--light-gray);border-radius:4px;font-size:12px;}
+.coupon-row button{padding:5px 10px;border:none;border-radius:4px;background:var(--purple);color:#fff;font-size:12px;cursor:pointer;font-weight:600;}
+.coupon-msg{font-size:11px;padding:2px 14px;font-weight:600;display:none;}
+.fn-bar{
+  display:flex;gap:3px;padding:6px 8px;background:#fff;border-top:2px solid var(--light-gray);flex-shrink:0;
+}
+.fn-btn{
+  flex:1;padding:10px 2px;border:none;border-radius:6px;cursor:pointer;
+  font-size:11px;font-weight:700;text-align:center;transition:.12s;
+  background:var(--dark);color:#dfe6e9;min-height:44px;
+}
+.fn-btn:hover{background:#444;}
+.fn-btn:active{transform:scale(.96);}
+.fn-btn.pay{background:var(--green);color:#fff;font-size:13px;}
+.fn-btn .fn-key{display:block;font-size:9px;color:#999;margin-bottom:2px;}
+.fn-btn.pay .fn-key{color:rgba(255,255,255,.7);}
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+  z-index:1000;align-items:center;justify-content:center;
+}
+.modal-overlay.show{display:flex;}
+.modal{
+  background:#fff;border-radius:16px;padding:24px;min-width:360px;max-width:520px;
+  width:90%;box-shadow:0 12px 60px rgba(0,0,0,.3);max-height:85vh;overflow-y:auto;
+}
+.modal h2{font-size:18px;margin-bottom:14px;color:var(--dark);}
+.modal-close{float:right;background:none;border:none;font-size:22px;cursor:pointer;color:var(--gray);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0;}
+.numpad button{
+  padding:16px;font-size:20px;font-weight:700;border:none;border-radius:10px;
+  background:#f0f0f0;cursor:pointer;transition:.1s;min-height:52px;
+}
+.numpad button:hover{background:#e0e0e0;}
+.numpad button:active{transform:scale(.95);}
+.numpad .num-clear{background:#ffeaa7;}.numpad .num-enter{background:var(--green);color:#fff;}
+.pay-display{font-size:28px;font-weight:800;text-align:right;padding:12px;background:#f8f9fa;border-radius:10px;margin-bottom:8px;min-height:52px;}
+.change-display{font-size:20px;text-align:center;color:var(--green);font-weight:700;margin:8px 0;min-height:30px;}
+.pay-method-btns{display:flex;gap:6px;margin-bottom:10px;}
+.pay-method-btn{
+  flex:1;padding:12px;border:2px solid var(--light-gray);border-radius:10px;
+  font-size:14px;font-weight:700;cursor:pointer;text-align:center;background:#fff;transition:.15s;
+}
+.pay-method-btn.active{border-color:var(--accent);background:#fff5f0;}
+.pay-method-btn:hover{border-color:var(--accent);}
+.split-section{display:none;margin:8px 0;padding:10px;background:#f8f9fa;border-radius:8px;}
+.split-section.show{display:block;}
+.split-row{display:flex;justify-content:space-between;align-items:center;margin:4px 0;font-size:14px;}
+.split-row input{width:100px;padding:6px;border:1px solid var(--light-gray);border-radius:6px;text-align:right;font-size:14px;font-weight:700;}
+.pin-display{
+  font-size:32px;letter-spacing:12px;text-align:center;padding:14px;
+  background:#f8f9fa;border-radius:10px;margin-bottom:10px;min-height:58px;
+}
+.receipt-modal .modal{max-width:360px;padding:0;overflow:hidden;border-radius:4px;}
+.receipt{
+  background:#fffef8;font-family:'Courier New','Lucida Console',monospace;
+  padding:28px 22px 36px;position:relative;font-size:11.5px;line-height:1.7;
+  box-shadow:2px 4px 16px rgba(0,0,0,.10),inset 0 0 60px rgba(0,0,0,.02);
+  border-left:1px solid #e8e4d8;border-right:1px solid #e8e4d8;
+}
+.receipt::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(0,0,0,.018) 27px,rgba(0,0,0,.018) 28px);
+  pointer-events:none;
+}
+.receipt::after{
+  content:'';position:absolute;bottom:-12px;left:0;right:0;height:12px;
+  background:linear-gradient(135deg,#fffef8 33.33%,transparent 33.33%),linear-gradient(225deg,#fffef8 33.33%,transparent 33.33%);
+  background-size:12px 12px;
+}
+.receipt .r-center{text-align:center;}
+.receipt .r-line{border:none;border-top:1px dashed #aaa;margin:8px 0;}
+.receipt .r-row{display:flex;justify-content:space-between;padding:1px 0;}
+.receipt .r-bold{font-weight:700;}
+.receipt .r-big{font-size:15px;font-weight:700;letter-spacing:.5px;}
+.receipt .barcode{
+  text-align:center;margin:12px auto 0;font-family:'Libre Barcode 39',monospace;
+  font-size:38px;letter-spacing:1px;max-width:90%;overflow:hidden;
+  word-break:break-all;line-height:1;
+}
+.manager-badge{
+  display:none;position:fixed;top:60px;right:18px;background:var(--red);
+  color:#fff;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;
+  z-index:500;box-shadow:var(--shadow);
+}
+.manager-badge.show{display:block;}
+.cash-drawer{
+  display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:420px;height:60px;background:linear-gradient(#555,#333);border-radius:8px 8px 0 0;
+  z-index:2000;box-shadow:0 -4px 20px rgba(0,0,0,.4);transition:transform .5s cubic-bezier(.17,.67,.35,1.2);
+  border:2px solid #666;
+}
+.cash-drawer.open{display:block;animation:drawerOpen .6s ease-out;}
+@keyframes drawerOpen{0%{transform:translateX(-50%) translateY(100%);}60%{transform:translateX(-50%) translateY(-10px);}100%{transform:translateX(-50%) translateY(0);}}
+.cash-drawer-inner{display:flex;gap:3px;padding:8px 12px;justify-content:center;}
+.cash-slot{width:50px;height:36px;background:#2a2a2a;border-radius:3px;border:1px solid #555;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:9px;font-weight:700;}
+.discount-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:10px 0;}
+.discount-btn{
+  padding:14px;border:2px solid var(--light-gray);border-radius:10px;
+  font-size:16px;font-weight:700;cursor:pointer;background:#fff;transition:.15s;
+}
+.discount-btn:hover{border-color:var(--accent);background:#fff5f0;}
+.discount-btn.active{border-color:var(--accent);background:#fff5f0;}
+.discount-custom{display:flex;gap:6px;margin:8px 0;align-items:center;}
+.discount-custom input{flex:1;padding:10px;border:1px solid var(--light-gray);border-radius:8px;font-size:16px;font-weight:700;}
+.discount-custom select{padding:10px;border:1px solid var(--light-gray);border-radius:8px;font-size:14px;}
+.history-list{max-height:400px;overflow-y:auto;}
+.history-item{
+  padding:10px;border-bottom:1px solid var(--light-gray);cursor:pointer;transition:.1s;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.history-item:hover{background:#f0f0f0;}
+.history-item .hi-time{font-size:12px;color:var(--gray);}
+.history-item .hi-total{font-weight:700;font-size:15px;}
+.history-item .hi-items{font-size:11px;color:var(--gray);}
+.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:10px 0;}
+.report-card{background:#f8f9fa;border-radius:10px;padding:14px;text-align:center;}
+.report-card .rc-val{font-size:24px;font-weight:800;color:var(--dark);}
+.report-card .rc-label{font-size:11px;color:var(--gray);margin-top:2px;}
+.top-list{counter-reset:rank;}
+.top-item{
+  display:flex;align-items:center;gap:10px;padding:8px 4px;
+  border-bottom:1px solid var(--light-gray);
+}
+.top-item::before{counter-increment:rank;content:counter(rank);font-size:18px;font-weight:800;color:var(--accent);min-width:28px;text-align:center;}
+.top-item .ti-name{flex:1;font-weight:600;}
+.top-item .ti-qty{font-weight:700;color:var(--gray);}
+.top-item .ti-rev{font-weight:700;color:var(--green);}
+.confirm-btns{display:flex;gap:8px;margin-top:14px;}
+.confirm-btns button{
+  flex:1;padding:12px;border:none;border-radius:8px;font-size:14px;
+  font-weight:700;cursor:pointer;transition:.1s;
+}
+.btn-yes{background:var(--green);color:#fff;}
+.btn-no{background:var(--red);color:#fff;}
+.btn-action{background:var(--accent);color:#fff;}
+.btn-gray{background:var(--light-gray);color:var(--dark);}
+.btn-yes:hover,.btn-no:hover,.btn-action:hover{filter:brightness(1.1);}
+.toast{
+  position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-100px);
+  background:var(--dark);color:#fff;padding:10px 24px;border-radius:10px;
+  font-size:14px;font-weight:600;z-index:3000;transition:.4s;opacity:0;
+  box-shadow:0 6px 24px rgba(0,0,0,.3);
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.toast.success{background:var(--green);}
+.toast.error{background:var(--red);}
+@media(max-width:900px){
+  .pos-right{width:280px;}
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}
+  .cat-tab{font-size:11px;padding:8px 2px;}
+}
+@media(max-width:650px){
+  .pos-main{flex-direction:column;}
+  .pos-right{width:100%;height:50%;}
+  .fn-bar{flex-wrap:wrap;}
+  .fn-btn{min-width:calc(25% - 3px);}
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="terminal-frame">
+  <div class="terminal-bezel">
+    <div class="terminal-dot r"></div><div class="terminal-dot y"></div><div class="terminal-dot g"></div>
+    <span class="terminal-label">BurgerMetrics POS v2.0</span>
+  </div>
+  <div class="terminal-screen">
+    <div class="pos-header">
+      <div class="logo">Burger<span>Metrics</span> POS</div>
+      <div class="header-info">
+        <span class="cashier" id="cashierName">Kasse 1</span>
+        <span class="clock" id="clock">--:--</span>
+        <span class="rev" id="dayRevenue">0,00 €</span>
+        <a href="index.html" class="header-link">Dashboard &#8599;</a>
+      </div>
+    </div>
+    <div class="pos-main">
+      <div class="pos-left">
+        <div class="cat-tabs" id="catTabs">
+          <button class="cat-tab active" data-cat="quick">&#9733; Schnell</button>
+          <button class="cat-tab" data-cat="burger">Burger</button>
+          <button class="cat-tab" data-cat="sides">Beilagen</button>
+          <button class="cat-tab" data-cat="drinks">Getr&#228;nke</button>
+          <button class="cat-tab" data-cat="dessert">Dessert</button>
+          <button class="cat-tab" data-cat="breakfast">Fr&#252;hst&#252;ck</button>
+          <button class="cat-tab" data-cat="extras">Extras</button>
+        </div>
+        <div class="product-grid" id="productGrid"></div>
+        <div class="fn-bar">
+          <button class="fn-btn" onclick="doStorno()"><span class="fn-key">F1</span>Storno</button>
+          <button class="fn-btn" onclick="doDiscount()"><span class="fn-key">F2</span>Rabatt</button>
+          <button class="fn-btn" onclick="doManager()"><span class="fn-key">F3</span>Manager</button>
+          <button class="fn-btn" onclick="openDrawer()"><span class="fn-key">F4</span>Kasse</button>
+          <button class="fn-btn" onclick="printReceipt()"><span class="fn-key">F5</span>Bon</button>
+          <button class="fn-btn" onclick="doDayClose()"><span class="fn-key">F6</span>Tagesab.</button>
+          <button class="fn-btn" onclick="showHistory()"><span class="fn-key">F7</span>Historie</button>
+          <button class="fn-btn" onclick="showTopSellers()"><span class="fn-key">F8</span>Top-Seller</button>
+          <button class="fn-btn pay" onclick="openPayment()"><span class="fn-key">F12</span>ZAHLEN</button>
+        </div>
+      </div>
+      <div class="pos-right">
+        <div class="order-header">
+          <div>
+            <span>Bestellung</span>
+            <span class="order-num" id="orderNum">#001</span>
+          </div>
+          <div class="order-type-btns">
+            <button class="order-type-btn active" data-type="counter" onclick="setOrderType('counter')">Mitnehmen</button>
+            <button class="order-type-btn" data-type="dine" onclick="setOrderType('dine')">Im Haus</button>
+          </div>
+        </div>
+        <div class="table-select" id="tableSelect">
+          <select id="tableNum" onchange="state.tableNum=this.value">
+            <option value="">Tisch w&#228;hlen...</option>
+          </select>
+        </div>
+        <div class="customer-card-row">
+          <input type="text" id="cardInput" placeholder="Kundenkarte #">
+          <button onclick="scanCard()">Scan</button>
+        </div>
+        <div class="customer-points" id="customerPoints"></div>
+        <div class="coupon-row">
+          <input type="text" id="couponInput" placeholder="Gutschein-Code">
+          <button onclick="applyCoupon()">Einl&#246;sen</button>
+        </div>
+        <div class="coupon-msg" id="couponMsg"></div>
+        <div class="order-items" id="orderItems">
+          <div style="text-align:center;color:#b2bec3;padding:40px 10px;font-size:13px;">Produkt antippen um hinzuzuf&#252;gen</div>
+        </div>
+        <div class="order-summary" id="orderSummary">
+          <div class="summary-row"><span>Zwischensumme</span><span id="subtotal">0,00 &#8364;</span></div>
+          <div class="summary-row" id="discountRow" style="display:none"><span>Rabatt</span><span id="discountAmt">0,00 &#8364;</span></div>
+          <div class="summary-row"><span>MwSt. (19%)</span><span id="taxAmt">0,00 &#8364;</span></div>
+          <div class="summary-row total"><span>GESAMT</span><span id="totalAmt">0,00 &#8364;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="manager-badge" id="managerBadge">&#128273; Manager-Modus</div>
+<div class="cash-drawer" id="cashDrawer">
+  <div class="cash-drawer-inner">
+    <div class="cash-slot">5&#8364;</div><div class="cash-slot">10&#8364;</div>
+    <div class="cash-slot">20&#8364;</div><div class="cash-slot">50&#8364;</div>
+    <div class="cash-slot">100&#8364;</div><div class="cash-slot">M&#252;nzen</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('payModal')">&times;</button>
+    <h2>Zahlung</h2>
+    <div class="pay-method-btns">
+      <div class="pay-method-btn active" data-method="cash" onclick="setPayMethod('cash')">&#128181; Bar</div>
+      <div class="pay-method-btn" data-method="card" onclick="setPayMethod('card')">&#128179; Karte</div>
+      <div class="pay-method-btn" data-method="split" onclick="setPayMethod('split')">&#9986; Split</div>
+    </div>
+    <div id="payTotal" style="text-align:center;font-size:22px;font-weight:800;margin:6px 0;">0,00 &#8364;</div>
+    <div class="split-section" id="splitSection">
+      <div class="split-row"><span>Bar:</span><input type="number" id="splitCash" step="0.01" min="0" oninput="calcSplit()"> &#8364;</div>
+      <div class="split-row"><span>Karte:</span><span id="splitCard">0,00 &#8364;</span></div>
+    </div>
+    <div id="cashSection">
+      <div class="pay-display" id="payDisplay">0,00</div>
+      <div class="change-display" id="changeDisplay"></div>
+      <div class="numpad" id="numpad">
+        <button onclick="numpadInput('7')">7</button><button onclick="numpadInput('8')">8</button><button onclick="numpadInput('9')">9</button>
+        <button onclick="numpadInput('4')">4</button><button onclick="numpadInput('5')">5</button><button onclick="numpadInput('6')">6</button>
+        <button onclick="numpadInput('1')">1</button><button onclick="numpadInput('2')">2</button><button onclick="numpadInput('3')">3</button>
+        <button class="num-clear" onclick="numpadInput('C')">C</button><button onclick="numpadInput('0')">0</button><button onclick="numpadInput('.')">.</button>
+        <button onclick="numpadInput('10')" style="font-size:14px;">10&#8364;</button>
+        <button onclick="numpadInput('20')" style="font-size:14px;">20&#8364;</button>
+        <button onclick="numpadInput('50')" style="font-size:14px;">50&#8364;</button>
+      </div>
+      <button class="btn-action" style="width:100%;padding:14px;font-size:16px;border:none;border-radius:10px;cursor:pointer;margin-top:6px;" onclick="processPayment()">Zahlung abschlie&#223;en</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="pinModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('pinModal')">&times;</button>
+    <h2>Manager-Login</h2>
+    <div class="pin-display" id="pinDisplay">____</div>
+    <div class="numpad">
+      <button onclick="pinInput('1')">1</button><button onclick="pinInput('2')">2</button><button onclick="pinInput('3')">3</button>
+      <button onclick="pinInput('4')">4</button><button onclick="pinInput('5')">5</button><button onclick="pinInput('6')">6</button>
+      <button onclick="pinInput('7')">7</button><button onclick="pinInput('8')">8</button><button onclick="pinInput('9')">9</button>
+      <button class="num-clear" onclick="pinInput('C')">C</button><button onclick="pinInput('0')">0</button>
+      <button class="num-enter" onclick="pinInput('OK')">OK</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="discountModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('discountModal')">&times;</button>
+    <h2>Rabatt gew&#228;hren</h2>
+    <div class="discount-btns">
+      <button class="discount-btn" onclick="applyDiscountPct(5)">5%</button>
+      <button class="discount-btn" onclick="applyDiscountPct(10)">10%</button>
+      <button class="discount-btn" onclick="applyDiscountPct(15)">15%</button>
+      <button class="discount-btn" onclick="applyDiscountPct(20)">20%</button>
+    </div>
+    <div class="discount-custom">
+      <input type="number" id="discountCustomVal" placeholder="Betrag" step="0.01" min="0">
+      <select id="discountCustomType">
+        <option value="pct">%</option>
+        <option value="fixed">&#8364;</option>
+      </select>
+      <button class="btn-action" onclick="applyCustomDiscount()" style="padding:10px 18px;border:none;border-radius:8px;cursor:pointer;">OK</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="stornoModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('stornoModal')">&times;</button>
+    <h2>Gesamte Bestellung stornieren?</h2>
+    <p style="color:var(--gray);margin-bottom:14px;">Alle Artikel werden entfernt.</p>
+    <div class="confirm-btns">
+      <button class="btn-no" onclick="closeModal('stornoModal')">Abbrechen</button>
+      <button class="btn-yes" onclick="confirmStorno()">Ja, stornieren</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay receipt-modal" id="receiptModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('receiptModal')">&times;</button>
+    <div class="receipt" id="receiptContent"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="historyModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('historyModal')">&times;</button>
+    <h2>Transaktionshistorie</h2>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="dayCloseModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('dayCloseModal')">&times;</button>
+    <h2>Tagesabschluss</h2>
+    <div id="dayCloseContent"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="topSellerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('topSellerModal')">&times;</button>
+    <h2>Top-Seller Ranking</h2>
+    <div class="top-list" id="topSellerList"></div>
+  </div>
+</div>
+<script>
+// ===== PRODUCTS =====
+const products = [
+  {id:1,name:'Classic Burger',price:4.99,cat:'burger',quick:true},
+  {id:2,name:'Cheeseburger',price:5.49,cat:'burger',quick:true},
+  {id:3,name:'Double Burger',price:7.99,cat:'burger'},
+  {id:4,name:'Bacon King',price:8.99,cat:'burger'},
+  {id:5,name:'Chicken Burger',price:6.49,cat:'burger'},
+  {id:6,name:'Crispy Chick DLX',price:7.49,cat:'burger'},
+  {id:7,name:'Veggie Burger',price:5.99,cat:'burger'},
+  {id:10,name:'Medium Fries',price:2.99,cat:'sides',quick:true},
+  {id:11,name:'Large Fries',price:3.49,cat:'sides'},
+  {id:12,name:'Nuggets 6pc',price:3.99,cat:'sides',quick:true},
+  {id:13,name:'Nuggets 9pc',price:5.49,cat:'sides'},
+  {id:14,name:'Onion Rings',price:3.29,cat:'sides'},
+  {id:15,name:'Side Salad',price:3.49,cat:'sides'},
+  {id:16,name:'Mozz Sticks',price:4.29,cat:'sides'},
+  {id:20,name:'Cola 0.3l',price:2.49,cat:'drinks'},
+  {id:21,name:'Cola 0.5l',price:3.29,cat:'drinks',quick:true},
+  {id:22,name:'Wasser 0.5l',price:1.99,cat:'drinks'},
+  {id:23,name:'Kaffee',price:2.29,cat:'drinks'},
+  {id:24,name:'Cappuccino',price:3.29,cat:'drinks'},
+  {id:25,name:'Shake Vanilla',price:4.49,cat:'drinks'},
+  {id:26,name:'Shake Chocolate',price:4.49,cat:'drinks'},
+  {id:27,name:'Bier 0.3l',price:3.99,cat:'drinks'},
+  {id:30,name:'Soft Ice',price:1.99,cat:'dessert'},
+  {id:31,name:'Sundae Caramel',price:3.49,cat:'dessert'},
+  {id:32,name:'Apple Pie',price:2.29,cat:'dessert'},
+  {id:33,name:'Cookie Choc',price:1.49,cat:'dessert'},
+  {id:40,name:'Breakfast Burger',price:4.99,cat:'breakfast'},
+  {id:41,name:'Pancakes',price:4.49,cat:'breakfast'},
+  {id:42,name:'Scrambled Eggs',price:3.99,cat:'breakfast'},
+  {id:43,name:'Breakfast Wrap',price:5.49,cat:'breakfast'},
+  {id:50,name:'Ketchup',price:0.50,cat:'extras'},
+  {id:51,name:'BBQ Sauce',price:0.50,cat:'extras'},
+  {id:52,name:'Cheese Dip',price:0.80,cat:'extras'}
+];
+
+// ===== CUSTOMER DB =====
+const customers = {
+  '1001':{name:'Max Mustermann',points:42},
+  '1002':{name:'Anna Schmidt',points:78},
+  '1003':{name:'Tim Weber',points:15}
+};
+
+// ===== COUPONS =====
+const coupons = {
+  'BURGER10':{type:'pct',value:10,desc:'10% Rabatt'},
+  'WELCOME5':{type:'fixed',value:5,desc:'5\u20ac Rabatt'},
+  'FREEDELIVERY':{type:'info',value:0,desc:'Gratis Lieferung'}
+};
+
+// ===== STATE =====
+const state = {
+  order:[],
+  orderNum:1,
+  orderType:'counter',
+  tableNum:'',
+  managerMode:false,
+  discount:{type:null,value:0},
+  customerCard:null,
+  coupon:null,
+  payInput:'',
+  payMethod:'cash',
+  pinBuffer:'',
+  transactions:[],
+  dayRevenue:0,
+  activeCat:'quick'
+};
+
+// ===== HELPERS =====
+function fmt(n){return n.toFixed(2).replace('.',',')+' \u20ac';}
+function fmtNum(n){return n.toFixed(2).replace('.',',');}
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(type||'')+' show';
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function openModal(id){document.getElementById(id).classList.add('show');}
+
+// ===== CLOCK =====
+function updateClock(){
+  const d=new Date();
+  document.getElementById('clock').textContent=
+    d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0');
+}
+setInterval(updateClock,1000);updateClock();
+
+// ===== TABLE SELECT =====
+(function(){
+  const sel=document.getElementById('tableNum');
+  for(let i=1;i<=20;i++){const o=document.createElement('option');o.value=i;o.textContent='Tisch '+i;sel.appendChild(o);}
+})();
+
+// ===== CATEGORY TABS =====
+document.getElementById('catTabs').addEventListener('click',function(e){
+  const btn=e.target.closest('.cat-tab');if(!btn)return;
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  state.activeCat=btn.dataset.cat;
+  renderProducts();
+});
+
+// ===== RENDER PRODUCTS =====
+function renderProducts(){
+  const grid=document.getElementById('productGrid');
+  grid.innerHTML='';
+  const list=state.activeCat==='quick'
+    ? products.filter(p=>p.quick)
+    : products.filter(p=>p.cat===state.activeCat);
+  list.forEach(p=>{
+    const btn=document.createElement('button');
+    btn.className='product-btn cat-'+p.cat;
+    btn.innerHTML='<span class="name">'+p.name+'</span><span class="price">'+fmt(p.price)+'</span>';
+    btn.onclick=()=>addToOrder(p);
+    grid.appendChild(btn);
+  });
+}
+
+// ===== ORDER MANAGEMENT =====
+function addToOrder(product){
+  const existing=state.order.find(i=>i.id===product.id);
+  if(existing){existing.qty++;}
+  else{state.order.push({...product,qty:1});}
+  renderOrder();
+  showToast(product.name+' hinzugef\u00fcgt','success');
+}
+
+function changeQty(id,delta){
+  const item=state.order.find(i=>i.id===id);
+  if(!item)return;
+  item.qty+=delta;
+  if(item.qty<=0)state.order=state.order.filter(i=>i.id!==id);
+  renderOrder();
+}
+
+function removeItem(id){
+  state.order=state.order.filter(i=>i.id!==id);
+  renderOrder();
+  showToast('Artikel entfernt');
+}
+
+function getSubtotal(){return state.order.reduce((s,i)=>s+i.price*i.qty,0);}
+
+function getDiscountAmount(){
+  const sub=getSubtotal();
+  if(state.coupon){
+    if(state.coupon.type==='pct')return sub*(state.coupon.value/100);
+    if(state.coupon.type==='fixed')return Math.min(state.coupon.value,sub);
+  }
+  if(state.discount.type==='pct')return sub*(state.discount.value/100);
+  if(state.discount.type==='fixed')return Math.min(state.discount.value,sub);
+  return 0;
+}
+
+function getTotal(){
+  const sub=getSubtotal();
+  const disc=getDiscountAmount();
+  let total=sub-disc;
+  // Customer card points redemption
+  if(state.customerCard && customers[state.customerCard] && customers[state.customerCard].points>=50){
+    total=Math.max(0,total-5);
+  }
+  return Math.max(0,total);
+}
+
+function renderOrder(){
+  const container=document.getElementById('orderItems');
+  if(state.order.length===0){
+    container.innerHTML='<div style="text-align:center;color:#b2bec3;padding:40px 10px;font-size:13px;">Produkt antippen um hinzuzuf\u00fcgen</div>';
+  } else {
+    container.innerHTML=state.order.map(item=>`
+      <div class="order-item">
+        <div class="qty-controls">
+          <button class="qty-btn minus" onclick="changeQty(${item.id},-1)">\u2212</button>
+          <span class="qty">${item.qty}</span>
+          <button class="qty-btn plus" onclick="changeQty(${item.id},1)">+</button>
+        </div>
+        <span class="item-name">${item.name}</span>
+        <span class="item-price">${fmt(item.price*item.qty)}</span>
+        <button class="remove-btn" onclick="removeItem(${item.id})">\u00d7</button>
+      </div>
+    `).join('');
+  }
+  // Update summary
+  const sub=getSubtotal();
+  const disc=getDiscountAmount();
+  const total=getTotal();
+  const tax=total*0.19/1.19;
+  document.getElementById('subtotal').textContent=fmt(sub);
+  const dRow=document.getElementById('discountRow');
+  if(disc>0){dRow.style.display='flex';document.getElementById('discountAmt').textContent='-'+fmt(disc);}
+  else{dRow.style.display='none';}
+  document.getElementById('taxAmt').textContent=fmt(tax);
+  document.getElementById('totalAmt').textContent=fmt(total);
+  document.getElementById('orderNum').textContent='#'+state.orderNum.toString().padStart(3,'0');
+}
+
+// ===== ORDER TYPE =====
+function setOrderType(type){
+  state.orderType=type;
+  document.querySelectorAll('.order-type-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.type===type);
+  });
+  document.getElementById('tableSelect').classList.toggle('show',type==='dine');
+}
+
+// ===== CUSTOMER CARD =====
+function scanCard(){
+  const id=document.getElementById('cardInput').value.trim();
+  if(!id){showToast('Kartennummer eingeben','error');return;}
+  const c=customers[id];
+  if(!c){showToast('Karte nicht gefunden','error');state.customerCard=null;document.getElementById('customerPoints').style.display='none';return;}
+  state.customerCard=id;
+  const ptsEl=document.getElementById('customerPoints');
+  let msg='\u2705 '+c.name+' \u2014 '+c.points+' Punkte';
+  if(c.points>=50)msg+=' (5\u20ac Bonus wird abgezogen!)';
+  ptsEl.textContent=msg;ptsEl.style.display='block';
+  renderOrder();
+  showToast('Kunde: '+c.name,'success');
+}
+
+// ===== COUPONS =====
+function applyCoupon(){
+  const code=document.getElementById('couponInput').value.trim().toUpperCase();
+  if(!code){showToast('Code eingeben','error');return;}
+  const c=coupons[code];
+  const msgEl=document.getElementById('couponMsg');
+  if(!c){msgEl.textContent='\u274c Ung\u00fcltiger Code';msgEl.style.color='var(--red)';msgEl.style.display='block';return;}
+  if(c.type==='info'){
+    msgEl.textContent='\u2705 '+c.desc+' (wird bei Lieferung angewendet)';
+    msgEl.style.color='var(--green)';msgEl.style.display='block';
+    showToast(c.desc,'success');return;
+  }
+  state.coupon=c;
+  msgEl.textContent='\u2705 '+c.desc+' angewendet!';
+  msgEl.style.color='var(--green)';msgEl.style.display='block';
+  renderOrder();
+  showToast(c.desc+' aktiviert!','success');
+}
+
+// ===== MANAGER =====
+function doManager(){
+  if(state.managerMode){
+    state.managerMode=false;
+    document.getElementById('managerBadge').classList.remove('show');
+    showToast('Manager-Modus beendet');
+    return;
+  }
+  state.pinBuffer='';
+  document.getElementById('pinDisplay').textContent='____';
+  openModal('pinModal');
+}
+
+function pinInput(key){
+  if(key==='C'){state.pinBuffer='';document.getElementById('pinDisplay').textContent='____';return;}
+  if(key==='OK'){
+    if(state.pinBuffer==='1234'){
+      state.managerMode=true;
+      document.getElementById('managerBadge').classList.add('show');
+      closeModal('pinModal');
+      showToast('Manager-Modus aktiviert','success');
+    } else {
+      showToast('Falscher PIN!','error');
+      state.pinBuffer='';document.getElementById('pinDisplay').textContent='____';
+    }
+    return;
+  }
+  if(state.pinBuffer.length<4){
+    state.pinBuffer+=key;
+    document.getElementById('pinDisplay').textContent=
+      '\u2022'.repeat(state.pinBuffer.length)+'_'.repeat(4-state.pinBuffer.length);
+  }
+}
+
+// ===== DISCOUNT =====
+function doDiscount(){
+  if(!state.managerMode){showToast('Manager-Login erforderlich (F3)','error');return;}
+  if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
+  openModal('discountModal');
+}
+
+function applyDiscountPct(pct){
+  state.discount={type:'pct',value:pct};
+  closeModal('discountModal');
+  renderOrder();
+  showToast(pct+'% Rabatt angewendet','success');
+}
+
+function applyCustomDiscount(){
+  const val=parseFloat(document.getElementById('discountCustomVal').value);
+  const type=document.getElementById('discountCustomType').value;
+  if(isNaN(val)||val<=0){showToast('G\u00fcltigen Betrag eingeben','error');return;}
+  state.discount={type:type==='pct'?'pct':'fixed',value:val};
+  closeModal('discountModal');
+  renderOrder();
+  showToast('Rabatt angewendet','success');
+}
+
+// ===== STORNO =====
+function doStorno(){
+  if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
+  openModal('stornoModal');
+}
+
+function confirmStorno(){
+  state.order=[];
+  state.discount={type:null,value:0};
+  state.coupon=null;
+  state.customerCard=null;
+  document.getElementById('customerPoints').style.display='none';
+  document.getElementById('couponMsg').style.display='none';
+  document.getElementById('cardInput').value='';
+  document.getElementById('couponInput').value='';
+  closeModal('stornoModal');
+  renderOrder();
+  showToast('Bestellung storniert','error');
+}
+
+// ===== PAYMENT =====
+function openPayment(){
+  if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
+  state.payInput='';state.payMethod='cash';
+  document.getElementById('payDisplay').textContent='0,00';
+  document.getElementById('changeDisplay').textContent='';
+  document.getElementById('payTotal').textContent=fmt(getTotal());
+  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.toggle('active',b.dataset.method==='cash'));
+  document.getElementById('splitSection').classList.remove('show');
+  document.getElementById('cashSection').style.display='block';
+  document.getElementById('splitCash').value='';
+  document.getElementById('splitCard').textContent='0,00 \u20ac';
+  openModal('payModal');
+}
+
+function setPayMethod(method){
+  state.payMethod=method;
+  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.toggle('active',b.dataset.method===method));
+  document.getElementById('splitSection').classList.toggle('show',method==='split');
+  if(method==='card'){
+    document.getElementById('cashSection').style.display='none';
+  } else {
+    document.getElementById('cashSection').style.display='block';
+  }
+}
+
+function calcSplit(){
+  const total=getTotal();
+  const cash=parseFloat(document.getElementById('splitCash').value)||0;
+  const card=Math.max(0,total-cash);
+  document.getElementById('splitCard').textContent=fmt(card);
+}
+
+function numpadInput(key){
+  if(key==='C'){state.payInput='';document.getElementById('payDisplay').textContent='0,00';document.getElementById('changeDisplay').textContent='';return;}
+  if(key==='10'||key==='20'||key==='50'){
+    const current=parseFloat(state.payInput)||0;
+    state.payInput=(current+parseInt(key)).toFixed(2);
+  } else {
+    if(key==='.'&&state.payInput.includes('.'))return;
+    state.payInput+=key;
+  }
+  const val=parseFloat(state.payInput)||0;
+  document.getElementById('payDisplay').textContent=fmtNum(val);
+  const total=getTotal();
+  if(val>=total){
+    document.getElementById('changeDisplay').textContent='R\u00fcckgeld: '+fmt(val-total);
+  } else {
+    document.getElementById('changeDisplay').textContent='';
+  }
+}
+
+function processPayment(){
+  const total=getTotal();
+  if(total<=0){showToast('Kein Betrag','error');return;}
+
+  if(state.payMethod==='cash'){
+    const paid=parseFloat(state.payInput)||0;
+    if(paid<total){showToast('Betrag zu gering! Fehlen: '+fmt(total-paid),'error');return;}
+    finishPayment('bar',paid,paid-total);
+  } else if(state.payMethod==='card'){
+    finishPayment('karte',total,0);
+  } else if(state.payMethod==='split'){
+    const cashPart=parseFloat(document.getElementById('splitCash').value)||0;
+    const cardPart=total-cashPart;
+    if(cashPart<0||cardPart<0){showToast('Ung\u00fcltige Aufteilung','error');return;}
+    finishPayment('split (Bar: '+fmt(cashPart)+' / Karte: '+fmt(cardPart)+')',total,0);
+  }
+}
+
+function finishPayment(method,paid,change){
+  const total=getTotal();
+  const sub=getSubtotal();
+  const disc=getDiscountAmount();
+
+  // Award loyalty points (1 per euro)
+  if(state.customerCard && customers[state.customerCard]){
+    const pts=Math.floor(total);
+    customers[state.customerCard].points+=pts;
+    if(customers[state.customerCard].points>=50)customers[state.customerCard].points-=50;
+  }
+
+  // Save transaction
+  const tx={
+    id:state.orderNum,
+    time:new Date().toLocaleTimeString('de-DE'),
+    date:new Date().toLocaleDateString('de-DE'),
+    items:[...state.order],
+    subtotal:sub,
+    discount:disc,
+    total:total,
+    method:method,
+    paid:paid,
+    change:change,
+    type:state.orderType,
+    table:state.tableNum,
+    customer:state.customerCard
+  };
+  state.transactions.push(tx);
+  state.dayRevenue+=total;
+  document.getElementById('dayRevenue').textContent=fmt(state.dayRevenue);
+
+  // Show receipt
+  showReceiptFromTx(tx);
+
+  // Open cash drawer for cash payments
+  if(method==='bar'||state.payMethod==='split') openDrawer();
+
+  // Reset
+  closeModal('payModal');
+  state.order=[];
+  state.orderNum++;
+  state.discount={type:null,value:0};
+  state.coupon=null;
+  state.customerCard=null;
+  state.tableNum='';
+  document.getElementById('customerPoints').style.display='none';
+  document.getElementById('couponMsg').style.display='none';
+  document.getElementById('cardInput').value='';
+  document.getElementById('couponInput').value='';
+  document.getElementById('tableNum').value='';
+  document.getElementById('tableSelect').classList.remove('show');
+  renderOrder();
+  showToast('Zahlung erfolgreich! '+fmt(total),'success');
+}
+
+// ===== CASH DRAWER =====
+function openDrawer(){
+  if(!state.managerMode && state.order.length===0 && state.transactions.length===0){
+    showToast('Manager-Login erforderlich (F3)','error');return;
+  }
+  const d=document.getElementById('cashDrawer');
+  d.className='cash-drawer open';
+  setTimeout(()=>{d.className='cash-drawer';},3000);
+}
+
+// ===== RECEIPT =====
+function printReceipt(){
+  if(state.transactions.length===0){showToast('Keine Transaktion vorhanden','error');return;}
+  const tx=state.transactions[state.transactions.length-1];
+  showReceiptFromTx(tx);
+}
+
+function showReceiptFromTx(tx){
+  const bc='*'+tx.id.toString().padStart(6,'0')+'*';
+  let html='<div class="r-center r-bold" style="font-size:16px;">BURGERMETRICS</div>';
+  html+='<div class="r-center" style="font-size:10px;">Musterstra\u00dfe 42 \u00b7 12345 Berlin</div>';
+  html+='<div class="r-center" style="font-size:10px;">Tel: 030-1234567 \u00b7 USt-ID: DE123456789</div>';
+  html+='<div class="r-line"></div>';
+  html+='<div class="r-row"><span>Bon #'+tx.id.toString().padStart(3,'0')+'</span><span>'+tx.date+' '+tx.time+'</span></div>';
+  html+='<div style="font-size:10px;">Typ: '+(tx.type==='dine'?'Im Haus'+(tx.table?' (Tisch '+tx.table+')':''):'Mitnehmen')+'</div>';
+  if(tx.customer)html+='<div style="font-size:10px;">Kunde: '+tx.customer+'</div>';
+  html+='<div class="r-line"></div>';
+  tx.items.forEach(function(item){
+    html+='<div class="r-row"><span>'+item.qty+'x '+item.name+'</span><span>'+fmt(item.price*item.qty)+'</span></div>';
+  });
+  html+='<div class="r-line"></div>';
+  html+='<div class="r-row"><span>Zwischensumme</span><span>'+fmt(tx.subtotal)+'</span></div>';
+  if(tx.discount>0){
+    html+='<div class="r-row" style="color:#d63031;"><span>Rabatt</span><span>-'+fmt(tx.discount)+'</span></div>';
+  }
+  var tax=tx.total*0.19/1.19;
+  var net=tx.total-tax;
+  html+='<div class="r-row"><span>Netto</span><span>'+fmt(net)+'</span></div>';
+  html+='<div class="r-row"><span>MwSt. 19%</span><span>'+fmt(tax)+'</span></div>';
+  html+='<div class="r-line"></div>';
+  html+='<div class="r-row r-big"><span>GESAMT</span><span>'+fmt(tx.total)+'</span></div>';
+  html+='<div class="r-line"></div>';
+  html+='<div class="r-row"><span>Zahlart</span><span>'+tx.method+'</span></div>';
+  if(tx.method==='bar'){
+    html+='<div class="r-row"><span>Gegeben</span><span>'+fmt(tx.paid)+'</span></div>';
+    html+='<div class="r-row"><span>R\u00fcckgeld</span><span>'+fmt(tx.change)+'</span></div>';
+  }
+  html+='<div class="r-line"></div>';
+  html+='<div class="r-center" style="font-size:10px;">Vielen Dank f\u00fcr Ihren Einkauf!</div>';
+  html+='<div class="r-center" style="font-size:10px;">Powered by BurgerMetrics POS</div>';
+  html+='<div class="barcode">'+bc+'</div>';
+  document.getElementById('receiptContent').innerHTML=html;
+  openModal('receiptModal');
+}
+
+// ===== HISTORY =====
+function showHistory(){
+  var list=document.getElementById('historyList');
+  if(state.transactions.length===0){
+    list.innerHTML='<div style="text-align:center;color:#b2bec3;padding:30px;">Keine Transaktionen</div>';
+    openModal('historyModal');return;
+  }
+  var html='';
+  for(var i=state.transactions.length-1;i>=0;i--){
+    var tx=state.transactions[i];
+    var itemsStr=tx.items.map(function(it){return it.qty+'x '+it.name;}).join(', ');
+    html+='<div class="history-item" data-idx="'+i+'" onclick="viewHistoryTx('+i+')">';
+    html+='<div><div class="hi-time">#'+tx.id.toString().padStart(3,'0')+' \u2014 '+tx.time+'</div>';
+    html+='<div class="hi-items">'+itemsStr+'</div></div>';
+    html+='<div class="hi-total">'+fmt(tx.total)+'</div></div>';
+  }
+  list.innerHTML=html;
+  openModal('historyModal');
+}
+
+function viewHistoryTx(idx){
+  closeModal('historyModal');
+  showReceiptFromTx(state.transactions[idx]);
+}
+
+// ===== DAY CLOSE =====
+function doDayClose(){
+  if(!state.managerMode){showToast('Manager-Login erforderlich (F3)','error');return;}
+  var txs=state.transactions;
+  var totalRev=0,totalItems=0,cashTotal=0,cardTotal=0,totalDisc=0;
+  for(var i=0;i<txs.length;i++){
+    totalRev+=txs[i].total;
+    totalDisc+=txs[i].discount;
+    for(var j=0;j<txs[i].items.length;j++) totalItems+=txs[i].items[j].qty;
+    if(txs[i].method==='bar') cashTotal+=txs[i].total;
+    else if(txs[i].method==='karte') cardTotal+=txs[i].total;
+  }
+  var splitTotal=totalRev-cashTotal-cardTotal;
+  var avgOrder=txs.length?totalRev/txs.length:0;
+  var tax=totalRev*0.19/1.19;
+  var html='<div class="report-grid">';
+  html+='<div class="report-card"><div class="rc-val">'+fmt(totalRev)+'</div><div class="rc-label">Gesamtumsatz</div></div>';
+  html+='<div class="report-card"><div class="rc-val">'+txs.length+'</div><div class="rc-label">Transaktionen</div></div>';
+  html+='<div class="report-card"><div class="rc-val">'+totalItems+'</div><div class="rc-label">Artikel verkauft</div></div>';
+  html+='<div class="report-card"><div class="rc-val">'+fmt(avgOrder)+'</div><div class="rc-label">\u00d8 Bon-Wert</div></div>';
+  html+='<div class="report-card"><div class="rc-val">'+fmt(cashTotal)+'</div><div class="rc-label">Barzahlung</div></div>';
+  html+='<div class="report-card"><div class="rc-val">'+fmt(cardTotal)+'</div><div class="rc-label">Kartenzahlung</div></div>';
+  html+='<div class="report-card"><div class="rc-val">'+fmt(splitTotal)+'</div><div class="rc-label">Split-Zahlung</div></div>';
+  html+='<div class="report-card"><div class="rc-val">'+fmt(totalDisc)+'</div><div class="rc-label">Rabatte gesamt</div></div>';
+  html+='</div>';
+  html+='<div style="margin-top:10px;padding:10px;background:#f8f9fa;border-radius:8px;">';
+  html+='<div style="display:flex;justify-content:space-between;margin:4px 0;"><span>MwSt. (19%)</span><span style="font-weight:700;">'+fmt(tax)+'</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;margin:4px 0;"><span>Netto</span><span style="font-weight:700;">'+fmt(totalRev-tax)+'</span></div>';
+  html+='</div>';
+  html+='<div style="text-align:center;margin-top:14px;color:var(--gray);font-size:12px;">Abschluss: '+new Date().toLocaleString('de-DE')+'</div>';
+  document.getElementById('dayCloseContent').innerHTML=html;
+  openModal('dayCloseModal');
+}
+
+// ===== TOP SELLERS =====
+function showTopSellers(){
+  var sales={};
+  state.transactions.forEach(function(tx){
+    tx.items.forEach(function(item){
+      if(!sales[item.name])sales[item.name]={qty:0,rev:0};
+      sales[item.name].qty+=item.qty;
+      sales[item.name].rev+=item.price*item.qty;
+    });
+  });
+  var sorted=Object.entries(sales).sort(function(a,b){return b[1].qty-a[1].qty;});
+  var list=document.getElementById('topSellerList');
+  if(sorted.length===0){
+    list.innerHTML='<div style="text-align:center;color:#b2bec3;padding:30px;">Noch keine Verk\u00e4ufe</div>';
+  } else {
+    var html='';
+    sorted.slice(0,10).forEach(function(entry){
+      html+='<div class="top-item"><span class="ti-name">'+entry[0]+'</span>';
+      html+='<span class="ti-qty">'+entry[1].qty+'x</span>';
+      html+='<span class="ti-rev">'+fmt(entry[1].rev)+'</span></div>';
+    });
+    list.innerHTML=html;
+  }
+  openModal('topSellerModal');
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown',function(e){
+  if(e.key==='F1'){e.preventDefault();doStorno();}
+  if(e.key==='F2'){e.preventDefault();doDiscount();}
+  if(e.key==='F3'){e.preventDefault();doManager();}
+  if(e.key==='F4'){e.preventDefault();openDrawer();}
+  if(e.key==='F5'){e.preventDefault();printReceipt();}
+  if(e.key==='F6'){e.preventDefault();doDayClose();}
+  if(e.key==='F7'){e.preventDefault();showHistory();}
+  if(e.key==='F8'){e.preventDefault();showTopSellers();}
+  if(e.key==='F12'){e.preventDefault();openPayment();}
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal-overlay.show').forEach(function(m){m.classList.remove('show');});
+  }
+});
+
+// ===== INIT =====
+renderProducts();
+renderOrder();
+</script>
+</body>
+</html>
