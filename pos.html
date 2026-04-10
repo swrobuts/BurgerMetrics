@@ -23,60 +23,77 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .terminal-dot.r{background:#ff5f56;}.terminal-dot.y{background:#ffbd2e;}.terminal-dot.g{background:#27c93f;}
 .terminal-label{color:#999;font-size:11px;margin-left:auto;letter-spacing:1px;text-transform:uppercase;}
 .terminal-screen{background:var(--bg);border-radius:10px;overflow:hidden;min-height:calc(100vh - 80px);}
-.pos-header{
-  background:var(--dark);color:#fff;display:flex;align-items:center;
-  padding:0 18px;height:48px;gap:14px;
+/* === STATUSBAR (Zeile 1) === */
+.pos-statusbar{
+  background:#1e2729;color:#a0adb3;display:flex;align-items:center;
+  padding:0 16px;height:36px;font-size:11px;
+  border-bottom:1px solid #3a4a52;
 }
-.pos-header .logo{font-weight:800;font-size:17px;letter-spacing:-.5px;}
-.pos-header .logo span{color:var(--accent);}
-.header-info{display:flex;gap:18px;margin-left:auto;align-items:center;font-size:13px;}
-.header-info .rev{background:var(--green);color:#fff;padding:4px 14px;border-radius:20px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;}
-.header-info .rev-label{font-size:10px;font-weight:600;opacity:.85;text-transform:uppercase;letter-spacing:.5px;}
-.header-info .clock{color:#b2bec3;}
-.header-info .cashier{color:#dfe6e9;}
-.header-link{
-  color:#fff;text-decoration:none;font-size:15px;font-weight:800;
-  background:var(--accent);padding:12px 22px;border-radius:10px;transition:.2s;
-  display:flex;align-items:center;gap:8px;white-space:nowrap;
-  box-shadow:0 2px 8px rgba(225,112,85,.3);min-height:48px;
-  letter-spacing:.5px;text-transform:uppercase;
+.pos-statusbar .logo{font-weight:800;font-size:13px;color:#cfd9db;letter-spacing:-.3px;}
+.pos-statusbar .logo span{color:var(--accent);}
+.status-center{margin:0 auto;display:flex;gap:6px;align-items:center;color:#8395a0;}
+.status-center .sep{opacity:.4;}
+.status-right{display:flex;gap:12px;align-items:center;}
+.status-right .rev-label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;opacity:.7;}
+.status-right .rev-val{font-weight:700;color:var(--green);font-size:12px;}
+.status-right .clock{color:#8395a0;font-variant-numeric:tabular-nums;}
+.view-toggle{display:flex;border-radius:4px;overflow:hidden;border:1px solid #4a5d6a;margin-left:8px;flex-shrink:0;}
+.view-toggle a,.view-toggle span{
+  padding:4px 10px;font-size:10px;font-weight:700;text-decoration:none;
+  letter-spacing:.3px;transition:.15s;cursor:pointer;
 }
-.header-link:hover{background:#d35400;transform:translateY(-1px);box-shadow:0 4px 12px rgba(225,112,85,.4);}
-.header-link svg{width:20px;height:20px;fill:currentColor;}
-.pos-main{display:flex;height:calc(100vh - 140px);min-height:520px;}
+.view-toggle .vt-active{background:#4a5d6a;color:#fff;}
+.view-toggle .vt-link{background:transparent;color:#6b8290;}
+.view-toggle .vt-link:hover{background:#2d3a44;color:#b0c4ce;}
+/* === TOOLBAR (Zeile 2) === */
+.pos-toolbar{
+  background:#374955;display:flex;align-items:center;gap:6px;
+  padding:0 10px;height:56px;
+  border-bottom:1px solid #4a5d6a;
+}
+.toolbar-toggle{display:flex;gap:2px;flex-shrink:0;}
+.toolbar-toggle-btn{
+  border:none;padding:8px 16px;border-radius:6px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:.15s;background:#2d3a44;color:#8ea1ab;min-height:40px;
+}
+.toolbar-toggle-btn.active{background:var(--accent);color:#fff;}
+.toolbar-toggle-btn:hover:not(.active){background:#3d4e58;}
+.toolbar-cats{display:flex;gap:3px;flex:1;margin:0 8px;}
+.toolbar-cat{
+  flex:1;padding:8px 4px;border:none;border-radius:6px;cursor:pointer;
+  font-size:12px;font-weight:700;color:#fff;text-align:center;transition:.15s;
+  text-shadow:0 1px 2px rgba(0,0,0,.2);min-height:40px;
+}
+.toolbar-cat:hover{filter:brightness(1.15);}
+.toolbar-cat.active{box-shadow:0 2px 10px rgba(0,0,0,.3);transform:translateY(-1px);}
+.toolbar-cat[data-cat="quick"]{background:#4a5d6a;}
+.toolbar-cat[data-cat="burger"]{background:var(--cat-burger);}
+.toolbar-cat[data-cat="sides"]{background:var(--cat-sides);}
+.toolbar-cat[data-cat="drinks"]{background:var(--cat-drinks);}
+.toolbar-cat[data-cat="dessert"]{background:var(--cat-dessert);}
+.toolbar-cat[data-cat="breakfast"]{background:var(--cat-breakfast);color:#333;text-shadow:none;}
+.toolbar-cat[data-cat="extras"]{background:var(--cat-extras);}
+/* toolbar-dash removed — data view toggle now in statusbar */
+.pos-main{display:flex;height:calc(100vh - 186px);min-height:460px;}
 .pos-left{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 .pos-right{width:400px;background:var(--white);border-left:2px solid var(--light-gray);display:flex;flex-direction:column;}
-.cat-tabs{display:flex;gap:3px;padding:6px 8px;background:#fff;border-bottom:2px solid var(--light-gray);flex-shrink:0;}
-.cat-tab{
-  flex:1;padding:16px 6px;border:none;border-radius:8px;cursor:pointer;
-  font-size:14px;font-weight:700;color:#fff;text-align:center;transition:.15s;
-  text-shadow:0 1px 2px rgba(0,0,0,.2);min-height:56px;
-}
-.cat-tab:hover{filter:brightness(1.1);transform:translateY(-1px);}
-.cat-tab.active{box-shadow:0 3px 12px rgba(0,0,0,.25);transform:translateY(-2px);}
-.cat-tab[data-cat="quick"]{background:var(--cat-quick);}
-.cat-tab[data-cat="burger"]{background:var(--cat-burger);}
-.cat-tab[data-cat="sides"]{background:var(--cat-sides);}
-.cat-tab[data-cat="drinks"]{background:var(--cat-drinks);}
-.cat-tab[data-cat="dessert"]{background:var(--cat-dessert);}
-.cat-tab[data-cat="breakfast"]{background:var(--cat-breakfast);color:#333;text-shadow:none;}
-.cat-tab[data-cat="extras"]{background:var(--cat-extras);}
+/* cat-tabs now in toolbar, old standalone styles removed */
 .product-grid{
-  flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  grid-auto-rows:minmax(130px,1fr);gap:8px;padding:10px;
-  overflow-y:auto;align-content:stretch;
+  flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  grid-auto-rows:minmax(90px,120px);gap:8px;padding:10px;
+  overflow-y:auto;align-content:start;
 }
 .product-btn{
-  height:100%;width:100%;border:none;border-radius:10px;cursor:pointer;
+  width:100%;aspect-ratio:1.2;border:none;border-radius:10px;cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:16px 10px;font-weight:700;color:#fff;
-  text-shadow:0 1px 2px rgba(0,0,0,.18);transition:.12s;position:relative;
+  padding:12px;font-weight:700;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.18);transition:filter .12s;
   box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
-.product-btn:hover{transform:scale(1.03);box-shadow:0 4px 14px rgba(0,0,0,.18);}
-.product-btn:active{transform:scale(.97);}
-.product-btn .price{font-size:22px;margin-top:10px;font-weight:900;}
-.product-btn .name{font-size:16px;font-weight:700;text-align:center;line-height:1.3;}
+.product-btn:hover{filter:brightness(1.12);}
+.product-btn:active{filter:brightness(.88);}
+.product-btn .price{font-size:20px;margin-top:8px;font-weight:900;}
+.product-btn .name{font-size:15px;font-weight:700;text-align:center;line-height:1.2;}
 .product-btn.cat-burger{background:var(--cat-burger);}
 .product-btn.cat-sides{background:var(--cat-sides);}
 .product-btn.cat-drinks{background:var(--cat-drinks);}
@@ -123,43 +140,52 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .summary-row{display:flex;justify-content:space-between;font-size:14px;margin:4px 0;color:var(--gray);}
 .summary-row.total{font-size:32px;font-weight:900;color:#fff;margin-top:8px;padding:12px 16px;border-radius:10px;background:var(--dark);letter-spacing:-.5px;}
 .summary-row.discount{color:var(--red);}
-.inline-pay-methods{display:flex;gap:6px;margin-top:10px;}
+.inline-pay-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:10px;}
 .inline-pay-btn{
-  flex:1;min-height:60px;border:2px solid var(--light-gray);border-radius:10px;
-  background:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;
-  display:flex;align-items:center;justify-content:center;gap:4px;
+  min-height:64px;border:2px solid var(--light-gray);border-radius:10px;
+  background:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:border-color .15s,background .15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
 }
+.inline-pay-btn:last-child{grid-column:1/-1;}
 .inline-pay-btn:hover{border-color:var(--accent);background:#fff5f0;}
-.inline-pay-btn:active{transform:scale(.96);}
+.inline-pay-btn.selected{border-color:var(--accent);background:#fff0e8;border-width:3px;}
+.inline-pay-btn:active{background:#ffe0d0;}
 .inline-bezahlen-btn{
   width:100%;min-height:64px;margin-top:8px;border:none;border-radius:10px;
   background:var(--green);color:#fff;font-size:20px;font-weight:800;
-  cursor:pointer;transition:.15s;letter-spacing:.5px;
+  cursor:pointer;transition:filter .15s;letter-spacing:.5px;
   box-shadow:0 3px 12px rgba(0,184,148,.3);
 }
-.inline-bezahlen-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
-.inline-bezahlen-btn:active{transform:scale(.97);}
-.customer-card-row{display:flex;gap:6px;padding:8px 14px;background:#f0f0f0;align-items:center;}
-.customer-card-row input{flex:1;padding:10px 12px;border:1px solid var(--light-gray);border-radius:6px;font-size:14px;min-height:44px;}
-.customer-card-row button{padding:10px 16px;border:none;border-radius:6px;background:var(--blue);color:#fff;font-size:13px;cursor:pointer;font-weight:700;min-height:44px;min-width:44px;}
-.customer-points{font-size:12px;color:var(--green);padding:4px 14px;font-weight:600;display:none;}
-.coupon-row{display:flex;gap:6px;padding:8px 14px;background:#f0f0f0;align-items:center;border-top:1px solid var(--light-gray);}
-.coupon-row input{flex:1;padding:10px 12px;border:1px solid var(--light-gray);border-radius:6px;font-size:14px;min-height:44px;}
-.coupon-row button{padding:10px 16px;border:none;border-radius:6px;background:var(--purple);color:#fff;font-size:13px;cursor:pointer;font-weight:700;min-height:44px;min-width:44px;}
-.coupon-msg{font-size:11px;padding:2px 14px;font-weight:600;display:none;}
+.inline-bezahlen-btn:hover{filter:brightness(1.1);}
+.inline-bezahlen-btn:active{filter:brightness(.9);}
+.extras-trigger{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 14px;min-height:48px;background:#e8f4fd;
+  border-bottom:2px solid #c5dff0;
+  cursor:pointer;font-size:14px;font-weight:700;color:var(--blue);transition:.15s;
+}
+.extras-trigger:hover{background:#d4ecfb;}
+.extras-trigger:active{background:#c0e2f7;}
+.extras-trigger.has-extras{background:#e6f9f0;border-color:#a8e6cf;color:var(--green);}
+.extras-status{font-size:12px;color:var(--green);font-weight:700;padding:6px 14px;display:none;background:#e6f9f0;border-bottom:1px solid #c3edd8;}
+/* hidden in modal now */
+.customer-card-row,.coupon-row{display:flex;gap:6px;padding:10px 0;align-items:center;}
+.customer-card-row input,.coupon-row input{flex:1;padding:10px 12px;border:1px solid var(--light-gray);border-radius:6px;font-size:14px;min-height:44px;}
+.customer-card-row button,.coupon-row button{padding:10px 16px;border:none;border-radius:6px;color:#fff;font-size:13px;cursor:pointer;font-weight:700;min-height:44px;}
+.customer-card-row button{background:var(--blue);}
+.coupon-row button{background:var(--purple);}
+.coupon-msg{font-size:12px;padding:4px 0;font-weight:600;display:none;}
 .fn-bar{
   display:flex;gap:3px;padding:6px 8px;background:#fff;border-top:2px solid var(--light-gray);flex-shrink:0;
 }
 .fn-btn{
-  flex:1;padding:10px 2px;border:none;border-radius:8px;cursor:pointer;
-  font-size:12px;font-weight:700;text-align:center;transition:.12s;
-  background:var(--dark);color:#dfe6e9;min-height:48px;
+  flex:1;padding:10px 4px;border:none;border-radius:8px;cursor:pointer;
+  font-size:13px;font-weight:700;text-align:center;transition:.12s;
+  background:var(--dark);color:#dfe6e9;min-height:52px;
 }
 .fn-btn:hover{background:#444;}
-.fn-btn:active{transform:scale(.96);}
-.fn-btn.pay{background:var(--green);color:#fff;font-size:15px;font-weight:800;min-height:64px;}
-.fn-btn .fn-key{display:block;font-size:9px;color:#999;margin-bottom:2px;}
-.fn-btn.pay .fn-key{color:rgba(255,255,255,.7);}
+.fn-btn:active{filter:brightness(.8);}
+.fn-btn .fn-key{display:block;font-size:10px;color:#999;margin-bottom:2px;}
 .modal-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
   z-index:1000;align-items:center;justify-content:center;
@@ -293,7 +319,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 @media(max-width:900px){
   .pos-right{width:280px;}
   .product-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}
-  .cat-tab{font-size:11px;padding:8px 2px;}
+  .toolbar-cat{font-size:10px;padding:6px 2px;}
 }
 @media(max-width:650px){
   .pos-main{flex-direction:column;}
@@ -311,26 +337,42 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
     <span class="terminal-label">BurgerMetrics POS v2.0</span>
   </div>
   <div class="terminal-screen">
-    <div class="pos-header">
+    <!-- STATUSBAR -->
+    <div class="pos-statusbar">
       <div class="logo">Burger<span>Metrics</span> POS</div>
-      <div class="header-info">
-        <span class="cashier" id="cashierName">Kasse 1</span>
+      <div class="status-center">
+        <span id="cashierName">Kasse 1</span>
+        <span class="sep">&#183;</span>
+        <span>Max M.</span>
+      </div>
+      <div class="status-right">
+        <span><span class="rev-label">Tagesumsatz: </span><span class="rev-val" id="dayRevenue">0,00 &#8364;</span></span>
+        <span class="sep">&#183;</span>
         <span class="clock" id="clock">--:--</span>
-        <span class="rev"><span class="rev-label">Tagesumsatz</span><span id="dayRevenue">0,00 &#8364;</span></span>
-        <a href="dashboard.html" class="header-link"><svg viewBox="0 0 24 24"><path d="M3 13h2v8H3zm4-4h2v12H7zm4-4h2v16h-2zm4 8h2v8h-2zm4-3h2v11h-2z"/></svg>Dashboard</a>
+        <div class="view-toggle">
+          <span class="vt-active">POS</span>
+          <a href="dashboard.html" class="vt-link">Data View</a>
+        </div>
+      </div>
+    </div>
+    <!-- TOOLBAR -->
+    <div class="pos-toolbar">
+      <div class="toolbar-toggle">
+        <button class="toolbar-toggle-btn active" data-type="counter" onclick="setOrderType('counter')">Mitnehmen</button>
+        <button class="toolbar-toggle-btn" data-type="dine" onclick="setOrderType('dine')">Im Haus</button>
+      </div>
+      <div class="toolbar-cats" id="catTabs">
+        <button class="toolbar-cat active" data-cat="quick">&#9733; Schnell</button>
+        <button class="toolbar-cat" data-cat="burger">Burger</button>
+        <button class="toolbar-cat" data-cat="sides">Beilagen</button>
+        <button class="toolbar-cat" data-cat="drinks">Getr&#228;nke</button>
+        <button class="toolbar-cat" data-cat="dessert">Dessert</button>
+        <button class="toolbar-cat" data-cat="breakfast">Fr&#252;hst&#252;ck</button>
+        <button class="toolbar-cat" data-cat="extras">Extras</button>
       </div>
     </div>
     <div class="pos-main">
       <div class="pos-left">
-        <div class="cat-tabs" id="catTabs">
-          <button class="cat-tab active" data-cat="quick">&#9733; Schnell</button>
-          <button class="cat-tab" data-cat="burger">Burger</button>
-          <button class="cat-tab" data-cat="sides">Beilagen</button>
-          <button class="cat-tab" data-cat="drinks">Getr&#228;nke</button>
-          <button class="cat-tab" data-cat="dessert">Dessert</button>
-          <button class="cat-tab" data-cat="breakfast">Fr&#252;hst&#252;ck</button>
-          <button class="cat-tab" data-cat="extras">Extras</button>
-        </div>
         <div class="product-grid" id="productGrid"></div>
         <div class="fn-bar">
           <button class="fn-btn" onclick="doStorno()"><span class="fn-key">F1</span>Storno</button>
@@ -341,7 +383,6 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
           <button class="fn-btn" onclick="doDayClose()"><span class="fn-key">F6</span>Tagesab.</button>
           <button class="fn-btn" onclick="showHistory()"><span class="fn-key">F7</span>Historie</button>
           <button class="fn-btn" onclick="showTopSellers()"><span class="fn-key">F8</span>Top-Seller</button>
-          <button class="fn-btn pay" onclick="openPayment()"><span class="fn-key">F12</span>ZAHLEN</button>
         </div>
       </div>
       <div class="pos-right">
@@ -350,26 +391,14 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
             <span>Bestellung</span>
             <span class="order-num" id="orderNum">#001</span>
           </div>
-          <div class="order-type-btns">
-            <button class="order-type-btn active" data-type="counter" onclick="setOrderType('counter')">Mitnehmen</button>
-            <button class="order-type-btn" data-type="dine" onclick="setOrderType('dine')">Im Haus</button>
-          </div>
         </div>
         <div class="table-select" id="tableSelect">
           <select id="tableNum" onchange="state.tableNum=this.value">
             <option value="">Tisch w&#228;hlen...</option>
           </select>
         </div>
-        <div class="customer-card-row">
-          <input type="text" id="cardInput" placeholder="Kundenkarte #">
-          <button onclick="scanCard()">Scan</button>
-        </div>
-        <div class="customer-points" id="customerPoints"></div>
-        <div class="coupon-row">
-          <input type="text" id="couponInput" placeholder="Gutschein-Code">
-          <button onclick="applyCoupon()">Einl&#246;sen</button>
-        </div>
-        <div class="coupon-msg" id="couponMsg"></div>
+        <div class="extras-trigger" onclick="openModal('extrasModal')">&#127915; Kundenkarte / Gutschein</div>
+        <div class="extras-status" id="extrasStatus"></div>
         <div class="order-items" id="orderItems">
           <div style="text-align:center;color:#b2bec3;padding:40px 10px;font-size:13px;">Produkt antippen um hinzuzuf&#252;gen</div>
         </div>
@@ -501,6 +530,28 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
     <div class="top-list" id="topSellerList"></div>
   </div>
 </div>
+<div class="modal-overlay" id="extrasModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('extrasModal')">&times;</button>
+    <h2>Kundenkarte &amp; Gutschein</h2>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:4px;">Kundenkarte</label>
+      <div class="customer-card-row">
+        <input type="text" id="cardInput" placeholder="Kartennummer eingeben (z.B. 1001)">
+        <button onclick="scanCard()">Scannen</button>
+      </div>
+      <div id="customerPoints" style="font-size:12px;color:var(--green);font-weight:600;margin-top:4px;display:none;"></div>
+    </div>
+    <div>
+      <label style="font-size:12px;font-weight:700;color:var(--gray);display:block;margin-bottom:4px;">Gutschein-Code</label>
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="Code eingeben (z.B. BURGER10)">
+        <button onclick="applyCoupon()">Einl&#246;sen</button>
+      </div>
+      <div id="couponMsg" style="font-size:12px;font-weight:600;margin-top:4px;display:none;"></div>
+    </div>
+  </div>
+</div>
 <script>
 // ===== PRODUCTS =====
 const products = [
@@ -587,6 +638,9 @@ function updateClock(){
   const d=new Date();
   document.getElementById('clock').textContent=
     d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0');
+  var dd=document.getElementById('dateDisplay');
+  if(dd) dd.textContent=d.getDate().toString().padStart(2,'0')+'.'+
+    (d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getFullYear();
 }
 setInterval(updateClock,1000);updateClock();
 
@@ -598,8 +652,8 @@ setInterval(updateClock,1000);updateClock();
 
 // ===== CATEGORY TABS =====
 document.getElementById('catTabs').addEventListener('click',function(e){
-  const btn=e.target.closest('.cat-tab');if(!btn)return;
-  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  const btn=e.target.closest('.toolbar-cat');if(!btn)return;
+  document.querySelectorAll('.toolbar-cat').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   state.activeCat=btn.dataset.cat;
   renderProducts();
@@ -703,6 +757,9 @@ function renderOrder(){
 // ===== ORDER TYPE =====
 function setOrderType(type){
   state.orderType=type;
+  document.querySelectorAll('.toolbar-toggle-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.type===type);
+  });
   document.querySelectorAll('.order-type-btn').forEach(b=>{
     b.classList.toggle('active',b.dataset.type===type);
   });
@@ -710,16 +767,35 @@ function setOrderType(type){
 }
 
 // ===== CUSTOMER CARD =====
+function updateExtrasStatus(){
+  var parts=[];
+  if(state.customerCard&&customers[state.customerCard]){
+    var c=customers[state.customerCard];
+    parts.push('\u2705 '+c.name+' ('+c.points+' Pkt)');
+  }
+  if(state.coupon) parts.push('\u2705 '+state.coupon.desc);
+  var el=document.getElementById('extrasStatus');
+  var trigger=document.querySelector('.extras-trigger');
+  if(parts.length){
+    el.textContent=parts.join(' \u00b7 ');el.style.display='block';
+    if(trigger) trigger.classList.add('has-extras');
+  } else {
+    el.style.display='none';
+    if(trigger) trigger.classList.remove('has-extras');
+  }
+}
+
 function scanCard(){
   const id=document.getElementById('cardInput').value.trim();
   if(!id){showToast('Kartennummer eingeben','error');return;}
   const c=customers[id];
-  if(!c){showToast('Karte nicht gefunden','error');state.customerCard=null;document.getElementById('customerPoints').style.display='none';return;}
+  if(!c){showToast('Karte nicht gefunden','error');state.customerCard=null;document.getElementById('customerPoints').style.display='none';updateExtrasStatus();return;}
   state.customerCard=id;
   const ptsEl=document.getElementById('customerPoints');
   let msg='\u2705 '+c.name+' \u2014 '+c.points+' Punkte';
   if(c.points>=50)msg+=' (5\u20ac Bonus wird abgezogen!)';
   ptsEl.textContent=msg;ptsEl.style.display='block';
+  updateExtrasStatus();
   renderOrder();
   showToast('Kunde: '+c.name,'success');
 }
@@ -734,11 +810,13 @@ function applyCoupon(){
   if(c.type==='info'){
     msgEl.textContent='\u2705 '+c.desc+' (wird bei Lieferung angewendet)';
     msgEl.style.color='var(--green)';msgEl.style.display='block';
+    updateExtrasStatus();
     showToast(c.desc,'success');return;
   }
   state.coupon=c;
   msgEl.textContent='\u2705 '+c.desc+' angewendet!';
   msgEl.style.color='var(--green)';msgEl.style.display='block';
+  updateExtrasStatus();
   renderOrder();
   showToast(c.desc+' aktiviert!','success');
 }
@@ -816,6 +894,7 @@ function confirmStorno(){
   document.getElementById('couponMsg').style.display='none';
   document.getElementById('cardInput').value='';
   document.getElementById('couponInput').value='';
+  updateExtrasStatus();
   closeModal('stornoModal');
   renderOrder();
   showToast('Bestellung storniert','error');
@@ -954,6 +1033,7 @@ function finishPayment(method,paid,change){
   document.getElementById('couponInput').value='';
   document.getElementById('tableNum').value='';
   document.getElementById('tableSelect').classList.remove('show');
+  updateExtrasStatus();
   renderOrder();
   showToast('Zahlung erfolgreich! '+fmt(total),'success');
 }

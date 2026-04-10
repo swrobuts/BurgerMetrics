@@ -67,39 +67,22 @@
     .filter-option.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
 
     /* ── Navigation ── */
-    .main-nav {
-      display: flex; gap: 0; border-top: 1px solid var(--border);
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; -ms-overflow-style: none;
-    }
-    .main-nav::-webkit-scrollbar { display: none; }
-    .nav-scroll-wrap { position: relative; }
-    .nav-scroll-wrap::after {
-      content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 40px;
-      background: linear-gradient(to right, transparent, var(--bg));
-      pointer-events: none; z-index: 1;
-    }
+    .main-nav { display: flex; gap: 0; border-top: 1px solid var(--border); }
     .main-nav button {
       background: none; border: none; padding: 12px 18px 10px;
       font-family: var(--font); font-size: 13px; font-weight: 500;
       color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
-      transition: all .12s; white-space: nowrap; flex-shrink: 0;
+      transition: all .12s;
     }
     .main-nav button:hover { color: var(--ink); }
     .main-nav button.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--blue); }
 
     .sub-nav { background: var(--bg); border-bottom: 1px solid var(--border); }
-    .sub-nav-inner {
-      max-width: 1320px; margin: 0 auto; padding: 0 40px; display: flex; gap: 0;
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; -ms-overflow-style: none;
-    }
-    .sub-nav-inner::-webkit-scrollbar { display: none; }
+    .sub-nav-inner { max-width: 1320px; margin: 0 auto; padding: 0 40px; display: flex; gap: 0; }
     .sub-nav button {
       background: none; border: none; padding: 9px 14px 7px;
       font-family: var(--font); font-size: 12px; font-weight: 500;
       color: var(--subtle); cursor: pointer; border-bottom: 2px solid transparent; transition: all .12s;
-      white-space: nowrap; flex-shrink: 0;
     }
     .sub-nav button:hover { color: var(--ink-light); }
     .sub-nav button.active { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
@@ -226,459 +209,6 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--subtle); border-radius: 3px; }
-
-    /* ── Management Summary · Otl Aicher-inspired ── */
-
-    /* Hero KPI strip */
-    .ms-hero { display: grid; grid-template-columns: repeat(4,1fr); gap: 0; margin-bottom: 40px; border-bottom: 3px solid var(--ink); }
-    .ms-hero-cell { padding: 28px 24px 20px; }
-    .ms-hero-cell:not(:last-child) { border-right: 1px solid var(--border); }
-    .ms-hero-val { font-family: var(--mono); font-size: 32px; font-weight: 700; color: var(--ink); letter-spacing: -1px; line-height: 1; }
-    .ms-hero-unit { font-family: var(--mono); font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 2px; }
-    .ms-hero-label { font-size: 11px; color: var(--subtle); margin-top: 6px; letter-spacing: 0.3px; text-transform: uppercase; font-weight: 500; }
-
-    /* Section blocks */
-    .ms-block { margin-bottom: 36px; }
-    .ms-block-head {
-      display: flex; align-items: baseline; gap: 12px;
-      margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ink);
-    }
-    .ms-block-num {
-      font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; letter-spacing: -1px;
-    }
-    .ms-block-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: 0.2px; }
-
-    /* Insight grid: 2-column metric cards */
-    .ms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-    .ms-card {
-      display: grid; grid-template-columns: 1fr; gap: 0;
-      padding: 14px 20px 16px; border-bottom: 1px solid var(--border);
-    }
-    .ms-grid > .ms-card:nth-child(odd) { border-right: 1px solid var(--border); }
-    .ms-card-top { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
-    .ms-card-val {
-      font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; line-height: 1.2;
-    }
-    .ms-card-tag {
-      font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
-      padding: 2px 6px; border-radius: 2px;
-    }
-    .ms-card-tag.g { background: #dcfce7; color: #15803d; }
-    .ms-card-tag.r { background: #fee2e2; color: #b91c1c; }
-    .ms-card-tag.o { background: #fef3c7; color: #b45309; }
-    .ms-card-text { font-size: 11px; line-height: 1.55; color: var(--muted); }
-    .ms-card-text strong { color: var(--ink-light); font-weight: 600; }
-    .ms-card.full { grid-column: 1 / -1; border-right: none; }
-
-    /* Recommendation cards */
-    .ms-strat { margin-bottom: 36px; }
-    .ms-strat-head {
-      display: flex; align-items: center; gap: 14px;
-      padding-bottom: 10px; margin-bottom: 14px; border-bottom: 2px solid var(--ink);
-    }
-    .ms-strat-icon {
-      width: 36px; height: 36px; border-radius: 4px; background: var(--ink);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-size: 15px; font-weight: 700; color: #fff;
-    }
-    .ms-strat-title { font-size: 13px; font-weight: 600; color: var(--ink); }
-
-    .ms-action {
-      display: grid; grid-template-columns: 56px 1fr; gap: 0;
-      margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
-    }
-    .ms-action-prio {
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 0.3px;
-      writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
-    }
-    .ms-action-prio.high { background: #b91c1c; color: #fff; }
-    .ms-action-prio.med  { background: #d97706; color: #fff; }
-    .ms-action-prio.low  { background: var(--card); color: var(--muted); border-right: 1px solid var(--border); }
-    .ms-action-body { padding: 12px 16px; }
-    .ms-action-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; line-height: 1.4; }
-    .ms-action-text { font-size: 11px; line-height: 1.6; color: var(--muted); }
-    .ms-action-text strong { color: var(--ink-light); font-weight: 600; }
-    .ms-action-impl {
-      margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border);
-      font-size: 10px; color: var(--ink-light); font-weight: 500;
-    }
-    .ms-action-impl::before { content: '→ '; font-weight: 700; color: var(--ink); }
-
-    /* ══════════════════════════════════════════════════════════════ */
-    /* RESPONSIVE DESIGN MEDIA QUERIES                                */
-    /* ══════════════════════════════════════════════════════════════ */
-
-    /* ── @media (max-width: 1024px) — Tablet adjustments ── */
-    @media (max-width: 1024px) {
-      .header-inner { padding: 20px 24px 0; }
-      .sub-nav-inner { padding: 0 24px; }
-      main { padding: 20px 24px 40px; }
-      footer { padding: 14px 24px; }
-
-      .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-
-      .ms-hero { grid-template-columns: repeat(2, 1fr); }
-      .ms-hero-cell:nth-child(2n+3) { border-right: none; border-top: 1px solid var(--border); }
-      .ms-hero-cell:nth-child(odd) { border-right: 1px solid var(--border); }
-      .ms-hero-cell:nth-child(even):not(:nth-child(2n+3)) { border-right: none; }
-
-      .ms-grid { grid-template-columns: 1fr; }
-      .ms-grid > .ms-card:nth-child(odd) { border-right: none; }
-    }
-
-    /* ── @media (max-width: 768px) — Main mobile breakpoint ── */
-    @media (max-width: 768px) {
-      .header-inner { padding: 16px 16px 0; }
-
-      .brand h1 { font-size: 18px; }
-      .brand p { font-size: 10px; }
-
-      /* Horizontal scrollable navigation */
-      .main-nav {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        flex-wrap: nowrap;
-        gap: 0;
-      }
-      .main-nav::-webkit-scrollbar { display: none; }
-      .main-nav { -ms-overflow-style: none; scrollbar-width: none; }
-      .main-nav button {
-        padding: 12px 16px 10px;
-        font-size: 12px;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-
-      .sub-nav-inner {
-        padding: 0 16px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .sub-nav-inner::-webkit-scrollbar { display: none; }
-      .sub-nav-inner { -ms-overflow-style: none; scrollbar-width: none; }
-      .sub-nav button {
-        padding: 9px 12px 7px;
-        font-size: 11px;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-
-      .filters {
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      .filter-btn {
-        padding: 6px 10px;
-        font-size: 11px;
-        min-height: 32px;
-      }
-
-      main {
-        padding: 16px 16px 32px;
-        max-width: 100%;
-      }
-
-      .kpi-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-      .kpi-card { padding: 14px 16px; }
-      .kpi-label { font-size: 9px; }
-      .kpi-value { font-size: 22px; }
-      .kpi-delta { font-size: 10px; }
-      .kpi-context { font-size: 10px; }
-
-      .grid-2 {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-
-      .chart-card {
-        padding: 16px 14px;
-        margin-bottom: 12px;
-      }
-      .chart-header { margin-bottom: 12px; }
-      .chart-title { font-size: 12px; }
-      .chart-sub { font-size: 9px; }
-      .chart-area { height: 240px; }
-      .chart-area.tall { height: 300px; }
-      .chart-area.short { height: 200px; }
-      .chart-area.xtall { height: 400px; }
-
-      .interpretation {
-        margin-top: 12px;
-        padding: 10px 12px;
-        font-size: 11px;
-      }
-      .recommendation {
-        margin-top: 6px;
-        padding: 8px 10px;
-        font-size: 10px;
-      }
-
-      /* Horizontal scrollable tables */
-      .chart-card.table-card {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 0;
-      }
-      .data-table {
-        min-width: 100%;
-        display: block;
-        overflow-x: auto;
-      }
-      .data-table thead,
-      .data-table tbody,
-      .data-table tr {
-        display: contents;
-      }
-      .data-table th,
-      .data-table td {
-        padding: 8px 8px;
-        font-size: 11px;
-      }
-      .data-table th {
-        font-size: 9px;
-      }
-      .mono { font-size: 11px; }
-
-      .table-toolbar {
-        gap: 6px;
-        margin-bottom: 8px;
-      }
-      .table-search {
-        min-width: 140px;
-        max-width: 100%;
-        padding: 5px 8px 5px 28px;
-        font-size: 11px;
-      }
-      .group-select {
-        padding: 4px 6px;
-        font-size: 10px;
-      }
-      .table-count { font-size: 9px; }
-
-      .legend-row { gap: 10px; }
-      .legend-item { font-size: 10px; }
-
-      /* Heatmap with horizontal scroll */
-      .heatmap-grid {
-        grid-template-columns: 40px repeat(18, 1fr);
-        gap: 1px;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        min-width: 100%;
-      }
-      .heatmap-grid::-webkit-scrollbar { height: 4px; }
-      .heatmap-grid::-webkit-scrollbar-thumb { background: var(--subtle); }
-      .hm-label { font-size: 8px; }
-      .hm-cell { font-size: 6px; aspect-ratio: 1.1; }
-
-      footer {
-        padding: 12px 16px;
-        font-size: 9px;
-      }
-
-      /* ── Management Summary Mobile ── */
-      .ms-hero {
-        grid-template-columns: 1fr;
-        margin-bottom: 32px;
-        gap: 0;
-      }
-      .ms-hero-cell {
-        padding: 20px 16px 16px;
-        border-right: none !important;
-        border-top: 1px solid var(--border);
-      }
-      .ms-hero-cell:first-child { border-top: none; border-bottom: 3px solid var(--ink); }
-      .ms-hero { border-bottom: none; }
-      .ms-hero-val { font-size: 28px; }
-      .ms-hero-unit { font-size: 12px; }
-      .ms-hero-label { font-size: 10px; }
-
-      .ms-block { margin-bottom: 28px; }
-      .ms-block-head { margin-bottom: 12px; padding-bottom: 6px; gap: 10px; }
-      .ms-block-num { font-size: 24px; }
-      .ms-block-title { font-size: 12px; }
-
-      .ms-grid {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-      .ms-card {
-        padding: 12px 14px 14px;
-        border-right: none;
-      }
-      .ms-card-val { font-size: 15px; }
-      .ms-card-tag { font-size: 7px; }
-      .ms-card-text { font-size: 10px; }
-
-      .ms-strat { margin-bottom: 28px; }
-      .ms-strat-head { gap: 10px; padding-bottom: 8px; margin-bottom: 10px; }
-      .ms-strat-icon { width: 32px; height: 32px; font-size: 14px; }
-      .ms-strat-title { font-size: 12px; }
-
-      .ms-action {
-        grid-template-columns: 48px 1fr;
-        margin-bottom: 8px;
-        min-height: 44px;
-      }
-      .ms-action-prio { font-size: 8px; }
-      .ms-action-body { padding: 10px 12px; }
-      .ms-action-title { font-size: 11px; }
-      .ms-action-text { font-size: 10px; }
-      .ms-action-impl { font-size: 9px; margin-top: 4px; padding-top: 4px; }
-
-      .toggle-group { padding: 1px; gap: 0; }
-      .toggle-btn { padding: 3px 8px; font-size: 10px; }
-    }
-
-    /* ── @media (max-width: 480px) — Small phone refinements ── */
-    @media (max-width: 480px) {
-      .header-inner { padding: 12px 12px 0; }
-
-      .brand h1 { font-size: 16px; }
-      .brand p { font-size: 9px; }
-
-      .main-nav button {
-        padding: 10px 14px 8px;
-        font-size: 11px;
-      }
-
-      .sub-nav button {
-        padding: 8px 10px 6px;
-        font-size: 10px;
-      }
-
-      .filter-btn {
-        padding: 5px 8px;
-        font-size: 10px;
-        min-height: 28px;
-      }
-
-      main { padding: 12px 12px 24px; }
-
-      .kpi-row {
-        grid-template-columns: 1fr;
-        gap: 8px;
-        margin-bottom: 16px;
-      }
-      .kpi-card { padding: 12px 12px; }
-      .kpi-label { font-size: 8px; margin-bottom: 2px; }
-      .kpi-value { font-size: 20px; margin-bottom: 4px; }
-      .kpi-delta { font-size: 9px; }
-      .kpi-context { font-size: 9px; margin-top: 4px; }
-
-      .grid-2 {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        margin-bottom: 10px;
-      }
-
-      .chart-card {
-        padding: 12px 10px;
-        margin-bottom: 10px;
-      }
-      .chart-header { margin-bottom: 10px; }
-      .chart-title { font-size: 11px; }
-      .chart-sub { font-size: 8px; }
-      .chart-area { height: 220px; }
-      .chart-area.tall { height: 280px; }
-      .chart-area.short { height: 180px; }
-      .chart-area.xtall { height: 350px; }
-
-      .interpretation {
-        margin-top: 10px;
-        padding: 8px 10px;
-        font-size: 10px;
-      }
-      .recommendation {
-        margin-top: 4px;
-        padding: 6px 8px;
-        font-size: 9px;
-      }
-
-      .data-table th,
-      .data-table td {
-        padding: 6px 6px;
-        font-size: 10px;
-      }
-      .data-table th { font-size: 8px; }
-      .mono { font-size: 10px; }
-
-      .table-search {
-        min-width: 120px;
-        padding: 4px 6px 4px 24px;
-        font-size: 10px;
-      }
-      .group-select {
-        padding: 3px 5px;
-        font-size: 9px;
-      }
-
-      .legend-row { gap: 8px; }
-      .legend-item { font-size: 9px; }
-
-      .heatmap-grid {
-        grid-template-columns: 36px repeat(18, 1fr);
-        gap: 0.5px;
-      }
-      .hm-label { font-size: 7px; }
-      .hm-cell { font-size: 5px; aspect-ratio: 1; }
-
-      footer {
-        padding: 10px 12px;
-        font-size: 8px;
-      }
-
-      /* ── Management Summary Small Phone ── */
-      .ms-hero { margin-bottom: 24px; }
-      .ms-hero-cell { padding: 16px 12px 12px; }
-      .ms-hero-val { font-size: 24px; }
-      .ms-hero-unit { font-size: 11px; }
-      .ms-hero-label { font-size: 9px; }
-
-      .ms-block { margin-bottom: 20px; }
-      .ms-block-head { margin-bottom: 10px; padding-bottom: 4px; gap: 8px; }
-      .ms-block-num { font-size: 20px; }
-      .ms-block-title { font-size: 11px; }
-
-      .ms-grid { grid-template-columns: 1fr; }
-      .ms-card { padding: 10px 12px 12px; }
-      .ms-card-val { font-size: 14px; }
-      .ms-card-tag { font-size: 6px; padding: 1px 4px; }
-      .ms-card-text { font-size: 9px; }
-
-      .ms-strat { margin-bottom: 20px; }
-      .ms-strat-head { gap: 8px; padding-bottom: 6px; margin-bottom: 8px; }
-      .ms-strat-icon { width: 28px; height: 28px; font-size: 12px; }
-      .ms-strat-title { font-size: 11px; }
-
-      .ms-action {
-        grid-template-columns: 44px 1fr;
-        margin-bottom: 6px;
-        min-height: 40px;
-      }
-      .ms-action-prio { font-size: 7px; }
-      .ms-action-body { padding: 8px 10px; }
-      .ms-action-title { font-size: 10px; margin-bottom: 2px; }
-      .ms-action-text { font-size: 9px; }
-      .ms-action-impl { font-size: 8px; margin-top: 2px; padding-top: 2px; }
-    }
-
-    /* ── Touch-friendly tap targets ── */
-    @media (hover: none) and (pointer: coarse) {
-      .filter-btn,
-      .main-nav button,
-      .sub-nav button,
-      .toggle-btn {
-        min-height: 44px;
-        min-width: 44px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -742,13 +272,11 @@
         </div>
       </div>
     </div>
-    <div class="nav-scroll-wrap">
     <nav class="main-nav">
       <button class="active" data-tab="uebersicht">Umsatz</button>
       <button data-tab="filialen">Filialen</button>
       <button data-tab="produkte">Produkte</button>
       <button data-tab="kunden">Kunden</button>
-      <button data-tab="kanaele">Kanäle</button>
       <button data-tab="zeitanalyse">Zeitanalyse</button>
       <button data-tab="trends">Trends</button>
       <button data-tab="datamining">Data Mining</button>
@@ -756,9 +284,7 @@
       <button data-tab="wetter">Wetter</button>
       <button data-tab="personal">Personal</button>
       <button data-tab="promotions">Promotions</button>
-      <button data-tab="summary">Management Summary</button>
     </nav>
-    </div>
   </div>
 </div>
 
@@ -795,46 +321,6 @@
         <div class="kpi-value">€14,52M</div>
         <div class="kpi-delta pos">↑ 1.478%</div>
         <div class="kpi-context">754.513 Bestellungen · 25.000 Kunden · 8 Filialen</div>
-      </div>
-      <div class="kpi-card" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Kanalverteilung 2025</div>
-        <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--bar);display:inline-block"></span>Counter</span>
-            <span class="mono" style="font-weight:700">51,2%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--bar-light);display:inline-block"></span>Drive-Through</span>
-            <span class="mono" style="font-weight:700">21,1%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>App</span>
-            <span class="mono" style="font-weight:700">10,6%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--orange);display:inline-block"></span>Kiosk</span>
-            <span class="mono" style="font-weight:700">17,1%</span>
-          </div>
-        </div>
-        <div class="kpi-context" style="margin-top:8px">App wächst +2,7pp YoY · Counter −1,6pp</div>
-      </div>
-      <div class="kpi-card" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Top-Burger 2025</div>
-        <div class="kpi-value">Beyond Burger</div>
-        <div class="kpi-delta pos">↑ meistverkauft</div>
-        <div class="kpi-context">30.597 verkauft · 10,4% Umsatzanteil</div>
-      </div>
-      <div class="kpi-card" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Wiederkehrende Kunden</div>
-        <div class="kpi-value">99,7%</div>
-        <div class="kpi-delta pos">↑ 0,3pp</div>
-        <div class="kpi-context">vs. 99,4% in 2024 · 23.810 Stammkunden</div>
-      </div>
-      <div class="kpi-card" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Kundenzufriedenheit</div>
-        <div class="kpi-value">3,82 / 5</div>
-        <div class="kpi-delta neutral">± 0,00</div>
-        <div class="kpi-context">vs. 3,82 in 2024 · 29.990 Bewertungen</div>
       </div>
     </div>
 
@@ -919,7 +405,7 @@
       </div>
       <div class="interpretation">
         <strong>Interpretation:</strong> Alle drei Wachstumskurven zeigen dasselbe Muster: explosive Frühphase (2018/19: >100%), COVID-Delle (2020: −12,4%), starke Erholung (2021: +69,1%) und seither kontinuierliche Verlangsamung. 2025 wächst der Umsatz nur noch um 5,4% — davon 2,9 Prozentpunkte durch AOV-Steigerung und nur 2,4 Prozentpunkte durch Bestellvolumen. Das Wachstum ist primär preisgetrieben, nicht mengengetrieben.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Für nachhaltiges Wachstum muss das Mengenwachstum wiederbelebt werden. Zwei Hebel: (1) Kundenakquise über App-Marketing (App-Bestellungen wachsen 37,7% YoY — der am schnellsten wachsende Kanal) und (2) neue Standorte außerhalb Würzburgs.</div>
+        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Für nachhaltiges Wachstum muss das Mengenwachstum wiederbelebt werden. Zwei Hebel: (1) Kundenakquise über App-Marketing (App-Bestellungen wachsen 12,9% — der einzige zweistellige Wachstumskanal) und (2) neue Standorte außerhalb Würzburgs.</div>
       </div>
     </div>
 
@@ -930,7 +416,7 @@
       <div class="chart-area"><canvas id="yoyBranchChart"></canvas></div>
       <div class="interpretation">
         <strong>Interpretation:</strong> Europastern führt mit €3,39M (23,3% Anteil), gefolgt von Hauptbahnhof (€2,21M) und Mainfrankenpark (€2,16M). Allerdings: Europastern ist seit 2017 aktiv und hat den niedrigsten AOV (€18,62). Mainfrankenpark, erst seit 2021 offen, erzielt bereits €2,16M mit einem AOV von €21,03 — ein deutlich profitableres Profil.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das Mainfrankenpark-Modell (Shopping-Lage, hoher AOV) sollte als Blueprint für neue Standorte dienen. Europastern sollte durch Menü-Optimierung den AOV an den Netzwerk-Durchschnitt (€19,25) heranführen — das ergäbe bei 182k Bestellungen +€111k Mehrumsatz.</div>
+        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das Mainfrankenpark-Modell (Shopping-Lage, hoher AOV) sollte als Blueprint für neue Standorte dienen. Europastern sollte durch Menü-Optimierung den AOV an den Netzwerk-Durchschnitt (€19,23) heranführen — das ergäbe bei 182k Bestellungen +€111k Mehrumsatz.</div>
       </div>
     </div>
   </div>
@@ -961,7 +447,7 @@
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Netzwerk-Durchschnitt</div>
-        <div class="kpi-value">€19,25</div>
+        <div class="kpi-value">€19,23</div>
         <div class="kpi-delta pos">8 Filialen</div>
         <div class="kpi-context">Ø AOV · Spreizung: €17,80–€21,05</div>
       </div>
@@ -991,19 +477,19 @@
         <span class="table-count" id="tblBranch_count">8 Zeilen</span>
       </div>
       <table class="data-table" id="tblBranch">
-        <thead><tr><th>Filiale</th><th>Typ</th><th>Drive-Through</th><th>Eröffnet</th><th>Umsatz</th><th>Bestellungen</th><th>AOV</th><th>Rating</th></tr></thead>
+        <thead><tr><th>Filiale</th><th>Typ</th><th>Eröffnet</th><th>Umsatz</th><th>Bestellungen</th><th>AOV</th><th>Rating</th></tr></thead>
         <tbody>
-          <tr><td>BM Europastern</td><td>Highway</td><td style="color:var(--green);font-weight:700">✓ DT</td><td class="mono">03/2017</td><td class="mono">€3.391.529</td><td class="mono">182.120</td><td class="mono text-neg">€18,62</td><td>3,81 ★</td></tr>
-          <tr><td>BM Hauptbahnhof</td><td>City Center</td><td style="color:var(--muted)">—</td><td class="mono">06/2018</td><td class="mono">€2.205.646</td><td class="mono">123.929</td><td class="mono text-neg">€17,80</td><td>3,77 ★</td></tr>
-          <tr><td>BM Mainfrankenpark</td><td>Shopping</td><td style="color:var(--muted)">—</td><td class="mono">04/2021</td><td class="mono">€2.158.128</td><td class="mono">102.631</td><td class="mono text-pos">€21,03</td><td>3,82 ★</td></tr>
-          <tr><td>BM Heuchelhof</td><td>Residential</td><td style="color:var(--green);font-weight:700">✓ DT</td><td class="mono">09/2019</td><td class="mono">€2.029.699</td><td class="mono">100.783</td><td class="mono text-pos">€20,14</td><td>3,81 ★</td></tr>
-          <tr><td>BM Sanderring</td><td>University</td><td style="color:var(--muted)">—</td><td class="mono">02/2019</td><td class="mono">€1.683.541</td><td class="mono">89.366</td><td class="mono">€18,84</td><td>3,76 ★</td></tr>
-          <tr><td>BM Lengfeld</td><td>Commercial</td><td style="color:var(--green);font-weight:700">✓ DT</td><td class="mono">08/2020</td><td class="mono">€1.359.198</td><td class="mono">72.218</td><td class="mono">€18,82</td><td>3,81 ★</td></tr>
-          <tr><td>BM Grombühl</td><td>Hospital</td><td style="color:var(--muted)">—</td><td class="mono">01/2022</td><td class="mono">€942.419</td><td class="mono">47.734</td><td class="mono text-pos">€19,74</td><td class="text-pos">3,83 ★</td></tr>
-          <tr><td>BM Zellerau</td><td>Mixed</td><td style="color:var(--muted)">—</td><td class="mono">03/2023</td><td class="mono">€752.219</td><td class="mono">35.732</td><td class="mono text-pos">€21,05</td><td>3,82 ★</td></tr>
+          <tr><td>BM Europastern</td><td>Highway</td><td class="mono">03/2017</td><td class="mono">€3.391.529</td><td class="mono">182.120</td><td class="mono text-neg">€18,62</td><td>3,81 ★</td></tr>
+          <tr><td>BM Hauptbahnhof</td><td>City Center</td><td class="mono">06/2018</td><td class="mono">€2.205.646</td><td class="mono">123.929</td><td class="mono text-neg">€17,80</td><td>3,77 ★</td></tr>
+          <tr><td>BM Mainfrankenpark</td><td>Shopping</td><td class="mono">04/2021</td><td class="mono">€2.158.128</td><td class="mono">102.631</td><td class="mono text-pos">€21,03</td><td>3,82 ★</td></tr>
+          <tr><td>BM Heuchelhof</td><td>Residential</td><td class="mono">09/2019</td><td class="mono">€2.029.699</td><td class="mono">100.783</td><td class="mono text-pos">€20,14</td><td>3,81 ★</td></tr>
+          <tr><td>BM Sanderring</td><td>University</td><td class="mono">02/2019</td><td class="mono">€1.683.541</td><td class="mono">89.366</td><td class="mono">€18,84</td><td>3,76 ★</td></tr>
+          <tr><td>BM Lengfeld</td><td>Commercial</td><td class="mono">08/2020</td><td class="mono">€1.359.198</td><td class="mono">72.218</td><td class="mono">€18,82</td><td>3,81 ★</td></tr>
+          <tr><td>BM Grombühl</td><td>Hospital</td><td class="mono">01/2022</td><td class="mono">€942.419</td><td class="mono">47.734</td><td class="mono text-pos">€19,74</td><td class="text-pos">3,83 ★</td></tr>
+          <tr><td>BM Zellerau</td><td>Mixed</td><td class="mono">03/2023</td><td class="mono">€752.219</td><td class="mono">35.732</td><td class="mono text-pos">€21,05</td><td>3,82 ★</td></tr>
         </tbody>
       </table>
-      <div class="interpretation" style="font-size:11px"><em>Farbcodierung AOV: <span style="color:var(--green)">Grün</span> = über Netzwerk-Ø (€19,25), <span style="color:var(--red)">Rot</span> = unter Netzwerk-Ø. <strong>Drive-Through (DT):</strong> 3 von 8 Filialen — Europastern, Heuchelhof, Lengfeld. DT-Filialen erzielen im Schnitt €23,80 AOV (+24% vs. Counter) durch höheres Bestellvolumen pro Transaktion.</em></div>
+      <div class="interpretation" style="font-size:11px"><em>Farbcodierung AOV: <span style="color:var(--green)">Grün</span> = über Netzwerk-Ø (€19,23), <span style="color:var(--red)">Rot</span> = unter Netzwerk-Ø</em></div>
     </div>
   </div>
 
@@ -1182,43 +668,6 @@
     </div>
   </div>
 
-  <div id="sub_kunden_herkunft" class="sub-content">
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="kpi-label">Stärkster Bezirk</div>
-        <div class="kpi-value" style="font-size:20px">Innenstadt</div>
-        <div class="kpi-delta pos">3.420</div>
-        <div class="kpi-context">13,7% aller Kunden · Zentrallage</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Filialnähe</div>
-        <div class="kpi-value">74%</div>
-        <div class="kpi-context">Kunden wohnen im selben Bezirk wie nächste Filiale</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Pendler-Anteil</div>
-        <div class="kpi-value">26%</div>
-        <div class="kpi-context">Kaufen außerhalb ihres Wohnbezirks</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Umland-Kunden</div>
-        <div class="kpi-value">6.590</div>
-        <div class="kpi-delta pos">26,4%</div>
-        <div class="kpi-context">Kunden außerhalb Würzburg · via App/Drive-Through</div>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Innenstadt und Heuchelhof stellen die meisten Kunden</div><div class="chart-sub">Kundenherkunft nach Würzburger Stadtbezirk · 25.000 Kunden · Musterdaten kompatibel mit dim_customer.csv (home_district)</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="districtChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Kundenverteilung zeigt eine klare Konzentration in den stadtnahen Bezirken. Innenstadt (3.420), Heuchelhof (2.950) und Sanderau (2.180) führen das Ranking — allesamt Bezirke mit BurgerMetrics-Filialen. Mainfranken/Lengfeld (2.100) und Grombühl (1.840) zeigen solide Kundenbindung. Auffällig: 6.590 Kunden (26,4%) kommen aus dem Umland — bevorzugt via Drive-Through (Europastern, Highway-Lage) oder App.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Bezirke ohne Filiale mit hoher Kundendichte sind potenzielle Standorte: Heidingsfeld (1.520 Kunden, keine Filiale), Frauenland (1.350). Ein Drive-Through in Heidingsfeld könnte 1.520 bestehende Kunden besser bedienen und Umland-Traffic aufnehmen.</div>
-      </div>
-    </div>
-  </div>
-
   <div id="sub_kunden_segmente" class="sub-content">
     <div class="chart-card">
       <div class="chart-header">
@@ -1239,132 +688,6 @@
       <div class="interpretation">
         <strong>Interpretation:</strong> Die Altersgruppe 25–34 generiert geschätzt 25–28% des Umsatzes. Obwohl die Gruppe 35–44 nur 18% der Kunden stellt, haben sie einen überdurchschnittlichen AOV (Familieneinkäufe). Die Gruppe 65+ (1.536 Kunden) bestellt seltener, aber mit hoher Loyalität (überdurchschnittlicher Gold-Anteil).
         <div class="recommendation"><strong>Handlungsempfehlung:</strong> Für die Gruppe 35–44 ein „Familien-Bundle" (2 Burger + 2 Kids-Menüs + Getränke) für €29,99 einführen. Erwarteter Effekt: AOV-Steigerung um 40% bei Familienbestellungen, Frequenzerhöhung von 1,8×/Monat auf 2,4×/Monat.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════ TAB: KANÄLE ═══════════════════ -->
-<div id="kanaele" class="tab-content">
-
-  <div id="sub_kanaele_overview" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="kpi-label">Counter 2025</div>
-        <div class="kpi-value">51,2%</div>
-        <div class="kpi-delta neg">↓ −1,6pp YoY</div>
-        <div class="kpi-context">69.939 Bestellungen · Ø AOV €21,86 · €1,529M Umsatz</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Drive-Through 2025</div>
-        <div class="kpi-value">21,1%</div>
-        <div class="kpi-delta neg">↓ −0,6pp YoY</div>
-        <div class="kpi-context">28.798 Bestellungen · Ø AOV €22,38 · €644k Umsatz</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">App 2025</div>
-        <div class="kpi-value">10,6%</div>
-        <div class="kpi-delta pos">↑ +2,7pp YoY</div>
-        <div class="kpi-context">14.441 Bestellungen · Ø AOV €21,47 · €310k Umsatz</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Kiosk 2025</div>
-        <div class="kpi-value">17,1%</div>
-        <div class="kpi-delta neg">↓ −0,5pp YoY</div>
-        <div class="kpi-context">23.379 Bestellungen · Ø AOV €21,89 · €512k Umsatz</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">App hat höchsten AOV — Counter das größte Volumen</div><div class="chart-sub">Ø Bestellwert pro Kanal in € · 2025 · Alle Filialen</div></div>
-        </div>
-        <div class="chart-area"><canvas id="channelAOVChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Drive-Through erzielt mit €22,38 den höchsten AOV, gefolgt von Kiosk (€21,89), Counter (€21,86) und App (€21,47). Alle Kanäle liegen nahe am Gesamtdurchschnitt (€21,93). Die AOV-Spreizung zwischen Kanälen ist gering (€0,91).
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die geringe AOV-Spreizung zwischen Kanälen deutet auf einheitliches Bestellverhalten hin. Potenzial liegt eher in Volumensteigerung als in AOV-Optimierung einzelner Kanäle. Upselling-Maßnahmen in App und Kiosk könnten den AOV über das Netzwerk-Mittel heben.</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Umsatzanteil je Kanal — Counter dominiert, App holt auf</div><div class="chart-sub">Umsatzanteil in % · 2025 · 4 Kanäle · €2,99M Gesamtumsatz</div></div>
-        </div>
-        <div class="chart-area"><canvas id="channelRevenueChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Counter macht 51,1% des Umsatzes aus, Drive-Through 21,5%, Kiosk 17,1%, App 10,4%. App hat den niedrigsten Volumenanteil (10,6%) und den niedrigsten Umsatzanteil (10,4%). Drive-Through generiert 21,5% des Umsatzes mit 21,1% der Bestellungen.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die App ist der effizienteste Kanal (höchster AOV, geringste Betriebskosten). Investition in App-Akquise: Bei 25% App-Anteil (statt 10,6%) könnten durch den AOV-Lift ~€450k Mehrjahresumsatz generiert werden.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_kanaele_detail" class="sub-content">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Tageszeiten-Verteilung nach Kanal — Drive-Through dominiert morgens, App abends</div><div class="chart-sub">Anteil der Bestellungen in % · 4 Kanäle · 06:00–22:00 Uhr</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="channelTodChart"></canvas></div>
-      <div class="legend-row">
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Counter</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>Drive-Through</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>App</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Kiosk</div>
-      </div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Kanalnutzung variiert stark nach Tageszeit. Drive-Through dominiert morgens (06–09 Uhr: 35% der Frühbestellungen) — klassisches Pendler-Muster. Counter ist über den Tag gleichmäßig verteilt (40–55%). App-Nutzung steigt abends (18–22 Uhr: bis zu 22%) — Kunden bestellen vom Sofa. Kiosk wird bevorzugt zur Mittagszeit (11–14 Uhr: 22%) genutzt, wenn es voll ist und Warteschlangen entstehen.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Morgens (06–09h) Drive-Through-Spezialangebote einführen (Frühstücks-Kombi), da 35% der Frühkunden Drive-Through nutzen. Abends App-Push-Notifications (18–19h): Wenn 22% der Abendkunden die App nutzen, können personalisierte Angebote den AOV weiter steigern.</div>
-      </div>
-    </div>
-
-    <div class="chart-card table-card" style="overflow-x:auto">
-      <div class="chart-title" style="margin-bottom:4px">Top-5 Produkte je Kanal — Bestellpräferenzen unterscheiden sich deutlich</div>
-      <div class="chart-sub" style="margin-bottom:14px">Ranking nach Bestellhäufigkeit · Musterdaten kompatibel mit fact_orders.csv × dim_product.csv</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar)">Counter</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Beyond Burger</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar-light)">Drive-Through</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Small Fries</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--green)">App</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Beyond Burger</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--orange)">Kiosk</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Beyond Burger</div>
-          </div>
-        </div>
-      </div>
-      <div class="interpretation" style="margin-top:16px">
-        <strong>Interpretation:</strong> Die Kanalprofile zeigen überraschend geringe Unterschiede: Alle vier Kanäle haben dieselben Top-3 (Cola 0,5l, Medium Fries, Cola 0,3l). Die Bestellpräferenzen variieren kaum nach Kanal — die Kunden bestellen kanalübergreifend ähnlich.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Kanalspezifisches Merchandising: App-Startseite mit Beyond Burger und Green Goddess als Featured Products. Drive-Through-Board-Optimierung: Large Fries und Shakes prominent platzieren (höhere Marge). Kiosk: Upsell-Vorschlag beim Classic Burger (Kombi-Angebot +€2,50 = Fries + Drink).</div>
       </div>
     </div>
   </div>
@@ -1943,420 +1266,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════ MANAGEMENT SUMMARY ═══════════════════ -->
-<div id="summary" class="tab-content">
-
-  <!-- ── Sub: Insights ── -->
-  <div id="sub_summary_insights" class="sub-content active">
-
-    <!-- Hero KPIs -->
-    <div class="ms-hero">
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">14,5<span class="ms-hero-unit">Mio. €</span></div>
-        <div class="ms-hero-label">Gesamtumsatz netto</div>
-      </div>
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">754.513</div>
-        <div class="ms-hero-label">Bestellungen</div>
-      </div>
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">24.992</div>
-        <div class="ms-hero-label">Unique Kunden</div>
-      </div>
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">8<span class="ms-hero-unit"> Filialen</span></div>
-        <div class="ms-hero-label">Würzburg · 2017–2026</div>
-      </div>
-    </div>
-
-    <!-- 01 Umsatz & Wachstum -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">01</span><span class="ms-block-title">Umsatz &amp; Wachstum</span></div>
-      <div class="ms-grid">
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">+22,1 % p.a.</span></div>
-          <div class="ms-card-text">CAGR 2017–2025. Getrieben von Filialexpansion (3 → 8 Standorte) und organischem Wachstum.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">€19,27</span></div>
-          <div class="ms-card-text">Ø Netto-Bestellwert (AOV). Spanne: €18,82 (Lengfeld) bis €21,05 (Zellerau).</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">3,91 Artikel</span></div>
-          <div class="ms-card-text">Mittlere Warenkorbgröße. 42 % aller Bestellungen enthalten genau 4 Positionen.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">Q4 Peak</span></div>
-          <div class="ms-card-text">Saisonaler Umsatzhöhepunkt Oktober–Dezember, konsistent über alle Jahre.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 02 Filialperformance -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">02</span><span class="ms-block-title">Filialperformance</span></div>
-      <div class="ms-grid">
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">23,3 %</span></div>
-          <div class="ms-card-text"><strong>BM Europastern</strong> — €3,39 Mio. Umsatzanteil. Highway-Lage, 350 m², Mietquote nur 2,4 %.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">€12.254/m²</span><span class="ms-card-tag g">BEST</span></div>
-          <div class="ms-card-text"><strong>BM Hauptbahnhof</strong> — Raumproduktivität Spitzenwert auf nur 180 m², ohne Drive-Through.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">€113k/MA</span><span class="ms-card-tag r">3× GAP</span></div>
-          <div class="ms-card-text"><strong>Europastern vs. Zellerau</strong> — MA-Produktivität €113.051 vs. €35.820. Faktor 3,2.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">6,4 %</span></div>
-          <div class="ms-card-text"><strong>BM Zellerau</strong> — Schlechteste Mietquote, niedrigster Umsatz (€752k) trotz höchstem AOV (€21,05).</div>
-        </div>
-        <div class="ms-card full">
-          <div class="ms-card-top"><span class="ms-card-val">5,1 %</span></div>
-          <div class="ms-card-text">Anteil Bestellungen aus dem Heimat-Stadtteil. Filialen bedienen großräumige Einzugsgebiete — Standortwahl ist überregional getrieben, nicht von lokaler Wohnortdichte bestimmt.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 03 Kunden & Loyalität -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">03</span><span class="ms-block-title">Kundenstruktur &amp; Loyalität</span></div>
-      <div class="ms-grid">
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">98–100 %</span><span class="ms-card-tag g">EXZELLENT</span></div>
-          <div class="ms-card-text">Kohorten-Retention über alle Jahrgänge 2017–2026. Nahezu kein Kundenverlust.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">30,2 Best./Kunde</span></div>
-          <div class="ms-card-text">Ø Bestellhäufigkeit über den gesamten Beobachtungszeitraum.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">16,3 % Champions</span><span class="ms-card-tag g">TOP</span></div>
-          <div class="ms-card-text">RFM-Segment mit höchster Kauffrequenz, höchstem Monetary-Wert und jüngstem Kauf.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">21,9 % at Risk</span><span class="ms-card-tag r">RISIKO</span></div>
-          <div class="ms-card-text">Abwanderungsgefahr — größtes RFM-Segment. Rückläufige Aktivität erfordert Reaktivierung.</div>
-        </div>
-        <div class="ms-card full">
-          <div class="ms-card-top"><span class="ms-card-val">25–34 Jahre</span></div>
-          <div class="ms-card-text">Umsatzstärkste Altersgruppe, gefolgt von 35–44 J. Zusammen &gt; 50 % des Gesamtumsatzes.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 04 Produkte & Warenkörbe -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">04</span><span class="ms-block-title">Produkte &amp; Warenkörbe</span></div>
-      <div class="ms-grid">
-        <div class="ms-card full">
-          <div class="ms-card-top"><span class="ms-card-val">3 Regeln mit Lift &gt; 2,0</span></div>
-          <div class="ms-card-text">Pommes ↔ Cola (2,38) · Pommes + Cola → Cheeseburger (2,10) · Beyond Burger ↔ Salat (2,03). Alle übrigen Regeln nahe Zufall (Lift ≈ 1).</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">Classic Burger</span></div>
-          <div class="ms-card-text">Meistverkauftes Produkt nach Absatzmenge, gefolgt von Pommes Frites und Cola.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">Beyond Burger</span></div>
-          <div class="ms-card-text">Premium-Segment mit überdurchschnittlichem DB. Affinität zu Salat zeigt gesundheitsbewusstes Segment.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 05 Kanäle -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">05</span><span class="ms-block-title">Kanäle &amp; Zahlungsarten</span></div>
-      <div class="ms-grid">
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">5,9 % App</span><span class="ms-card-tag o">UNTERPENETR.</span></div>
-          <div class="ms-card-text">Höchste Zufriedenheit (Ø 4,0/5) — aber am wenigsten genutzter Kanal.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">3,77 Counter</span></div>
-          <div class="ms-card-text">Niedrigster Zufriedenheitswert aller Kanäle. Hauptbestellweg mit schwächster Customer Experience.</div>
-        </div>
-        <div class="ms-card full">
-          <div class="ms-card-top"><span class="ms-card-val">Kartenzahlung ↑</span></div>
-          <div class="ms-card-text">Bargeldanteil strukturell rückläufig. Karte und Mobile Payment mit steigendem Trend — Infrastrukturanpassung erforderlich.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 06 Wetter -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">06</span><span class="ms-block-title">Wetter &amp; externe Faktoren</span></div>
-      <div class="ms-grid">
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">+21,6 %</span></div>
-          <div class="ms-card-text">Umsatzaufschlag Sunny vs. Snowy (€4.624 vs. €3.804 Ø Tagesumsatz).</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">r = 0,056</span></div>
-          <div class="ms-card-text">Korrelation Temperatur ↔ Tagesumsatz nahe null. Wachstumstrend überlagert Wettereffekt. Kein operativer Hebel.</div>
-        </div>
-        <div class="ms-card full">
-          <div class="ms-card-top"><span class="ms-card-val">Extremwerte</span></div>
-          <div class="ms-card-text">Bins –15 bis –10 °C (€8.899) und 25–30 °C (€6.210) zeigen erhöhte Ø-Umsätze. Vermutlich Sondereffekte (Feiertage, Sommer-Peaks), nicht kausal.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 07 Personal -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">07</span><span class="ms-block-title">Personal &amp; Zufriedenheit</span></div>
-      <div class="ms-grid">
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">r = −0,48</span><span class="ms-card-tag r">KRITISCH</span></div>
-          <div class="ms-card-text">Wartezeit ↔ Zufriedenheit. Ab 10+ Min. fällt Zufriedenheit auf Ø 3,69 — deutlicher Knick vs. 3,86 bei 1–3 Min.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">Ø 3,81</span></div>
-          <div class="ms-card-text">Gesamtzufriedenheit (5er-Skala). Geringe Streuung 3,76–3,83 zwischen Standorten — konsistentes Servicelevel.</div>
-        </div>
-        <div class="ms-card full">
-          <div class="ms-card-top"><span class="ms-card-val">3× Spreizung</span></div>
-          <div class="ms-card-text">MA-Produktivität: €113k (Europastern) vs. €36k (Zellerau). Erklärbar durch Standorttyp (Highway vs. Mixed) und Kundenfrequenz, nicht primär durch Personalleistung.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 08 Promotions -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">08</span><span class="ms-block-title">Promotions</span></div>
-      <div class="ms-grid">
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">8,2 %</span><span class="ms-card-tag g">GESUND</span></div>
-          <div class="ms-card-text">Promo-Quote. Nur jede 12. Bestellung nutzt eine Aktion. Geringe Preissensitivität.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">Ø €19,45 Baseline</span></div>
-          <div class="ms-card-text">AOV ohne Promotion (692.490 Bestellungen). Promo-Bestellungen zeigen keinen höheren Warenkorbwert.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">11,5× ROI</span><span class="ms-card-tag g">BEST</span></div>
-          <div class="ms-card-text"><strong>Student Discount 8 %</strong> — Höchster ROI. Geringe Rabatthöhe bei hoher Frequenz im Universitätsumfeld.</div>
-        </div>
-        <div class="ms-card">
-          <div class="ms-card-top"><span class="ms-card-val">3,0× ROI</span></div>
-          <div class="ms-card-text"><strong>Birthday Offer 25 %</strong> — Niedrigster ROI. Hoher Rabatt ohne nachweislichen Zusatzumsatz.</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ── Sub: Empfehlungen ── -->
-  <div id="sub_summary_empfehlungen" class="sub-content">
-
-    <!-- S1 Filialnetz -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">01</div>
-        <div class="ms-strat-title">Filialnetz &amp; Flächenproduktivität</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Zellerau: Standort-Review einleiten</div>
-          <div class="ms-action-text">Niedrigster Umsatz (<strong>€752k</strong>), höchste Mietquote (<strong>6,4 %</strong>), schwächste MA-Produktivität (<strong>€36k/MA</strong>). Der hohe AOV (€21,05) kompensiert die Frequenzschwäche nicht.</div>
-          <div class="ms-action-impl">Vergleichsrechnung Standortschließung vs. Relaunch (Flächenverkleinerung, Mietverhandlung, Konzeptanpassung) innerhalb Q3 durchführen.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Hauptbahnhof-Modell skalieren</div>
-          <div class="ms-action-text">Höchste Raumproduktivität (<strong>€12.254/m²</strong>) auf nur 180 m² — ohne Drive-Through. Kompaktformat als Blaupause für weitere High-Frequency-Standorte.</div>
-          <div class="ms-action-impl">Standort-Screening für zweites Kompaktformat in der Region Mainfranken.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Einzugsgebiet ist überregional</div>
-          <div class="ms-action-text">Nur <strong>5,1 %</strong> der Bestellungen aus dem Stadtteil der Filiale. Standortwahl primär nach Verkehrsanbindung und Lauffrequenz, nicht nach Wohnortdichte.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S2 Digitalisierung -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">02</div>
-        <div class="ms-strat-title">Digitalisierung &amp; Kanalsteuerung</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">App-Penetration verdreifachen — Ziel: 18 % in 18 Monaten</div>
-          <div class="ms-action-text">App-Zufriedenheit <strong>4,0</strong> (höchste aller Kanäle), aber nur <strong>5,9 %</strong> Anteil. Jede App-Migration reduziert Counter-Last (schwächste Zufriedenheit: 3,77).</div>
-          <div class="ms-action-impl">App-First-Aktionen: exklusive Coupons, Loyalty-Punkte, Pre-Order. Student Discount (ROI 11,5×) exklusiv in der App.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Kiosk-Ausbau in Hauptbahnhof und Sanderring</div>
-          <div class="ms-action-text">Kiosk-Zufriedenheit (<strong>3,78</strong>) über Counter (<strong>3,77</strong>) — entlastet Personal. Beide Standorte ohne Drive-Through, Kiosks als Alternative.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Mobile-Payment-Infrastruktur vorziehen</div>
-          <div class="ms-action-text">Bargeldanteil strukturell rückläufig. Kontaktlose Zahlungsterminals priorisiert in Filialen mit hohem Counter-Anteil.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S3 Kundenmanagement -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">03</div>
-        <div class="ms-strat-title">Kundenmanagement &amp; Retention</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Reaktivierungskampagne für 21,9 % „at Risk"-Segment</div>
-          <div class="ms-action-text"><strong>5.479 Kunden</strong> mit rückläufiger Aktivität. Bei Ø 30,2 Bestellungen/Kunde und €19,27 AOV repräsentiert dieses Segment ca. <strong>€3,2 Mio.</strong> Lifetime-Revenue-Potenzial.</div>
-          <div class="ms-action-impl">Win-Back-Kampagne via App-Push + E-Mail mit gestaffeltem Incentive (5 % → 10 % → 15 %) über 90 Tage.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Champions-Programm aufbauen (16,3 % = 4.074 Kunden)</div>
-          <div class="ms-action-text">Überproportionaler Umsatzanteil. Ziel: Advocacy und Weiterempfehlung monetarisieren.</div>
-          <div class="ms-action-impl">Exklusives Loyalty-Tier mit Early Access, Birthday-Upgrade (Premium-Menü statt 25 %-Rabatt — höherer perceived value, niedrigerer Margenverlust).</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Kohorten-Retention 98–100 % ist exzellent</div>
-          <div class="ms-action-text">Kein strukturelles Churn-Problem. Fokus auf Frequenzsteigerung bestehender Kunden, nicht auf Neukundengewinnung.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S4 Sortiment & Pricing -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">04</div>
-        <div class="ms-strat-title">Sortiment &amp; Pricing</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Cross-Selling-Bundles auf Basis Assoziationsanalyse</div>
-          <div class="ms-action-text">Pommes + Cola (<strong>Lift 2,38</strong>) und Beyond Burger + Salat (<strong>Lift 2,03</strong>) sind die einzigen signifikanten Affinitäten.</div>
-          <div class="ms-action-impl">Combo-Menüs mit 3–5 % Bundle-Rabatt — erhöht Warenkorbgröße bei minimalem Marginverlust.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Beyond-Burger-Segment als Premium-Linie ausbauen</div>
-          <div class="ms-action-text">Signifikante Affinität zu Salat (Lift 2,03) zeigt gesundheitsbewusstes Kundensegment.</div>
-          <div class="ms-action-impl">„Green Line"-Erweiterung (Plant-Based-Menüs) mit höherer Marge evaluieren.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Preiserhöhung mit Augenmaß möglich</div>
-          <div class="ms-action-text">Promo-Quote <strong>8,2 %</strong> zeigt geringe Preissensitivität. Moderate Anpassung (2–3 %) sollte Nachfrage kaum beeinflussen — verifizierbar über Preissimulation.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S5 Promotions -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">05</div>
-        <div class="ms-strat-title">Promotions &amp; Incentivierung</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Birthday Offer (25 %) reformieren oder einstellen</div>
-          <div class="ms-action-text">Niedrigster ROI (<strong>3,0×</strong>). Ein 25 %-Rabatt ohne nachweisbaren Frequenz- oder Cross-Selling-Effekt ist Margenvernichtung.</div>
-          <div class="ms-action-impl">Umstellen auf „Birthday Special" (exklusives Produkt statt Rabatt) oder Reduktion auf 15 % bei App-Bindung.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Student Discount (11,5× ROI) ausweiten</div>
-          <div class="ms-action-text">Best-Performer: geringe Rabatthöhe (<strong>8 %</strong>) bei hoher Wiederholungsrate. Aktuell primär Sanderring.</div>
-          <div class="ms-action-impl">Kooperation mit Studierendenwerk für App-Integration (Mensacard-Verknüpfung). Ausweitung auf alle Uni-nahen Filialen.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Promo-Gesamtquote bei 8,2 % halten</div>
-          <div class="ms-action-text">Keine Indikation für aggressive Rabattierung. Gesunde Preispositionierung — Promotions gezielt als Frequenztreiber, nicht als Margenkiller.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S6 Operations -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">06</div>
-        <div class="ms-strat-title">Operations &amp; Wartezeit</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Wartezeit unter 10 Minuten halten — harte Grenze</div>
-          <div class="ms-action-text">Zufriedenheit fällt ab 10+ Min. signifikant auf <strong>Ø 3,69</strong> (vs. 3,86 bei 1–3 Min.). Korrelation <strong>r = −0,48</strong> ist der stärkste Hebel auf Zufriedenheit.</div>
-          <div class="ms-action-impl">SLA einführen: 95 % der Bestellungen unter 10 Min. Monitoring per POS-System, wöchentliches Reporting an Filialleiter.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Peak-Hour-Staffing optimieren</div>
-          <div class="ms-action-text">Umsatzkonzentration <strong>11:30–13:30</strong> und <strong>17:30–19:30</strong> laut Heatmap.</div>
-          <div class="ms-action-impl">Personalbesetzung in Peak-Fenstern erhöhen — Schichtteilung oder Teilzeitkräfte.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Produktivitätsgefälle ist standortbedingt</div>
-          <div class="ms-action-text">3× Spreizung (<strong>€113k vs. €36k</strong>) korreliert mit Standorttyp (Highway/City &gt; Residential/Mixed). Filialvergleiche für Personalbewertung müssen nach Standorttyp normalisiert werden.</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-</div>
-
 </main>
 
 <footer>Fiktives Unternehmen — BI-Kurs THWS Würzburg · Prof. Robert Butscher &nbsp;|&nbsp; 754.513 Bestellungen · 2017–2026 · Erstellt mit Chart.js</footer>
@@ -2402,18 +1311,6 @@ const dowOrders=[93117,92168,97848,104023,120584,131444,115329];
 const dowRevenue=[1790393,1774042,1875684,1998150,2322635,2535972,2225503];
 const hourLabels=['06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23'];
 const hourOrders=[12235,30576,37909,24757,18363,41517,121331,104250,50750,26012,26333,44067,81926,63592,32974,19399,12192,6330];
-/* ── KANAL & DISTRICT DATA ── */
-const channelLabels=['Counter','Drive-Through','App','Kiosk'];
-const channelOrders2025=[68044,27994,17616,22803];
-const channelAOV2025=[21.40,23.80,25.30,18.60];
-const channelRevenue2025=[1456941,666447,445684,424136];
-const channelTodHours=[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
-const channelTodCounter=[28,30,35,42,48,52,55,53,48,44,47,50,52,49,44,38,28];
-const channelTodDrive=[35,38,42,40,36,30,28,26,22,20,21,22,24,22,18,14,10];
-const channelTodApp=[8,7,6,7,9,11,14,15,14,13,14,16,20,22,21,19,15];
-const channelTodKiosk=[16,14,12,11,13,18,21,22,19,18,20,21,19,16,14,12,9];
-const districtLabels=['Innenstadt','Heuchelhof','Sanderau','Mainfranken','Grombühl','Zellerau','Heidingsfeld','Frauenland','Versbach','Rottenbauer','Umland'];
-const districtCounts=[3420,2950,2180,2100,1840,1650,1520,1350,980,420,6590];
 const ageGroups=['<18','18–24','25–34','35–44','45–54','55–64','65+'];
 const ageCount=[2034,5392,6320,4516,2948,2254,1536];
 const loyaltyTiers=['Kein Programm','Bronze','Silber','Gold'];
@@ -2554,13 +1451,13 @@ function createBranchChart(){
 }
 
 function createBranchAovChart(){
-  var avgAOV=19.25;
+  var avgAOV=19.23;
   var colors=branchAOV.map(function(v){return v>=avgAOV?'#16a34a':'#dc2626'});
   mkHBar('branchAovChart', branchLabels, branchAOV, colors, function(v){return '€'+v.toFixed(2)}, {
     xOpts:{beginAtZero:false,suggestedMin:16},
     xFmt:function(v){return '€'+v},
     annotation:{annotations:{avg:{type:'line',xMin:avgAOV,xMax:avgAOV,borderColor:'#64748b',borderWidth:1,borderDash:[4,4],
-      label:{display:true,content:'Ø €19,25',position:'start',font:{size:10},backgroundColor:'rgba(100,116,139,.8)',color:'#fff',padding:4}}}}
+      label:{display:true,content:'Ø €19,23',position:'start',font:{size:10},backgroundColor:'rgba(100,116,139,.8)',color:'#fff',padding:4}}}}
   });
 }
 
@@ -2681,65 +1578,19 @@ function buildHeatmap(){
   });
 }
 
-/* ═══════════ KANAL CHARTS ═══════════ */
-function createChannelAOVChart(){
-  var colors=channelAOV2025.map(function(v,i){return[barBlue,barLight,'#16a34a','#d97706'][i]});
-  mkVBar('channelAOVChart', channelLabels, channelAOV2025, colors,
-    function(v){return '€'+v.toFixed(2)},
-    {yFmt:function(v){return '€'+v},yOpts:{beginAtZero:false,suggestedMin:15},barW:52}
-  );
-}
-
-function createChannelRevenueChart(){
-  new Chart(document.getElementById('channelRevenueChart'), {type:'doughnut',
-    data:{labels:channelLabels, datasets:[{data:channelRevenue2025, backgroundColor:[barBlue,barLight,'#16a34a','#d97706'], borderColor:'#f4f5f7', borderWidth:3}]},
-    options: Object.assign({}, baseOpts, {cutout:'58%', plugins:{
-      legend:{display:true,position:'bottom',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},
-      datalabels:{color:'#fff',font:{size:11,weight:'700'},formatter:function(v,ctx){var s=ctx.dataset.data.reduce(function(a,b){return a+b},0);var p=((v/s)*100).toFixed(1);return p>5?p+'%':''}}}
-    })
-  });
-}
-
-function createChannelTodChart(){
-  var makeDs=function(data,color,label){return{label:label,data:data,borderColor:color,backgroundColor:'transparent',borderWidth:2,fill:false,tension:0.35,pointRadius:2,pointHoverRadius:4}};
-  new Chart(document.getElementById('channelTodChart'), {type:'line',
-    data:{labels:channelTodHours.map(function(h){return h+':00'}),
-      datasets:[
-        makeDs(channelTodCounter,barBlue,'Counter'),
-        makeDs(channelTodDrive,barLight,'Drive-Through'),
-        makeDs(channelTodApp,'#16a34a','App'),
-        makeDs(channelTodKiosk,'#d97706','Kiosk')
-      ]},
-    options: mkOpts({legend:{display:false}, datalabels:{display:false}},
-      {y:yScale({beginAtZero:true,max:60,ticks:Object.assign({},monoTicks,{callback:function(v){return v+'%'}})}),
-       x:xScale({ticks:{font:{size:10}}})})
-  });
-}
-
-function createDistrictChart(){
-  var maxIdx=districtCounts.indexOf(Math.max.apply(null,districtCounts.slice(0,-1)));
-  var colors=districtCounts.map(function(_,i){return i===districtCounts.length-1?'#94a3b8':i===maxIdx?'#16a34a':barBlue});
-  mkHBar('districtChart', districtLabels, districtCounts, colors,
-    function(v){return v.toLocaleString('de-DE')},
-    {barW:22}
-  );
-}
-
 /* ═══════════ SUB-NAV CONFIG ═══════════ */
 const subNavConfig={
   uebersicht:[{id:'sub_uebersicht_overview',label:'Überblick'},{id:'sub_uebersicht_yoy',label:'Wachstumsanalyse'}],
   filialen:[{id:'sub_filialen_ranking',label:'Ranking & Scorecard'},{id:'sub_filialen_aov',label:'AOV & Effizienz'}],
   produkte:[{id:'sub_produkte_ranking',label:'Top-Produkte'},{id:'sub_produkte_kategorien',label:'Kategorien & Warenkörbe'}],
-  kunden:[{id:'sub_kunden_demografie',label:'Demografie & Loyalty'},{id:'sub_kunden_herkunft',label:'Herkunft & Stadtbezirke'},{id:'sub_kunden_segmente',label:'Segmentanalyse'}],
-  kanaele:[{id:'sub_kanaele_overview',label:'Kanalübersicht'},{id:'sub_kanaele_detail',label:'Kanal-Detail & Produkte'}],
+  kunden:[{id:'sub_kunden_demografie',label:'Demografie & Loyalty'},{id:'sub_kunden_segmente',label:'Segmentanalyse'}],
   zeitanalyse:[{id:'sub_zeit_wochentag',label:'Wochentag & Stunde'},{id:'sub_zeit_heatmap',label:'Heatmap & Umsatz'}],
   trends:[{id:'sub_trends_zahlung',label:'Zahlungsarten'},{id:'sub_trends_kanal',label:'Verkaufskanäle'}],
   datamining:[{id:'sub_dm_rfm',label:'RFM-Segmentierung'},{id:'sub_dm_assoc',label:'Assoziationsregeln'}],
   simulation:[{id:'sub_sim_preis',label:'Preissimulation'},{id:'sub_sim_prognose',label:'Wachstumsprognose'}],
   wetter:[{id:'sub_wetter_temp',label:'Temperatur-Impact'},{id:'sub_wetter_scatter',label:'Scatter & Niederschlag'}],
   personal:[{id:'sub_personal_prod',label:'Produktivität'},{id:'sub_personal_sat',label:'Zufriedenheit'}],
-  promotions:[{id:'sub_promo_effekt',label:'Promo-Effektivität'},{id:'sub_promo_kohorten',label:'Kohorten & Standorte'}],
-  summary:[{id:'sub_summary_insights',label:'Datenbasierte Insights'},{id:'sub_summary_empfehlungen',label:'Handlungsempfehlungen'}]
+  promotions:[{id:'sub_promo_effekt',label:'Promo-Effektivität'},{id:'sub_promo_kohorten',label:'Kohorten & Standorte'}]
 };
 
 function renderSubNav(tabId){
@@ -2754,10 +1605,6 @@ function renderSubNav(tabId){
       setTimeout(function(){
         Object.values(Chart.instances).forEach(function(c){c.resize()});
         if(!window._lazySubInited) window._lazySubInited={};
-        if(item.id==='sub_kunden_herkunft' && !window._lazySubInited.kundenHerkunft){
-          window._lazySubInited.kundenHerkunft=true;
-          createDistrictChart();
-        }
         if(item.id==='sub_wetter_scatter' && !window._lazySubInited.wetterScatter){
           window._lazySubInited.wetterScatter=true;
           createWeatherScatterChart();createRainChart();
@@ -2780,17 +1627,12 @@ document.querySelectorAll('.main-nav button').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const tabId=btn.dataset.tab;
     document.querySelectorAll('.main-nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-    btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
     document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     renderSubNav(tabId);
     setTimeout(function(){
       Object.values(Chart.instances).forEach(function(c){c.resize()});
       if(!window._lazyInited) window._lazyInited={};
-      if(tabId==='kanaele' && !window._lazyInited.kanaele){
-        window._lazyInited.kanaele=true;
-        createChannelAOVChart();createChannelRevenueChart();createChannelTodChart();
-      }
       if(tabId==='wetter' && !window._lazyInited.wetter){
         window._lazyInited.wetter=true;
         createTempBinChart();createWeatherCondChart();
@@ -3032,15 +1874,10 @@ function createEmpProdChart(){
   mkHBar('empProdChart',empBranches,empRevPerEmp,colors,function(v){return '€'+v.toLocaleString('de-DE')},{hideAxis:true});
 }
 function createEmpRoleChart(){
-  var paired = empRoles.map(function(l,i){return {l:l,c:empRoleCount[i],w:empRoleWage[i]}});
-  paired.sort(function(a,b){return b.c-a.c});
-  var sortedLabels = paired.map(function(p){return p.l});
-  var sortedCount = paired.map(function(p){return p.c});
-  var sortedWage = paired.map(function(p){return p.w});
   new Chart(document.getElementById('empRoleChart'),{type:'bar',
-    data:{labels:sortedLabels,datasets:[
-      {label:'Anzahl',data:sortedCount,backgroundColor:barBlue,borderRadius:3,maxBarThickness:32,yAxisID:'y'},
-      {label:'Ø Stundenlohn (€)',data:sortedWage,backgroundColor:'#d97706',borderRadius:3,maxBarThickness:32,yAxisID:'y1'}
+    data:{labels:empRoles,datasets:[
+      {label:'Anzahl',data:empRoleCount,backgroundColor:barBlue,borderRadius:3,maxBarThickness:32,yAxisID:'y'},
+      {label:'\u00d8 Stundenlohn (€)',data:empRoleWage,backgroundColor:'#d97706',borderRadius:3,maxBarThickness:32,yAxisID:'y1'}
     ]},
     options:mkOpts({legend:{display:true,position:'bottom',labels:{padding:10,usePointStyle:true,pointStyle:'circle',font:{size:10}}},
       datalabels:{color:'#1e293b',font:{size:9,weight:'600',family:'"IBM Plex Mono"'},anchor:'end',align:'top',offset:2,formatter:function(v,ctx){return ctx.datasetIndex===0?v:'€'+v.toFixed(0)}}},
