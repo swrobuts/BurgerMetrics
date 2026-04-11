@@ -4,2035 +4,1726 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BurgerMetrics POS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Barcode+39&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* ===== RESET & BASE ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  background: #f8f9fa;
-  color: #212529;
-  font-size: 13px;
-  line-height: 1.4;
-  -webkit-font-smoothing: antialiased;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f2f5;--white:#ffffff;--dark:#1a1d21;--text:#374151;--text-light:#6b7280;
+  --border:#e5e7eb;--border-hover:#d1d5db;
+  --green:#2d9f6f;--green-hover:#258a5e;--red:#dc4b4b;
+  --cat-burger:#d4564e;--cat-sides:#e8a84c;--cat-drinks:#5b8db8;
+  --cat-dessert:#9b7bb8;--cat-breakfast:#d4a843;--cat-extras:#6ba389;--cat-quick:#6b7280;
+  --header-bg:#2d3436;--shadow:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.1);
+  --radius:8px;--radius-lg:12px;
 }
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.4}
 
-/* ===== LAYOUT SHELL ===== */
-.pos-shell {
-  display: grid;
-  grid-template-rows: 52px 1fr 48px;
-  grid-template-columns: 100px 1fr 340px;
-  height: 100vh;
-  width: 100vw;
-}
+/* === HEADER === */
+.header{height:62px;background:var(--header-bg);display:flex;align-items:center;padding:0 24px;gap:20px;color:#fff;z-index:100}
+.header-logo{font-size:20px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
+.header-logo span{color:var(--green);font-weight:400}
+.header-spacer{flex:1}
+.header-info{display:flex;align-items:center;gap:20px;font-size:14px;color:#cbd5e1}
+.header-info .revenue{display:flex;align-items:center;gap:6px}
+.header-info .revenue .label{font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+.header-info .revenue .value{font-weight:800;color:#4ade80;font-size:18px}
+.header-info .staff{display:flex;align-items:center;gap:6px}
+.header-info .staff-icon{width:24px;height:24px;border-radius:50%;background:#475569;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#e2e8f0}
+.header-info .clock{font-variant-numeric:tabular-nums;font-weight:600;font-size:16px;color:#e2e8f0}
+.header-link{color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:10px 18px;border-radius:8px;transition:all .15s;background:var(--green);display:flex;align-items:center;gap:6px}
+.header-link:hover{background:var(--green-hover)}
 
-/* ===== HEADER BAR ===== */
-.header-bar {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  background: #343a40;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 24px;
-  z-index: 10;
-}
-.header-logo {
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-  white-space: nowrap;
-  letter-spacing: -0.3px;
-}
-.header-logo .logo-dot { color: #dc3545; }
-.header-meta {
-  color: rgba(255,255,255,0.6);
-  font-size: 12px;
-  white-space: nowrap;
-}
-.header-spacer { flex: 1; }
-.header-revenue {
-  text-align: right;
-  white-space: nowrap;
-}
-.header-revenue-label {
-  color: rgba(255,255,255,0.5);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.header-revenue-value {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-}
-.header-clock {
-  color: #fff;
-  font-size: 14px;
-  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
-  min-width: 50px;
-  text-align: right;
-}
-.header-dashboard {
-  color: rgba(255,255,255,0.5);
-  font-size: 11px;
-  text-decoration: none;
-  white-space: nowrap;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
-}
-.header-dashboard:hover {
-  color: rgba(255,255,255,0.8);
-  background: rgba(255,255,255,0.08);
-}
+/* === MAIN LAYOUT === */
+.main{display:flex;height:calc(100vh - 62px - 56px);overflow:hidden}
 
-/* ===== CATEGORY SIDEBAR ===== */
-.cat-sidebar {
-  grid-column: 1;
-  grid-row: 2;
-  background: #fff;
-  border-right: 1px solid #e9ecef;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-.cat-btn {
-  width: 100px;
-  height: 80px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: background 0.12s;
-  position: relative;
-}
-.cat-btn:hover { background: #f8f9fa; }
-.cat-btn.active {
-  background: #f8f9fa;
-  font-weight: 700;
-}
-.cat-btn .cat-icon { font-size: 22px; line-height: 1; }
-.cat-btn .cat-label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: #6c757d;
-}
-.cat-btn.active .cat-label { color: #212529; }
+/* === CATEGORY SIDEBAR === */
+.sidebar{width:136px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:6px 0;overflow-y:auto;flex-shrink:0;gap:2px}
+.cat-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;cursor:pointer;border:none;background:none;font-size:12px;font-weight:700;color:var(--text-light);transition:all .15s;border-left:4px solid transparent;position:relative;min-height:70px;letter-spacing:.3px;margin:0 6px;border-radius:10px}
+.cat-btn:hover{background:#f1f3f5;color:var(--text)}
+.cat-btn.active{background:#f1f3f5;color:var(--text);font-weight:800;border-left-color:transparent;box-shadow:inset 0 0 0 2px #dee2e6}
+.cat-btn .cat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .15s}
+.cat-btn.active .cat-icon{transform:scale(1.08)}
+.cat-btn[data-cat="quick"] .cat-icon{background:#f3f4f6;color:var(--cat-quick)}
+.cat-btn[data-cat="burger"] .cat-icon{background:#fde8e8;color:var(--cat-burger)}
+.cat-btn[data-cat="sides"] .cat-icon{background:#fef3e2;color:var(--cat-sides)}
+.cat-btn[data-cat="drinks"] .cat-icon{background:#e8f1f8;color:var(--cat-drinks)}
+.cat-btn[data-cat="dessert"] .cat-icon{background:#f3eef8;color:var(--cat-dessert)}
+.cat-btn[data-cat="breakfast"] .cat-icon{background:#fdf6e3;color:var(--cat-breakfast)}
+.cat-btn[data-cat="extras"] .cat-icon{background:#e8f5f0;color:var(--cat-extras)}
 
-/* Category accent colors */
-.cat-btn[data-cat="quick"] { border-left-color: transparent; }
-.cat-btn[data-cat="quick"].active { border-left-color: #6c757d; }
-.cat-btn[data-cat="burger"] { border-left-color: transparent; }
-.cat-btn[data-cat="burger"].active { border-left-color: #e8a59a; }
-.cat-btn[data-cat="sides"] { border-left-color: transparent; }
-.cat-btn[data-cat="sides"].active { border-left-color: #f0c78a; }
-.cat-btn[data-cat="drinks"] { border-left-color: transparent; }
-.cat-btn[data-cat="drinks"].active { border-left-color: #8bb8d4; }
-.cat-btn[data-cat="dessert"] { border-left-color: transparent; }
-.cat-btn[data-cat="dessert"].active { border-left-color: #b8a3cc; }
-.cat-btn[data-cat="breakfast"] { border-left-color: transparent; }
-.cat-btn[data-cat="breakfast"].active { border-left-color: #e8d48a; }
-.cat-btn[data-cat="extras"] { border-left-color: transparent; }
-.cat-btn[data-cat="extras"].active { border-left-color: #8dc4a8; }
+/* === PRODUCT GRID === */
+.grid-area::-webkit-scrollbar{width:6px}
+.grid-area::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+/* View toggle */
+.view-toggle{display:flex;gap:2px;background:#e9ecef;border-radius:10px;padding:3px;margin:0 0 10px;align-self:flex-end;width:auto}
+.view-toggle button{padding:8px 16px;border:none;border-radius:8px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#868e96;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.view-toggle button.active{background:#fff;color:#212529;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.view-toggle button:hover:not(.active){color:#495057}
+.view-toggle button i{font-size:14px}
 
-/* ===== PRODUCT GRID ===== */
-.product-area {
-  grid-column: 2;
-  grid-row: 2;
-  background: #f8f9fa;
-  padding: 16px;
-  overflow-y: auto;
-}
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  grid-auto-rows: 1fr;
-  gap: 8px;
-  height: 100%;
-}
-.product-card {
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 16px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: border-color 0.12s, box-shadow 0.12s;
-  position: relative;
-  min-height: 96px;
-}
-.product-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: 8px 8px 0 0;
-}
-.product-card:hover {
-  border-color: #ced4da;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-}
-.product-card.in-cart {
-  border-color: #198754;
-}
-.product-card .cart-badge {
-  display: none;
-  position: absolute;
-  top: -6px; right: -6px;
-  background: #198754;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  width: 20px; height: 20px;
-  border-radius: 50%;
-  line-height: 20px;
-  text-align: center;
-}
-.product-card.in-cart .cart-badge { display: block; }
-.product-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: #212529;
-  text-align: center;
-  line-height: 1.2;
-}
-.product-price {
-  font-size: 18px;
-  font-weight: 800;
-  color: #212529;
-}
+/* List view */
+.product-list{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto}
+.product-list-header{display:flex;align-items:center;padding:8px 16px;background:#e9ecef;border-radius:8px;font-size:12px;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;user-select:none;position:sticky;top:0;z-index:5}
+.product-list-header span{display:flex;align-items:center;gap:4px}
+.product-list-header .sort-arrow{font-size:10px;opacity:.4}
+.product-list-header .sort-arrow.active{opacity:1;color:var(--green)}
+.plh-img{width:50px;flex-shrink:0}
+.plh-name{flex:1}
+.plh-cat{width:90px;text-align:center}
+.plh-price{width:80px;text-align:right}
+.plh-action{width:60px;text-align:center}
+.product-row{display:flex;align-items:center;padding:10px 16px;background:#fff;border-radius:10px;cursor:pointer;transition:background .1s;gap:10px;border:1.5px solid transparent;min-height:64px}
+.product-row:hover{background:#f8f9fa;border-color:#dee2e6}
+.product-row:active{background:#e9ecef}
+.product-row.in-cart{border-color:var(--green);background:rgba(25,135,84,.03)}
+.product-row .pr-img{width:50px;height:50px;border-radius:8px;background-size:cover;background-position:center;flex-shrink:0;border:1px solid #e9ecef}
+.product-row .pr-name{flex:1;font-size:16px;font-weight:700;color:#212529}
+.product-row .pr-cat{width:90px;text-align:center}
+.product-row .pr-cat-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;color:#fff}
+.product-row .pr-price{width:80px;text-align:right;font-size:18px;font-weight:800;color:#212529}
+.product-row .pr-add{width:60px;display:flex;justify-content:center}
+.product-row .pr-add-btn{width:44px;height:44px;border-radius:10px;border:2px solid var(--green);background:#fff;color:var(--green);font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.product-row .pr-add-btn:hover{background:var(--green);color:#fff}
+.product-row .pr-qty-badge{position:absolute;top:-5px;right:-5px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
 
-/* Category stripe colors */
-.product-card[data-cat="quick"]::before { background: #6c757d; }
-.product-card[data-cat="burger"]::before { background: #e8a59a; }
-.product-card[data-cat="sides"]::before { background: #f0c78a; }
-.product-card[data-cat="drinks"]::before { background: #8bb8d4; }
-.product-card[data-cat="dessert"]::before { background: #b8a3cc; }
-.product-card[data-cat="breakfast"]::before { background: #e8d48a; }
-.product-card[data-cat="extras"]::before { background: #8dc4a8; }
+.grid-area{flex:1;padding:16px 20px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+.product-grid{display:grid;gap:14px;flex:1;align-content:stretch;overflow-y:auto;padding:4px}
+.product-card{border:2px solid var(--border);border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;position:relative;transition:box-shadow .15s,border-color .15s;user-select:none;min-width:0;min-height:0;overflow:hidden;background-size:cover;background-position:center;aspect-ratio:1}
+.product-card::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.35) 40%,rgba(0,0,0,.1) 100%);border-radius:12px;pointer-events:none}
+.product-card.in-cart{border-color:var(--green);box-shadow:0 0 0 2px var(--green)}
+.product-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.2);border-color:#adb5bd}
+.product-card:active{filter:brightness(.9)}
+.product-card .cart-badge{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.5);transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:2}
+.product-card .cart-badge.show{opacity:1;transform:scale(1)}
+.product-card .p-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.25;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.product-card .p-price{font-size:22px;font-weight:800;color:#fff;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.5);padding-bottom:12px}
 
-/* ===== ORDER PANEL ===== */
-.order-panel {
-  grid-column: 3;
-  grid-row: 2;
-  background: #fff;
-  border-left: 1px solid #e9ecef;
-  display: flex;
-  flex-direction: column;
-}
-.order-header {
-  height: 44px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  border-bottom: 1px solid #e9ecef;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.order-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #212529;
-}
-.order-count {
-  background: #e9ecef;
-  color: #6c757d;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
-.order-header-spacer { flex: 1; }
-.service-toggle {
-  display: flex;
-  background: #f1f3f5;
-  border-radius: 6px;
-  overflow: hidden;
-}
-.service-btn {
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: #6c757d;
-  transition: all 0.12s;
-}
-.service-btn.active {
-  background: #fff;
-  color: #212529;
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-}
+/* === ORDER PANEL === */
+.order-panel{width:440px;background:var(--white);border-left:2px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.order-header{padding:14px 20px;border-bottom:2px solid var(--border);display:flex;align-items:center;justify-content:between;gap:10px}
+.order-title{font-size:19px;font-weight:800;color:var(--dark);flex:1}
+.order-count{background:var(--bg);color:var(--text-light);font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px}
+.order-clear{background:none;border:1px solid var(--border);color:var(--text-light);font-size:12px;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s}
+.order-clear:hover{border-color:var(--red);color:var(--red);background:#fef2f2}
+
+/* Service mode toggle */
+.service-toggle{display:flex;padding:12px 20px;gap:10px;border-bottom:1px solid var(--border)}
+.svc-btn{flex:1;padding:12px;border:2px solid var(--border);background:var(--white);border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;text-align:center;color:var(--text-light);transition:all .15s;min-height:48px}
+.svc-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.table-select{margin-left:4px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--white);color:var(--text);display:none}
+.table-select.show{display:inline-block}
 
 /* Order items */
-.order-items {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 0;
-}
-.order-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #adb5bd;
-  font-size: 13px;
-  gap: 8px;
-}
-.order-empty-icon { font-size: 32px; opacity: 0.4; }
-.order-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  padding: 8px 16px;
-  gap: 8px;
-  position: relative;
-}
-.order-item:hover { background: #f8f9fa; }
-.order-item:hover .item-remove { opacity: 1; }
-.order-item-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #212529;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.item-qty-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.qty-btn {
-  width: 40px; height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1f3f5;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: #495057;
-  transition: background 0.12s;
-}
-.qty-btn:hover { background: #e9ecef; }
-.qty-value {
-  font-size: 13px;
-  font-weight: 600;
-  min-width: 20px;
-  text-align: center;
-}
-.item-total {
-  font-size: 13px;
-  font-weight: 600;
-  color: #212529;
-  min-width: 56px;
-  text-align: right;
-}
-.item-remove {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0;
-  background: none;
-  border: none;
-  color: #adb5bd;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 4px;
-  transition: opacity 0.12s, color 0.12s;
-}
-.item-remove:hover { color: #dc3545; }
+.order-items{flex:1;overflow-y:auto;padding:8px 0}
+.order-items::-webkit-scrollbar{width:5px}
+.order-items::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.order-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-light);font-size:13px;gap:8px}
+.order-empty .empty-icon{font-size:32px;opacity:.4}
+.order-item{display:flex;align-items:center;padding:12px 20px;gap:10px;border-bottom:1px solid #f3f4f6;transition:background .1s}
+.order-item:hover{background:#f9fafb}
+.order-item .item-info{flex:1;min-width:0}
+.order-item .item-name{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.order-item .item-price{font-size:13px;color:var(--text-light)}
+.qty-ctrl{display:flex;align-items:center;gap:4px}
+.qty-btn{width:44px;height:44px;border-radius:10px;border:2px solid var(--border);background:var(--white);cursor:pointer;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;color:var(--text);transition:all .15s}
+.qty-btn:hover{background:var(--bg);border-color:var(--border-hover)}
+.qty-val{width:32px;text-align:center;font-size:18px;font-weight:800}
+.item-total{font-size:17px;font-weight:700;min-width:60px;text-align:right}
+.item-remove{background:none;border:none;color:#d1d5db;cursor:pointer;font-size:16px;padding:2px;transition:color .15s;line-height:1}
+.item-remove:hover{color:var(--red)}
 
 /* Order footer */
-.order-footer {
-  border-top: 1px solid #e9ecef;
-  padding: 12px 16px;
-  flex-shrink: 0;
-}
-.order-line {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-}
-.order-line-label {
-  font-size: 12px;
-  color: #6c757d;
-}
-.order-line-value {
-  font-size: 13px;
-  font-weight: 500;
-  color: #212529;
-}
-.order-line.discount .order-line-value { color: #dc3545; }
-.order-total-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f8f9fa;
-  margin: 8px -16px;
-  padding: 10px 16px;
-}
-.order-total-label {
-  font-size: 14px;
-  font-weight: 700;
-  color: #212529;
-}
-.order-total-value {
-  font-size: 28px;
-  font-weight: 800;
-  color: #212529;
+.order-footer{border-top:2px solid var(--border);padding:16px 20px}
+.order-subtotals{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-size:15px}
+.order-subtotals .row{display:flex;justify-content:space-between;color:var(--text-light)}
+.order-subtotals .row.discount{color:var(--red)}
+.order-subtotals .row.bonus{color:var(--green)}
+.order-total{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0;border-top:3px solid var(--dark);margin-bottom:14px}
+.order-total .total-label{font-size:20px;font-weight:800;color:var(--dark);letter-spacing:.5px}
+.order-total .total-value{font-size:36px;font-weight:900;color:var(--dark)}
+
+/* Extras button */
+.extras-trigger{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;margin-bottom:12px;border:2px dashed var(--border);border-radius:12px;cursor:pointer;font-size:15px;font-weight:700;color:var(--text-light);transition:all .15s;background:transparent;min-height:52px}
+.extras-trigger:hover{border-color:var(--green);color:var(--green);background:#f0fdf4}
+.extras-trigger.has-extras{border-color:var(--green);color:var(--green);background:#f0fdf4;border-style:solid;font-weight:700}
+.extras-status{font-size:11px;color:var(--green);padding:0 0 6px;text-align:center}
+
+/* Payment methods */
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pay-method-btn{padding:16px 8px;border:2px solid var(--border);border-radius:12px;background:var(--white);cursor:pointer;font-size:15px;font-weight:700;text-align:center;color:var(--text);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:70px;justify-content:center}
+.pay-method-btn .pm-icon{font-size:24px}
+.pay-method-btn:hover{border-color:var(--green);background:#f0fdf4}
+.pay-method-btn.active{border-color:var(--green);background:#f0fdf4;color:var(--green);border-width:3px}
+
+/* PAY button */
+.pay-btn{width:100%;height:68px;border:none;border-radius:14px;background:var(--green);color:#fff;font-size:22px;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.5px}
+.pay-btn:hover{background:var(--green-hover)}
+.pay-btn:disabled{background:#d1d5db;cursor:not-allowed}
+
+/* === FUNCTION BAR === */
+.funcbar{height:56px;background:var(--white);border-top:2px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:6px}
+.func-btn{flex:1;height:44px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:#495057;transition:all .15s;white-space:nowrap;padding:0 10px}
+.func-btn:hover{background:var(--bg);border-color:#adb5bd;color:var(--dark)}
+.func-btn .fkey{font-size:11px;font-weight:700;color:#868e96;background:#f1f3f5;padding:2px 6px;border-radius:4px}
+.func-btn .ficon{font-size:16px}
+
+/* === DATA VIEW TOGGLE === */
+.pos-data-toggle{position:fixed;bottom:62px;left:24px;z-index:1500;display:flex;align-items:center;gap:12px;background:#1e293b;padding:10px 20px;border-radius:50px;box-shadow:0 8px 32px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);transition:all .4s;cursor:pointer}
+.pos-data-toggle:hover{border-color:rgba(0,255,136,.3);box-shadow:0 8px 40px rgba(0,255,136,.15)}
+.pos-data-toggle-label{font-family:'Courier New',monospace;font-size:13px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.85);text-transform:uppercase;transition:color .3s}
+body.data-mode .pos-data-toggle-label{color:#00FF88}
+.pos-data-toggle-track{width:48px;height:26px;background:#475569;border-radius:13px;position:relative;transition:background .3s;border:none;cursor:pointer}
+body.data-mode .pos-data-toggle-track{background:#00FF88}
+.pos-data-toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all .3s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 4px rgba(0,0,0,.2)}
+body.data-mode .pos-data-toggle-thumb{left:25px;background:#1e293b}
+
+/* Data Mode Overlay */
+body.data-mode::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.015) 2px,rgba(0,255,136,.015) 4px);pointer-events:none;z-index:1100;animation:scanlines 8s linear infinite}
+@keyframes scanlines{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(0,4px,0)}}
+body.data-mode .header{background:#0f1923!important}
+body.data-mode .sidebar{background:#0a1218!important;border-color:rgba(0,255,136,.15)!important}
+body.data-mode .grid-area{background:#0d1820!important}
+body.data-mode .product-card{background:#111d27!important;border-color:rgba(0,255,136,.12)!important;color:#00FF88!important}
+body.data-mode .product-card .p-name{color:rgba(255,255,255,.8)!important}
+body.data-mode .product-card .p-price{color:#00FF88!important}
+body.data-mode .order-panel{background:#0a1218!important;border-color:rgba(0,255,136,.15)!important}
+body.data-mode .funcbar{background:#0a1218!important;border-color:rgba(0,255,136,.12)!important}
+body.data-mode .func-btn{border-color:rgba(0,255,136,.12)!important;color:rgba(0,255,136,.6)!important;background:transparent!important}
+body.data-mode .cat-btn{color:rgba(0,255,136,.5)!important}
+body.data-mode .cat-btn.active{color:#00FF88!important}
+
+/* Data Annotations */
+.pos-data-annotation{display:none;position:absolute;z-index:1200;background:rgba(5,25,15,.97);backdrop-filter:blur(16px);border:1px solid rgba(0,255,136,.4);border-radius:12px;padding:18px 22px;max-width:360px;font-family:'Courier New',monospace;font-size:12px;color:rgba(255,255,255,.9);line-height:1.7;box-shadow:0 12px 48px rgba(0,0,0,.6),0 0 30px rgba(0,255,136,.15);animation:daAppear .5s cubic-bezier(.4,0,.2,1) both}
+body.data-mode .pos-data-annotation{display:block}
+@keyframes daAppear{from{opacity:0;transform:translateY(8px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.pos-da-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(0,255,136,.15)}
+.pos-da-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.pos-da-icon.collect{background:rgba(0,255,136,.15);color:#00FF88}
+.pos-da-icon.analyze{background:rgba(0,191,255,.15);color:#00BFFF}
+.pos-da-icon.storage{background:rgba(255,149,0,.15);color:#FF9500}
+.pos-da-title{font-weight:700;font-size:12px;color:#00FF88;letter-spacing:.5px}
+.pos-da-metric{display:inline-block;background:rgba(0,255,136,.1);color:#00FF88;padding:2px 8px;border-radius:4px;font-size:11px;margin:2px 2px;font-weight:600}
+.pos-da-sql{display:block;background:rgba(0,0,0,.3);padding:8px 12px;border-radius:6px;margin-top:8px;font-size:11px;color:#8be9fd;border-left:3px solid rgba(0,255,136,.3)}
+
+/* Dashboard link in header */
+.header-dash{color:#e2e8f0;text-decoration:none;font-size:14px;font-weight:700;padding:10px 18px;border:1.5px solid #64748b;border-radius:10px;transition:all .15s;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06)}
+.header-dash:hover{color:#fff;border-color:#94a3b8;background:rgba(255,255,255,.12)}
+
+/* === MODALS === */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal{background:var(--white);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,.2);max-width:90vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:16px;font-weight:700;color:var(--dark)}
+.modal-close{width:32px;height:32px;border:none;background:#f3f4f6;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text-light);transition:all .15s}
+.modal-close:hover{background:#e5e7eb;color:var(--text)}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+
+/* === PAYMENT MODAL === */
+.pay-modal{width:440px}
+.pay-modal .method-tabs{display:flex;gap:4px;margin-bottom:16px}
+.pay-modal .method-tab{flex:1;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);cursor:pointer;text-align:center;font-size:13px;font-weight:500;color:var(--text-light);transition:all .15s}
+.pay-modal .method-tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+.pay-display{background:var(--bg);border-radius:var(--radius);padding:16px;margin-bottom:16px;text-align:right}
+.pay-display .pay-label{font-size:12px;color:var(--text-light);margin-bottom:4px}
+.pay-display .pay-amount{font-size:32px;font-weight:700;color:var(--dark);font-variant-numeric:tabular-nums}
+.pay-display .pay-change{font-size:14px;color:var(--green);font-weight:600;margin-top:4px}
+.pay-display .pay-total-ref{font-size:13px;color:var(--text-light);margin-top:4px}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.numpad button{height:52px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);font-size:20px;font-weight:600;cursor:pointer;color:var(--text);transition:all .12s}
+.numpad button:hover{background:var(--bg)}
+.numpad button:active{background:#e5e7eb}
+.numpad button.num-clear{color:var(--red);font-size:14px;font-weight:700}
+.quick-amounts{display:flex;gap:6px;margin-bottom:16px}
+.quick-amounts button{flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--white);font-size:13px;font-weight:600;cursor:pointer;color:var(--text);transition:all .12s}
+.quick-amounts button:hover{background:var(--bg);border-color:var(--border-hover)}
+.split-info{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:12px;margin-bottom:12px;font-size:13px;display:none}
+.split-info .split-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.split-info .split-row:last-child{margin-bottom:0;font-weight:600}
+.pay-confirm-btn{width:100%;height:52px;border:none;border-radius:var(--radius-lg);background:var(--green);color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all .15s}
+.pay-confirm-btn:hover{background:var(--green-hover)}
+.pay-confirm-btn:disabled{background:#d1d5db;cursor:not-allowed}
+
+/* === PIN MODAL === */
+.pin-modal{width:320px}
+.pin-display{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
+.pin-dot{width:40px;height:48px;border:2px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--dark)}
+.pin-dot.filled{border-color:var(--dark);background:#f9fafb}
+.pin-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pin-numpad button{height:52px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);font-size:20px;font-weight:600;cursor:pointer;color:var(--text);transition:all .12s}
+.pin-numpad button:hover{background:var(--bg)}
+.pin-numpad button.pin-clear{font-size:14px;color:var(--red)}
+
+/* === DISCOUNT MODAL === */
+.discount-modal{width:380px}
+.discount-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.discount-presets button{padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--white);font-size:14px;font-weight:600;cursor:pointer;color:var(--text);transition:all .15s}
+.discount-presets button:hover{border-color:var(--green);color:var(--green);background:#f0fdf4}
+.discount-custom{display:flex;gap:8px;align-items:center}
+.discount-custom input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;color:var(--text);outline:none}
+.discount-custom input:focus{border-color:var(--green)}
+.discount-custom select{padding:10px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;background:var(--white);color:var(--text);cursor:pointer}
+.discount-custom button{padding:10px 16px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+
+/* === STORNO MODAL === */
+.storno-modal{width:380px}
+.storno-modal .storno-msg{text-align:center;padding:20px 0;font-size:14px;color:var(--text)}
+.storno-modal .storno-msg .warn-icon{font-size:40px;display:block;margin-bottom:12px}
+.storno-actions{display:flex;gap:8px}
+.storno-actions button{flex:1;padding:12px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;border:none}
+.storno-actions .cancel-btn{background:#f3f4f6;color:var(--text)}
+.storno-actions .confirm-btn{background:var(--red);color:#fff}
+
+/* === RECEIPT MODAL === */
+.receipt-modal{width:360px}
+.receipt{background:#fffef8;padding:24px 20px 32px;font-family:'Courier New','Lucida Console',monospace;font-size:12px;line-height:1.5;color:#333;position:relative;border:1px solid #e5e7eb;border-radius:4px}
+.receipt::after{content:'';position:absolute;bottom:-8px;left:0;right:0;height:8px;background:linear-gradient(135deg,#fffef8 33.33%,transparent 33.33%) -8px 0,linear-gradient(225deg,#fffef8 33.33%,transparent 33.33%) -8px 0;background-size:16px 16px;background-position:left bottom}
+.receipt .r-center{text-align:center}
+.receipt .r-bold{font-weight:bold}
+.receipt .r-line{border-bottom:1px dashed #999;margin:8px 0}
+.receipt .r-row{display:flex;justify-content:space-between}
+.receipt .r-big{font-size:16px;font-weight:bold}
+.receipt .r-barcode{font-family:'Libre Barcode 39',cursive;font-size:40px;text-align:center;margin-top:12px;letter-spacing:2px}
+
+/* === HISTORY MODAL === */
+.history-modal{width:500px;max-height:80vh}
+.history-list{max-height:400px;overflow-y:auto}
+.history-item{padding:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.history-item:hover{background:var(--bg)}
+.history-item .h-left{flex:1;min-width:0}
+.history-item .h-order{font-weight:600;font-size:13px}
+.history-item .h-time{font-size:12px;color:var(--text-light)}
+.history-item .h-items{font-size:12px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.history-item .h-total{font-weight:700;font-size:14px;white-space:nowrap}
+
+/* === DAY CLOSE MODAL === */
+.dayclose-modal{width:560px}
+/* Ledger report */
+.ledger{font-size:14px;color:#212529}
+.ledger-header{padding:20px 24px;background:#f8f9fa;border-bottom:2px solid #dee2e6}
+.ledger-header h4{font-size:16px;font-weight:800;margin-bottom:4px}
+.ledger-header .ledger-meta{font-size:12px;color:#6c757d;display:flex;gap:20px;flex-wrap:wrap}
+.ledger-section{padding:16px 24px;border-bottom:1px solid #e9ecef}
+.ledger-section h5{font-size:13px;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.ledger-table{width:100%;border-collapse:collapse}
+.ledger-table td{padding:8px 0;border-bottom:1px solid #f1f3f5;font-size:14px}
+.ledger-table td:last-child{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.ledger-table tr.subtotal td{border-top:2px solid #dee2e6;border-bottom:none;font-weight:700;padding-top:12px;font-size:15px}
+.ledger-table tr.grand td{border-top:3px double #212529;border-bottom:none;font-weight:800;font-size:18px;padding-top:14px;color:#212529}
+.ledger-table tr.indent td:first-child{padding-left:20px;color:#6c757d}
+.ledger-items{padding:16px 24px;border-bottom:1px solid #e9ecef}
+.ledger-items h5{font-size:13px;font-weight:700;color:#6c757d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.ledger-items table{width:100%;border-collapse:collapse;font-size:13px}
+.ledger-items th{text-align:left;padding:6px 0;border-bottom:2px solid #dee2e6;font-weight:700;color:#6c757d;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.ledger-items th:nth-child(2),.ledger-items td:nth-child(2){text-align:center}
+.ledger-items th:nth-child(3),.ledger-items td:nth-child(3),.ledger-items th:nth-child(4),.ledger-items td:nth-child(4){text-align:right}
+.ledger-items td{padding:6px 0;border-bottom:1px solid #f1f3f5;font-variant-numeric:tabular-nums}
+.ledger-footer{padding:16px 24px;background:#f8f9fa;font-size:12px;color:#6c757d;text-align:center}
+@media print{
+  body>*{display:none!important}
+  .modal-overlay.show{display:flex!important;position:fixed!important;inset:0!important;background:#fff!important;z-index:9999!important;backdrop-filter:none!important}
+  .modal-overlay .modal{box-shadow:none!important;max-width:100%!important;width:100%!important;max-height:none!important;overflow:visible!important;border-radius:0!important}
+  .modal-overlay .modal-header{padding:12px 24px!important;border-bottom:2px solid #000!important;display:flex!important}
+  .modal-overlay .modal-header h3{font-size:18px!important;color:#000!important}
+  .modal-overlay .modal-header button,.modal-overlay .modal-header .modal-close{display:none!important}
+  .modal-overlay .modal-body{padding:0!important;overflow:visible!important}
+  .ledger{color:#000!important;font-size:12pt!important}
+  .ledger-header{background:#f0f0f0!important;padding:16px 20px!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ledger-header h4{font-size:16pt!important}
+  .ledger-section{padding:12px 20px!important}
+  .ledger-section h5{font-size:10pt!important;color:#333!important}
+  .ledger-table td{padding:6px 0!important;font-size:11pt!important}
+  .ledger-table tr.grand td{font-size:14pt!important}
+  .ledger-items table{font-size:10pt!important}
+  .ledger-items th{font-size:9pt!important}
+  .ledger-footer{background:#f0f0f0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pos-data-toggle,.pos-data-annotation,.toast,.funcbar{display:none!important}
 }
 
-/* Payment buttons */
-.payment-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-.pay-method-btn {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: #495057;
-  transition: border-color 0.12s, background 0.12s;
-}
-.pay-method-btn:hover {
-  border-color: #ced4da;
-  background: #f8f9fa;
-}
-.pay-method-btn .pay-icon { font-size: 18px; }
-.pay-method-btn.selected {
-  border-color: #198754;
-  background: #f0faf4;
-  color: #198754;
-}
+/* === TOP SELLER MODAL === */
+.topseller-modal{width:440px}
+.top-list{counter-reset:rank}
+.top-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6}
+.top-item::before{counter-increment:rank;content:counter(rank);width:28px;height:28px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green);flex-shrink:0}
+.top-item .ts-name{flex:1;font-weight:500;font-size:13px}
+.top-item .ts-qty{font-size:12px;color:var(--text-light);margin-right:12px}
+.top-item .ts-rev{font-weight:600;font-size:13px}
 
-.pay-btn {
-  width: 100%;
-  height: 56px;
-  background: #198754;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.12s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.pay-btn:hover { background: #157347; }
-.pay-btn:disabled {
-  background: #adb5bd;
-  cursor: not-allowed;
-}
-.extras-link {
-  display: block;
-  text-align: center;
-  margin-top: 8px;
-  font-size: 11px;
-  color: #6c757d;
-  cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  transition: text-decoration-color 0.12s;
-}
-.extras-link:hover { text-decoration-color: #6c757d; }
+/* === EXTRAS MODAL === */
+.extras-modal{width:400px}
+.extras-section{margin-bottom:20px}
+.extras-section h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px}
+.extras-input-row{display:flex;gap:8px}
+.extras-input-row input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;outline:none}
+.extras-input-row input:focus{border-color:var(--green)}
+.extras-input-row button{padding:10px 16px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.extras-result{margin-top:8px;padding:8px 12px;border-radius:6px;font-size:13px;display:none}
+.extras-result.show{display:block}
+.extras-result.success{background:#f0fdf4;color:var(--green);border:1px solid #bbf7d0}
+.extras-result.error{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
 
-/* ===== FUNCTION BAR ===== */
-.func-bar {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  background: #f1f3f5;
-  display: flex;
-  border-top: 1px solid #e9ecef;
-}
-.func-btn {
-  flex: 1;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-right: 1px solid #e9ecef;
-  transition: background 0.12s;
-}
-.func-btn:last-child { border-right: none; }
-.func-btn:hover { background: #e9ecef; }
-.func-btn .fkey {
-  font-size: 10px;
-  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
-  color: #adb5bd;
-}
-.func-btn .func-icon { font-size: 12px; }
-.func-btn .func-label {
-  font-size: 12px;
-  color: #495057;
-  font-weight: 500;
-}
+/* cash drawer removed */
 
-/* ===== MODAL SYSTEM ===== */
-.modal-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(2px);
-  z-index: 100;
-  align-items: center;
-  justify-content: center;
-}
-.modal-backdrop.show { display: flex; }
-.modal {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  max-height: 90vh;
-  overflow-y: auto;
-  width: auto;
-  min-width: 320px;
-  max-width: 600px;
-}
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid #e9ecef;
-}
-.modal-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #212529;
-}
-.modal-close {
-  width: 32px; height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1f3f5;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #6c757d;
-  transition: background 0.12s;
-}
-.modal-close:hover { background: #e9ecef; }
-.modal-body { padding: 20px; }
-.modal-footer {
-  padding: 12px 20px;
-  border-top: 1px solid #e9ecef;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
+/* === TOAST === */
+.toast{position:fixed;top:-60px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:var(--radius);font-size:13px;font-weight:500;color:#fff;z-index:2000;transition:top .3s ease;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast.show{top:60px}
+.toast.default{background:var(--dark)}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
 
-/* Modal buttons */
-.btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  border: 1px solid #e9ecef;
-  background: #fff;
-  color: #495057;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-  min-height: 36px;
-}
-.btn:hover { background: #f8f9fa; border-color: #ced4da; }
-.btn-primary {
-  background: #198754;
-  color: #fff;
-  border-color: #198754;
-}
-.btn-primary:hover { background: #157347; border-color: #157347; }
-.btn-danger {
-  background: #dc3545;
-  color: #fff;
-  border-color: #dc3545;
-}
-.btn-danger:hover { background: #bb2d3b; border-color: #bb2d3b; }
+/* === MANAGER BADGE === */
+.manager-badge{position:fixed;top:52px;right:12px;background:var(--red);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:0 0 6px 6px;z-index:200;display:none;letter-spacing:.3px}
+.manager-badge.show{display:block}
 
-/* ===== CASH MODAL ===== */
-.cash-numpad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-top: 12px;
-}
-.numpad-btn {
-  height: 48px;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.numpad-btn:hover { background: #f8f9fa; }
-.numpad-btn.quick-cash {
-  background: #f0faf4;
-  border-color: #198754;
-  color: #198754;
-  font-size: 13px;
-  font-weight: 600;
-}
-.cash-display {
-  text-align: center;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 8px;
-}
-.cash-given-label { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
-.cash-given-value { font-size: 28px; font-weight: 800; color: #212529; }
-.cash-change { margin-top: 12px; text-align: center; }
-.cash-change-label { font-size: 11px; color: #6c757d; }
-.cash-change-value { font-size: 22px; font-weight: 700; }
-.cash-change-value.positive { color: #198754; }
-.cash-change-value.negative { color: #dc3545; }
-
-/* ===== RECEIPT MODAL ===== */
-.receipt-paper {
-  background: #fffff8;
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 27px,
-    rgba(0,0,0,0.02) 27px,
-    rgba(0,0,0,0.02) 28px
-  );
-  border: 1px solid #e9ecef;
-  border-radius: 4px;
-  padding: 24px 20px;
-  max-width: 300px;
-  margin: 0 auto;
-  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
-  font-size: 11px;
-  line-height: 1.6;
-  color: #212529;
-}
-.receipt-header { text-align: center; margin-bottom: 12px; }
-.receipt-header h3 { font-size: 14px; font-weight: 700; }
-.receipt-divider {
-  border: none;
-  border-top: 1px dashed #ced4da;
-  margin: 8px 0;
-}
-.receipt-row {
-  display: flex;
-  justify-content: space-between;
-}
-.receipt-total {
-  font-weight: 700;
-  font-size: 13px;
-}
-.receipt-barcode {
-  text-align: center;
-  margin-top: 12px;
-  overflow: hidden;
-  max-width: 90%;
-  margin-left: auto;
-  margin-right: auto;
-}
-.receipt-barcode svg { max-width: 100%; }
-
-/* ===== MANAGER LOGIN ===== */
-.pin-display {
-  text-align: center;
-  font-size: 32px;
-  letter-spacing: 12px;
-  font-weight: 700;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  min-height: 56px;
-}
-
-/* ===== TABLE SELECT ===== */
-.table-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-}
-.table-btn {
-  height: 44px;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-}
-.table-btn:hover { background: #f8f9fa; border-color: #ced4da; }
-.table-btn.selected { background: #198754; color: #fff; border-color: #198754; }
-
-/* ===== LOYALTY ===== */
-.loyalty-info {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  text-align: center;
-  margin-top: 12px;
-}
-.loyalty-name { font-size: 15px; font-weight: 700; }
-.loyalty-points { font-size: 24px; font-weight: 800; color: #198754; margin: 4px 0; }
-.loyalty-note { font-size: 11px; color: #6c757d; }
-
-/* ===== DISCOUNT ===== */
-.discount-options {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-bottom: 12px;
-}
-.discount-btn {
-  height: 44px;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.12s;
-}
-.discount-btn:hover { background: #f8f9fa; border-color: #ced4da; }
-.discount-btn.selected { background: #dc3545; color: #fff; border-color: #dc3545; }
-
-/* ===== CASH DRAWER ===== */
-.drawer-animation {
-  text-align: center;
-  padding: 32px;
-  font-size: 48px;
-}
-.drawer-animation.opening {
-  animation: drawerSlide 0.8s ease-out;
-}
-@keyframes drawerSlide {
-  0% { transform: translateX(0); }
-  30% { transform: translateX(40px); }
-  100% { transform: translateX(0); }
-}
-
-/* ===== REPORT TABLES ===== */
-.report-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-.report-table th {
-  text-align: left;
-  padding: 8px 12px;
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #495057;
-  border-bottom: 1px solid #e9ecef;
-}
-.report-table td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #f1f3f5;
-  color: #212529;
-}
-.report-table td:last-child { text-align: right; font-weight: 600; }
-.report-stat {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.stat-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 12px;
-  text-align: center;
-}
-.stat-card-value { font-size: 20px; font-weight: 800; color: #212529; }
-.stat-card-label { font-size: 10px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-
-/* ===== SPLIT PAY ===== */
-.split-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f3f5;
-}
-.split-method { flex: 1; }
-.split-input {
-  width: 100px;
-  padding: 6px 8px;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 13px;
-  text-align: right;
-}
-.split-remaining {
-  text-align: center;
-  padding: 8px;
-  margin-top: 8px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Utility */
-.hidden { display: none !important; }
-input[type="text"], input[type="number"] {
-  padding: 8px 12px;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 13px;
-  width: 100%;
-  outline: none;
-  transition: border-color 0.12s;
-}
-input:focus { border-color: #86b7fe; }
-select {
-  padding: 8px 12px;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 13px;
-  background: #fff;
-}
+/* === EMPTY STATES === */
+.empty-state{text-align:center;padding:40px;color:var(--text-light);font-size:15px}
+.empty-state .empty-icon{font-size:36px;margin-bottom:10px;opacity:.4}
 </style>
 </head>
 <body>
-<div class="pos-shell">
-  <!-- HEADER -->
-  <div class="header-bar">
-    <div class="header-logo">Burger<span class="logo-dot">Metrics</span></div>
-    <div class="header-meta">Kasse 1 · Max M.</div>
-    <div class="header-spacer"></div>
-    <div class="header-revenue">
-      <div class="header-revenue-label">Tagesumsatz</div>
-      <div class="header-revenue-value" id="dayRevenue">€0,00</div>
-    </div>
-    <div class="header-clock" id="clock">00:00</div>
-    <a href="dashboard.html" class="header-dashboard">📊 Dashboard</a>
-  </div>
 
-  <!-- CATEGORY SIDEBAR -->
-  <div class="cat-sidebar" id="catSidebar"></div>
-
-  <!-- PRODUCT GRID -->
-  <div class="product-area">
-    <div class="product-grid" id="productGrid"></div>
-  </div>
-
-  <!-- ORDER PANEL -->
-  <div class="order-panel">
-    <div class="order-header">
-      <div class="order-title">Bestellung</div>
-      <div class="order-count" id="orderCount">0</div>
-      <div class="order-header-spacer"></div>
-      <div class="service-toggle">
-        <button class="service-btn active" onclick="setServiceMode('takeaway')">Mitnehmen</button>
-        <button class="service-btn" onclick="setServiceMode('dinein')">Im Haus</button>
-      </div>
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">BurgerMetrics <span>POS</span></div>
+  <div class="header-spacer"></div>
+  <div class="header-info">
+    <div class="revenue">
+      <span class="label">Tagesumsatz</span>
+      <span class="value" id="hdrRevenue">0,00 €</span>
     </div>
-    <div class="order-items" id="orderItems">
-      <div class="order-empty">
-        <div class="order-empty-icon">🛒</div>
-        <div>Produkt antippen zum Hinzufügen</div>
-      </div>
+    <div class="staff">
+      <div class="staff-icon">MM</div>
+      <span>Max M. · Kasse 1</span>
+      <span style="font-size:11px;color:#94a3b8;margin-left:4px" id="shiftInfo"></span>
     </div>
-    <div class="order-footer" id="orderFooter">
-      <div class="order-line" id="subtotalRow">
-        <span class="order-line-label">Zwischensumme</span>
-        <span class="order-line-value" id="subtotal">€0,00</span>
-      </div>
-      <div class="order-line discount hidden" id="discountRow">
-        <span class="order-line-label" id="discountLabel">Rabatt</span>
-        <span class="order-line-value" id="discountValue">-€0,00</span>
-      </div>
-      <div class="order-line" id="taxRow">
-        <span class="order-line-label" id="taxLabel">MwSt. 7%</span>
-        <span class="order-line-value" id="taxValue">€0,00</span>
-      </div>
-      <div class="order-total-row">
-        <span class="order-total-label">GESAMT</span>
-        <span class="order-total-value" id="totalValue">€0,00</span>
-      </div>
-      <div class="payment-grid">
-        <button class="pay-method-btn" data-method="cash" onclick="selectPayMethod('cash')">
-          <span class="pay-icon">💵</span> Bar
-        </button>
-        <button class="pay-method-btn" data-method="card" onclick="selectPayMethod('card')">
-          <span class="pay-icon">💳</span> Karte
-        </button>
-        <button class="pay-method-btn" data-method="app" onclick="selectPayMethod('app')">
-          <span class="pay-icon">📱</span> App
-        </button>
-        <button class="pay-method-btn" data-method="split" onclick="selectPayMethod('split')">
-          <span class="pay-icon">✂️</span> Split
-        </button>
-      </div>
-      <button class="pay-btn" id="payBtn" onclick="processPayment()" disabled>
-        Zahlungsart wählen
-      </button>
-      <div class="extras-link" onclick="openModal('extrasModal')">Extras (Kundenkarte, Gutschein, Rabatt)</div>
-    </div>
-  </div>
-
-  <!-- FUNCTION BAR -->
-  <div class="func-bar">
-    <button class="func-btn" onclick="voidLastItem()"><span class="fkey">F1</span><span class="func-icon">↩️</span><span class="func-label">Storno</span></button>
-    <button class="func-btn" onclick="voidOrder()"><span class="fkey">F2</span><span class="func-icon">🗑️</span><span class="func-label">Alles</span></button>
-    <button class="func-btn" onclick="openModal('managerModal')"><span class="fkey">F3</span><span class="func-icon">🔑</span><span class="func-label">Manager</span></button>
-    <button class="func-btn" onclick="openDrawer()"><span class="fkey">F4</span><span class="func-icon">🗃️</span><span class="func-label">Kasse</span></button>
-    <button class="func-btn" onclick="printReceipt()"><span class="fkey">F5</span><span class="func-icon">🧾</span><span class="func-label">Bon</span></button>
-    <button class="func-btn" onclick="showShiftReport()"><span class="fkey">F6</span><span class="func-icon">📊</span><span class="func-label">Bericht</span></button>
-    <button class="func-btn" onclick="showHistory()"><span class="fkey">F7</span><span class="func-icon">📋</span><span class="func-label">Historie</span></button>
-    <button class="func-btn" onclick="showTopSellers()"><span class="fkey">F8</span><span class="func-icon">🏆</span><span class="func-label">Top</span></button>
+    <span class="clock" id="hdrClock">00:00:00</span>
+    <a href="dashboard.html" class="header-dash">📊 Dashboard</a>
   </div>
 </div>
 
-<!-- ===== MODALS ===== -->
+<!-- MAIN -->
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar" id="catSidebar">
+    <button class="cat-btn active" data-cat="quick"><div class="cat-icon"><i class="fa-solid fa-bolt"></i></div>Schnell</button>
+    <button class="cat-btn" data-cat="burger"><div class="cat-icon"><i class="fa-solid fa-hamburger"></i></div>Burger</button>
+    <button class="cat-btn" data-cat="sides"><div class="cat-icon"><i class="fa-solid fa-drumstick-bite"></i></div>Beilagen</button>
+    <button class="cat-btn" data-cat="drinks"><div class="cat-icon"><i class="fa-solid fa-wine-glass"></i></div>Getränke</button>
+    <button class="cat-btn" data-cat="dessert"><div class="cat-icon"><i class="fa-solid fa-cookie-bite"></i></div>Dessert</button>
+    <button class="cat-btn" data-cat="breakfast"><div class="cat-icon"><i class="fa-solid fa-mug-saucer"></i></div>Frühstück</button>
+    <button class="cat-btn" data-cat="extras"><div class="cat-icon"><i class="fa-solid fa-plus-circle"></i></div>Extras</button>
+  </div>
 
-<!-- Cash Payment Modal -->
-<div class="modal-backdrop" id="cashModal">
-  <div class="modal" style="width:340px">
+  <!-- Product Grid -->
+  <div class="grid-area">
+    <div class="view-toggle">
+      <button class="active" id="viewGrid" onclick="setView('grid')"><i class="fa-solid fa-table-cells-large"></i> Kacheln</button>
+      <button id="viewList" onclick="setView('list')"><i class="fa-solid fa-list"></i> Liste</button>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+    <div class="product-list" id="productList" style="display:none"></div>
+  </div>
+
+  <!-- Order Panel -->
+  <div class="order-panel">
+    <div class="order-header">
+      <span class="order-title">Bestellung</span>
+      <span class="order-count" id="orderCount">0</span>
+      <button class="order-clear" id="clearOrderBtn">Leeren</button>
+    </div>
+    <div class="service-toggle">
+      <button class="svc-btn active" data-type="counter">Mitnehmen</button>
+      <button class="svc-btn" data-type="dine">Im Haus</button>
+      <select class="table-select" id="tableSelect">
+        <option value="">Tisch...</option>
+      </select>
+    </div>
+    <div class="order-items" id="orderItems">
+      <div class="order-empty" id="orderEmpty">
+        <span class="empty-icon">🛒</span>
+        <span>Produkt antippen<br>um hinzuzufügen</span>
+      </div>
+    </div>
+    <div class="order-footer">
+      <div class="order-subtotals" id="orderSubtotals">
+        <div class="row"><span>Zwischensumme</span><span id="subtotalVal">0,00 €</span></div>
+      </div>
+      <div class="order-total">
+        <span class="total-label">GESAMT</span>
+        <span class="total-value" id="totalVal">0,00 €</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div class="extras-trigger" id="extrasTrigger" onclick="openModal('extrasModal')" style="flex:1;margin-bottom:0">
+          🏷️ Kundenkarte / Gutschein
+        </div>
+        <div class="extras-trigger" onclick="handleDiscount()" style="flex:0 0 auto;margin-bottom:0;min-width:100px">
+          % Rabatt
+        </div>
+      </div>
+      <div class="extras-status" id="extrasStatus"></div>
+      <div class="pay-methods" id="payMethods">
+        <button class="pay-method-btn active" data-method="cash" onclick="selectPayMethod(this,'cash')"><span class="pm-icon"><i class="fa-solid fa-money-bill-wave"></i></span>Bar</button>
+        <button class="pay-method-btn" data-method="ec" onclick="selectPayMethod(this,'ec')"><span class="pm-icon"><i class="fa-solid fa-credit-card"></i></span>EC / Mobile</button>
+        <button class="pay-method-btn" data-method="credit" onclick="selectPayMethod(this,'credit')"><span class="pm-icon"><i class="fa-brands fa-cc-visa"></i></span>Kreditkarte</button>
+        <button class="pay-method-btn" data-method="split" onclick="selectPayMethod(this,'split')"><span class="pm-icon"><i class="fa-solid fa-scissors"></i></span>Split</button>
+      </div>
+      <button class="pay-btn" id="payBtn" onclick="startPayment()" disabled>BEZAHLEN</button>
+    </div>
+  </div>
+</div>
+
+<!-- FUNCTION BAR -->
+<div class="funcbar">
+  <button class="func-btn" onclick="handleStorno()"><span class="fkey">F1</span><span class="ficon">🚫</span>Storno</button>
+  <button class="func-btn" onclick="handleManager()"><span class="fkey">F3</span><span class="ficon">👤</span>Manager</button>
+  <button class="func-btn" onclick="reprintReceipt()"><span class="fkey">F5</span><span class="ficon">🧾</span>Bon</button>
+  <button class="func-btn" onclick="handleDayClose()"><span class="fkey">F6</span><span class="ficon">📋</span>Abschluss</button>
+  <button class="func-btn" onclick="openModal('historyModal')"><span class="fkey">F7</span><span class="ficon">📜</span>Historie</button>
+  <button class="func-btn" onclick="openModal('topSellerModal');renderTopSellers()"><span class="fkey">F8</span><span class="ficon">🏆</span>Top-Seller</button>
+</div>
+
+<!-- MANAGER BADGE -->
+<div class="manager-badge" id="managerBadge">🔑 Manager-Modus</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- DATA VIEW TOGGLE (like on website) -->
+<div class="pos-data-toggle" onclick="togglePosDataMode()">
+  <span class="pos-data-toggle-label" id="posDataLabel">DATA VIEW</span>
+  <button class="pos-data-toggle-track" id="posDataTrack">
+    <div class="pos-data-toggle-thumb"></div>
+  </button>
+</div>
+
+<!-- DATA ANNOTATIONS (visible only in data-mode) -->
+<div class="pos-data-annotation" style="position:fixed;top:80px;left:130px;animation-delay:.1s;z-index:1200">
+  <div class="pos-da-header">
+    <div class="pos-da-icon collect"><i class="fa-solid fa-database"></i></div>
+    <div class="pos-da-title">PRODUKT-AUSWAHL → fact_order_items</div>
+  </div>
+  Jeder Klick auf ein Produkt erzeugt einen Datensatz:<br>
+  <span class="pos-da-metric">order_item_id</span>
+  <span class="pos-da-metric">product_id</span>
+  <span class="pos-da-metric">quantity</span>
+  <span class="pos-da-metric">unit_price</span>
+  <span class="pos-da-metric">line_total</span>
+  <div class="pos-da-sql">INSERT INTO fact_order_items (order_id, product_id, quantity, unit_price, line_total) VALUES (...)</div>
+</div>
+
+<div class="pos-data-annotation" style="position:fixed;top:80px;right:20px;animation-delay:.2s;z-index:1200;max-width:300px">
+  <div class="pos-da-header">
+    <div class="pos-da-icon analyze"><i class="fa-solid fa-chart-line"></i></div>
+    <div class="pos-da-title">WARENKORB-ANALYSE</div>
+  </div>
+  Die Bestellliste speist:<br>
+  <span class="pos-da-metric">item_count</span>
+  <span class="pos-da-metric">distinct_items</span>
+  <span class="pos-da-metric">gross_total</span>
+  <span class="pos-da-metric">discount_amount</span>
+  <span class="pos-da-metric">net_total</span><br>
+  → Assoziationsregeln: Welche Produkte werden häufig zusammen bestellt?
+</div>
+
+<div class="pos-data-annotation" style="position:fixed;bottom:80px;left:130px;animation-delay:.3s;z-index:1200">
+  <div class="pos-da-header">
+    <div class="pos-da-icon storage"><i class="fa-solid fa-receipt"></i></div>
+    <div class="pos-da-title">TRANSAKTION → fact_orders</div>
+  </div>
+  Bei Bezahlung entsteht ein kompletter Datensatz:<br>
+  <span class="pos-da-metric">order_id</span>
+  <span class="pos-da-metric">date</span>
+  <span class="pos-da-metric">time</span>
+  <span class="pos-da-metric">branch_id</span>
+  <span class="pos-da-metric">customer_id</span>
+  <span class="pos-da-metric">payment_id</span>
+  <span class="pos-da-metric">order_channel</span>
+  <span class="pos-da-metric">satisfaction_score</span>
+  <div class="pos-da-sql">INSERT INTO fact_orders (...) → Füllt obt_orders über JOIN mit allen Dimensionstabellen</div>
+</div>
+
+<div class="pos-data-annotation" style="position:fixed;bottom:80px;right:20px;animation-delay:.4s;z-index:1200;max-width:300px">
+  <div class="pos-da-header">
+    <div class="pos-da-icon collect"><i class="fa-solid fa-users"></i></div>
+    <div class="pos-da-title">KUNDENDATEN → dim_customer</div>
+  </div>
+  Bei Kundenkarten-Scan:<br>
+  <span class="pos-da-metric">customer_id</span>
+  <span class="pos-da-metric">loyalty_tier</span>
+  <span class="pos-da-metric">home_district</span>
+  <span class="pos-da-metric">has_app</span><br>
+  → RFM-Segmentierung, Cohort-Analyse, Kundenherkunft
+</div>
+
+<!-- cash drawer removed -->
+
+<!-- MODALS -->
+<!-- Payment Modal -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal pay-modal">
     <div class="modal-header">
-      <div class="modal-title">Barzahlung</div>
-      <button class="modal-close" onclick="closeModal('cashModal')">✕</button>
+      <h3>Zahlung</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="cash-display">
-        <div class="cash-given-label">Gegeben</div>
-        <div class="cash-given-value" id="cashGiven">€0,00</div>
+      <div class="method-tabs">
+        <button class="method-tab active" onclick="setPayMethod('cash')"><i class="fa-solid fa-money-bill-wave"></i> Bar</button>
+        <button class="method-tab" onclick="setPayMethod('card')"><i class="fa-solid fa-credit-card"></i> EC / Mobile / Kredit</button>
+        <button class="method-tab" onclick="setPayMethod('split')"><i class="fa-solid fa-scissors"></i> Split</button>
       </div>
-      <div class="cash-change" id="cashChangeArea">
-        <div class="cash-change-label">Rückgeld</div>
-        <div class="cash-change-value" id="cashChange">€0,00</div>
+      <div class="pay-display">
+        <div class="pay-label">Betrag</div>
+        <div class="pay-amount" id="payAmountDisplay">0,00 €</div>
+        <div class="pay-change" id="payChangeDisplay"></div>
+        <div class="pay-total-ref" id="payTotalRef"></div>
       </div>
-      <div class="cash-numpad" id="cashNumpad"></div>
+      <div id="numpadArea">
+        <div class="numpad" id="numpad">
+          <button onclick="numpadInput('7')">7</button>
+          <button onclick="numpadInput('8')">8</button>
+          <button onclick="numpadInput('9')">9</button>
+          <button onclick="numpadInput('4')">4</button>
+          <button onclick="numpadInput('5')">5</button>
+          <button onclick="numpadInput('6')">6</button>
+          <button onclick="numpadInput('1')">1</button>
+          <button onclick="numpadInput('2')">2</button>
+          <button onclick="numpadInput('3')">3</button>
+          <button onclick="numpadInput('0')">0</button>
+          <button onclick="numpadInput('.')">.</button>
+          <button class="num-clear" onclick="numpadInput('C')">CLEAR</button>
+        </div>
+        <div class="quick-amounts">
+          <button onclick="numpadSet(10)">10 €</button>
+          <button onclick="numpadSet(20)">20 €</button>
+          <button onclick="numpadSet(50)">50 €</button>
+        </div>
+      </div>
+      <div class="split-info" id="splitInfo">
+        <div class="split-row"><span>Gesamt:</span><span id="splitTotal"></span></div>
+        <div class="split-row"><span>Bar:</span><span id="splitCash"></span></div>
+        <div class="split-row"><span>Karte:</span><span id="splitCard"></span></div>
+      </div>
+      <button class="pay-confirm-btn" id="payConfirmBtn" onclick="confirmPayment()" disabled>Bezahlen</button>
     </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('cashModal')">Abbrechen</button>
-      <button class="btn btn-primary" id="cashConfirmBtn" onclick="confirmCash()" disabled>Bezahlt</button>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal pin-modal">
+    <div class="modal-header">
+      <h3>Manager-Anmeldung</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pin-display" id="pinDisplay">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-numpad">
+        <button onclick="pinInput('1')">1</button>
+        <button onclick="pinInput('2')">2</button>
+        <button onclick="pinInput('3')">3</button>
+        <button onclick="pinInput('4')">4</button>
+        <button onclick="pinInput('5')">5</button>
+        <button onclick="pinInput('6')">6</button>
+        <button onclick="pinInput('7')">7</button>
+        <button onclick="pinInput('8')">8</button>
+        <button onclick="pinInput('9')">9</button>
+        <button class="pin-clear" onclick="pinInput('C')">✕</button>
+        <button onclick="pinInput('0')">0</button>
+        <button onclick="pinInput('C')">⌫</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Discount Modal -->
+<div class="modal-overlay" id="discountModal">
+  <div class="modal discount-modal">
+    <div class="modal-header">
+      <h3>Rabatt</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="discount-presets">
+        <button onclick="applyPresetDiscount(5)">5%</button>
+        <button onclick="applyPresetDiscount(10)">10%</button>
+        <button onclick="applyPresetDiscount(15)">15%</button>
+        <button onclick="applyPresetDiscount(20)">20%</button>
+      </div>
+      <div class="discount-custom">
+        <input type="number" id="discountInput" placeholder="Wert" min="0" step="0.01">
+        <select id="discountType">
+          <option value="pct">%</option>
+          <option value="fixed">€</option>
+        </select>
+        <button onclick="applyCustomDiscount()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Storno Modal -->
+<div class="modal-overlay" id="stornoModal">
+  <div class="modal storno-modal">
+    <div class="modal-header">
+      <h3>Storno</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="storno-msg">
+        <span class="warn-icon">⚠️</span>
+        Gesamte Bestellung stornieren?<br>Alle Artikel werden entfernt.
+      </div>
+      <div class="storno-actions">
+        <button class="cancel-btn" onclick="closeAllModals()">Abbrechen</button>
+        <button class="confirm-btn" onclick="confirmStorno()">Stornieren</button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Receipt Modal -->
-<div class="modal-backdrop" id="receiptModal">
-  <div class="modal" style="width:360px">
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal receipt-modal">
     <div class="modal-header">
-      <div class="modal-title">Kassenbon</div>
-      <button class="modal-close" onclick="closeModal('receiptModal')">✕</button>
-    </div>
-    <div class="modal-body" id="receiptBody"></div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('receiptModal')">Schließen</button>
-    </div>
-  </div>
-</div>
-
-<!-- Manager Modal -->
-<div class="modal-backdrop" id="managerModal">
-  <div class="modal" style="width:320px">
-    <div class="modal-header">
-      <div class="modal-title" id="managerTitle">Manager Login</div>
-      <button class="modal-close" onclick="closeModal('managerModal')">✕</button>
+      <h3>Bon</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="pin-display" id="pinDisplay"></div>
-      <div class="cash-numpad" id="pinPad"></div>
+      <div class="receipt" id="receiptContent"></div>
     </div>
-  </div>
-</div>
-
-<!-- Extras Modal (Loyalty, Coupon, Discount) -->
-<div class="modal-backdrop" id="extrasModal">
-  <div class="modal" style="width:400px">
-    <div class="modal-header">
-      <div class="modal-title">Extras</div>
-      <button class="modal-close" onclick="closeModal('extrasModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <!-- Loyalty -->
-      <div style="margin-bottom:16px">
-        <label style="font-size:12px;font-weight:600;color:#495057;display:block;margin-bottom:6px">Kundenkarte</label>
-        <div style="display:flex;gap:6px">
-          <input type="text" id="loyaltyInput" placeholder="Karten-Nr. (z.B. 1001)">
-          <button class="btn btn-primary" onclick="lookupLoyalty()" style="white-space:nowrap">Suchen</button>
-        </div>
-        <div id="loyaltyResult"></div>
-      </div>
-      <!-- Coupon -->
-      <div style="margin-bottom:16px">
-        <label style="font-size:12px;font-weight:600;color:#495057;display:block;margin-bottom:6px">Gutschein-Code</label>
-        <div style="display:flex;gap:6px">
-          <input type="text" id="couponInput" placeholder="Code eingeben">
-          <button class="btn btn-primary" onclick="applyCoupon()" style="white-space:nowrap">Einlösen</button>
-        </div>
-        <div id="couponResult" style="margin-top:6px;font-size:12px"></div>
-      </div>
-      <!-- Discount (manager only) -->
-      <div id="discountSection">
-        <label style="font-size:12px;font-weight:600;color:#495057;display:block;margin-bottom:6px">Rabatt <span id="discountLock" style="color:#adb5bd">(Manager-Login nötig)</span></label>
-        <div class="discount-options" id="discountOptions">
-          <button class="discount-btn" onclick="applyDiscount(5)" disabled>5%</button>
-          <button class="discount-btn" onclick="applyDiscount(10)" disabled>10%</button>
-          <button class="discount-btn" onclick="applyDiscount(15)" disabled>15%</button>
-          <button class="discount-btn" onclick="applyDiscount(20)" disabled>20%</button>
-        </div>
-        <div style="display:flex;gap:6px">
-          <input type="number" id="customDiscountInput" placeholder="Betrag in €" disabled>
-          <button class="btn" id="customDiscountBtn" onclick="applyCustomDiscount()" disabled>Anwenden</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Table Select Modal -->
-<div class="modal-backdrop" id="tableModal">
-  <div class="modal" style="width:340px">
-    <div class="modal-header">
-      <div class="modal-title">Tisch wählen</div>
-      <button class="modal-close" onclick="closeModal('tableModal');setServiceMode('takeaway')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="table-grid" id="tableGrid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Drawer Modal -->
-<div class="modal-backdrop" id="drawerModal">
-  <div class="modal" style="width:300px">
-    <div class="modal-header">
-      <div class="modal-title">Kassenschublade</div>
-      <button class="modal-close" onclick="closeModal('drawerModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="drawer-animation" id="drawerAnim">🗃️</div>
-      <p style="text-align:center;font-size:12px;color:#6c757d" id="drawerMsg"></p>
-    </div>
-  </div>
-</div>
-
-<!-- Split Payment Modal -->
-<div class="modal-backdrop" id="splitModal">
-  <div class="modal" style="width:380px">
-    <div class="modal-header">
-      <div class="modal-title">Split-Zahlung</div>
-      <button class="modal-close" onclick="closeModal('splitModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="split-row">
-        <span class="split-method">💵 Bar</span>
-        <input class="split-input" type="number" id="splitCash" value="0" step="0.01" min="0" oninput="updateSplit()">
-      </div>
-      <div class="split-row">
-        <span class="split-method">💳 Karte</span>
-        <input class="split-input" type="number" id="splitCard" value="0" step="0.01" min="0" oninput="updateSplit()">
-      </div>
-      <div class="split-row">
-        <span class="split-method">📱 App</span>
-        <input class="split-input" type="number" id="splitApp" value="0" step="0.01" min="0" oninput="updateSplit()">
-      </div>
-      <div class="split-remaining" id="splitRemaining">Verbleibend: €0,00</div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('splitModal')">Abbrechen</button>
-      <button class="btn btn-primary" id="splitConfirmBtn" onclick="confirmSplit()" disabled>Bestätigen</button>
-    </div>
-  </div>
-</div>
-
-<!-- Void Order Confirm Modal -->
-<div class="modal-backdrop" id="voidConfirmModal">
-  <div class="modal" style="width:320px">
-    <div class="modal-header">
-      <div class="modal-title">Bestellung stornieren</div>
-      <button class="modal-close" onclick="closeModal('voidConfirmModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:13px;color:#495057">Gesamte Bestellung wirklich stornieren?</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('voidConfirmModal')">Nein</button>
-      <button class="btn btn-danger" onclick="confirmVoidOrder()">Ja, stornieren</button>
-    </div>
-  </div>
-</div>
-
-<!-- Shift Report Modal -->
-<div class="modal-backdrop" id="shiftModal">
-  <div class="modal" style="width:480px">
-    <div class="modal-header">
-      <div class="modal-title">Schichtbericht</div>
-      <button class="modal-close" onclick="closeModal('shiftModal')">✕</button>
-    </div>
-    <div class="modal-body" id="shiftBody"></div>
   </div>
 </div>
 
 <!-- History Modal -->
-<div class="modal-backdrop" id="historyModal">
-  <div class="modal" style="width:520px">
+<div class="modal-overlay" id="historyModal">
+  <div class="modal history-modal">
     <div class="modal-header">
-      <div class="modal-title">Transaktionsverlauf</div>
-      <button class="modal-close" onclick="closeModal('historyModal')">✕</button>
+      <h3>Transaktionen</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
     </div>
-    <div class="modal-body" id="historyBody" style="max-height:400px;overflow-y:auto"></div>
+    <div class="modal-body">
+      <div class="history-list" id="historyList"></div>
+    </div>
   </div>
 </div>
 
-<!-- Top Sellers Modal -->
-<div class="modal-backdrop" id="topModal">
-  <div class="modal" style="width:400px">
+<!-- Day Close Modal -->
+<div class="modal-overlay" id="dayCloseModal">
+  <div class="modal" style="width:640px;max-width:95vw">
     <div class="modal-header">
-      <div class="modal-title">Top-Seller</div>
-      <button class="modal-close" onclick="closeModal('topModal')">✕</button>
+      <h3>Tagesabschluss — Kassenbericht</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="printDayClose()" style="padding:8px 14px;border:1.5px solid #dee2e6;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#495057;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-print"></i> Drucken</button>
+        <button onclick="exportDayCloseCSV()" style="padding:8px 14px;border:1.5px solid #198754;border-radius:8px;background:#f0fdf4;font-size:13px;font-weight:600;color:#198754;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-file-csv"></i> CSV Export</button>
+        <button class="modal-close" onclick="closeAllModals()">✕</button>
+      </div>
     </div>
-    <div class="modal-body" id="topBody"></div>
+    <div class="modal-body" id="dayCloseContent" style="padding:0"></div>
   </div>
 </div>
 
+<!-- Top Seller Modal -->
+<div class="modal-overlay" id="topSellerModal">
+  <div class="modal topseller-modal">
+    <div class="modal-header">
+      <h3>Top-Seller</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="top-list" id="topSellerList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Extras Modal -->
+<div class="modal-overlay" id="extrasModal">
+  <div class="modal extras-modal">
+    <div class="modal-header">
+      <h3>Kundenkarte & Gutschein</h3>
+      <button class="modal-close" onclick="closeAllModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="extras-section">
+        <h4>🏷️ Kundenkarte</h4>
+        <div class="extras-input-row">
+          <input type="text" id="cardInput" placeholder="Kartennummer eingeben">
+          <button onclick="scanCard()">Scannen</button>
+        </div>
+        <div class="extras-result" id="cardResult"></div>
+      </div>
+      <div class="extras-section">
+        <h4>🎟️ Gutschein-Code</h4>
+        <div class="extras-input-row">
+          <input type="text" id="couponInput" placeholder="Code eingeben">
+          <button onclick="applyCoupon()">Einlösen</button>
+        </div>
+        <div class="extras-result" id="couponResult"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ===== PRODUCT DATA ===== */
+// ===== DATA =====
 const PRODUCTS = [
-  // Quick (bestsellers)
-  { id: 1, name: 'Classic Burger', price: 6.90, cat: 'quick' },
-  { id: 2, name: 'Pommes', price: 3.50, cat: 'quick' },
-  { id: 3, name: 'Cola 0.4l', price: 2.90, cat: 'quick' },
-  { id: 4, name: 'Cheese Burger', price: 7.90, cat: 'quick' },
-  { id: 5, name: 'Nuggets 6er', price: 4.50, cat: 'quick' },
-  // Burger
-  { id: 10, name: 'Classic Burger', price: 6.90, cat: 'burger' },
-  { id: 11, name: 'Cheese Burger', price: 7.90, cat: 'burger' },
-  { id: 12, name: 'Bacon Burger', price: 8.90, cat: 'burger' },
-  { id: 13, name: 'BBQ Burger', price: 9.50, cat: 'burger' },
-  { id: 14, name: 'Veggie Burger', price: 8.50, cat: 'burger' },
-  { id: 15, name: 'Double Burger', price: 11.90, cat: 'burger' },
-  { id: 16, name: 'Chicken Burger', price: 8.90, cat: 'burger' },
-  // Sides
-  { id: 20, name: 'Pommes', price: 3.50, cat: 'sides' },
-  { id: 21, name: 'Süßkartoffel', price: 4.50, cat: 'sides' },
-  { id: 22, name: 'Onion Rings', price: 4.20, cat: 'sides' },
-  { id: 23, name: 'Nuggets 6er', price: 4.50, cat: 'sides' },
-  { id: 24, name: 'Nuggets 9er', price: 6.20, cat: 'sides' },
-  { id: 25, name: 'Coleslaw', price: 2.80, cat: 'sides' },
-  // Drinks
-  { id: 30, name: 'Cola 0.4l', price: 2.90, cat: 'drinks' },
-  { id: 31, name: 'Fanta 0.4l', price: 2.90, cat: 'drinks' },
-  { id: 32, name: 'Sprite 0.4l', price: 2.90, cat: 'drinks' },
-  { id: 33, name: 'Wasser 0.5l', price: 2.50, cat: 'drinks' },
-  { id: 34, name: 'Bier 0.3l', price: 3.80, cat: 'drinks' },
-  { id: 35, name: 'Milchshake', price: 4.90, cat: 'drinks' },
-  // Dessert
-  { id: 40, name: 'Brownie', price: 3.50, cat: 'dessert' },
-  { id: 41, name: 'Eis 2 Kugeln', price: 3.20, cat: 'dessert' },
-  { id: 42, name: 'Cheesecake', price: 4.50, cat: 'dessert' },
-  // Breakfast
-  { id: 50, name: 'Frühstücksburger', price: 5.90, cat: 'breakfast' },
-  { id: 51, name: 'Pancakes', price: 6.50, cat: 'breakfast' },
-  { id: 52, name: 'Rührei & Toast', price: 5.50, cat: 'breakfast' },
-  // Extras
-  { id: 60, name: 'Extra Käse', price: 1.00, cat: 'extras' },
-  { id: 61, name: 'Extra Bacon', price: 1.50, cat: 'extras' },
-  { id: 62, name: 'Extra Soße', price: 0.50, cat: 'extras' },
+  {id:1,name:'Classic Burger',price:4.99,cat:'burger',quick:true,img:'photo-1568901346375-23c9450c58cd'},
+  {id:2,name:'Cheeseburger',price:5.49,cat:'burger',quick:true,img:'photo-1550547660-d9450f859349'},
+  {id:3,name:'Double Burger',price:7.99,cat:'burger',img:'photo-1594212699903-ec8a3eca50f5'},
+  {id:4,name:'Bacon King',price:8.99,cat:'burger',img:'photo-1553979459-d2229ba7433b'},
+  {id:5,name:'Chicken Burger',price:6.49,cat:'burger',img:'photo-1606755962773-d324e0a13086'},
+  {id:6,name:'Crispy Chick DLX',price:7.49,cat:'burger',img:'photo-1513185158878-8d8c2a2a3da3'},
+  {id:7,name:'Veggie Burger',price:5.99,cat:'burger',img:'photo-1525059696034-4967a8e1dca2'},
+  {id:10,name:'Medium Fries',price:2.99,cat:'sides',quick:true,img:'photo-1573080496219-bb080dd4f877'},
+  {id:11,name:'Large Fries',price:3.49,cat:'sides',img:'photo-1598679253544-2c97992403ea'},
+  {id:12,name:'Nuggets 6pc',price:3.99,cat:'sides',quick:true,img:'photo-1562967916-eb82221dfb92'},
+  {id:13,name:'Nuggets 9pc',price:5.49,cat:'sides',img:'photo-1562967916-eb82221dfb92'},
+  {id:14,name:'Onion Rings',price:3.29,cat:'sides',img:'photo-1639024471283-03518883512d'},
+  {id:15,name:'Side Salad',price:3.49,cat:'sides',img:'photo-1512621776951-a57141f2eefd'},
+  {id:16,name:'Mozz Sticks',price:4.29,cat:'sides',img:'photo-1531749668029-2db88e4276c7'},
+  {id:20,name:'Cola 0.3l',price:2.49,cat:'drinks',img:'photo-1622483767028-3f66f32aef97'},
+  {id:21,name:'Cola 0.5l',price:3.29,cat:'drinks',quick:true,img:'photo-1622483767028-3f66f32aef97'},
+  {id:22,name:'Wasser 0.5l',price:1.99,cat:'drinks',img:'photo-1548839140-29a749e1cf4d'},
+  {id:23,name:'Kaffee',price:2.29,cat:'drinks',img:'photo-1509042239860-f550ce710b93'},
+  {id:24,name:'Cappuccino',price:3.29,cat:'drinks',img:'photo-1572442388796-11668a67e53d'},
+  {id:25,name:'Shake Vanilla',price:4.49,cat:'drinks',img:'photo-1572490122747-3968b75cc699'},
+  {id:26,name:'Shake Chocolate',price:4.49,cat:'drinks',img:'photo-1572490122747-3968b75cc699'},
+  {id:27,name:'Bier 0.3l',price:3.99,cat:'drinks',img:'photo-1535958636474-b021ee887b13'},
+  {id:30,name:'Soft Ice',price:1.99,cat:'dessert',img:'photo-1570197571499-166b36435e9f'},
+  {id:31,name:'Sundae Caramel',price:3.49,cat:'dessert',img:'photo-1563805042-7684c019e1cb'},
+  {id:32,name:'Apple Pie',price:2.29,cat:'dessert',img:'photo-1568571780765-9276ac8b75a2'},
+  {id:33,name:'Cookie Choc',price:1.49,cat:'dessert',img:'photo-1499636136210-6f4ee915583e'},
+  {id:40,name:'Breakfast Burger',price:4.99,cat:'breakfast',img:'photo-1525351484163-7529414344d8'},
+  {id:41,name:'Pancakes',price:4.49,cat:'breakfast',img:'photo-1567620905732-2d1ec7ab7445'},
+  {id:42,name:'Scrambled Eggs',price:3.99,cat:'breakfast',img:'photo-1528735602780-2552fd46c7af'},
+  {id:43,name:'Breakfast Wrap',price:5.49,cat:'breakfast',img:'photo-1626700051175-6818013e1d4f'},
+  {id:50,name:'Ketchup',price:0.50,cat:'extras',img:'photo-1472476443507-c7a5948772fc'},
+  {id:51,name:'BBQ Sauce',price:0.50,cat:'extras',img:'photo-1472476443507-c7a5948772fc'},
+  {id:52,name:'Cheese Dip',price:0.80,cat:'extras',img:'photo-1472476443507-c7a5948772fc'}
 ];
 
-const CATEGORIES = [
-  { id: 'quick', label: 'Quick', icon: '⚡' },
-  { id: 'burger', label: 'Burger', icon: '🍔' },
-  { id: 'sides', label: 'Seiten', icon: '🍟' },
-  { id: 'drinks', label: 'Drinks', icon: '🥤' },
-  { id: 'dessert', label: 'Dessert', icon: '🍰' },
-  { id: 'breakfast', label: 'Früh', icon: '🌅' },
-  { id: 'extras', label: 'Extras', icon: '➕' },
-];
+const CAT_COLORS = {
+  burger:'#d4564e',sides:'#e8a84c',drinks:'#5b8db8',
+  dessert:'#9b7bb8',breakfast:'#d4a843',extras:'#6ba389',quick:'#6b7280'
+};
 
-const LOYALTY_DB = {
-  '1001': { name: 'Anna Schmidt', points: 52 },
-  '1002': { name: 'Max Müller', points: 28 },
-  '1003': { name: 'Lisa Weber', points: 105 },
+const CUSTOMERS = {
+  '1001':{name:'Max Mustermann',points:42},
+  '1002':{name:'Anna Schmidt',points:78},
+  '1003':{name:'Tim Weber',points:15}
 };
 
 const COUPONS = {
-  'BURGER10': { type: 'percent', value: 10, label: '10% Rabatt' },
-  'WELCOME5': { type: 'fixed', value: 5, label: '5€ Rabatt' },
-  'FREEDELIVERY': { type: 'fixed', value: 0, label: 'Gratis Lieferung (nur Lieferung)' },
+  'BURGER10':{type:'pct',value:10,desc:'10% Rabatt'},
+  'WELCOME5':{type:'fixed',value:5,desc:'5 € Rabatt'},
+  'FREEDELIVERY':{type:'info',value:0,desc:'Gratis Lieferung'}
 };
 
-/* ===== STATE ===== */
-let state = {
-  cart: [],
-  activeCat: 'quick',
-  serviceMode: 'takeaway', // 'takeaway' | 'dinein'
-  tableNumber: null,
-  payMethod: null,
-  managerAuth: false,
-  discount: { type: null, value: 0, label: '' },
-  coupon: null,
-  loyalty: null,
-  transactions: [],
-  cashInput: '',
-  pinInput: '',
+const MANAGER_PIN = '1234';
+
+// ===== STATE =====
+const state = {
+  order:[],
+  orderNum:1,
+  orderType:'counter',
+  tableNum:'',
+  managerMode:false,
+  discount:{type:null,value:0},
+  customerCard:null,
+  coupon:null,
+  payInput:'',
+  payMethod:'cash',
+  pinBuffer:'',
+  transactions:[],
+  dayRevenue:0,
+  activeCat:'quick',
+  lastReceipt:null,
+  viewMode:'grid',
+  listSort:{field:'name',asc:true}
 };
 
-/* ===== UTILITIES ===== */
-function fmt(n) {
-  return '€' + n.toFixed(2).replace('.', ',');
+// ===== UTILITY =====
+function fmt(n){return n.toFixed(2).replace('.',',') + ' €';}
+function fmtNum(n){return n.toFixed(2).replace('.',',');}
+function now(){const d=new Date();return d.toLocaleString('de-DE');}
+function timeStr(){const d=new Date();return [d.getHours(),d.getMinutes(),d.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');}
+function dateStr(){return new Date().toLocaleDateString('de-DE');}
+function pad3(n){return String(n).padStart(3,'0');}
+
+function showToast(msg,type='default'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-function getTaxRate() {
-  return state.serviceMode === 'dinein' ? 0.19 : 0.07;
+// ===== MODAL HELPERS =====
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function closeAllModals(){document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show'));state.pinBuffer='';renderPinDots();}
+
+// ===== CATEGORY SWITCHING =====
+function setCategory(cat){
+  state.activeCat=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.cat===cat);
+  });
+  renderProducts();
 }
 
-function getSubtotal() {
-  return state.cart.reduce((s, i) => s + i.price * i.qty, 0);
+// ===== PRODUCT RENDERING =====
+function getItems(){
+  const cat=state.activeCat;
+  return cat==='quick'?PRODUCTS.filter(p=>p.quick):PRODUCTS.filter(p=>p.cat===cat);
+}
+function renderCard(p){
+  const inCart=state.order.find(o=>o.id===p.id);
+  const qty=inCart?inCart.qty:0;
+  const imgUrl=p.img?`https://images.unsplash.com/${p.img}?w=400&q=70`:'';
+  const bgStyle=imgUrl?`background-image:url('${imgUrl}')`:`background:${CAT_COLORS[p.cat]}22`;
+  return `<div class="product-card${qty?' in-cart':''}" onclick="addToOrder(${p.id})" style="${bgStyle}">
+    <span class="cart-badge ${qty?'show':''}">${qty}</span>
+    <span class="p-name">${p.name}</span>
+    <span class="p-price">${fmt(p.price)}</span>
+  </div>`;
+}
+const CAT_LABEL_SHORT={burger:'Burger',sides:'Beilagen',drinks:'Getränke',dessert:'Dessert',breakfast:'Frühst.',extras:'Extras'};
+function renderRow(p){
+  const inCart=state.order.find(o=>o.id===p.id);
+  const qty=inCart?inCart.qty:0;
+  const imgUrl=p.img?`https://images.unsplash.com/${p.img}?w=100&q=60`:'';
+  return `<div class="product-row${qty?' in-cart':''}" onclick="addToOrder(${p.id})">
+    <div class="pr-img" style="background-image:url('${imgUrl}')"></div>
+    <div class="pr-name">${p.name}</div>
+    <div class="pr-cat"><span class="pr-cat-badge" style="background:${CAT_COLORS[p.cat]}">${CAT_LABEL_SHORT[p.cat]||p.cat}</span></div>
+    <div class="pr-price">${fmt(p.price)}</div>
+    <div class="pr-add"><div class="pr-add-btn" style="position:relative">+${qty?`<span class="pr-qty-badge">${qty}</span>`:''}</div></div>
+  </div>`;
+}
+function sortArrow(field){
+  if(state.listSort.field!==field)return '<span class="sort-arrow">↕</span>';
+  return `<span class="sort-arrow active">${state.listSort.asc?'↑':'↓'}</span>`;
+}
+function renderListView(){
+  const list=document.getElementById('productList');
+  let items=[...getItems()];
+  const s=state.listSort;
+  items.sort((a,b)=>{
+    let va=a[s.field],vb=b[s.field];
+    if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}
+    if(va<vb)return s.asc?-1:1;
+    if(va>vb)return s.asc?1:-1;
+    return 0;
+  });
+  list.innerHTML=`<div class="product-list-header">
+    <span class="plh-img"></span>
+    <span class="plh-name" onclick="toggleSort('name')">Produkt ${sortArrow('name')}</span>
+    <span class="plh-cat" onclick="toggleSort('cat')">Kategorie ${sortArrow('cat')}</span>
+    <span class="plh-price" onclick="toggleSort('price')">Preis ${sortArrow('price')}</span>
+    <span class="plh-action"></span>
+  </div>`+items.map(p=>renderRow(p)).join('');
+}
+function toggleSort(field){
+  if(state.listSort.field===field){state.listSort.asc=!state.listSort.asc;}
+  else{state.listSort.field=field;state.listSort.asc=true;}
+  renderListView();
+}
+function setView(mode){
+  state.viewMode=mode;
+  document.getElementById('viewGrid').classList.toggle('active',mode==='grid');
+  document.getElementById('viewList').classList.toggle('active',mode==='list');
+  document.getElementById('productGrid').style.display=mode==='grid'?'grid':'none';
+  document.getElementById('productList').style.display=mode==='list'?'flex':'none';
+  renderProducts();
+}
+function renderProducts(){
+  if(state.viewMode==='list'){renderListView();return;}
+  const grid=document.getElementById('productGrid');
+  const items=getItems();
+  const n=items.length;
+  // Aim for roughly square cells: more cols for fewer items
+  let cols;
+  if(n<=4)cols=n;
+  else if(n<=6)cols=3;
+  else if(n<=8)cols=4;
+  else cols=Math.min(5,Math.ceil(Math.sqrt(n*1.5)));
+  const rows=Math.ceil(n/cols);
+  grid.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  grid.style.gridTemplateRows='repeat('+rows+',1fr)';
+  grid.innerHTML=items.map(p=>renderCard(p)).join('');
 }
 
-function getDiscountAmount() {
-  const sub = getSubtotal();
-  if (state.discount.type === 'percent') return sub * (state.discount.value / 100);
-  if (state.discount.type === 'fixed') return Math.min(state.discount.value, sub);
+// ===== ORDER MANAGEMENT =====
+function addToOrder(id){
+  const p=PRODUCTS.find(x=>x.id===id);
+  if(!p)return;
+  const existing=state.order.find(x=>x.id===id);
+  if(existing){existing.qty++;}
+  else{state.order.push({id:p.id,name:p.name,price:p.price,qty:1});}
+  renderOrder();renderProducts();
+}
+
+function removeFromOrder(idx){
+  state.order.splice(idx,1);
+  renderOrder();renderProducts();
+}
+
+function changeQty(idx,delta){
+  state.order[idx].qty+=delta;
+  if(state.order[idx].qty<=0)state.order.splice(idx,1);
+  renderOrder();renderProducts();
+}
+
+function clearOrder(){
+  state.order=[];
+  state.discount={type:null,value:0};
+  state.customerCard=null;
+  state.coupon=null;
+  document.getElementById('cardInput').value='';
+  document.getElementById('couponInput').value='';
+  document.getElementById('cardResult').className='extras-result';
+  document.getElementById('couponResult').className='extras-result';
+  document.getElementById('extrasTrigger').classList.remove('has-extras');
+  document.getElementById('extrasStatus').textContent='';
+  renderOrder();renderProducts();
+}
+
+function getSubtotal(){
+  return state.order.reduce((s,i)=>s+i.price*i.qty,0);
+}
+
+function getDiscountAmount(subtotal){
+  // Coupon takes priority
+  if(state.coupon){
+    if(state.coupon.type==='pct')return subtotal*state.coupon.value/100;
+    if(state.coupon.type==='fixed')return Math.min(state.coupon.value,subtotal);
+    return 0;
+  }
+  if(state.discount.type==='pct')return subtotal*state.discount.value/100;
+  if(state.discount.type==='fixed')return Math.min(state.discount.value,subtotal);
   return 0;
 }
 
-function getTotal() {
-  const sub = getSubtotal();
-  const disc = getDiscountAmount();
-  const afterDisc = sub - disc;
-  const tax = afterDisc * getTaxRate();
-  return afterDisc + tax;
+function getCardBonus(){
+  if(!state.customerCard)return 0;
+  const c=CUSTOMERS[state.customerCard];
+  return(c&&c.points>=50)?5:0;
 }
 
-function getTaxAmount() {
-  const sub = getSubtotal();
-  const disc = getDiscountAmount();
-  return (sub - disc) * getTaxRate();
+function getTotal(){
+  const sub=getSubtotal();
+  const disc=getDiscountAmount(sub);
+  const bonus=getCardBonus();
+  return Math.max(0,sub-disc-bonus);
 }
 
-function openModal(id) {
-  document.getElementById(id).classList.add('show');
+function getTotalItems(){
+  return state.order.reduce((s,i)=>s+i.qty,0);
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
-}
+function renderOrder(){
+  const itemsEl=document.getElementById('orderItems');
+  const emptyEl=document.getElementById('orderEmpty');
+  const countEl=document.getElementById('orderCount');
+  const subtotalEl=document.getElementById('subtotalVal');
+  const totalEl=document.getElementById('totalVal');
+  const payBtn=document.getElementById('payBtn');
+  const subsEl=document.getElementById('orderSubtotals');
 
-function getCartQty(productId) {
-  const item = state.cart.find(i => i.id === productId);
-  return item ? item.qty : 0;
-}
+  const totalItems=getTotalItems();
+  countEl.textContent=totalItems;
 
-/* ===== RENDER FUNCTIONS ===== */
-function renderCategories() {
-  const el = document.getElementById('catSidebar');
-  el.innerHTML = CATEGORIES.map(c => `
-    <button class="cat-btn ${state.activeCat === c.id ? 'active' : ''}" data-cat="${c.id}" onclick="selectCategory('${c.id}')">
-      <span class="cat-icon">${c.icon}</span>
-      <span class="cat-label">${c.label}</span>
-    </button>
-  `).join('');
-}
+  if(state.order.length===0){
+    emptyEl.style.display='flex';
+    itemsEl.querySelectorAll('.order-item').forEach(e=>e.remove());
+    subsEl.innerHTML=`<div class="row"><span>Zwischensumme</span><span id="subtotalVal">0,00 €</span></div>`;
+    totalEl.textContent='0,00 €';
+    payBtn.disabled=true;
+    return;
+  }
 
-function renderProducts() {
-  const grid = document.getElementById('productGrid');
-  const items = PRODUCTS.filter(p => p.cat === state.activeCat);
-  grid.innerHTML = items.map(p => {
-    const qty = getCartQty(p.id);
-    return `
-      <div class="product-card ${qty > 0 ? 'in-cart' : ''}" data-cat="${p.cat}" onclick="addToCart(${p.id})">
-        <div class="cart-badge">${qty}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-price">${fmt(p.price)}</div>
+  emptyEl.style.display='none';
+  // Render items
+  const html=state.order.map((item,idx)=>`
+    <div class="order-item">
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
+        <span class="qty-val">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
       </div>
-    `;
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-price">${fmt(item.price)}</div>
+      </div>
+      <span class="item-total">${fmt(item.price*item.qty)}</span>
+      <button class="item-remove" onclick="removeFromOrder(${idx})">✕</button>
+    </div>
+  `).join('');
+  // Replace items (keep empty el)
+  itemsEl.querySelectorAll('.order-item').forEach(e=>e.remove());
+  emptyEl.insertAdjacentHTML('afterend',html);
+
+  // Subtotals
+  const sub=getSubtotal();
+  const disc=getDiscountAmount(sub);
+  const bonus=getCardBonus();
+  const total=getTotal();
+
+  let subHtml=`<div class="row"><span>Zwischensumme</span><span>${fmt(sub)}</span></div>`;
+  if(disc>0){
+    const lbl=state.coupon?state.coupon.desc:'Rabatt';
+    subHtml+=`<div class="row discount"><span>${lbl}</span><span>-${fmt(disc)}</span></div>`;
+  }
+  if(bonus>0){
+    subHtml+=`<div class="row bonus"><span>Kundenbonus</span><span>-${fmt(bonus)}</span></div>`;
+  }
+  subsEl.innerHTML=subHtml;
+  totalEl.textContent=fmt(total);
+  payBtn.disabled=false;
+}
+
+// ===== SERVICE MODE =====
+document.querySelectorAll('.svc-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.svc-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.orderType=btn.dataset.type;
+    const ts=document.getElementById('tableSelect');
+    if(btn.dataset.type==='dine'){ts.classList.add('show');}
+    else{ts.classList.remove('show');state.tableNum='';}
+  });
+});
+
+// Populate table select
+(function(){
+  const sel=document.getElementById('tableSelect');
+  for(let i=1;i<=20;i++){
+    const o=document.createElement('option');o.value=i;o.textContent='Tisch '+i;sel.appendChild(o);
+  }
+  sel.addEventListener('change',()=>{state.tableNum=sel.value;});
+})();
+
+// ===== CATEGORY SIDEBAR EVENTS =====
+document.querySelectorAll('.cat-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>setCategory(btn.dataset.cat));
+});
+
+// ===== CLEAR ORDER BUTTON =====
+document.getElementById('clearOrderBtn').addEventListener('click',()=>{
+  if(state.order.length===0)return;
+  handleStorno();
+});
+
+// ===== CLOCK + SHIFT =====
+const SHIFT_START=new Date();
+const SHIFT_DURATION_MIN=480; // 8h shift
+const shiftStartStr=SHIFT_START.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+function updateClock(){
+  document.getElementById('hdrClock').textContent=timeStr();
+  const elapsed=Math.floor((Date.now()-SHIFT_START.getTime())/60000);
+  const remaining=Math.max(0,SHIFT_DURATION_MIN-elapsed);
+  const h=Math.floor(remaining/60);const m=remaining%60;
+  document.getElementById('shiftInfo').textContent=
+    `Login ${shiftStartStr} · noch ${h>0?h+'h ':''}${m}min`;
+}
+setInterval(updateClock,10000);
+updateClock();
+
+// ===== HEADER REVENUE =====
+function updateHeaderRevenue(){
+  document.getElementById('hdrRevenue').textContent=fmt(state.dayRevenue);
+}
+
+// ===== PAYMENT MODAL =====
+function openPayModal(method){
+  if(state.order.length===0){showToast('Keine Artikel in der Bestellung','error');return;}
+  state.payInput='';
+  state.payMethod=method||'cash';
+  updatePayModal();
+  openModal('payModal');
+}
+
+function setPayMethod(m){
+  state.payMethod=m;
+  state.payInput='';
+  updatePayModal();
+}
+
+function updatePayModal(){
+  // Tabs
+  document.querySelectorAll('.method-tab').forEach(t=>{
+    const m=t.textContent.includes('Bar')?'cash':t.textContent.includes('Karte')?'card':'split';
+    t.classList.toggle('active',m===state.payMethod);
+  });
+  const total=getTotal();
+  const numpadArea=document.getElementById('numpadArea');
+  const splitInfo=document.getElementById('splitInfo');
+  const confirmBtn=document.getElementById('payConfirmBtn');
+  const amountDisp=document.getElementById('payAmountDisplay');
+  const changeDisp=document.getElementById('payChangeDisplay');
+  const totalRef=document.getElementById('payTotalRef');
+
+  totalRef.textContent='Zu zahlen: '+fmt(total);
+
+  if(state.payMethod==='card'){
+    numpadArea.style.display='none';
+    splitInfo.style.display='none';
+    amountDisp.textContent=fmt(total);
+    changeDisp.textContent='';
+    confirmBtn.disabled=false;
+    confirmBtn.textContent='Kartenzahlung '+fmt(total);
+  } else if(state.payMethod==='split'){
+    numpadArea.style.display='block';
+    splitInfo.style.display='block';
+    const cashAmt=parseFloat(state.payInput)||0;
+    const cardAmt=Math.max(0,total-cashAmt);
+    amountDisp.textContent=state.payInput?fmtNum(parseFloat(state.payInput))+' €':'0,00 €';
+    changeDisp.textContent='';
+    document.getElementById('splitTotal').textContent=fmt(total);
+    document.getElementById('splitCash').textContent=fmt(cashAmt);
+    document.getElementById('splitCard').textContent=fmt(cardAmt);
+    confirmBtn.disabled=cashAmt<=0||cashAmt>=total;
+    confirmBtn.textContent='Split-Zahlung bestätigen';
+  } else {
+    // Cash
+    numpadArea.style.display='block';
+    splitInfo.style.display='none';
+    const entered=parseFloat(state.payInput)||0;
+    amountDisp.textContent=state.payInput?fmtNum(entered)+' €':'0,00 €';
+    if(entered>=total&&total>0){
+      changeDisp.textContent='Rückgeld: '+fmt(entered-total);
+      confirmBtn.disabled=false;
+    } else {
+      changeDisp.textContent='';
+      confirmBtn.disabled=true;
+    }
+    confirmBtn.textContent='Bar bezahlen';
+  }
+}
+
+function numpadInput(key){
+  if(key==='C'){state.payInput='';}
+  else if(key==='.'){
+    if(!state.payInput.includes('.'))state.payInput+=state.payInput?'.':'0.';
+  } else {
+    // Limit to 2 decimal places
+    if(state.payInput.includes('.')&&state.payInput.split('.')[1].length>=2)return;
+    state.payInput+=key;
+  }
+  updatePayModal();
+}
+
+function numpadSet(val){
+  state.payInput=val.toFixed(2);
+  updatePayModal();
+}
+
+let selectedPayMethod='cash';
+function selectPayMethod(btn,method){
+  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedPayMethod=method;
+}
+function startPayment(){
+  if(state.order.length===0){showToast('Keine Artikel in der Bestellung','error');return;}
+  if(selectedPayMethod==='split'){openPayModal('split');}
+  else if(selectedPayMethod==='cash'){openPayModal('cash');}
+  else{
+    // EC/Kredit — open pay modal to confirm amount
+    openPayModal('card');
+  }
+}
+
+function confirmPayment(){
+  const total=getTotal();
+  if(state.payMethod==='card'){
+    processPayment('card',total,0);
+  } else if(state.payMethod==='split'){
+    const cashAmt=parseFloat(state.payInput)||0;
+    const cardAmt=total-cashAmt;
+    processPayment('split',total,0,cashAmt,cardAmt);
+  } else {
+    const entered=parseFloat(state.payInput)||0;
+    if(entered<total)return;
+    processPayment('cash',entered,entered-total);
+  }
+}
+
+function processPayment(method,paid,change,splitCash,splitCard){
+  const total=getTotal();
+  const sub=getSubtotal();
+  const disc=getDiscountAmount(sub);
+  const bonus=getCardBonus();
+  const tax=total*0.19/1.19;
+  const net=total-tax;
+
+  // Build transaction
+  const tx={
+    orderNum:state.orderNum,
+    time:now(),
+    items:state.order.map(i=>({...i})),
+    subtotal:sub,
+    discount:disc,
+    bonus:bonus,
+    total:total,
+    tax:tax,
+    net:net,
+    method:method,
+    paid:paid,
+    change:change||0,
+    splitCash:splitCash||0,
+    splitCard:splitCard||0,
+    orderType:state.orderType,
+    tableNum:state.tableNum,
+    customerCard:state.customerCard,
+    coupon:state.coupon?{...state.coupon}:null,
+    discountInfo:state.discount.type?{...state.discount}:null
+  };
+
+  state.transactions.push(tx);
+  state.dayRevenue+=total;
+  updateHeaderRevenue();
+
+  // Loyalty points
+  if(state.customerCard&&CUSTOMERS[state.customerCard]){
+    const c=CUSTOMERS[state.customerCard];
+    const earned=Math.floor(total);
+    c.points+=earned;
+    if(c.points>=50)c.points-=50;
+  }
+
+  // Generate receipt
+  state.lastReceipt=generateReceipt(tx);
+
+  // Show receipt
+  document.getElementById('receiptContent').innerHTML=state.lastReceipt;
+  closeAllModals();
+  openModal('receiptModal');
+
+  // drawer removed
+
+  // Toast
+  const methodLabel=method==='cash'?'Bar':method==='card'?'EC / Mobile':method==='credit'?'Kreditkarte':'Split';
+  showToast(`Zahlung ${fmt(total)} (${methodLabel}) ✓`,'success');
+
+  // Reset order
+  state.orderNum++;
+  state.order=[];
+  state.discount={type:null,value:0};
+  state.customerCard=null;
+  state.coupon=null;
+  state.payInput='';
+  document.getElementById('cardInput').value='';
+  document.getElementById('couponInput').value='';
+  document.getElementById('cardResult').className='extras-result';
+  document.getElementById('couponResult').className='extras-result';
+  document.getElementById('extrasTrigger').classList.remove('has-extras');
+  document.getElementById('extrasStatus').textContent='';
+  renderOrder();renderProducts();
+}
+
+// ===== RECEIPT =====
+function generateReceipt(tx){
+  const orderPad=pad3(tx.orderNum);
+  let items=tx.items.map(i=>{
+    const nameStr=`${i.qty}x ${i.name}`;
+    const priceStr=fmtNum(i.price*i.qty);
+    return `<div class="r-row"><span>${nameStr}</span><span>${priceStr}</span></div>`;
+  }).join('');
+
+  let typeStr=tx.orderType==='dine'?`Im Haus (Tisch ${tx.tableNum})`:'Mitnehmen';
+  let customerLine=tx.customerCard?`<div>Kunde: ${tx.customerCard}</div>`:'';
+  let discountLine=tx.discount>0?`<div class="r-row"><span>${tx.coupon?tx.coupon.desc:'Rabatt'}</span><span>-${fmtNum(tx.discount)}</span></div>`:'';
+  let bonusLine=tx.bonus>0?`<div class="r-row"><span>Kundenbonus</span><span>-${fmtNum(tx.bonus)}</span></div>`:'';
+
+  let payLine=`<div class="r-row"><span>Zahlart</span><span>${tx.method==='cash'?'Bar':tx.method==='card'?'EC / Mobile':tx.method==='credit'?'Kreditkarte':'Split'}</span></div>`;
+  let paidLine='';
+  if(tx.method==='cash'){
+    paidLine=`<div class="r-row"><span>Gegeben</span><span>${fmtNum(tx.paid)}</span></div>
+    <div class="r-row"><span>Rückgeld</span><span>${fmtNum(tx.change)}</span></div>`;
+  } else if(tx.method==='split'){
+    paidLine=`<div class="r-row"><span>Bar</span><span>${fmtNum(tx.splitCash)}</span></div>
+    <div class="r-row"><span>Karte</span><span>${fmtNum(tx.splitCard)}</span></div>`;
+  }
+
+  const barcode='*'+String(tx.orderNum).padStart(6,'0')+'*';
+
+  return `
+    <div class="r-center r-bold">BURGERMETRICS</div>
+    <div class="r-center">Musterstraße 42 · 12345 Berlin</div>
+    <div class="r-center">Tel: 030-1234567 · USt-ID: DE123456789</div>
+    <div class="r-line"></div>
+    <div class="r-row"><span>Bon #${orderPad}</span><span>${tx.time}</span></div>
+    <div>Typ: ${typeStr}</div>
+    ${customerLine}
+    <div class="r-line"></div>
+    ${items}
+    <div class="r-line"></div>
+    <div class="r-row"><span>Zwischensumme</span><span>${fmtNum(tx.subtotal)}</span></div>
+    ${discountLine}${bonusLine}
+    <div class="r-row"><span>Netto</span><span>${fmtNum(tx.net)}</span></div>
+    <div class="r-row"><span>MwSt. 19%</span><span>${fmtNum(tx.tax)}</span></div>
+    <div class="r-line"></div>
+    <div class="r-row r-big"><span>GESAMT</span><span>${fmtNum(tx.total)} €</span></div>
+    <div class="r-line"></div>
+    ${payLine}${paidLine}
+    <div class="r-line"></div>
+    <div class="r-center">Vielen Dank für Ihren Einkauf!</div>
+    <div class="r-center" style="font-size:11px;color:#888">Powered by BurgerMetrics POS</div>
+    <div class="r-barcode">${barcode}</div>
+  `;
+}
+
+function reprintReceipt(){
+  if(!state.lastReceipt){showToast('Kein letzter Bon vorhanden','error');return;}
+  document.getElementById('receiptContent').innerHTML=state.lastReceipt;
+  openModal('receiptModal');
+}
+
+// ===== CASH DRAWER (simplified) =====
+function openCashDrawer(){showToast('Kassenlade geöffnet (simuliert)');}
+function handleDrawer(){
+  if(state.managerMode||state.order.length>0||state.transactions.length>0){
+    showToast('Kassenlade geöffnet (simuliert)');
+  } else {
+    showToast('Kassenöffnung nicht möglich','error');
+  }
+}
+
+// ===== MANAGER / PIN =====
+function handleManager(){
+  if(state.managerMode){
+    state.managerMode=false;
+    document.getElementById('managerBadge').classList.remove('show');
+    showToast('Manager-Modus beendet');
+    return;
+  }
+  state.pinBuffer='';
+  renderPinDots();
+  openModal('pinModal');
+}
+
+function pinInput(key){
+  if(key==='C'){state.pinBuffer='';renderPinDots();return;}
+  if(state.pinBuffer.length>=4)return;
+  state.pinBuffer+=key;
+  renderPinDots();
+  if(state.pinBuffer.length===4){
+    setTimeout(()=>{
+      if(state.pinBuffer===MANAGER_PIN){
+        state.managerMode=true;
+        document.getElementById('managerBadge').classList.add('show');
+        closeAllModals();
+        showToast('Manager-Modus aktiviert','success');
+      } else {
+        showToast('Falscher PIN','error');
+        state.pinBuffer='';
+        renderPinDots();
+      }
+    },200);
+  }
+}
+
+function renderPinDots(){
+  const dots=document.querySelectorAll('#pinDisplay .pin-dot');
+  dots.forEach((d,i)=>{
+    d.classList.toggle('filled',i<state.pinBuffer.length);
+    d.textContent=i<state.pinBuffer.length?'●':'';
+  });
+}
+
+// ===== DISCOUNT =====
+function handleDiscount(){
+  if(!state.managerMode){showToast('Manager-Modus erforderlich','error');return;}
+  if(state.order.length===0){showToast('Keine Bestellung vorhanden','error');return;}
+  openModal('discountModal');
+}
+
+function applyPresetDiscount(pct){
+  state.discount={type:'pct',value:pct};
+  closeAllModals();
+  renderOrder();
+  showToast(`${pct}% Rabatt angewendet`,'success');
+}
+
+function applyCustomDiscount(){
+  const val=parseFloat(document.getElementById('discountInput').value);
+  const type=document.getElementById('discountType').value;
+  if(!val||val<=0){showToast('Ungültiger Wert','error');return;}
+  state.discount={type:type,value:val};
+  closeAllModals();
+  renderOrder();
+  const label=type==='pct'?val+'%':fmt(val);
+  showToast(`Rabatt ${label} angewendet`,'success');
+}
+
+// ===== STORNO =====
+function handleStorno(){
+  if(state.order.length===0){showToast('Keine Bestellung zum Stornieren','error');return;}
+  openModal('stornoModal');
+}
+
+function confirmStorno(){
+  clearOrder();
+  closeAllModals();
+  showToast('Bestellung storniert','success');
+}
+
+// ===== LOYALTY CARD =====
+function scanCard(){
+  const id=document.getElementById('cardInput').value.trim();
+  const res=document.getElementById('cardResult');
+  if(!id){res.className='extras-result show error';res.textContent='Bitte Kartennummer eingeben';return;}
+  const c=CUSTOMERS[id];
+  if(!c){res.className='extras-result show error';res.textContent='Karte nicht gefunden';return;}
+  state.customerCard=id;
+  let msg=`✓ ${c.name} — ${c.points} Punkte`;
+  if(c.points>=50)msg+=' (5 € Bonus aktiv!)';
+  res.className='extras-result show success';
+  res.textContent=msg;
+  updateExtrasIndicator();
+  renderOrder();
+}
+
+// ===== COUPONS =====
+function applyCoupon(){
+  const code=document.getElementById('couponInput').value.trim().toUpperCase();
+  const res=document.getElementById('couponResult');
+  if(!code){res.className='extras-result show error';res.textContent='Bitte Code eingeben';return;}
+  const cp=COUPONS[code];
+  if(!cp){res.className='extras-result show error';res.textContent='Ungültiger Code';return;}
+  if(cp.type==='info'){
+    res.className='extras-result show success';
+    res.textContent='✓ '+cp.desc+' — wird bei Lieferung angewendet';
+    return;
+  }
+  state.coupon={...cp,code:code};
+  res.className='extras-result show success';
+  res.textContent='✓ '+cp.desc+' angewendet';
+  updateExtrasIndicator();
+  renderOrder();
+}
+
+function updateExtrasIndicator(){
+  const trigger=document.getElementById('extrasTrigger');
+  const status=document.getElementById('extrasStatus');
+  const hasCard=!!state.customerCard;
+  const hasCoupon=!!state.coupon;
+  if(hasCard||hasCoupon){
+    trigger.classList.add('has-extras');
+    let parts=[];
+    if(hasCard)parts.push('Karte: '+state.customerCard);
+    if(hasCoupon)parts.push('Gutschein: '+state.coupon.code);
+    status.textContent=parts.join(' | ');
+  } else {
+    trigger.classList.remove('has-extras');
+    status.textContent='';
+  }
+}
+
+// ===== HISTORY =====
+function renderHistory(){
+  const list=document.getElementById('historyList');
+  if(state.transactions.length===0){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">📜</div>Keine Transaktionen</div>';
+    return;
+  }
+  list.innerHTML=state.transactions.slice().reverse().map((tx,i)=>{
+    const summary=tx.items.map(it=>`${it.qty}x ${it.name}`).join(', ');
+    return `<div class="history-item" onclick="showHistoryReceipt(${state.transactions.length-1-i})">
+      <div class="h-left">
+        <div class="h-order">Bon #${pad3(tx.orderNum)}</div>
+        <div class="h-time">${tx.time}</div>
+        <div class="h-items">${summary}</div>
+      </div>
+      <div class="h-total">${fmt(tx.total)}</div>
+    </div>`;
   }).join('');
 }
 
-function renderOrder() {
-  const itemsEl = document.getElementById('orderItems');
-  const countEl = document.getElementById('orderCount');
+function showHistoryReceipt(idx){
+  const tx=state.transactions[idx];
+  if(!tx)return;
+  document.getElementById('receiptContent').innerHTML=generateReceipt(tx);
+  closeModal('historyModal');
+  openModal('receiptModal');
+}
 
-  const totalItems = state.cart.reduce((s, i) => s + i.qty, 0);
-  countEl.textContent = totalItems;
+// Render history when modal opens
+const historyObserver=new MutationObserver(()=>{
+  if(document.getElementById('historyModal').classList.contains('show'))renderHistory();
+});
+historyObserver.observe(document.getElementById('historyModal'),{attributes:true,attributeFilter:['class']});
 
-  if (state.cart.length === 0) {
-    itemsEl.innerHTML = `
-      <div class="order-empty">
-        <div class="order-empty-icon">🛒</div>
-        <div>Produkt antippen zum Hinzufügen</div>
-      </div>
-    `;
-  } else {
-    itemsEl.innerHTML = state.cart.map((item, idx) => `
-      <div class="order-item">
-        <div class="order-item-name">${item.name}</div>
-        <div class="item-qty-controls">
-          <button class="qty-btn" onclick="changeQty(${idx}, -1)">−</button>
-          <span class="qty-value">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
+// ===== DAY CLOSE / SHIFT REPORT =====
+function handleDayClose(){
+  if(!state.managerMode){showToast('Manager-Modus erforderlich','error');return;}
+  renderDayClose();
+  openModal('dayCloseModal');
+}
+
+function renderDayClose(){
+  const txs=state.transactions;
+  const totalRev=txs.reduce((s,t)=>s+t.total,0);
+  const txCount=txs.length;
+  const totalItems=txs.reduce((s,t)=>s+t.items.reduce((a,i)=>a+i.qty,0),0);
+  const avgOrder=txCount>0?totalRev/txCount:0;
+  const cashTotal=txs.filter(t=>t.method==='cash').reduce((s,t)=>s+t.total,0);
+  const cashCount=txs.filter(t=>t.method==='cash').length;
+  const cardTotal=txs.filter(t=>t.method==='card').reduce((s,t)=>s+t.total,0);
+  const cardCount=txs.filter(t=>t.method==='card').length;
+  const splitTotal=totalRev-cashTotal-cardTotal;
+  const splitCount=txs.filter(t=>t.method==='split').length;
+  const totalDisc=txs.reduce((s,t)=>s+t.discount+t.bonus,0);
+  const totalTax=txs.reduce((s,t)=>s+t.tax,0);
+  const totalNet=txs.reduce((s,t)=>s+t.net,0);
+  // Product breakdown
+  const prodMap={};
+  txs.forEach(t=>t.items.forEach(i=>{
+    if(!prodMap[i.name])prodMap[i.name]={qty:0,rev:0};
+    prodMap[i.name].qty+=i.qty;prodMap[i.name].rev+=i.qty*i.price;
+  }));
+  const prods=Object.entries(prodMap).sort((a,b)=>b[1].rev-a[1].rev);
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const timeStr=now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('dayCloseContent').innerHTML=`
+    <div class="ledger">
+      <div class="ledger-header">
+        <h4>BurgerMetrics — Kassenbericht</h4>
+        <div class="ledger-meta">
+          <span>Kasse 1 · BM Hauptbahnhof</span>
+          <span>Kassierer: Max M.</span>
+          <span>Datum: ${dateStr}</span>
+          <span>Abschluss: ${timeStr}</span>
         </div>
-        <div class="item-total">${fmt(item.price * item.qty)}</div>
-        <button class="item-remove" onclick="removeItem(${idx})">✕</button>
       </div>
-    `).join('');
-  }
-
-  // Footer values
-  const sub = getSubtotal();
-  const disc = getDiscountAmount();
-  const tax = getTaxAmount();
-  const total = getTotal();
-  const taxRate = state.serviceMode === 'dinein' ? '19' : '7';
-
-  document.getElementById('subtotal').textContent = fmt(sub);
-  document.getElementById('taxLabel').textContent = `MwSt. ${taxRate}%`;
-  document.getElementById('taxValue').textContent = fmt(tax);
-  document.getElementById('totalValue').textContent = fmt(total);
-
-  const discRow = document.getElementById('discountRow');
-  if (disc > 0) {
-    discRow.classList.remove('hidden');
-    document.getElementById('discountLabel').textContent = state.discount.label || 'Rabatt';
-    document.getElementById('discountValue').textContent = '-' + fmt(disc);
-  } else {
-    discRow.classList.add('hidden');
-  }
-
-  updateDayRevenue();
+      <div class="ledger-section">
+        <h5>Zusammenfassung</h5>
+        <table class="ledger-table">
+          <tr><td>Anzahl Transaktionen</td><td>${txCount}</td></tr>
+          <tr><td>Verkaufte Artikel</td><td>${totalItems}</td></tr>
+          <tr><td>Durchschn. Bonwert</td><td>${fmt(avgOrder)}</td></tr>
+        </table>
+      </div>
+      <div class="ledger-section">
+        <h5>Umsatz nach Zahlungsart</h5>
+        <table class="ledger-table">
+          <tr><td>Barzahlung (${cashCount} Txn)</td><td>${fmt(cashTotal)}</td></tr>
+          <tr><td>EC / Mobile / Kreditkarte (${cardCount} Txn)</td><td>${fmt(cardTotal)}</td></tr>
+          <tr><td>Split-Zahlung (${splitCount} Txn)</td><td>${fmt(splitTotal)}</td></tr>
+          <tr class="subtotal"><td>Brutto-Umsatz</td><td>${fmt(totalRev)}</td></tr>
+        </table>
+      </div>
+      <div class="ledger-section">
+        <h5>Abzüge & Steuern</h5>
+        <table class="ledger-table">
+          <tr><td>Rabatte / Gutscheine / Treuepunkte</td><td>− ${fmt(totalDisc)}</td></tr>
+          <tr><td>davon MwSt.</td><td>${fmt(totalTax)}</td></tr>
+          <tr class="subtotal"><td>Netto-Umsatz</td><td>${fmt(totalNet)}</td></tr>
+          <tr class="grand"><td>Brutto-Tagesumsatz</td><td>${fmt(totalRev)}</td></tr>
+        </table>
+      </div>
+      ${prods.length>0?`<div class="ledger-items">
+        <h5>Artikel-Aufstellung (Top ${Math.min(prods.length,15)})</h5>
+        <table>
+          <tr><th>Produkt</th><th>Menge</th><th>Einzelpreis</th><th>Umsatz</th></tr>
+          ${prods.slice(0,15).map(([name,d])=>`<tr><td>${name}</td><td>${d.qty}</td><td>${fmt(d.rev/d.qty)}</td><td>${fmt(d.rev)}</td></tr>`).join('')}
+        </table>
+      </div>`:''}
+      <div class="ledger-footer">
+        Kassenbericht erstellt am ${dateStr} um ${timeStr} · Kasse 1 · BurgerMetrics POS v1.0
+      </div>
+    </div>`;
 }
 
-function updatePayBtn() {
-  const btn = document.getElementById('payBtn');
-  const total = getTotal();
-  if (!state.payMethod || state.cart.length === 0) {
-    btn.disabled = true;
-    btn.textContent = state.cart.length === 0 ? 'Warenkorb leer' : 'Zahlungsart wählen';
-  } else {
-    btn.disabled = false;
-    const labels = { cash: '💵 Bar', card: '💳 Karte', app: '📱 App', split: '✂️ Split' };
-    btn.innerHTML = `${labels[state.payMethod]} – ${fmt(total)} bezahlen`;
-  }
-}
+function printDayClose(){window.print();}
 
-/* ===== CART FUNCTIONS ===== */
-function addToCart(productId) {
-  const product = PRODUCTS.find(p => p.id === productId);
-  if (!product) return;
-
-  const existing = state.cart.find(i => i.id === productId);
-  if (existing) {
-    existing.qty++;
-  } else {
-    state.cart.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
-  }
-  renderProducts();
-  renderOrder();
-  updatePayBtn();
-}
-
-function changeQty(idx, delta) {
-  if (!state.cart[idx]) return;
-  state.cart[idx].qty += delta;
-  if (state.cart[idx].qty <= 0) {
-    state.cart.splice(idx, 1);
-  }
-  renderProducts();
-  renderOrder();
-  updatePayBtn();
-}
-
-function removeItem(idx) {
-  state.cart.splice(idx, 1);
-  renderProducts();
-  renderOrder();
-  updatePayBtn();
-}
-
-function voidLastItem() {
-  if (state.cart.length === 0) return;
-  state.cart.pop();
-  renderProducts();
-  renderOrder();
-  updatePayBtn();
-}
-
-function voidOrder() {
-  if (state.cart.length === 0) return;
-  openModal('voidConfirmModal');
-}
-
-function confirmVoidOrder() {
-  state.cart = [];
-  state.discount = { type: null, value: 0, label: '' };
-  state.coupon = null;
-  state.loyalty = null;
-  state.payMethod = null;
-  document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
-  closeModal('voidConfirmModal');
-  renderProducts();
-  renderOrder();
-  updatePayBtn();
-}
-
-function selectCategory(catId) {
-  state.activeCat = catId;
-  renderCategories();
-  renderProducts();
-}
-
-function setServiceMode(mode) {
-  state.serviceMode = mode;
-  document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.service-btn[onclick*="${mode}"]`).classList.add('active');
-
-  if (mode === 'dinein') {
-    renderTableGrid();
-    openModal('tableModal');
-  } else {
-    state.tableNumber = null;
-  }
-  renderOrder();
-  updatePayBtn();
-}
-
-function selectPayMethod(method) {
-  state.payMethod = method;
-  document.querySelectorAll('.pay-method-btn').forEach(b => {
-    b.classList.toggle('selected', b.dataset.method === method);
+function exportDayCloseCSV(){
+  const txs=state.transactions;
+  if(!txs.length){showToast('Keine Transaktionen','error');return;}
+  let csv='Bon-Nr;Datum;Uhrzeit;Zahlungsart;Artikel;Brutto;Rabatt;MwSt;Netto\\n';
+  txs.forEach(t=>{
+    const items=t.items.map(i=>i.qty+'x '+i.name).join(', ');
+    const mLabel=t.method==='cash'?'Bar':t.method==='card'?'EC/Mobile':t.method==='credit'?'Kreditkarte':'Split';
+    csv+=`${t.orderNum};${t.date};${t.time};${mLabel};${items};${t.total.toFixed(2)};${(t.discount+t.bonus).toFixed(2)};${t.tax.toFixed(2)};${t.net.toFixed(2)}\\n`;
   });
-  updatePayBtn();
+  const blob=new Blob([csv.replace(/\\\\n/g,'\\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='BurgerMetrics_Kassenbericht_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  showToast('CSV exportiert','success');
 }
 
-function renderTableGrid() {
-  const grid = document.getElementById('tableGrid');
-  let html = '';
-  for (let i = 1; i <= 20; i++) {
-    html += `<button class="table-btn ${state.tableNumber === i ? 'selected' : ''}" onclick="selectTable(${i})">${i}</button>`;
-  }
-  grid.innerHTML = html;
-}
-
-function selectTable(n) {
-  state.tableNumber = n;
-  closeModal('tableModal');
-  renderTableGrid();
-}
-
-/* ===== PAYMENT ===== */
-function processPayment() {
-  if (state.cart.length === 0 || !state.payMethod) return;
-
-  if (state.payMethod === 'cash') {
-    state.cashInput = '';
-    renderCashModal();
-    openModal('cashModal');
+// ===== TOP SELLERS =====
+function renderTopSellers(){
+  const list=document.getElementById('topSellerList');
+  if(state.transactions.length===0){
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div>Noch keine Verkäufe</div>';
     return;
   }
-
-  if (state.payMethod === 'split') {
-    const total = getTotal();
-    document.getElementById('splitCash').value = '0';
-    document.getElementById('splitCard').value = '0';
-    document.getElementById('splitApp').value = '0';
-    updateSplit();
-    openModal('splitModal');
-    return;
-  }
-
-  // Card or App: direct
-  completeTransaction(state.payMethod);
-}
-
-function renderCashModal() {
-  const total = getTotal();
-  const given = parseFloat(state.cashInput) / 100 || 0;
-  const change = given - total;
-
-  document.getElementById('cashGiven').textContent = fmt(given);
-  const changeEl = document.getElementById('cashChange');
-  changeEl.textContent = fmt(Math.abs(change));
-  changeEl.className = 'cash-change-value ' + (change >= 0 ? 'positive' : 'negative');
-
-  document.getElementById('cashConfirmBtn').disabled = change < 0;
-
-  // Build numpad
-  const pad = document.getElementById('cashNumpad');
-  const quickAmounts = [5, 10, 20, 50];
-  const ceil = Math.ceil(total);
-  if (!quickAmounts.includes(ceil) && ceil > 0) quickAmounts.unshift(ceil);
-
-  pad.innerHTML = '';
-  // Quick cash buttons
-  quickAmounts.slice(0, 4).forEach(a => {
-    pad.innerHTML += `<button class="numpad-btn quick-cash" onclick="setCashAmount(${a * 100})">${fmt(a)}</button>`;
-  });
-  // Number pad
-  for (let i = 1; i <= 9; i++) {
-    pad.innerHTML += `<button class="numpad-btn" onclick="appendCash('${i}')">${i}</button>`;
-  }
-  pad.innerHTML += `<button class="numpad-btn" onclick="appendCash('00')">00</button>`;
-  pad.innerHTML += `<button class="numpad-btn" onclick="appendCash('0')">0</button>`;
-  pad.innerHTML += `<button class="numpad-btn" onclick="clearCash()">C</button>`;
-}
-
-function appendCash(digit) {
-  state.cashInput += digit;
-  renderCashModal();
-}
-
-function clearCash() {
-  state.cashInput = '';
-  renderCashModal();
-}
-
-function setCashAmount(cents) {
-  state.cashInput = String(cents);
-  renderCashModal();
-}
-
-function confirmCash() {
-  const given = parseFloat(state.cashInput) / 100 || 0;
-  const total = getTotal();
-  if (given < total) return;
-  completeTransaction('cash', { given, change: given - total });
-  closeModal('cashModal');
-}
-
-/* ===== SPLIT PAYMENT ===== */
-function updateSplit() {
-  const total = getTotal();
-  const cash = parseFloat(document.getElementById('splitCash').value) || 0;
-  const card = parseFloat(document.getElementById('splitCard').value) || 0;
-  const app = parseFloat(document.getElementById('splitApp').value) || 0;
-  const remaining = total - cash - card - app;
-
-  const el = document.getElementById('splitRemaining');
-  el.textContent = `Verbleibend: ${fmt(Math.max(0, remaining))}`;
-  el.style.color = remaining <= 0.005 ? '#198754' : '#dc3545';
-
-  document.getElementById('splitConfirmBtn').disabled = remaining > 0.005;
-}
-
-function confirmSplit() {
-  const cash = parseFloat(document.getElementById('splitCash').value) || 0;
-  const card = parseFloat(document.getElementById('splitCard').value) || 0;
-  const app = parseFloat(document.getElementById('splitApp').value) || 0;
-  completeTransaction('split', { cash, card, app });
-  closeModal('splitModal');
-}
-
-/* ===== COMPLETE TRANSACTION ===== */
-function completeTransaction(method, details) {
-  const tx = {
-    id: Date.now(),
-    time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-    items: JSON.parse(JSON.stringify(state.cart)),
-    subtotal: getSubtotal(),
-    discount: getDiscountAmount(),
-    discountLabel: state.discount.label,
-    tax: getTaxAmount(),
-    taxRate: getTaxRate(),
-    total: getTotal(),
-    method: method,
-    details: details || {},
-    serviceMode: state.serviceMode,
-    table: state.tableNumber,
-    loyalty: state.loyalty,
-  };
-
-  // Loyalty points
-  if (state.loyalty) {
-    const pts = Math.floor(tx.total);
-    LOYALTY_DB[state.loyalty].points += pts;
-  }
-
-  state.transactions.push(tx);
-
-  // Show receipt
-  renderReceipt(tx);
-  openModal('receiptModal');
-
-  // Reset
-  state.cart = [];
-  state.discount = { type: null, value: 0, label: '' };
-  state.coupon = null;
-  state.loyalty = null;
-  state.payMethod = null;
-  document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
-  renderProducts();
-  renderOrder();
-  updatePayBtn();
-}
-
-/* ===== RECEIPT ===== */
-function renderReceipt(tx) {
-  const body = document.getElementById('receiptBody');
-  const methodLabels = { cash: 'Bar', card: 'Karte', app: 'App', split: 'Split' };
-  const serviceLabels = { takeaway: 'Mitnehmen', dinein: 'Im Haus' };
-
-  let itemsHtml = tx.items.map(i =>
-    `<div class="receipt-row"><span>${i.qty}x ${i.name}</span><span>${fmt(i.price * i.qty)}</span></div>`
-  ).join('');
-
-  let barcodeHtml = '';
-  const barcodeNum = String(tx.id).slice(-12);
-  // Simple barcode SVG
-  let bars = '';
-  let x = 0;
-  for (let i = 0; i < barcodeNum.length; i++) {
-    const d = parseInt(barcodeNum[i]);
-    const w = d % 3 + 1;
-    bars += `<rect x="${x}" y="0" width="${w}" height="30" fill="#212529"/>`;
-    x += w + 1;
-    bars += `<rect x="${x}" y="0" width="1" height="30" fill="#212529"/>`;
-    x += 2;
-  }
-
-  body.innerHTML = `
-    <div class="receipt-paper">
-      <div class="receipt-header">
-        <h3>BurgerMetrics</h3>
-        <div style="font-size:10px;color:#6c757d">Musterstraße 1 · 10115 Berlin</div>
-        <div style="font-size:10px;color:#6c757d">USt-IdNr: DE123456789</div>
-      </div>
-      <hr class="receipt-divider">
-      <div style="font-size:10px;color:#6c757d">
-        ${new Date().toLocaleDateString('de-DE')} ${tx.time} · ${serviceLabels[tx.serviceMode]}${tx.table ? ' · Tisch ' + tx.table : ''}
-      </div>
-      <hr class="receipt-divider">
-      ${itemsHtml}
-      <hr class="receipt-divider">
-      ${tx.discount > 0 ? `<div class="receipt-row"><span>${tx.discountLabel}</span><span>-${fmt(tx.discount)}</span></div>` : ''}
-      <div class="receipt-row"><span>Netto</span><span>${fmt(tx.subtotal - tx.discount)}</span></div>
-      <div class="receipt-row"><span>MwSt. ${(tx.taxRate * 100).toFixed(0)}%</span><span>${fmt(tx.tax)}</span></div>
-      <hr class="receipt-divider">
-      <div class="receipt-row receipt-total"><span>GESAMT</span><span>${fmt(tx.total)}</span></div>
-      <hr class="receipt-divider">
-      <div class="receipt-row"><span>Zahlung</span><span>${methodLabels[tx.method]}</span></div>
-      ${tx.method === 'cash' && tx.details.given ? `
-        <div class="receipt-row"><span>Gegeben</span><span>${fmt(tx.details.given)}</span></div>
-        <div class="receipt-row"><span>Rückgeld</span><span>${fmt(tx.details.change)}</span></div>
-      ` : ''}
-      ${tx.loyalty ? `<div style="font-size:10px;margin-top:4px">Kundenkarte: ${tx.loyalty} (+${Math.floor(tx.total)} Punkte)</div>` : ''}
-      <div class="receipt-barcode">
-        <svg viewBox="0 0 ${x} 30" width="${Math.min(x * 2, 200)}" height="30">${bars}</svg>
-        <div style="font-size:9px;color:#6c757d;margin-top:2px">${barcodeNum}</div>
-      </div>
-      <div style="text-align:center;font-size:10px;margin-top:8px;color:#6c757d">Vielen Dank für Ihren Besuch!</div>
-    </div>
-  `;
-}
-
-function printReceipt() {
-  if (state.transactions.length === 0) return;
-  renderReceipt(state.transactions[state.transactions.length - 1]);
-  openModal('receiptModal');
-}
-
-/* ===== MANAGER LOGIN ===== */
-function renderPinPad() {
-  const pad = document.getElementById('pinPad');
-  pad.innerHTML = '';
-  for (let i = 1; i <= 9; i++) {
-    pad.innerHTML += `<button class="numpad-btn" onclick="appendPin('${i}')">${i}</button>`;
-  }
-  pad.innerHTML += `<button class="numpad-btn" onclick="clearPin()">C</button>`;
-  pad.innerHTML += `<button class="numpad-btn" onclick="appendPin('0')">0</button>`;
-  pad.innerHTML += `<button class="numpad-btn" onclick="submitPin()">✓</button>`;
-
-  document.getElementById('pinDisplay').textContent = '●'.repeat(state.pinInput.length);
-  document.getElementById('managerTitle').textContent = state.managerAuth ? 'Manager ✓ (autorisiert)' : 'Manager Login';
-}
-
-function appendPin(d) {
-  if (state.pinInput.length >= 4) return;
-  state.pinInput += d;
-  document.getElementById('pinDisplay').textContent = '●'.repeat(state.pinInput.length);
-}
-
-function clearPin() {
-  state.pinInput = '';
-  document.getElementById('pinDisplay').textContent = '';
-}
-
-function submitPin() {
-  if (state.pinInput === '1234') {
-    state.managerAuth = true;
-    state.pinInput = '';
-    closeModal('managerModal');
-    unlockDiscounts();
-  } else {
-    state.pinInput = '';
-    document.getElementById('pinDisplay').textContent = 'FALSCH';
-    setTimeout(() => {
-      document.getElementById('pinDisplay').textContent = '';
-    }, 1000);
-  }
-}
-
-function unlockDiscounts() {
-  document.getElementById('discountLock').textContent = '(freigeschaltet ✓)';
-  document.getElementById('discountLock').style.color = '#198754';
-  document.querySelectorAll('.discount-btn').forEach(b => b.disabled = false);
-  document.getElementById('customDiscountInput').disabled = false;
-  document.getElementById('customDiscountBtn').disabled = false;
-}
-
-/* ===== LOYALTY ===== */
-function lookupLoyalty() {
-  const input = document.getElementById('loyaltyInput').value.trim();
-  const result = document.getElementById('loyaltyResult');
-
-  if (!LOYALTY_DB[input]) {
-    result.innerHTML = `<div style="color:#dc3545;font-size:12px;margin-top:6px">Karte nicht gefunden.</div>`;
-    return;
-  }
-
-  const customer = LOYALTY_DB[input];
-  state.loyalty = input;
-  const canRedeem = customer.points >= 50;
-
-  result.innerHTML = `
-    <div class="loyalty-info">
-      <div class="loyalty-name">${customer.name}</div>
-      <div class="loyalty-points">${customer.points} Punkte</div>
-      ${canRedeem ? `
-        <button class="btn btn-primary" onclick="redeemLoyalty('${input}')" style="margin-top:8px">50 Punkte = 5€ Rabatt einlösen</button>
-      ` : `
-        <div class="loyalty-note">Ab 50 Punkte: 5€ Rabatt einlösbar</div>
-      `}
-    </div>
-  `;
-}
-
-function redeemLoyalty(cardId) {
-  if (!LOYALTY_DB[cardId] || LOYALTY_DB[cardId].points < 50) return;
-  LOYALTY_DB[cardId].points -= 50;
-  state.discount = { type: 'fixed', value: 5, label: 'Treuebonus -5€' };
-  renderOrder();
-  updatePayBtn();
-  lookupLoyalty(); // refresh display
-}
-
-/* ===== COUPONS ===== */
-function applyCoupon() {
-  const code = document.getElementById('couponInput').value.trim().toUpperCase();
-  const result = document.getElementById('couponResult');
-
-  if (!COUPONS[code]) {
-    result.innerHTML = `<span style="color:#dc3545">Ungültiger Code.</span>`;
-    return;
-  }
-
-  const coupon = COUPONS[code];
-  state.coupon = code;
-
-  if (coupon.type === 'percent') {
-    state.discount = { type: 'percent', value: coupon.value, label: `Gutschein ${code} (-${coupon.value}%)` };
-  } else if (coupon.value > 0) {
-    state.discount = { type: 'fixed', value: coupon.value, label: `Gutschein ${code} (-${fmt(coupon.value)})` };
-  }
-
-  result.innerHTML = `<span style="color:#198754">✓ ${coupon.label} angewendet!</span>`;
-  renderOrder();
-  updatePayBtn();
-}
-
-/* ===== DISCOUNT ===== */
-function applyDiscount(pct) {
-  if (!state.managerAuth) return;
-  state.discount = { type: 'percent', value: pct, label: `Rabatt ${pct}%` };
-  document.querySelectorAll('.discount-btn').forEach(b => {
-    b.classList.toggle('selected', parseInt(b.textContent) === pct);
-  });
-  renderOrder();
-  updatePayBtn();
-}
-
-function applyCustomDiscount() {
-  if (!state.managerAuth) return;
-  const val = parseFloat(document.getElementById('customDiscountInput').value);
-  if (!val || val <= 0) return;
-  state.discount = { type: 'fixed', value: val, label: `Rabatt -${fmt(val)}` };
-  renderOrder();
-  updatePayBtn();
-}
-
-/* ===== CASH DRAWER ===== */
-function openDrawer() {
-  if (!state.managerAuth) {
-    openModal('managerModal');
-    state.pinInput = '';
-    renderPinPad();
-    return;
-  }
-  const anim = document.getElementById('drawerAnim');
-  const msg = document.getElementById('drawerMsg');
-  anim.className = 'drawer-animation opening';
-  msg.textContent = 'Kassenschublade geöffnet...';
-  openModal('drawerModal');
-  setTimeout(() => {
-    anim.className = 'drawer-animation';
-    msg.textContent = 'Kassenschublade geschlossen.';
-  }, 2000);
-}
-
-/* ===== SHIFT REPORT ===== */
-function showShiftReport() {
-  const body = document.getElementById('shiftBody');
-  const txs = state.transactions;
-
-  if (txs.length === 0) {
-    body.innerHTML = '<p style="color:#6c757d;text-align:center;padding:16px">Keine Transaktionen heute.</p>';
-    openModal('shiftModal');
-    return;
-  }
-
-  const totalRev = txs.reduce((s, t) => s + t.total, 0);
-  const totalDisc = txs.reduce((s, t) => s + t.discount, 0);
-  const totalTax = txs.reduce((s, t) => s + t.tax, 0);
-  const avgTicket = totalRev / txs.length;
-
-  const methods = {};
-  txs.forEach(t => {
-    if (t.method === 'split') {
-      if (t.details.cash) methods['Bar'] = (methods['Bar'] || 0) + t.details.cash;
-      if (t.details.card) methods['Karte'] = (methods['Karte'] || 0) + t.details.card;
-      if (t.details.app) methods['App'] = (methods['App'] || 0) + t.details.app;
-    } else {
-      const label = { cash: 'Bar', card: 'Karte', app: 'App' }[t.method] || t.method;
-      methods[label] = (methods[label] || 0) + t.total;
-    }
-  });
-
-  const takeaway = txs.filter(t => t.serviceMode === 'takeaway').length;
-  const dinein = txs.filter(t => t.serviceMode === 'dinein').length;
-
-  body.innerHTML = `
-    <div class="report-stat">
-      <div class="stat-card">
-        <div class="stat-card-value">${fmt(totalRev)}</div>
-        <div class="stat-card-label">Umsatz</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-value">${txs.length}</div>
-        <div class="stat-card-label">Transaktionen</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-value">${fmt(avgTicket)}</div>
-        <div class="stat-card-label">Ø Bon</div>
-      </div>
-    </div>
-    <table class="report-table">
-      <tr><th>Kennzahl</th><th style="text-align:right">Wert</th></tr>
-      <tr><td>Brutto-Umsatz</td><td>${fmt(totalRev)}</td></tr>
-      <tr><td>Rabatte</td><td>-${fmt(totalDisc)}</td></tr>
-      <tr><td>MwSt. gesamt</td><td>${fmt(totalTax)}</td></tr>
-      <tr><td>Mitnehmen</td><td>${takeaway}</td></tr>
-      <tr><td>Im Haus</td><td>${dinein}</td></tr>
-      ${Object.entries(methods).map(([k, v]) => `<tr><td>${k}</td><td>${fmt(v)}</td></tr>`).join('')}
-    </table>
-  `;
-  openModal('shiftModal');
-}
-
-/* ===== TRANSACTION HISTORY ===== */
-function showHistory() {
-  const body = document.getElementById('historyBody');
-  const txs = state.transactions;
-
-  if (txs.length === 0) {
-    body.innerHTML = '<p style="color:#6c757d;text-align:center;padding:16px">Keine Transaktionen.</p>';
-    openModal('historyModal');
-    return;
-  }
-
-  const methodLabels = { cash: 'Bar', card: 'Karte', app: 'App', split: 'Split' };
-
-  body.innerHTML = `
-    <table class="report-table">
-      <tr><th>Zeit</th><th>Artikel</th><th>Art</th><th style="text-align:right">Betrag</th></tr>
-      ${txs.slice().reverse().map(t => `
-        <tr>
-          <td>${t.time}</td>
-          <td>${t.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
-          <td>${methodLabels[t.method]}</td>
-          <td>${fmt(t.total)}</td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
-  openModal('historyModal');
-}
-
-/* ===== TOP SELLERS ===== */
-function showTopSellers() {
-  const body = document.getElementById('topBody');
-  const txs = state.transactions;
-
-  if (txs.length === 0) {
-    body.innerHTML = '<p style="color:#6c757d;text-align:center;padding:16px">Keine Daten.</p>';
-    openModal('topModal');
-    return;
-  }
-
-  const counts = {};
-  txs.forEach(t => {
-    t.items.forEach(i => {
-      counts[i.name] = (counts[i.name] || 0) + i.qty;
+  // Aggregate
+  const map={};
+  state.transactions.forEach(tx=>{
+    tx.items.forEach(i=>{
+      if(!map[i.id])map[i.id]={name:i.name,qty:0,rev:0,price:i.price};
+      map[i.id].qty+=i.qty;
+      map[i.id].rev+=i.price*i.qty;
     });
   });
-
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  const max = sorted[0][1];
-
-  body.innerHTML = `
-    <table class="report-table">
-      <tr><th>#</th><th>Produkt</th><th style="text-align:right">Menge</th></tr>
-      ${sorted.map(([name, qty], i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${name}</td>
-          <td>${qty}</td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
-  openModal('topModal');
+  const sorted=Object.values(map).sort((a,b)=>b.qty-a.qty).slice(0,10);
+  list.innerHTML=sorted.map(p=>`
+    <div class="top-item">
+      <span class="ts-name">${p.name}</span>
+      <span class="ts-qty">${p.qty}x</span>
+      <span class="ts-rev">${fmt(p.rev)}</span>
+    </div>
+  `).join('');
 }
 
-/* ===== DAY REVENUE ===== */
-function updateDayRevenue() {
-  const total = state.transactions.reduce((s, t) => s + t.total, 0);
-  document.getElementById('dayRevenue').textContent = fmt(total);
-}
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown',e=>{
+  // Don't trigger in input fields
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA')return;
 
-/* ===== KEYBOARD SHORTCUTS ===== */
-document.addEventListener('keydown', function(e) {
-  // Close modals on Escape
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-backdrop.show').forEach(m => {
-      m.classList.remove('show');
-    });
-    return;
-  }
-
-  // Don't trigger shortcuts when typing in inputs
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-  switch (e.key) {
-    case 'F1':
-      e.preventDefault();
-      voidLastItem();
-      break;
-    case 'F2':
-      e.preventDefault();
-      voidOrder();
-      break;
-    case 'F3':
-      e.preventDefault();
-      state.pinInput = '';
-      renderPinPad();
-      openModal('managerModal');
-      break;
-    case 'F4':
-      e.preventDefault();
-      openDrawer();
-      break;
-    case 'F5':
-      e.preventDefault();
-      printReceipt();
-      break;
-    case 'F6':
-      e.preventDefault();
-      showShiftReport();
-      break;
-    case 'F7':
-      e.preventDefault();
-      showHistory();
-      break;
-    case 'F8':
-      e.preventDefault();
-      showTopSellers();
-      break;
-    case 'F12':
-      e.preventDefault();
-      processPayment();
-      break;
+  switch(e.key){
+    case 'F1':e.preventDefault();handleStorno();break;
+    case 'F3':e.preventDefault();handleManager();break;
+    case 'F5':e.preventDefault();reprintReceipt();break;
+    case 'F6':e.preventDefault();handleDayClose();break;
+    case 'F7':e.preventDefault();openModal('historyModal');break;
+    case 'F8':e.preventDefault();openModal('topSellerModal');renderTopSellers();break;
+    case 'F12':e.preventDefault();openPayModal('cash');break;
+    case 'Escape':e.preventDefault();closeAllModals();break;
   }
 });
 
-// Click outside modal to close
-document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-  backdrop.addEventListener('click', function(e) {
-    if (e.target === this) {
-      this.classList.remove('show');
-    }
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{
+    if(e.target===overlay)closeAllModals();
   });
 });
 
-/* ===== CLOCK ===== */
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent =
-    now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+// ===== DATA VIEW TOGGLE =====
+let posDataMode=false;
+function togglePosDataMode(){
+  posDataMode=!posDataMode;
+  document.body.classList.toggle('data-mode',posDataMode);
+  if(posDataMode){
+    showToast('🔬 Datenperspektive aktiviert — Willkommen, Data Expert!');
+  }else{
+    showToast('🍔 Zurück zur POS-Ansicht');
+  }
 }
 
-/* ===== INIT ===== */
-function init() {
-  renderCategories();
-  renderProducts();
-  renderOrder();
-  updatePayBtn();
-  updateClock();
-  setInterval(updateClock, 10000);
-
-  // Init pin pad
-  state.pinInput = '';
-  renderPinPad();
-}
-
-document.addEventListener('DOMContentLoaded', init);
-</script>
-</body>
-</html>
+// ===== INIT =====
+renderProducts();
+renderOrder();
+</script></body></html>

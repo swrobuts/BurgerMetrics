@@ -130,18 +130,18 @@ body {
 .stat-item:last-child { border-right: none; }
 .stat-val {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--gold);
   display: block;
 }
 .stat-lbl {
-  font-size: 9px;
+  font-size: 10px;
   color: var(--stone-light);
   text-transform: uppercase;
   letter-spacing: 1px;
   display: block;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* ── Cards ── */
@@ -223,10 +223,19 @@ body {
 }
 
 .card-icon {
-  font-size: 28px;
-  margin-bottom: 18px;
+  font-size: 36px;
+  margin-bottom: 20px;
   line-height: 1;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.card-red .card-icon { background: rgba(185,28,28,.12); }
+.card-gold .card-icon { background: rgba(217,119,6,.12); }
+.card-blue .card-icon { background: rgba(91,122,157,.12); }
 .card-red   .card-icon { color: var(--red); }
 .card-gold  .card-icon { color: var(--gold); }
 .card-blue  .card-icon { color: var(--blue); }
@@ -242,15 +251,15 @@ body {
 }
 .card-title {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 32px;
   letter-spacing: 2px;
   color: #fff;
   line-height: 1;
   margin-bottom: 14px;
 }
 .card-desc {
-  font-size: 12.5px;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.7;
   color: rgba(255,255,255,.5);
   flex: 1;
   margin-bottom: 20px;
@@ -260,12 +269,12 @@ body {
   align-items: center;
   gap: 5px;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 3px;
+  padding: 5px 12px;
+  border-radius: 4px;
   align-self: flex-start;
   margin-top: auto;
 }
@@ -343,24 +352,28 @@ footer {
     <div class="logo">Burger<span class="logo-accent">Metrics</span><span class="cursor"></span></div>
   </div>
   <div class="tagline">Flame-Grilled Since 2017 &nbsp;·&nbsp; Würzburg</div>
-  <div class="sub-heading">Wählen Sie Ihre Perspektive</div>
+  <div class="sub-heading">Wählen Sie Ihren Einstiegspunkt in die BurgerMetrics-Welt</div>
 
   <div class="stats-strip">
     <div class="stat-item">
-      <span class="stat-val">8</span>
+      <span class="stat-val">9</span>
       <span class="stat-lbl">Filialen</span>
     </div>
     <div class="stat-item">
-      <span class="stat-val">25.000</span>
+      <span class="stat-val">25.000+</span>
       <span class="stat-lbl">Kunden</span>
     </div>
     <div class="stat-item">
-      <span class="stat-val">€14,52M</span>
+      <span class="stat-val">€14,5M</span>
       <span class="stat-lbl">Gesamtumsatz</span>
     </div>
     <div class="stat-item">
-      <span class="stat-val">754.513</span>
+      <span class="stat-val">754.514</span>
       <span class="stat-lbl">Bestellungen</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-val">33</span>
+      <span class="stat-lbl">Produkte</span>
     </div>
   </div>
 </div>
@@ -390,7 +403,7 @@ footer {
 
     <a class="card card-blue" href="dashboard.html">
       <span class="card-key">[ 3 ]</span>
-      <div class="card-icon"><i class="fa-solid fa-chart-mixed"></i></div>
+      <div class="card-icon"><i class="fa-solid fa-chart-column"></i></div>
       <div class="card-subtitle">Analyse & Reporting</div>
       <div class="card-title">BI Dashboard</div>
       <p class="card-desc">Vollständige Business Intelligence Plattform — 12 Analyse-Tabs, Zeitreihen 2017–2026, RFM-Segmentierung, Preissimulation, Kanalanalyse & Management Summary.</p>
