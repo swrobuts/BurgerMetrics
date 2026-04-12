@@ -168,7 +168,7 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
     <div class="stat"><b>57</b><small>Produkte</small></div>
   </div>
   <div class="hero-intro">
-    BurgerMetrics ist eine fiktive Systemgastronomie-Kette, die als durchgängige Lernumgebung für Business Intelligence und Datenanalyse konzipiert wurde. Das Szenario bildet den kompletten Datenfluss einer Fast-Food-Kette ab: Vom operativen Geschäft an der Kasse (POS-Terminal mit den Kanälen Counter, Drive-Through und Kiosk) über den digitalen Vertriebskanal (Online-Bestellportal mit App Order) bis hin zur analytischen Auswertung im BI-Dashboard. Die zugrunde liegenden Daten — 754.513 Bestellungen mit knapp 3 Millionen Einzelposten über den Zeitraum 2017 bis 2026 — stehen als CSV-Dateien in einem klassischen Star-Schema bereit und lassen sich mit gängigen BI-Tools, Programmiersprachen oder SQL-Datenbanken auswerten. Sämtliche im Dashboard dargestellten Kennzahlen sind aus diesen CSV-Dateien berechnet und können von Studierenden mit Werkzeugen wie Power BI, Tableau, Python, R oder Excel eigenständig nachvollzogen und verifiziert werden.
+    BurgerMetrics ist eine fiktive Systemgastronomie-Kette, die als durchgängige Lernumgebung für Business Intelligence und Datenanalyse konzipiert wurde. Das Szenario bildet den kompletten Datenfluss einer Fast-Food-Kette ab: Vom operativen Geschäft an der Kasse (POS-Terminal mit den Kanälen Counter, Drive-Through und Kiosk) über den digitalen Vertriebskanal (Online-Bestellportal mit App Order) bis hin zur analytischen Auswertung im BI-Dashboard. Die zugrunde liegenden Daten — 754.513 Bestellungen mit knapp 3 Millionen Einzelposten über den Zeitraum 2017 bis 2026 — stehen als CSV-Dateien in einem klassischen Galaxy-Schema (Fact Constellation) bereit und lassen sich mit gängigen BI-Tools, Programmiersprachen oder SQL-Datenbanken auswerten. Sämtliche im Dashboard dargestellten Kennzahlen sind aus diesen CSV-Dateien berechnet und können von Studierenden mit Werkzeugen wie Power BI, Tableau, Python, R oder Excel eigenständig nachvollzogen und verifiziert werden.
   </div>
 </div>
 
@@ -212,7 +212,7 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
 <!-- ANALYTICS WORKFLOW -->
 <div class="sec" style="padding-top:0">
   <h2>Analytics-Projektablauf</h2>
-  <p class="lead">Der folgende Ablauf beschreibt die typische Vorgehensweise in einem Analytics-Projekt — von der Rohdatenbereitstellung bis zur fertigen Entscheidungsvorlage. Jeder Schritt lässt sich mit den BurgerMetrics-CSV-Dateien konkret nachvollziehen. Die Daten simulieren dabei Exporte aus operativen Quellsystemen (POS-Kassensystem, Online-Bestellportal), wie sie in der betrieblichen Praxis aus ERP- oder Warenwirtschaftssystemen erzeugt werden. Das Datenmodell folgt dem Star-Schema mit zwei Faktentabellen (fact_orders, fact_order_items) und neun Dimensionstabellen, ergänzt um eine vollständig vorverknüpfte One Big Table (obt_orders.csv) für den schnellen Einstieg ohne SQL-JOINs.</p>
+  <p class="lead">Der folgende Ablauf beschreibt die typische Vorgehensweise in einem Analytics-Projekt — von der Rohdatenbereitstellung bis zur fertigen Entscheidungsvorlage. Jeder Schritt lässt sich mit den BurgerMetrics-CSV-Dateien konkret nachvollziehen. Die Daten simulieren dabei Exporte aus operativen Quellsystemen (POS-Kassensystem, Online-Bestellportal), wie sie in der betrieblichen Praxis aus ERP- oder Warenwirtschaftssystemen erzeugt werden. Das Datenmodell folgt dem Galaxy-Schema (Fact Constellation) mit zwei Faktentabellen (fact_orders, fact_order_items) und neun Dimensionstabellen, ergänzt um eine vollständig vorverknüpfte One Big Table (obt_orders.csv) für den schnellen Einstieg ohne SQL-JOINs.</p>
   <div class="wf-box">
     <div class="wf-flow">
       <div class="wf-node">
@@ -231,7 +231,7 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
             <div class="wf-node-icon"><i class="fa-solid fa-diagram-project"></i></div>
             <h4>Datenmodell</h4>
           </div>
-          <p>Star-Schema: fact_orders + fact_order_items über Fremdschlüssel mit Dimensionstabellen verknüpfen (JOIN).</p>
+          <p>Galaxy-Schema (Fact Constellation): fact_orders + fact_order_items über Fremdschlüssel mit Dimensionstabellen verknüpfen (JOIN).</p>
         </div>
       </div>
       <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
@@ -349,11 +349,11 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
   <div class="ds-box">
     <div class="ds-icon"><i class="fa-solid fa-database"></i></div>
     <div class="ds-body">
-      <div class="ds-title">CSV-Dateien im Star-Schema <a href="https://github.com/swrobuts/BurgerMetrics" target="_blank"><i class="fa-brands fa-github"></i> GitHub Repository</a></div>
+      <div class="ds-title">CSV-Dateien im Galaxy-Schema (Fact Constellation) <a href="https://github.com/swrobuts/BurgerMetrics" target="_blank"><i class="fa-brands fa-github"></i> GitHub Repository</a></div>
       <p class="ds-text">
         Simulierte Exporte aus POS-System und Online-Shop (wie aus ERP/Warenwirtschaft).
         <strong>754.513 Bestellungen</strong>, knapp <strong>3 Mio. Einzelposten</strong>, Zeitraum 2017–2026.
-        Star-Schema mit 2 Fakten- und 9 Dimensionstabellen. Datenherkunft über
+        Galaxy-Schema (Fact Constellation) mit 2 Fakten- und 9 Dimensionstabellen. Datenherkunft über
         <strong>order_channel</strong> (Counter, Drive-Through, Kiosk, App Order) und
         <strong>branch_id</strong> (Filiale) nachvollziehbar.
       </p>
