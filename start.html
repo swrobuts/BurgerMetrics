@@ -250,31 +250,67 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
 <!-- TECHNOLOGY STACKS -->
 <div class="sec" style="padding-top:0">
   <h2>Technology Stacks</h2>
-  <p class="lead">Das Projekt lässt sich mit verschiedenen Technologien umsetzen. Viele kommerzielle Anbieter bieten kostenlose Academic Accounts an.</p>
+  <p class="lead">Das Projekt lässt sich mit verschiedenen Technologien umsetzen — von der Datenbank bis zum Dashboard. Viele Anbieter bieten kostenlose Academic Accounts an.</p>
   <div class="stacks">
+
     <div class="stack">
-      <h4><i class="fa-solid fa-building"></i> Kommerzielle BI-Plattformen</h4>
-      <p class="hint">Kostenlose Lizenzen für Studierende und Lehrende verfügbar.</p>
+      <h4><i class="fa-solid fa-server"></i> Datenbanken &amp; Data Warehouses</h4>
+      <p class="hint">Für SQL-basierte Analyse, Modellierung und OLAP.</p>
+      <ul>
+        <li><strong>PostgreSQL</strong> Relationale DB, kostenlos, idealer Einstieg in SQL</li>
+        <li><strong>MySQL</strong> Verbreitete relationale Datenbank, Open Source</li>
+        <li><strong>DuckDB</strong> Analytische In-Process-DB, liest CSVs direkt, kein Server nötig</li>
+        <li><strong>SQL Server</strong> Microsoft, Developer Edition kostenlos <a href="https://www.microsoft.com/de-de/sql-server/sql-server-downloads" target="_blank">Download →</a></li>
+        <li><strong>Snowflake</strong> Cloud Data Warehouse, Education Program <a href="https://www.snowflake.com/en/data-cloud/overview/education/" target="_blank">Academic →</a></li>
+        <li><strong>Google BigQuery</strong> Serverless DWH, Free Tier 1 TB/Monat <a href="https://cloud.google.com/bigquery/pricing" target="_blank">Info →</a></li>
+        <li><strong>MongoDB</strong> Dokumentenbasierte NoSQL-DB, Community Server kostenlos</li>
+      </ul>
+    </div>
+
+    <div class="stack">
+      <h4><i class="fa-solid fa-chart-pie"></i> BI-Plattformen &amp; Reporting</h4>
+      <p class="hint">Dashboards, Reports und Self-Service Analytics.</p>
       <ul>
         <li><strong>Power BI</strong> Desktop kostenlos; Pro über Microsoft Education <a href="https://www.microsoft.com/de-de/education" target="_blank">Academic →</a></li>
         <li><strong>Tableau</strong> 1 Jahr kostenlos für Studierende <a href="https://www.tableau.com/de-de/academic/students" target="_blank">Academic →</a></li>
         <li><strong>DeltaMaster</strong> OLAP-basierte Analyse und Reporting (Bissantz) <a href="https://www.bissantz.de/deltamaster/" target="_blank">Info →</a></li>
-        <li><strong>SAP Analytics</strong> Zugang über SAP University Alliances <a href="https://www.sap.com/germany/products/technology-platform/cloud-analytics.html" target="_blank">Info →</a></li>
-        <li><strong>Qlik Sense</strong> Academic Program verfügbar <a href="https://www.qlik.com/de-de/academic-program" target="_blank">Academic →</a></li>
-      </ul>
-    </div>
-    <div class="stack">
-      <h4><i class="fa-brands fa-osi"></i> Open-Source-Alternativen</h4>
-      <p class="hint">Kostenlos und ohne Einschränkungen — ideal für den Einstieg.</p>
-      <ul>
-        <li><strong>Python</strong> pandas, matplotlib, seaborn, plotly, Jupyter Notebooks</li>
-        <li><strong>R</strong> tidyverse, ggplot2, shiny, R Markdown</li>
-        <li><strong>DuckDB</strong> Analytische SQL-Datenbank, liest CSV-Dateien direkt</li>
+        <li><strong>Qlik Sense</strong> Assoziatives Datenmodell, Academic Program <a href="https://www.qlik.com/de-de/academic-program" target="_blank">Academic →</a></li>
+        <li><strong>SAP Analytics</strong> Cloud, Zugang über University Alliances <a href="https://www.sap.com/germany/products/technology-platform/cloud-analytics.html" target="_blank">Info →</a></li>
         <li><strong>Superset</strong> Open-Source BI-Dashboard (Apache Foundation)</li>
-        <li><strong>Metabase</strong> Self-hosted BI mit SQL und visueller Exploration</li>
-        <li><strong>Excel / Calc</strong> Pivot-Tabellen, Power Query, schneller Einstieg</li>
+        <li><strong>Metabase</strong> Self-hosted BI, Open Source, visuelle Exploration</li>
       </ul>
     </div>
+
+    <div class="stack">
+      <h4><i class="fa-solid fa-arrows-spin"></i> ETL, Integration &amp; Orchestrierung</h4>
+      <p class="hint">Datenpipelines bauen: Extraktion, Transformation, Laden.</p>
+      <ul>
+        <li><strong>Power Query</strong> In Excel/Power BI integriert, GUI-basiertes ETL</li>
+        <li><strong>dbt</strong> SQL-basierte Transformation, Open-Source Core <a href="https://www.getdbt.com/" target="_blank">Info →</a></li>
+        <li><strong>Apache Airflow</strong> Workflow-Orchestrierung, Open Source</li>
+        <li><strong>Talend Open Studio</strong> GUI-basiertes ETL, Open-Source-Edition</li>
+        <li><strong>KNIME</strong> Visual Data Science, Open Source <a href="https://www.knime.com/knime-analytics-platform" target="_blank">Download →</a></li>
+        <li><strong>Azure Data Factory</strong> Cloud-ETL, über Azure for Students kostenlos <a href="https://azure.microsoft.com/de-de/free/students/" target="_blank">Academic →</a></li>
+        <li><strong>AWS Glue</strong> Serverless ETL, über AWS Educate <a href="https://aws.amazon.com/de/education/awseducate/" target="_blank">Academic →</a></li>
+      </ul>
+    </div>
+
+    <div class="stack">
+      <h4><i class="fa-solid fa-code"></i> Programmierung &amp; Data Science</h4>
+      <p class="hint">Für Scripting, statistische Analyse und Machine Learning.</p>
+      <ul>
+        <li><strong>Python</strong> pandas, matplotlib, seaborn, plotly, Dash, scikit-learn, Streamlit, Jupyter</li>
+        <li><strong>R</strong> tidyverse, ggplot2, shiny, R Markdown, caret</li>
+        <li><strong>JavaScript</strong> D3.js, Chart.js, Observable, Node.js — ideal für Web-Dashboards</li>
+        <li><strong>SQL</strong> Universelle Abfragesprache, läuft auf allen genannten DBs</li>
+        <li><strong>Excel</strong> Pivot-Tabellen, Power Query — kommerziell (Office 365 Education kostenlos) <a href="https://www.microsoft.com/de-de/education/products/office" target="_blank">Academic →</a></li>
+        <li><strong>LibreOffice Calc</strong> Open-Source-Alternative mit Pivot-Tabellen</li>
+        <li><strong>Jupyter Hub</strong> Kollaborative Notebooks, Open Source</li>
+        <li><strong>Google Colab</strong> Cloud-Notebooks, kostenlos, GPU-Zugang <a href="https://colab.research.google.com/" target="_blank">Starten →</a></li>
+        <li><strong>Databricks</strong> Community Edition kostenlos, Spark-basiert <a href="https://community.cloud.databricks.com/" target="_blank">Community →</a></li>
+      </ul>
+    </div>
+
   </div>
 </div>
 
