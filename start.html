@@ -406,6 +406,125 @@ footer {
   letter-spacing: .5px;
 }
 
+/* ── Workflow ── */
+.workflow-section {
+  max-width: 960px;
+  margin: 32px auto 0;
+  padding: 0 24px;
+}
+.workflow-section h3 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--stone-light);
+  margin-bottom: 16px;
+  text-align: center;
+}
+.workflow-box {
+  background: var(--charcoal-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 24px;
+}
+.wf-steps {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+.wf-step {
+  flex: 1;
+  text-align: center;
+  padding: 0 8px;
+  position: relative;
+}
+.wf-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  margin: 0 auto 10px;
+  position: relative; z-index: 2;
+}
+.wf-step:nth-child(1) .wf-num { background: #B91C1C; }
+.wf-step:nth-child(2) .wf-num { background: #D97706; }
+.wf-step:nth-child(3) .wf-num { background: #2563eb; }
+.wf-step:nth-child(4) .wf-num { background: #059669; }
+.wf-step:nth-child(5) .wf-num { background: #7c3aed; }
+.wf-title {
+  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8); margin-bottom: 6px;
+}
+.wf-desc {
+  font-size: 11px; color: rgba(255,255,255,.35); line-height: 1.6;
+}
+.wf-arrow {
+  position: absolute; top: 18px; right: -6px;
+  color: var(--stone); font-size: 10px; z-index: 1;
+}
+.wf-step:last-child .wf-arrow { display: none; }
+
+/* ── Tech stacks ── */
+.stacks-section {
+  max-width: 960px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+}
+.stacks-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.stack-box {
+  background: var(--charcoal-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 22px;
+}
+.stack-box h4 {
+  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.7);
+  margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+}
+.stack-box h4 i { color: var(--stone-light); font-size: 13px; }
+.stack-hint {
+  font-size: 10px; color: var(--stone-light); margin-bottom: 12px; font-style: italic;
+}
+.stack-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.stack-item {
+  font-size: 11.5px; color: rgba(255,255,255,.4); line-height: 1.5;
+  display: flex; align-items: baseline; gap: 6px;
+}
+.stack-item strong { color: rgba(255,255,255,.65); font-weight: 600; min-width: 110px; flex-shrink: 0; }
+.stack-item a {
+  color: var(--gold); text-decoration: none; font-size: 10px; font-weight: 500;
+  white-space: nowrap;
+}
+.stack-item a:hover { text-decoration: underline; }
+
+/* ── Disclaimer ── */
+.disclaimer {
+  max-width: 960px;
+  margin: 20px auto 0;
+  padding: 0 24px;
+}
+.disclaimer-box {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 20px;
+  font-size: 11px;
+  color: rgba(255,255,255,.3);
+  line-height: 1.7;
+}
+.disclaimer-box strong { color: rgba(255,255,255,.45); }
+
+/* ── Global overflow fix ── */
+body { overflow-x: hidden; }
+.header, .cards-section, .dataset-strip, .workflow-section, .stacks-section, .disclaimer, .info-strip, footer {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .header { padding: 32px 20px 0; }
@@ -415,6 +534,11 @@ footer {
   .stat-val { font-size: 11px; }
   .dataset-box { flex-direction: column; }
   .intro { padding: 0 20px; }
+  .wf-steps { flex-direction: column; gap: 16px; }
+  .wf-arrow { display: none !important; }
+  .stacks-grid { grid-template-columns: 1fr; }
+  .stack-item { flex-direction: column; gap: 2px; }
+  .stack-item strong { min-width: auto; }
 }
 @media (max-width: 480px) {
   .stats-strip { flex-wrap: wrap; }
@@ -507,13 +631,15 @@ footer {
   <div class="dataset-box">
     <div class="dataset-icon"><i class="fa-solid fa-database"></i></div>
     <div class="dataset-content">
-      <div class="dataset-title">CSV-Datensatz für eigene Analysen</div>
+      <div class="dataset-title">CSV-Datensatz für eigene Analysen &nbsp;·&nbsp; <a href="https://github.com/swrobuts/BurgerMetrics" target="_blank" style="color:var(--gold);text-decoration:none;font-size:11px"><i class="fa-brands fa-github"></i> github.com/swrobuts/BurgerMetrics</a></div>
       <div class="dataset-desc">
-        Alle Daten stehen als <strong>CSV-Dateien</strong> zur Verfügung — ideal für eigene Auswertungen mit
-        Python, R, SQL, Excel oder BI-Tools. Der Datensatz umfasst <strong>754.513 Bestellungen</strong> mit
-        knapp <strong>3 Mio. Einzelposten</strong>, Kunden-, Filial-, Produkt-, Wetter- und Promotionsdaten
-        im klassischen <strong>Star-Schema</strong> (Fact- und Dimensionstabellen) sowie eine vorbereitete
-        <strong>One Big Table (OBT)</strong> für den schnellen Einstieg.
+        Alle Daten stehen als <strong>CSV-Dateien</strong> auf GitHub zum Download bereit. Der Datensatz simuliert
+        <strong>Exporte aus dem POS-System und dem Online-Shop</strong>, wie sie in der Praxis aus ERP- bzw.
+        Warenwirtschaftssystemen generiert werden. Er umfasst <strong>754.513 Bestellungen</strong> mit knapp
+        <strong>3 Mio. Einzelposten</strong> im klassischen <strong>Star-Schema</strong> (Fakten- und
+        Dimensionstabellen) sowie eine vorbereitete <strong>One Big Table (obt_orders.csv)</strong> für den
+        schnellen Einstieg ohne JOINs. Ideal für Auswertungen mit <strong>Power BI, Tableau, DeltaMaster,
+        Excel, Python, R</strong> oder SQL-Datenbanken.
       </div>
       <div class="dataset-files">
         <span class="dataset-file">fact_orders.csv</span>
@@ -531,6 +657,84 @@ footer {
         <span class="dataset-file">dim_time_slot.csv</span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Analytics Workflow -->
+<div class="workflow-section">
+  <h3>Analytics-Projektablauf</h3>
+  <div class="workflow-box">
+    <div class="wf-steps">
+      <div class="wf-step">
+        <div class="wf-num">1</div>
+        <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        <div class="wf-title">Datenquellen</div>
+        <div class="wf-desc">Die CSV-Dateien simulieren Exporte aus dem POS-Kassensystem (Counter, Drive-Through, Kiosk) und dem Online-Shop (App Order). In der Praxis stammen solche Exporte aus ERP- bzw. Warenwirtschaftssystemen.</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">2</div>
+        <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        <div class="wf-title">Datenmodell</div>
+        <div class="wf-desc">Star-Schema aufbauen: fact_orders und fact_order_items mit Dimensionstabellen (dim_branch, dim_product, dim_customer, dim_date, ...) über Schlüssel verknüpfen (JOIN).</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">3</div>
+        <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        <div class="wf-title">Transformation</div>
+        <div class="wf-desc">Datentypen bereinigen, Datumsfelder parsen, berechnete Spalten anlegen (z.B. Umsatz pro Kunde, Kanalzuordnung POS vs. App, Zeitslots). Alternativ: obt_orders.csv nutzen (alles vorverknüpft).</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">4</div>
+        <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        <div class="wf-title">Analyse</div>
+        <div class="wf-desc">KPIs berechnen, Filialvergleich, Kanalanalyse (order_channel), Kundensegmentierung (RFM), Zeitreihen, Korrelationen (Wetter, Promotions).</div>
+      </div>
+      <div class="wf-step">
+        <div class="wf-num">5</div>
+        <div class="wf-title">Visualisierung</div>
+        <div class="wf-desc">Dashboards und Berichte erstellen. Ergebnisse mit dem BurgerMetrics-BI-Dashboard vergleichen — alle dortigen Werte sind aus denselben CSV-Dateien berechnet.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Technology Stacks -->
+<div class="stacks-section">
+  <div class="stacks-grid">
+    <div class="stack-box">
+      <h4><i class="fa-solid fa-building"></i> Kommerzielle BI-Plattformen</h4>
+      <p class="stack-hint">Viele Anbieter bieten kostenlose Lizenzen für Studierende und Lehrende.</p>
+      <ul class="stack-list">
+        <li class="stack-item"><strong>Power BI</strong> Desktop kostenlos; Pro via Education <a href="https://www.microsoft.com/de-de/education" target="_blank">Academic →</a></li>
+        <li class="stack-item"><strong>Tableau</strong> 1 Jahr kostenlos für Studierende <a href="https://www.tableau.com/de-de/academic/students" target="_blank">Academic →</a></li>
+        <li class="stack-item"><strong>DeltaMaster</strong> OLAP-basierte Analyse &amp; Reporting <a href="https://www.bissantz.de/deltamaster/" target="_blank">Info →</a></li>
+        <li class="stack-item"><strong>SAP Analytics</strong> Über University Alliances <a href="https://www.sap.com/germany/products/technology-platform/cloud-analytics.html" target="_blank">Info →</a></li>
+        <li class="stack-item"><strong>Qlik Sense</strong> Academic Program verfügbar <a href="https://www.qlik.com/de-de/academic-program" target="_blank">Academic →</a></li>
+      </ul>
+    </div>
+    <div class="stack-box">
+      <h4><i class="fa-brands fa-osi"></i> Open-Source-Alternativen</h4>
+      <p class="stack-hint">Kostenlos und ohne Einschränkungen — ideal für den Einstieg.</p>
+      <ul class="stack-list">
+        <li class="stack-item"><strong>Python</strong> pandas, matplotlib, seaborn, plotly, Jupyter</li>
+        <li class="stack-item"><strong>R</strong> tidyverse, ggplot2, shiny, R Markdown</li>
+        <li class="stack-item"><strong>DuckDB</strong> Analytische SQL-DB, liest CSVs direkt</li>
+        <li class="stack-item"><strong>Superset</strong> Open-Source BI-Dashboard (Apache)</li>
+        <li class="stack-item"><strong>Metabase</strong> Self-hosted BI mit SQL &amp; Exploration</li>
+        <li class="stack-item"><strong>Excel / Calc</strong> Pivot-Tabellen, schneller Einstieg</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Disclaimer -->
+<div class="disclaimer">
+  <div class="disclaimer-box">
+    <strong>Hinweis:</strong> BurgerMetrics ist ein fiktives Unternehmen. Alle Daten sind <strong>Musterdaten</strong>,
+    die für Lehrzwecke generiert wurden. Die Werte bilden keine realistischen betriebswirtschaftlichen Größenordnungen
+    ab — der Fokus liegt auf einer <strong>umfangreichen, strukturell vielfältigen Datenmenge</strong>, die sich für
+    analytische Übungen eignet. Die Erwähnung kommerzieller Produkte dient ausschließlich der
+    <strong>technischen Einordnung</strong> und stellt keine Werbung oder Produktempfehlung dar.
   </div>
 </div>
 
