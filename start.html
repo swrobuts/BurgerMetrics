@@ -54,18 +54,29 @@ body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;
 .c-gold .card-tag{background:#fffbeb;color:var(--gold);border:1px solid #fde68a}
 .c-blue .card-tag{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe}
 
-/* === WORKFLOW === */
-.wf-box{background:var(--g50);border:1px solid var(--g200);border-radius:12px;padding:28px 24px}
-.wf-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
-.wf-step{text-align:center}
-.wf-num{width:34px;height:34px;border-radius:50%;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
-.wf-step:nth-child(1) .wf-num{background:var(--red)}
-.wf-step:nth-child(2) .wf-num{background:var(--gold)}
-.wf-step:nth-child(3) .wf-num{background:var(--blue)}
-.wf-step:nth-child(4) .wf-num{background:var(--green)}
-.wf-step:nth-child(5) .wf-num{background:var(--purple)}
-.wf-step h4{font-size:14px;font-weight:700;color:var(--g800);margin-bottom:4px}
-.wf-step p{font-size:13px;color:var(--g500);line-height:1.6}
+/* === WORKFLOW (Flowchart) === */
+.wf-box{padding:8px 0}
+.wf-flow{display:flex;align-items:stretch;gap:0}
+.wf-node{flex:1;display:flex;flex-direction:column;position:relative}
+.wf-node-box{background:#fff;border:2px solid var(--g200);border-radius:10px;padding:16px 18px;flex:1;transition:border-color .2s}
+.wf-node:nth-child(1) .wf-node-box{border-top:3px solid var(--red)}
+.wf-node:nth-child(2) .wf-node-box{border-top:3px solid var(--gold)}
+.wf-node:nth-child(3) .wf-node-box{border-top:3px solid var(--blue)}
+.wf-node:nth-child(4) .wf-node-box{border-top:3px solid var(--green)}
+.wf-node:nth-child(5) .wf-node-box{border-top:3px solid var(--purple)}
+.wf-node-box:hover{border-color:var(--g300)}
+.wf-node-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.wf-node-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;flex-shrink:0}
+.wf-node:nth-child(1) .wf-node-icon{background:var(--red)}
+.wf-node:nth-child(2) .wf-node-icon{background:var(--gold)}
+.wf-node:nth-child(3) .wf-node-icon{background:var(--blue)}
+.wf-node:nth-child(4) .wf-node-icon{background:var(--green)}
+.wf-node:nth-child(5) .wf-node-icon{background:var(--purple)}
+.wf-node h4{font-size:14px;font-weight:700;color:var(--g800)}
+.wf-node p{font-size:13px;color:var(--g500);line-height:1.6}
+.wf-arrow{display:flex;align-items:center;justify-content:center;width:36px;flex-shrink:0;color:var(--g300);font-size:18px;position:relative}
+.wf-arrow::before{content:'';position:absolute;top:50%;left:0;right:14px;height:2px;background:var(--g200)}
+.wf-arrow i{position:relative;z-index:1;background:#fff;padding:0 2px}
 
 /* === STACKS === */
 .stacks{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
@@ -107,9 +118,8 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
 @media(max-width:768px){
   .cards{grid-template-columns:1fr}
   .stacks{grid-template-columns:1fr}
-  .wf-steps{grid-template-columns:1fr;gap:14px}
-  .wf-step{text-align:left;display:flex;gap:12px;align-items:flex-start}
-  .wf-num{margin:0;flex-shrink:0}
+  .wf-flow{flex-direction:column;gap:0}
+  .wf-arrow{width:auto;height:28px;transform:rotate(90deg)}
   .ds-box{flex-direction:column}
   .stats{flex-wrap:wrap;max-width:100%}
   .stat{min-width:50%;border-bottom:1px solid var(--g200)}
@@ -134,7 +144,7 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
 <div class="hero">
   <div class="hero-badge"><i class="fa-solid fa-graduation-cap"></i> Business Intelligence Lernumgebung</div>
   <h1>Burger<span>Metrics</span></h1>
-  <p>Fiktive Fast-Food-Kette mit 8 Filialen in Würzburg. Die Lernumgebung simuliert den Datenfluss einer Systemgastronomie — entweder vom POS-Kassensystem oder über den Online-Shop bis zur BI-Analyse.</p>
+  <p>Fiktive Fast-Food-Kette mit 8 Filialen in Würzburg. Die Lernumgebung simuliert den Datenfluss einer Systemgastronomie — vom POS-Kassensystem über den Online-Shop bis zur BI-Analyse.</p>
   <div class="stats">
     <div class="stat"><b>8</b><small>Filialen</small></div>
     <div class="stat"><b>24.992</b><small>Kunden</small></div>
@@ -183,40 +193,54 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
   <h2>Analytics-Projektablauf</h2>
   <p class="lead">Von den Rohdaten bis zur Entscheidungsvorlage — dieser Ablauf lässt sich mit den BurgerMetrics-Daten Schritt für Schritt nachbauen.</p>
   <div class="wf-box">
-    <div class="wf-steps">
-      <div class="wf-step">
-        <div class="wf-num">1</div>
-        <div>
-          <h4>Datenquellen</h4>
-          <p>CSV-Exporte aus dem POS-System (Counter, Drive-Through, Kiosk) und Online-Shop (App Order). Simuliert Exporte aus ERP-/Warenwirtschaftssystemen.</p>
+    <div class="wf-flow">
+      <div class="wf-node">
+        <div class="wf-node-box">
+          <div class="wf-node-head">
+            <div class="wf-node-icon"><i class="fa-solid fa-database"></i></div>
+            <h4>Datenquellen</h4>
+          </div>
+          <p>CSV-Exporte aus POS-System (Counter, Drive-Through, Kiosk) und Online-Shop (App Order). Simuliert Exporte aus ERP-/Warenwirtschaft.</p>
         </div>
       </div>
-      <div class="wf-step">
-        <div class="wf-num">2</div>
-        <div>
-          <h4>Datenmodell</h4>
-          <p>Star-Schema: fact_orders und fact_order_items über Fremdschlüssel (branch_id, product_id, customer_id, …) mit Dimensionstabellen verknüpfen.</p>
+      <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="wf-node">
+        <div class="wf-node-box">
+          <div class="wf-node-head">
+            <div class="wf-node-icon"><i class="fa-solid fa-diagram-project"></i></div>
+            <h4>Datenmodell</h4>
+          </div>
+          <p>Star-Schema: fact_orders + fact_order_items über Fremdschlüssel mit Dimensionstabellen verknüpfen (JOIN).</p>
         </div>
       </div>
-      <div class="wf-step">
-        <div class="wf-num">3</div>
-        <div>
-          <h4>Transformation</h4>
-          <p>Datentypen bereinigen, berechnete Spalten anlegen (AOV, Kanalzuordnung, Zeitslots). Shortcut: obt_orders.csv — alles vorverknüpft, kein JOIN nötig.</p>
+      <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="wf-node">
+        <div class="wf-node-box">
+          <div class="wf-node-head">
+            <div class="wf-node-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <h4>Transformation</h4>
+          </div>
+          <p>Datentypen bereinigen, berechnete Spalten (AOV, Zeitslots). Shortcut: obt_orders.csv — vorverknüpft, kein JOIN.</p>
         </div>
       </div>
-      <div class="wf-step">
-        <div class="wf-num">4</div>
-        <div>
-          <h4>Analyse</h4>
-          <p>KPIs berechnen, Filialvergleich, Kanalanalyse (order_channel), RFM-Segmentierung, Zeitreihen, Korrelationen mit Wetter- und Promotionsdaten.</p>
+      <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="wf-node">
+        <div class="wf-node-box">
+          <div class="wf-node-head">
+            <div class="wf-node-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <h4>Analyse</h4>
+          </div>
+          <p>KPIs, Filialvergleich, Kanalanalyse, RFM-Segmentierung, Zeitreihen, Wetter-/Promotions-Korrelationen.</p>
         </div>
       </div>
-      <div class="wf-step">
-        <div class="wf-num">5</div>
-        <div>
-          <h4>Visualisierung</h4>
-          <p>Dashboards bauen, Ergebnisse mit dem BurgerMetrics-Dashboard vergleichen — alle Werte sind aus denselben CSVs berechnet und nachprüfbar.</p>
+      <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+      <div class="wf-node">
+        <div class="wf-node-box">
+          <div class="wf-node-head">
+            <div class="wf-node-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h4>Visualisierung</h4>
+          </div>
+          <p>Dashboards bauen, Ergebnisse mit dem BurgerMetrics-Dashboard vergleichen. Alle Werte aus denselben CSVs.</p>
         </div>
       </div>
     </div>
