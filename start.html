@@ -78,17 +78,24 @@ body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;
 .wf-arrow::before{content:'';position:absolute;top:50%;left:0;right:14px;height:2px;background:var(--g200)}
 .wf-arrow i{position:relative;z-index:1;background:#fff;padding:0 2px}
 
-/* === STACKS === */
+/* === STACKS (Tables) === */
 .stacks{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
-.stack{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:20px 22px}
-.stack h4{font-size:15px;font-weight:700;color:var(--g800);margin-bottom:2px;display:flex;align-items:center;gap:6px}
-.stack h4 i{color:var(--g400);font-size:15px}
-.stack .hint{font-size:12px;color:var(--g400);font-style:italic;margin-bottom:12px}
-.stack ul{list-style:none;display:flex;flex-direction:column;gap:8px}
-.stack li{font-size:14px;color:var(--g600);display:flex;align-items:baseline;gap:6px;line-height:1.5}
-.stack li strong{color:var(--g800);font-weight:600;min-width:110px;flex-shrink:0}
-.stack li a{color:var(--blue);font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap}
-.stack li a:hover{text-decoration:underline}
+.stack{background:#fff;border:1px solid var(--g200);border-radius:10px;overflow:hidden}
+.stack-head{padding:16px 20px 12px;border-bottom:1px solid var(--g200);background:var(--g50)}
+.stack-head h4{font-size:15px;font-weight:700;color:var(--g800);display:flex;align-items:center;gap:6px;margin-bottom:0}
+.stack-head h4 i{color:var(--g400);font-size:15px}
+.stk-table{width:100%;border-collapse:collapse;font-size:13px}
+.stk-table thead th{text-align:left;padding:8px 14px;font-size:11px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--g200);background:var(--g50)}
+.stk-table thead th:last-child{text-align:center;width:100px}
+.stk-table tbody td{padding:9px 14px;border-bottom:1px solid var(--g100);color:var(--g600);vertical-align:top}
+.stk-table tbody tr:last-child td{border-bottom:none}
+.stk-table tbody td:first-child{font-weight:600;color:var(--g800);white-space:nowrap}
+.stk-table tbody td:last-child{text-align:center}
+.stk-table a{color:var(--blue);font-size:11px;font-weight:600;text-decoration:none;white-space:nowrap}
+.stk-table a:hover{text-decoration:underline}
+.badge-os{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0}
+.badge-com{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.badge-free{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:#fefce8;color:#a16207;border:1px solid #fde68a}
 
 /* === DATASET === */
 .ds-box{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:24px 28px;display:flex;gap:18px;align-items:flex-start;margin-top:20px}
@@ -250,65 +257,73 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
 <!-- TECHNOLOGY STACKS -->
 <div class="sec" style="padding-top:0">
   <h2>Technology Stacks</h2>
-  <p class="lead">Das Projekt lässt sich mit verschiedenen Technologien umsetzen — von der Datenbank bis zum Dashboard. Viele Anbieter bieten kostenlose Academic Accounts an.</p>
+  <p class="lead">Von der Datenbank bis zum Dashboard — eine Auswahl geeigneter Technologien für das Projekt. Viele kommerzielle Anbieter bieten kostenlose Academic Accounts an.</p>
   <div class="stacks">
 
     <div class="stack">
-      <h4><i class="fa-solid fa-server"></i> Datenbanken &amp; Data Warehouses</h4>
-      <p class="hint">Für SQL-basierte Analyse, Modellierung und OLAP.</p>
-      <ul>
-        <li><strong>PostgreSQL</strong> Relationale DB, kostenlos, idealer Einstieg in SQL</li>
-        <li><strong>MySQL</strong> Verbreitete relationale Datenbank, Open Source</li>
-        <li><strong>DuckDB</strong> Analytische In-Process-DB, liest CSVs direkt, kein Server nötig</li>
-        <li><strong>SQL Server</strong> Microsoft, Developer Edition kostenlos <a href="https://www.microsoft.com/de-de/sql-server/sql-server-downloads" target="_blank">Download →</a></li>
-        <li><strong>Snowflake</strong> Cloud Data Warehouse, Education Program <a href="https://www.snowflake.com/en/data-cloud/overview/education/" target="_blank">Academic →</a></li>
-        <li><strong>Google BigQuery</strong> Serverless DWH, Free Tier 1 TB/Monat <a href="https://cloud.google.com/bigquery/pricing" target="_blank">Info →</a></li>
-        <li><strong>MongoDB</strong> Dokumentenbasierte NoSQL-DB, Community Server kostenlos</li>
-      </ul>
+      <div class="stack-head"><h4><i class="fa-solid fa-server"></i> Datenbanken &amp; Data Warehouses</h4></div>
+      <table class="stk-table">
+        <thead><tr><th>Bezeichnung</th><th>Kurzbeschreibung</th><th>Lizenz</th></tr></thead>
+        <tbody>
+          <tr><td>PostgreSQL</td><td>Relationale DB, idealer SQL-Einstieg</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>MySQL</td><td>Weit verbreitete relationale Datenbank</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>DuckDB</td><td>Analytische In-Process-DB, liest CSVs direkt</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>SQL Server</td><td>Microsoft, Developer Edition kostenlos <a href="https://www.microsoft.com/de-de/sql-server/sql-server-downloads" target="_blank">Download →</a></td><td><span class="badge-free">Free Tier</span></td></tr>
+          <tr><td>Snowflake</td><td>Cloud Data Warehouse <a href="https://www.snowflake.com/en/data-cloud/overview/education/" target="_blank">Academic →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>Google BigQuery</td><td>Serverless DWH, Free Tier 1 TB/Monat <a href="https://cloud.google.com/bigquery/pricing" target="_blank">Info →</a></td><td><span class="badge-free">Free Tier</span></td></tr>
+          <tr><td>MongoDB</td><td>Dokumentenbasierte NoSQL-DB</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Neo4j</td><td>Graphdatenbank, Community Edition kostenlos</td><td><span class="badge-os">Open Source</span></td></tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="stack">
-      <h4><i class="fa-solid fa-chart-pie"></i> BI-Plattformen &amp; Reporting</h4>
-      <p class="hint">Dashboards, Reports und Self-Service Analytics.</p>
-      <ul>
-        <li><strong>Power BI</strong> Desktop kostenlos; Pro über Microsoft Education <a href="https://www.microsoft.com/de-de/education" target="_blank">Academic →</a></li>
-        <li><strong>Tableau</strong> 1 Jahr kostenlos für Studierende <a href="https://www.tableau.com/de-de/academic/students" target="_blank">Academic →</a></li>
-        <li><strong>DeltaMaster</strong> OLAP-basierte Analyse und Reporting (Bissantz) <a href="https://www.bissantz.de/deltamaster/" target="_blank">Info →</a></li>
-        <li><strong>Qlik Sense</strong> Assoziatives Datenmodell, Academic Program <a href="https://www.qlik.com/de-de/academic-program" target="_blank">Academic →</a></li>
-        <li><strong>SAP Analytics</strong> Cloud, Zugang über University Alliances <a href="https://www.sap.com/germany/products/technology-platform/cloud-analytics.html" target="_blank">Info →</a></li>
-        <li><strong>Superset</strong> Open-Source BI-Dashboard (Apache Foundation)</li>
-        <li><strong>Metabase</strong> Self-hosted BI, Open Source, visuelle Exploration</li>
-      </ul>
+      <div class="stack-head"><h4><i class="fa-solid fa-chart-pie"></i> BI-Plattformen &amp; Reporting</h4></div>
+      <table class="stk-table">
+        <thead><tr><th>Bezeichnung</th><th>Kurzbeschreibung</th><th>Lizenz</th></tr></thead>
+        <tbody>
+          <tr><td>Power BI</td><td>Desktop kostenlos, Pro über Education <a href="https://www.microsoft.com/de-de/education" target="_blank">Academic →</a></td><td><span class="badge-free">Free Tier</span></td></tr>
+          <tr><td>Tableau</td><td>1 Jahr kostenlos für Studierende <a href="https://www.tableau.com/de-de/academic/students" target="_blank">Academic →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>DeltaMaster</td><td>OLAP-basierte Analyse und Reporting (Bissantz) <a href="https://www.bissantz.de/deltamaster/" target="_blank">Info →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>Qlik Sense</td><td>Assoziatives Datenmodell <a href="https://www.qlik.com/de-de/academic-program" target="_blank">Academic →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>SAP Analytics Cloud</td><td>Zugang über University Alliances <a href="https://www.sap.com/germany/products/technology-platform/cloud-analytics.html" target="_blank">Info →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>Apache Superset</td><td>Webbasiertes BI-Dashboard</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Metabase</td><td>Self-hosted BI mit SQL und visueller Exploration</td><td><span class="badge-os">Open Source</span></td></tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="stack">
-      <h4><i class="fa-solid fa-arrows-spin"></i> ETL, Integration &amp; Orchestrierung</h4>
-      <p class="hint">Datenpipelines bauen: Extraktion, Transformation, Laden.</p>
-      <ul>
-        <li><strong>Power Query</strong> In Excel/Power BI integriert, GUI-basiertes ETL</li>
-        <li><strong>dbt</strong> SQL-basierte Transformation, Open-Source Core <a href="https://www.getdbt.com/" target="_blank">Info →</a></li>
-        <li><strong>Apache Airflow</strong> Workflow-Orchestrierung, Open Source</li>
-        <li><strong>Talend Open Studio</strong> GUI-basiertes ETL, Open-Source-Edition</li>
-        <li><strong>KNIME</strong> Visual Data Science, Open Source <a href="https://www.knime.com/knime-analytics-platform" target="_blank">Download →</a></li>
-        <li><strong>Azure Data Factory</strong> Cloud-ETL, über Azure for Students kostenlos <a href="https://azure.microsoft.com/de-de/free/students/" target="_blank">Academic →</a></li>
-        <li><strong>AWS Glue</strong> Serverless ETL, über AWS Educate <a href="https://aws.amazon.com/de/education/awseducate/" target="_blank">Academic →</a></li>
-      </ul>
+      <div class="stack-head"><h4><i class="fa-solid fa-arrows-spin"></i> ETL, Integration &amp; Orchestrierung</h4></div>
+      <table class="stk-table">
+        <thead><tr><th>Bezeichnung</th><th>Kurzbeschreibung</th><th>Lizenz</th></tr></thead>
+        <tbody>
+          <tr><td>Power Query</td><td>GUI-basiertes ETL, in Excel und Power BI integriert</td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>dbt</td><td>SQL-basierte Transformation <a href="https://www.getdbt.com/" target="_blank">Info →</a></td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Apache Airflow</td><td>Workflow-Orchestrierung für Datenpipelines</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Talend Open Studio</td><td>GUI-basiertes ETL mit visueller Modellierung</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>KNIME</td><td>Visual Data Science Platform <a href="https://www.knime.com/knime-analytics-platform" target="_blank">Download →</a></td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Azure Data Factory</td><td>Cloud-ETL <a href="https://azure.microsoft.com/de-de/free/students/" target="_blank">Azure for Students →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>AWS Glue</td><td>Serverless ETL <a href="https://aws.amazon.com/de/education/awseducate/" target="_blank">AWS Educate →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="stack">
-      <h4><i class="fa-solid fa-code"></i> Programmierung &amp; Data Science</h4>
-      <p class="hint">Für Scripting, statistische Analyse und Machine Learning.</p>
-      <ul>
-        <li><strong>Python</strong> pandas, matplotlib, seaborn, plotly, Dash, scikit-learn, Streamlit, Jupyter</li>
-        <li><strong>R</strong> tidyverse, ggplot2, shiny, R Markdown, caret</li>
-        <li><strong>JavaScript</strong> D3.js, Chart.js, Observable, Node.js — ideal für Web-Dashboards</li>
-        <li><strong>SQL</strong> Universelle Abfragesprache, läuft auf allen genannten DBs</li>
-        <li><strong>Excel</strong> Pivot-Tabellen, Power Query — kommerziell (Office 365 Education kostenlos) <a href="https://www.microsoft.com/de-de/education/products/office" target="_blank">Academic →</a></li>
-        <li><strong>LibreOffice Calc</strong> Open-Source-Alternative mit Pivot-Tabellen</li>
-        <li><strong>Jupyter Hub</strong> Kollaborative Notebooks, Open Source</li>
-        <li><strong>Google Colab</strong> Cloud-Notebooks, kostenlos, GPU-Zugang <a href="https://colab.research.google.com/" target="_blank">Starten →</a></li>
-        <li><strong>Databricks</strong> Community Edition kostenlos, Spark-basiert <a href="https://community.cloud.databricks.com/" target="_blank">Community →</a></li>
-      </ul>
+      <div class="stack-head"><h4><i class="fa-solid fa-code"></i> Programmierung &amp; Data Science</h4></div>
+      <table class="stk-table">
+        <thead><tr><th>Bezeichnung</th><th>Kurzbeschreibung</th><th>Lizenz</th></tr></thead>
+        <tbody>
+          <tr><td>Python</td><td>pandas, matplotlib, seaborn, plotly, Dash, Streamlit, scikit-learn</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>R</td><td>tidyverse, ggplot2, shiny, R Markdown, caret</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>JavaScript</td><td>D3.js, Chart.js, Observable, Node.js — Web-Dashboards</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>SQL</td><td>Universelle Abfragesprache, läuft auf allen genannten DBs</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Excel</td><td>Pivot-Tabellen, Power Query <a href="https://www.microsoft.com/de-de/education/products/office" target="_blank">Education →</a></td><td><span class="badge-com">Kommerziell</span></td></tr>
+          <tr><td>LibreOffice Calc</td><td>Alternative mit Pivot-Tabellen und Makros</td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Jupyter / Colab</td><td>Notebooks lokal oder in der Cloud <a href="https://colab.research.google.com/" target="_blank">Colab →</a></td><td><span class="badge-os">Open Source</span></td></tr>
+          <tr><td>Databricks</td><td>Community Edition kostenlos, Spark-basiert <a href="https://community.cloud.databricks.com/" target="_blank">Community →</a></td><td><span class="badge-free">Free Tier</span></td></tr>
+        </tbody>
+      </table>
     </div>
 
   </div>
