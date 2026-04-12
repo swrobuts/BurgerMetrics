@@ -19,24 +19,24 @@
 body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;overflow-x:hidden}
 
 /* === LAYOUT === */
-.wrap{max-width:var(--max);margin:0 auto;padding:0 28px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 16px}
 
 /* === HERO === */
-.hero{border-bottom:1px solid var(--g200);padding:44px 28px 36px;text-align:center}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--red);background:#fef2f2;border:1px solid #fecaca;border-radius:20px;padding:5px 14px;margin-bottom:18px}
-.hero h1{font-size:clamp(32px,5vw,48px);font-weight:800;color:var(--g900);letter-spacing:-0.5px;line-height:1.15}
+.hero{border-bottom:1px solid var(--g200);padding:40px 16px 32px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--red);background:#fef2f2;border:1px solid #fecaca;border-radius:20px;padding:6px 16px;margin-bottom:16px}
+.hero h1{font-size:clamp(34px,5vw,50px);font-weight:800;color:var(--g900);letter-spacing:-0.5px;line-height:1.15}
 .hero h1 span{color:var(--red)}
-.hero p{font-size:14px;color:var(--g500);max-width:640px;margin:10px auto 0;line-height:1.75}
-.stats{display:flex;justify-content:center;margin:24px auto 0;border:1px solid var(--g200);border-radius:10px;overflow:hidden;max-width:600px;background:var(--g50)}
+.hero p{font-size:15px;color:var(--g500);max-width:700px;margin:10px auto 0;line-height:1.7}
+.stats{display:flex;justify-content:center;margin:22px auto 0;border:1px solid var(--g200);border-radius:10px;overflow:hidden;max-width:640px;background:var(--g50)}
 .stat{flex:1;padding:12px;text-align:center;border-right:1px solid var(--g200)}
 .stat:last-child{border-right:none}
-.stat b{font-family:var(--mono);font-size:16px;color:var(--g900);display:block}
-.stat small{font-size:10px;color:var(--g400);text-transform:uppercase;letter-spacing:.5px}
+.stat b{font-family:var(--mono);font-size:18px;color:var(--g900);display:block}
+.stat small{font-size:11px;color:var(--g400);text-transform:uppercase;letter-spacing:.5px}
 
 /* === SECTION === */
-.sec{padding:40px 0}
-.sec h2{font-size:20px;font-weight:800;color:var(--g900);margin-bottom:4px}
-.sec .lead{font-size:13px;color:var(--g500);margin-bottom:24px;max-width:680px}
+.sec{padding:36px 0}
+.sec h2{font-size:22px;font-weight:800;color:var(--g900);margin-bottom:4px}
+.sec .lead{font-size:15px;color:var(--g500);margin-bottom:22px;max-width:750px}
 
 /* === CARDS === */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -46,10 +46,10 @@ body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;
 .c-red .card-top{background:var(--red)}.c-gold .card-top{background:var(--gold)}.c-blue .card-top{background:var(--blue)}
 .card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
 .c-red .card-icon{background:#fef2f2;color:var(--red)}.c-gold .card-icon{background:#fffbeb;color:var(--gold)}.c-blue .card-icon{background:#eff6ff;color:var(--blue)}
-.card-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--g400);margin-bottom:2px}
-.card h3{font-size:18px;font-weight:800;color:var(--g900);margin-bottom:8px}
-.card p{font-size:12.5px;color:var(--g500);line-height:1.7;flex:1;margin-bottom:14px}
-.card-tag{font-size:10px;font-weight:600;padding:4px 10px;border-radius:5px;align-self:flex-start}
+.card-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--g400);margin-bottom:2px}
+.card h3{font-size:20px;font-weight:800;color:var(--g900);margin-bottom:8px}
+.card p{font-size:14px;color:var(--g500);line-height:1.7;flex:1;margin-bottom:14px}
+.card-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:5px;align-self:flex-start}
 .c-red .card-tag{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
 .c-gold .card-tag{background:#fffbeb;color:var(--gold);border:1px solid #fde68a}
 .c-blue .card-tag{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe}
@@ -64,39 +64,39 @@ body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;
 .wf-step:nth-child(3) .wf-num{background:var(--blue)}
 .wf-step:nth-child(4) .wf-num{background:var(--green)}
 .wf-step:nth-child(5) .wf-num{background:var(--purple)}
-.wf-step h4{font-size:12px;font-weight:700;color:var(--g800);margin-bottom:4px}
-.wf-step p{font-size:11px;color:var(--g500);line-height:1.6}
+.wf-step h4{font-size:14px;font-weight:700;color:var(--g800);margin-bottom:4px}
+.wf-step p{font-size:13px;color:var(--g500);line-height:1.6}
 
 /* === STACKS === */
 .stacks{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
 .stack{background:var(--g50);border:1px solid var(--g200);border-radius:10px;padding:20px 22px}
-.stack h4{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:2px;display:flex;align-items:center;gap:6px}
-.stack h4 i{color:var(--g400);font-size:14px}
-.stack .hint{font-size:10px;color:var(--g400);font-style:italic;margin-bottom:12px}
-.stack ul{list-style:none;display:flex;flex-direction:column;gap:7px}
-.stack li{font-size:12px;color:var(--g600);display:flex;align-items:baseline;gap:6px;line-height:1.5}
-.stack li strong{color:var(--g800);font-weight:600;min-width:100px;flex-shrink:0}
-.stack li a{color:var(--blue);font-size:10px;font-weight:600;text-decoration:none;white-space:nowrap}
+.stack h4{font-size:15px;font-weight:700;color:var(--g800);margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.stack h4 i{color:var(--g400);font-size:15px}
+.stack .hint{font-size:12px;color:var(--g400);font-style:italic;margin-bottom:12px}
+.stack ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+.stack li{font-size:14px;color:var(--g600);display:flex;align-items:baseline;gap:6px;line-height:1.5}
+.stack li strong{color:var(--g800);font-weight:600;min-width:110px;flex-shrink:0}
+.stack li a{color:var(--blue);font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap}
 .stack li a:hover{text-decoration:underline}
 
 /* === DATASET === */
 .ds-box{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:24px 28px;display:flex;gap:18px;align-items:flex-start;margin-top:20px}
 .ds-icon{width:44px;height:44px;border-radius:10px;background:rgba(180,83,9,.1);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);flex-shrink:0}
 .ds-body{flex:1;min-width:0}
-.ds-title{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:6px}
-.ds-title a{color:var(--blue);font-weight:600;text-decoration:none;margin-left:8px;font-size:12px}
+.ds-title{font-size:15px;font-weight:700;color:var(--g800);margin-bottom:6px}
+.ds-title a{color:var(--blue);font-weight:600;text-decoration:none;margin-left:8px;font-size:13px}
 .ds-title a:hover{text-decoration:underline}
-.ds-text{font-size:12px;color:var(--g600);line-height:1.75;margin-bottom:10px}
+.ds-text{font-size:14px;color:var(--g600);line-height:1.75;margin-bottom:10px}
 .ds-text strong{color:var(--g800)}
 .ds-files{display:flex;flex-wrap:wrap;gap:4px}
-.df{font-family:var(--mono);font-size:9.5px;background:#fff;border:1px solid #fde68a;color:var(--g600);padding:2px 7px;border-radius:3px}
+.df{font-family:var(--mono);font-size:11px;background:#fff;border:1px solid #fde68a;color:var(--g600);padding:3px 9px;border-radius:4px}
 
 /* === DISCLAIMER === */
-.note{background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:14px 18px;margin-top:20px;font-size:11px;color:var(--g500);line-height:1.75}
+.note{background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:16px 20px;margin-top:20px;font-size:13px;color:var(--g500);line-height:1.75}
 .note strong{color:var(--g600)}
 
 /* === FOOTER === */
-footer{text-align:center;padding:20px 24px;border-top:1px solid var(--g200);margin-top:40px;font-size:11px;color:var(--g400)}
+footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);margin-top:36px;font-size:13px;color:var(--g400)}
 
 /* === RESPONSIVE === */
 @media(max-width:768px){
@@ -118,7 +118,7 @@ footer{text-align:center;padding:20px 24px;border-top:1px solid var(--g200);marg
 <div class="hero">
   <div class="hero-badge"><i class="fa-solid fa-graduation-cap"></i> Business Intelligence Lernumgebung</div>
   <h1>Burger<span>Metrics</span></h1>
-  <p>Fiktive Burger-Restaurant-Kette mit 8 Filialen in Würzburg. Die Lernumgebung simuliert den kompletten Datenfluss eines Gastronomiebetriebs — vom POS-Kassensystem über den Online-Shop bis zur BI-Analyse.</p>
+  <p>Fiktive Fast-Food-Kette mit 8 Filialen in Würzburg. Die Lernumgebung simuliert den Datenfluss einer Systemgastronomie — vom POS-Kassensystem über den Online-Shop bis zur BI-Analyse.</p>
   <div class="stats">
     <div class="stat"><b>8</b><small>Filialen</small></div>
     <div class="stat"><b>24.992</b><small>Kunden</small></div>
@@ -140,7 +140,7 @@ footer{text-align:center;padding:20px 24px;border-top:1px solid var(--g200);marg
       <div class="card-icon"><i class="fa-solid fa-cash-register"></i></div>
       <div class="card-label">Kassensystem</div>
       <h3>POS Terminal</h3>
-      <p>Simuliertes Kassensystem für den Filialverkauf. Artikel erfassen, Zahlungen abwickeln, Bons drucken, Tagesabschluss mit CSV-Export. Erzeugt Datensätze in fact_orders und fact_order_items.</p>
+      <p>Kassensystem für den Filialverkauf. Artikel erfassen, Zahlungen abwickeln, Bons drucken, Tagesabschluss mit CSV-Export.</p>
       <span class="card-tag">Counter · Drive-Through · Kiosk</span>
     </a>
     <a class="card c-gold" href="index.html">
@@ -148,7 +148,7 @@ footer{text-align:center;padding:20px 24px;border-top:1px solid var(--g200);marg
       <div class="card-icon"><i class="fa-solid fa-bag-shopping"></i></div>
       <div class="card-label">Bestellportal</div>
       <h3>Online Shop</h3>
-      <p>Vollständiges Bestellsystem mit Speisekarte, Warenkorb, interaktiver Filialkarte und Checkout. Mit Data View Toggle für die Datenperspektive — zeigt welche Daten bei jeder Interaktion entstehen.</p>
+      <p>Bestellsystem mit Speisekarte, Warenkorb, Filialkarte und Checkout. Data View Toggle zeigt, welche Daten bei jeder Interaktion entstehen.</p>
       <span class="card-tag">App Order · Delivery</span>
     </a>
     <a class="card c-blue" href="dashboard.html">
@@ -156,7 +156,7 @@ footer{text-align:center;padding:20px 24px;border-top:1px solid var(--g200);marg
       <div class="card-icon"><i class="fa-solid fa-chart-column"></i></div>
       <div class="card-label">Analyse &amp; Reporting</div>
       <h3>BI Dashboard</h3>
-      <p>Business-Intelligence-Plattform mit Umsatz-Zeitreihen (2017–2026), Filial-Scorecard, RFM-Segmentierung, Kanalanalyse, Preissimulation und Management Summary. Alle Werte aus den CSV-Daten berechnet.</p>
+      <p>BI-Plattform mit Zeitreihen 2017–2026, Filial-Scorecard, RFM-Segmentierung, Kanalanalyse und Management Summary. Alle Werte aus den CSV-Daten berechnet.</p>
       <span class="card-tag">Analytics · Data Mining</span>
     </a>
   </div>
@@ -172,35 +172,35 @@ footer{text-align:center;padding:20px 24px;border-top:1px solid var(--g200);marg
         <div class="wf-num">1</div>
         <div>
           <h4>Datenquellen</h4>
-          <p>Die CSV-Dateien simulieren Exporte aus operativen Systemen: dem POS-Kassensystem (Kanäle Counter, Drive-Through, Kiosk) und dem Online-Bestellportal (App Order). In der Praxis stammen solche Exporte aus ERP- oder Warenwirtschaftssystemen.</p>
+          <p>CSV-Exporte aus dem POS-System (Counter, Drive-Through, Kiosk) und Online-Shop (App Order). Simuliert Exporte aus ERP-/Warenwirtschaftssystemen.</p>
         </div>
       </div>
       <div class="wf-step">
         <div class="wf-num">2</div>
         <div>
           <h4>Datenmodell</h4>
-          <p>Star-Schema aufbauen: Die Faktentabellen fact_orders und fact_order_items über Fremdschlüssel (branch_id, product_id, customer_id, payment_id, promo_id) mit den Dimensionstabellen verknüpfen.</p>
+          <p>Star-Schema: fact_orders und fact_order_items über Fremdschlüssel (branch_id, product_id, customer_id, …) mit Dimensionstabellen verknüpfen.</p>
         </div>
       </div>
       <div class="wf-step">
         <div class="wf-num">3</div>
         <div>
           <h4>Transformation</h4>
-          <p>Datentypen bereinigen, Datumsfelder parsen, berechnete Kennzahlen anlegen (z.B. AOV, Kanalzuordnung, Zeitslots). Alternativ: obt_orders.csv nutzen — alle Dimensionen bereits vorverknüpft, kein JOIN nötig.</p>
+          <p>Datentypen bereinigen, berechnete Spalten anlegen (AOV, Kanalzuordnung, Zeitslots). Shortcut: obt_orders.csv — alles vorverknüpft, kein JOIN nötig.</p>
         </div>
       </div>
       <div class="wf-step">
         <div class="wf-num">4</div>
         <div>
           <h4>Analyse</h4>
-          <p>KPIs berechnen, Filialvergleich (branch_id → dim_branch), Kanalanalyse (order_channel), Kundensegmentierung (RFM via dim_customer), Zeitreihen, Korrelationen mit Wetter- und Promotionsdaten.</p>
+          <p>KPIs berechnen, Filialvergleich, Kanalanalyse (order_channel), RFM-Segmentierung, Zeitreihen, Korrelationen mit Wetter- und Promotionsdaten.</p>
         </div>
       </div>
       <div class="wf-step">
         <div class="wf-num">5</div>
         <div>
           <h4>Visualisierung</h4>
-          <p>Dashboards und Berichte erstellen. Ergebnisse mit dem BurgerMetrics-BI-Dashboard vergleichen — alle dortigen Werte sind aus denselben CSV-Dateien berechnet und nachprüfbar.</p>
+          <p>Dashboards bauen, Ergebnisse mit dem BurgerMetrics-Dashboard vergleichen — alle Werte sind aus denselben CSVs berechnet und nachprüfbar.</p>
         </div>
       </div>
     </div>
@@ -246,12 +246,11 @@ footer{text-align:center;padding:20px 24px;border-top:1px solid var(--g200);marg
     <div class="ds-body">
       <div class="ds-title">CSV-Dateien im Star-Schema <a href="https://github.com/swrobuts/BurgerMetrics" target="_blank"><i class="fa-brands fa-github"></i> GitHub Repository</a></div>
       <p class="ds-text">
-        Der Datensatz simuliert <strong>Datenexporte aus dem POS-Kassensystem und dem Online-Bestellportal</strong>,
-        wie sie in der Praxis aus ERP- bzw. Warenwirtschaftssystemen erzeugt werden. Er umfasst
-        <strong>754.513 Bestellungen</strong> mit knapp <strong>3 Mio. Einzelposten</strong> über den Zeitraum
-        2017–2026. Das Star-Schema besteht aus 2 Faktentabellen und 9 Dimensionstabellen. Die Datenherkunft
-        ist über <strong>order_channel</strong> (Counter, Drive-Through, Kiosk, App Order) und
-        <strong>branch_id</strong> (Filialzuordnung) durchgängig nachvollziehbar.
+        Simulierte Exporte aus POS-System und Online-Shop (wie aus ERP/Warenwirtschaft).
+        <strong>754.513 Bestellungen</strong>, knapp <strong>3 Mio. Einzelposten</strong>, Zeitraum 2017–2026.
+        Star-Schema mit 2 Fakten- und 9 Dimensionstabellen. Datenherkunft über
+        <strong>order_channel</strong> (Counter, Drive-Through, Kiosk, App Order) und
+        <strong>branch_id</strong> (Filiale) nachvollziehbar.
       </p>
       <div class="ds-files">
         <span class="df">fact_orders.csv</span>
