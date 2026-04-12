@@ -2549,6 +2549,10 @@ function mkHBar(id, labels, data, colors, fmtFn, extra) {
   });
 }
 
+function createYoyBranchChart(){
+  mkHBar('yoyBranchChart', branchLabels, branchRevenue, barBlue, function(v){return fmt(v)});
+}
+
 function createBranchChart(){
   mkHBar('branchChart', branchLabels, branchRevenue, barBlue, function(v){return fmt(v)});
 }
