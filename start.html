@@ -329,6 +329,83 @@ footer {
 .footer-text a { color: rgba(255,255,255,.25); text-decoration: none; }
 .footer-dot { margin: 0 8px; opacity: .3; }
 
+/* ── Intro section ── */
+.intro {
+  max-width: 780px;
+  margin: 28px auto 0;
+  padding: 0 24px;
+  text-align: center;
+}
+.intro-text {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: rgba(255,255,255,.45);
+  letter-spacing: .2px;
+}
+.intro-text strong { color: rgba(255,255,255,.7); font-weight: 600; }
+
+/* ── Dataset info ── */
+.dataset-strip {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.dataset-box {
+  background: rgba(217,119,6,.06);
+  border: 1px solid rgba(217,119,6,.15);
+  border-radius: 8px;
+  padding: 20px 28px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.dataset-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(217,119,6,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--gold);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.dataset-content { flex: 1; }
+.dataset-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+.dataset-desc {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: rgba(255,255,255,.4);
+}
+.dataset-desc strong { color: rgba(255,255,255,.6); font-weight: 600; }
+.dataset-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.dataset-file {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,.35);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: .5px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .header { padding: 32px 20px 0; }
@@ -336,6 +413,8 @@ footer {
   .cards-section { padding: 28px 20px; }
   .stats-strip { max-width: 100%; }
   .stat-val { font-size: 11px; }
+  .dataset-box { flex-direction: column; }
+  .intro { padding: 0 20px; }
 }
 @media (max-width: 480px) {
   .stats-strip { flex-wrap: wrap; }
@@ -376,6 +455,16 @@ footer {
       <span class="stat-lbl">Produkte</span>
     </div>
   </div>
+
+  <div class="intro">
+    <p class="intro-text">
+      <strong>BurgerMetrics</strong> ist ein fiktives Burger-Restaurant mit 9 Filialen in Würzburg.
+      Die Lernumgebung simuliert den gesamten Datenfluss eines realen Gastronomiebetriebs — vom
+      <strong>Kassensystem am Tresen</strong> über den <strong>Online-Bestellprozess</strong> bis zur
+      <strong>BI-Analyse</strong>. Erkunden Sie, wie bei jedem Verkaufsvorgang Daten entstehen und
+      wie diese in aussagekräftige Business-Kennzahlen transformiert werden.
+    </p>
+  </div>
 </div>
 
 <div class="cards-section">
@@ -414,7 +503,38 @@ footer {
   </div>
 </div>
 
-<div class="info-strip">
+<div class="dataset-strip">
+  <div class="dataset-box">
+    <div class="dataset-icon"><i class="fa-solid fa-database"></i></div>
+    <div class="dataset-content">
+      <div class="dataset-title">CSV-Datensatz für eigene Analysen</div>
+      <div class="dataset-desc">
+        Alle Daten stehen als <strong>CSV-Dateien</strong> zur Verfügung — ideal für eigene Auswertungen mit
+        Python, R, SQL, Excel oder BI-Tools. Der Datensatz umfasst <strong>754.514 Bestellungen</strong> mit
+        knapp <strong>3 Mio. Einzelposten</strong>, Kunden-, Filial-, Produkt-, Wetter- und Promotionsdaten
+        im klassischen <strong>Star-Schema</strong> (Fact- und Dimensionstabellen) sowie eine vorbereitete
+        <strong>One Big Table (OBT)</strong> für den schnellen Einstieg.
+      </div>
+      <div class="dataset-files">
+        <span class="dataset-file">fact_orders.csv</span>
+        <span class="dataset-file">fact_order_items.csv</span>
+        <span class="dataset-file">obt_orders.csv</span>
+        <span class="dataset-file">dim_product.csv</span>
+        <span class="dataset-file">dim_branch.csv</span>
+        <span class="dataset-file">dim_customer.csv</span>
+        <span class="dataset-file">dim_date.csv</span>
+        <span class="dataset-file">dim_employee.csv</span>
+        <span class="dataset-file">dim_weather.csv</span>
+        <span class="dataset-file">dim_promotion.csv</span>
+        <span class="dataset-file">dim_supplier.csv</span>
+        <span class="dataset-file">dim_payment_method.csv</span>
+        <span class="dataset-file">dim_time_slot.csv</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="info-strip" style="margin-top:16px">
   <span class="info-text">Tastaturkürzel: <kbd>1</kbd> POS &nbsp; <kbd>2</kbd> Shop &nbsp; <kbd>3</kbd> Dashboard</span>
 </div>
 
