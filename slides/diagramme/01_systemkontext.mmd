@@ -1,0 +1,10 @@
+flowchart LR
+    K(["Kunde"])
+    K --> SH["Online-Shop<br/>Website"]
+    K --> PO["POS-Terminal<br/>Kasse"]
+    SH --> WW[("Warenwirtschaft<br/>operativ")]
+    PO --> WW
+    WW -. "nächtlicher Abzug" .-> AW[("Auswertung<br/>analytisch")]
+    AW --> DB["Dashboard<br/>Bericht"]
+    style WW fill:#003E6E,color:#FFFFFF,stroke:#003E6E
+    style AW fill:#F7F5EF,stroke:#C9C3B4

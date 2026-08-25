@@ -114,3 +114,15 @@ py
 ERP-Modell
 CASE-Aggregation
 Ebenenwechsel
+slides
+diagramme
+mmd
+Kategoriename
+Dimensionstabelle
+raw
+stg
+mart
+materialisiert
+Historisierung
+versionierte
+Mio

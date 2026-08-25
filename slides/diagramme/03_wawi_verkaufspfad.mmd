@@ -1,0 +1,6 @@
+erDiagram
+    filiale          ||--o{ kundenbestellung : "findet statt in"
+    kunde            ||--o{ kundenbestellung : "gibt auf"
+    zahlungsart      ||--o{ kundenbestellung : "begleicht"
+    kundenbestellung ||--|{ bestellposition  : "besteht aus"
+    artikel          ||--o{ bestellposition  : "verkauft als"

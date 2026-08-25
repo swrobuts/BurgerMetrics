@@ -1,0 +1,7 @@
+flowchart LR
+    subgraph Q ["operativ · dritte Normalform"]
+      direction LR
+      A["artikel"] --- U["artikelunterkategorie"] --- K["artikelkategorie"]
+    end
+    Q ==> D["dim_product<br/>eine breite Tabelle"]
+    style D fill:#003E6E,color:#FFFFFF,stroke:#003E6E

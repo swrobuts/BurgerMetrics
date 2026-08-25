@@ -1,0 +1,17 @@
+erDiagram
+    SESSION   ||--o{ WARENKORBPOS : "hält"
+    ARTIKEL   ||--o{ WARENKORBPOS : "liegt drin"
+    SESSION   }o--o| KUNDE        : "optional angemeldet"
+    SESSION {
+        string session_id PK
+        timestamp letzte_aktivitaet
+    }
+    WARENKORBPOS {
+        int    artikel_id FK
+        int    menge
+    }
+    ARTIKEL {
+        int    artikel_id PK
+        string name
+        money  preis
+    }

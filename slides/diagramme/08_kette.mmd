@@ -1,0 +1,8 @@
+flowchart LR
+    Q["Quellsystem<br/>26 Tabellen, 3NF"]
+    R["raw<br/>1:1 übernommen"]
+    S["stg<br/>getypt, benannt"]
+    M["mart<br/>Galaxy-Schema"]
+    B["Bericht"]
+    Q --> R --> S --> M --> B
+    style M fill:#003E6E,color:#FFFFFF,stroke:#003E6E
