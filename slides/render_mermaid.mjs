@@ -22,13 +22,23 @@ const DIR = process.argv[2] || path.join(__dirname, "diagramme");
 
 // THWS-Farben aus assets/tokens.json des Skills thws-slides.
 // Grau als Normalfall, Blau nur als Akzent — siehe references/diagramme.md.
-const THEME = `%%{init: {'theme':'base','themeVariables':{
-'primaryColor':'#FFFFFF','primaryBorderColor':'#9DA8AE','primaryTextColor':'#404040',
-'lineColor':'#9DA8AE','secondaryColor':'#F7F5EF','tertiaryColor':'#FFFFFF',
-'fontFamily':'Segoe UI, Helvetica, Arial','fontSize':'15px',
-'clusterBkg':'#FCFBF8','clusterBorder':'#C9C3B4',
-'edgeLabelBackground':'#FFFFFF'}}}%%
-`;
+//
+// Das Theme geht ueber mermaid.initialize() und NICHT als vorangestellter
+// %%{init}%%-Block in die Quelle. Grund: Mermaid wertet nur die erste
+// init-Direktive einer Datei aus. Ein vorangestellter Block wuerde jede
+// Direktive im .mmd stillschweigend verwerfen — etwa das layoutDirection
+// der ER-Diagramme. Ueber initialize() gesetzt, ergaenzen Direktiven aus
+// der Datei das Theme punktuell, statt es zu verdraengen.
+const THEME = {
+  theme: "base",
+  themeVariables: {
+    primaryColor: "#FFFFFF", primaryBorderColor: "#9DA8AE", primaryTextColor: "#404040",
+    lineColor: "#9DA8AE", secondaryColor: "#F7F5EF", tertiaryColor: "#FFFFFF",
+    fontFamily: "Segoe UI, Helvetica, Arial", fontSize: "15px",
+    clusterBkg: "#FCFBF8", clusterBorder: "#C9C3B4",
+    edgeLabelBackground: "#FFFFFF",
+  },
+};
 
 const dateien = fs.readdirSync(DIR).filter(f => f.endsWith(".mmd")).sort();
 if (!dateien.length) { console.error(`Keine .mmd-Dateien in ${DIR}`); process.exit(1); }
@@ -47,12 +57,13 @@ if (!await page.evaluate(() => typeof window.mermaid !== "undefined")) {
   console.error("FEHLER: mermaid.js nicht geladen — Internetverbindung pruefen.");
   await browser.close(); process.exit(1);
 }
-await page.evaluate(() => window.mermaid.initialize({ startOnLoad: false, securityLevel: "loose" }));
+await page.evaluate((th) => window.mermaid.initialize(
+  { startOnLoad: false, securityLevel: "loose", ...th }), THEME);
 
 let ok = 0, fehler = 0;
 for (const f of dateien) {
   const name = path.basename(f, ".mmd");
-  const code = THEME + fs.readFileSync(path.join(DIR, f), "utf-8");
+  const code = fs.readFileSync(path.join(DIR, f), "utf-8");
   try {
     await page.evaluate(async (src) => {
       const { svg } = await window.mermaid.render("g" + Math.floor(performance.now() * 1000), src);

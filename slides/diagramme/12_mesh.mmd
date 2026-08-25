@@ -1,0 +1,7 @@
+flowchart LR
+    Z0["zentral"] ~~~ Z1["Verkauf · Einkauf · Personal<br/>liefern Rohdaten"] --> ZT["ein Datenteam<br/>modelliert alles"] --> ZM["ein Auswertungsmodell"]
+    M0["Data Mesh"] ~~~ M1["jede Domäne modelliert<br/>ihr eigenes Datenprodukt"] --> MG["föderierte Regeln<br/>gemeinsame Plattform"] --> MM["viele Produkte,<br/>ein gemeinsamer Vertrag"]
+    style Z0 fill:#FFFFFF,stroke:#FFFFFF,color:#8A8A8A
+    style M0 fill:#FFFFFF,stroke:#FFFFFF,color:#003E6E
+    style ZM fill:#003E6E,color:#FFFFFF,stroke:#003E6E
+    style MG fill:#EAF0F5,stroke:#003E6E
