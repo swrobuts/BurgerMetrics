@@ -1,18 +1,46 @@
 #!/usr/bin/env python3
 """
-generate_obt.py — Erzeugt die denormalisierte One-Big-Table (obt_orders.csv)
+generate_obt.py — Erzeugt die denormalisierte One Big Table (obt_orders.csv)
 aus den Star-Schema-CSVs des BurgerMetrics-Datasets.
 
-Verwendung:
-    python generate_obt.py
+Fachlicher Hintergrund
+----------------------
+Die OBT beantwortet dieselben Fragen wie das Galaxy-Schema, aber ohne JOINs:
+jede Zeile ist eine Bestellung, angereichert um die beschreibenden Attribute
+ihrer Dimensionen. Das ist der klassische Trade-off aus der BI-Vorlesung —
+Abfragekomfort und Lesegeschwindigkeit gegen Redundanz und Pflegeaufwand.
 
-Voraussetzungen:
+Die Granularität bleibt die der Bestellung (order grain), NICHT die der
+Bestellposition. `fact_order_items` wird deshalb bewusst nicht eingebunden:
+ein Join auf Positionsebene würde jede Bestellung vervielfachen und sämtliche
+Umsatzsummen aufblähen. Wer Produktanalysen braucht, arbeitet direkt auf
+`fact_order_items` × `dim_product`.
+
+Verwendung
+----------
+    python generate_obt.py                 # schreibt obt_orders.csv
+    python generate_obt.py /pfad/out.csv   # alternatives Ziel
+
+Voraussetzungen
+---------------
     - Python 3.8+
     - pandas (pip install pandas)
     - Alle CSV-Dateien im selben Verzeichnis wie dieses Skript
 
-Ausgabe:
-    obt_orders.csv (~185 MB, 754.513 Zeilen)
+Ausgabe
+-------
+    obt_orders.csv — 754.513 Zeilen, 41 Spalten, ~185 MB
+
+Hinweis zum Einlesen
+--------------------
+Alle Dateien werden als Text eingelesen (`dtype=str`, `keep_default_na=False`).
+Das ist Absicht, kein Schludern: Die Spalte `loyalty_tier` enthält den
+Literal-String "None" für Kunden ohne Loyalty-Programm. Mit den
+pandas-Standardeinstellungen würde daraus ein fehlender Wert (NaN) und beim
+Schreiben ein leeres Feld — die Information ginge still verloren. Ebenso
+bleiben `discount_pct` als "15" statt "15.0" und `net_total` als "8.8" statt
+"8.800000000000001" erhalten. Für eine reine Denormalisierung ist der
+Texttransport verlustfrei; typisiert wird erst im auswertenden Werkzeug.
 """
 
 import os
@@ -20,99 +48,84 @@ import sys
 import pandas as pd
 from pathlib import Path
 
-def main():
-    base = Path(__file__).parent
+# Encoding der Quelldateien: UTF-8 mit BOM (Excel-kompatibel)
+ENCODING = "utf-8-sig"
 
-    print("Lade Dimensionstabellen...")
-    dim_branch = pd.read_csv(base / "dim_branch.csv", encoding="utf-8-sig")
-    dim_customer = pd.read_csv(base / "dim_customer.csv", encoding="utf-8-sig")
-    dim_date = pd.read_csv(base / "dim_date.csv", encoding="utf-8-sig")
-    dim_product = pd.read_csv(base / "dim_product.csv", encoding="utf-8-sig")
-    dim_payment = pd.read_csv(base / "dim_payment_method.csv", encoding="utf-8-sig")
-    dim_promotion = pd.read_csv(base / "dim_promotion.csv", encoding="utf-8-sig")
-    dim_employee = pd.read_csv(base / "dim_employee.csv", encoding="utf-8-sig")
-    dim_time_slot = pd.read_csv(base / "dim_time_slot.csv", encoding="utf-8-sig")
-    dim_weather = pd.read_csv(base / "dim_weather.csv", encoding="utf-8-sig")
+# Welche Attribute je Dimension in die OBT wandern und über welchen
+# Fremdschlüssel sie an fact_orders hängen. Die Reihenfolge dieser Liste
+# bestimmt die Spaltenreihenfolge der Ausgabe.
+DIMENSIONS = [
+    ("dim_branch.csv", "branch_id", [
+        "branch_name", "district", "branch_type", "has_drive_through", "opening_date",
+    ]),
+    ("dim_customer.csv", "customer_id", [
+        "age_group", "gender", "has_app", "loyalty_tier", "home_district",
+    ]),
+    ("dim_payment_method.csv", "payment_id", [
+        "payment_type",
+    ]),
+    ("dim_promotion.csv", "promo_id", [
+        "promo_name", "promo_type", "discount_pct",
+    ]),
+    ("dim_date.csv", "date", [
+        "year", "quarter", "month", "month_name", "day_name",
+        "is_weekend", "is_holiday", "special_event", "season",
+    ]),
+    ("dim_weather.csv", "date", [
+        "temperature_celsius", "condition",
+    ]),
+]
+
+
+def read_csv(path):
+    """Liest eine CSV verlustfrei als Text ein (siehe Modul-Docstring)."""
+    return pd.read_csv(path, encoding=ENCODING, dtype=str, keep_default_na=False)
+
+
+def main(out_path=None):
+    base = Path(__file__).parent
+    out_path = Path(out_path) if out_path else base / "obt_orders.csv"
 
     print("Lade fact_orders.csv (754.513 Zeilen)...")
-    fact_orders = pd.read_csv(base / "fact_orders.csv", encoding="utf-8-sig")
+    obt = read_csv(base / "fact_orders.csv")
+    fact_rows = len(obt)
 
-    print("Lade fact_order_items.csv (~2,95 Mio. Zeilen)...")
-    fact_items = pd.read_csv(base / "fact_order_items.csv", encoding="utf-8-sig")
+    for filename, key, columns in DIMENSIONS:
+        print(f"Verknüpfe {filename} über {key}...")
+        dim = read_csv(base / filename)
 
-    # --- Joins aufbauen ---
-    print("Verknüpfe Dimensionstabellen...")
+        missing = [c for c in [key] + columns if c not in dim.columns]
+        if missing:
+            raise SystemExit(f"FEHLER: {filename} fehlen die Spalten: {', '.join(missing)}")
 
-    # 1. Order Items mit Produktdaten anreichern
-    items_enriched = fact_items.merge(
-        dim_product, on="product_id", how="left", suffixes=("", "_prod")
-    )
+        # Dimensionsschlüssel müssen eindeutig sein, sonst vervielfacht der
+        # LEFT JOIN die Faktenzeilen — der klassische Fan-Trap.
+        if dim[key].duplicated().any():
+            raise SystemExit(f"FEHLER: {filename} hat mehrdeutige Schlüssel in '{key}'")
 
-    # 2. Items auf Order-Ebene aggregieren (für OBT brauchen wir eine Zeile pro Order)
-    #    → Produktliste als kommaseparierter String
-    item_agg = items_enriched.groupby("order_id").agg(
-        products=("product_name", lambda x: ", ".join(x)),
-        categories=("category", lambda x: ", ".join(x.unique())),
-        total_items=("quantity", "sum"),
-        has_vegetarian=("is_vegetarian", "max"),
-        has_vegan=("is_vegan", "max"),
-    ).reset_index()
+        obt = obt.merge(dim[[key] + columns], on=key, how="left")
 
-    # 3. Fact Orders mit Dimensionen joinen
-    obt = fact_orders.copy()
+        if len(obt) != fact_rows:
+            raise SystemExit(
+                f"FEHLER: Join mit {filename} hat die Zeilenzahl verändert "
+                f"({fact_rows} → {len(obt)})"
+            )
 
-    # Date-Dimension (über date-Spalte → date_id generieren)
-    obt["date_id"] = pd.to_datetime(obt["date"]).dt.strftime("%Y%m%d").astype(int)
-    obt = obt.merge(dim_date, on="date_id", how="left", suffixes=("", "_dim"))
+    # Nicht getroffene Fremdschlüssel tauchen als NaN auf. Da alles als Text
+    # gelesen wurde, ist NaN ein sicheres Zeichen für referenzielle Lücken —
+    # im sauberen Sternschema darf es keine geben.
+    luecken = obt.isna().any()
+    if luecken.any():
+        betroffen = ", ".join(luecken[luecken].index)
+        print(f"WARNUNG: Fremdschlüssel ohne Treffer in: {betroffen}")
+        obt = obt.fillna("")
 
-    # Branch
-    obt = obt.merge(
-        dim_branch[["branch_id", "branch_name", "district", "branch_type",
-                     "has_drive_through", "seats_indoor", "seats_outdoor"]],
-        on="branch_id", how="left"
-    )
-
-    # Customer
-    obt = obt.merge(
-        dim_customer[["customer_id", "age_group", "gender", "home_district",
-                       "loyalty_tier", "has_app"]],
-        on="customer_id", how="left"
-    )
-
-    # Payment
-    obt = obt.merge(
-        dim_payment[["payment_id", "payment_type"]],
-        on="payment_id", how="left"
-    )
-
-    # Promotion
-    obt = obt.merge(
-        dim_promotion, on="promo_id", how="left", suffixes=("", "_promo")
-    )
-
-    # Weather (über date_id)
-    if "date_id" in dim_weather.columns:
-        obt = obt.merge(dim_weather, on="date_id", how="left", suffixes=("", "_weather"))
-
-    # Item-Aggregation
-    obt = obt.merge(item_agg, on="order_id", how="left")
-
-    # --- Aufräumen ---
-    # Doppelte/überflüssige Spalten entfernen
-    drop_cols = [c for c in obt.columns if c.endswith("_dim") or c.endswith("_weather")]
-    # date_dim duplicate
-    if "date_dim" in obt.columns:
-        drop_cols.append("date_dim")
-    obt.drop(columns=drop_cols, errors="ignore", inplace=True)
-
-    # --- Export ---
-    out_path = base / "obt_orders.csv"
-    print(f"Schreibe {len(obt):,} Zeilen nach {out_path.name}...")
-    obt.to_csv(out_path, index=False, encoding="utf-8-sig")
+    print(f"Schreibe {len(obt):,} Zeilen × {len(obt.columns)} Spalten nach {out_path.name}...")
+    obt.to_csv(out_path, index=False, encoding=ENCODING, lineterminator="\n")
 
     size_mb = os.path.getsize(out_path) / (1024 * 1024)
     print(f"Fertig! {out_path.name} ({size_mb:.0f} MB, {len(obt):,} Zeilen, {len(obt.columns)} Spalten)")
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1] if len(sys.argv) > 1 else None)
