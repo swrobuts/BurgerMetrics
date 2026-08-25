@@ -291,6 +291,16 @@ Import im `psql`-Client (die Dateien sind UTF-8 mit BOM):
 3. DAX-Measures erstellen, z. B. `Total Revenue = SUM(fact_orders[net_total])`
 4. Visualisierungen erstellen
 
+### In eine Datenbank laden
+
+```bash
+pip install duckdb
+python load_duckdb.py --lokal          # lokale Datei burger_metrics.duckdb
+python load_duckdb.py --motherduck     # MotherDuck (Token in motherduck_token)
+```
+
+Lädt alle 13 Tabellen und prüft jede Zeilenzahl gegen die Sollwerte aus diesem Dokument. Laufzeit lokal rund 10 Sekunden. Erkennt außerdem, wenn statt der Daten Git-LFS-Verweisdateien vorliegen, und nennt die Abhilfe.
+
 ### One Big Table neu erzeugen
 
 ```bash

@@ -12,6 +12,33 @@ USE burger_metrics;
 
 ---
 
+## Vorbereitung: die Datenbank anlegen
+
+Steht die Datenbank `burger_metrics` bereits bereit, kann dieser Abschnitt übersprungen werden. Andernfalls erzeugt sie das mitgelieferte Ladeskript aus den CSV-Dateien.
+
+```bash
+pip install duckdb
+
+# Zugangstoken von app.motherduck.com, einmalig in der Sitzung setzen
+export motherduck_token="<Token>"
+
+cd dataset
+python load_duckdb.py --motherduck
+```
+
+Das Skript legt die Datenbank an, lädt alle 13 Tabellen und prüft jede Zeilenzahl gegen den Sollwert. Weicht eine ab, wird sie einzeln gemeldet.
+
+**Ohne MotherDuck-Konto** funktioniert dasselbe Übungsblatt auf einer lokalen Datei — sämtliche Abfragen laufen unverändert, nur `USE burger_metrics;` entfällt:
+
+```bash
+python load_duckdb.py --lokal        # erzeugt burger_metrics.duckdb
+duckdb burger_metrics.duckdb         # oder in DBeaver öffnen
+```
+
+Für einen schnellen Durchlauf ohne die 176 MB große One Big Table: `--klein` ergänzen. Block E lässt sich dann allerdings nicht bearbeiten, weil dort `obt_orders` gebraucht wird.
+
+---
+
 ## Block A — Daten erkunden (≈ 15 Min)
 
 ### A1. Welche Tabellen gibt es?
