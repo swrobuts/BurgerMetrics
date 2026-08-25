@@ -5,3 +5,12 @@
 # Backup-Dateien
 *.bak
 *.backup
+
+# Gebaute Foliendecks und ihre Renders.
+# Eine PPTX bettet die verwendeten Schriften ein — hier rund 2,1 MB, darunter
+# GT Planar (kommerzielle Lizenz) und mehrere Segoe-UI-Schnitte. In einem
+# oeffentlichen Repository wuerden sie damit weiterverbreitet.
+# Das Deck wird aus slides/bau_deck.py erzeugt, nicht versioniert.
+*.pptx
+*.potx
+BurgerMetrics_Fallstudie.pdf
