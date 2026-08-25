@@ -61,7 +61,7 @@ Ein synthetischer Datensatz enthält nur die Muster, die man hineinlegt. Für di
 
 **Muster, die sich bestätigen lassen.** Wochentagseffekte, Mittagspeak, Saisonalität bei Eis und Heißgetränken, Bargeldrückgang. Sie belohnen sauberes Arbeiten mit einem klaren Ergebnis.
 
-**Muster, die sich nur mit Sorgfalt zeigen.** Der Wettereffekt liegt unter einem starken Wachstumstrend; wer beides nicht trennt, sieht ihn nicht. Der Sommereinbruch am Universitätsstandort ist nur im Vergleich zum eigenen Jahresmittel sichtbar, nicht im Vergleich zu anderen Filialen.
+**Muster, die sich nur mit Sorgfalt zeigen.** Der Wettereffekt liegt unter einem ausgeprägten Wachstumstrend; wer beides nicht trennt, sieht ihn nicht. Der sommerliche Rückgang am Universitätsstandort ist nur im Vergleich zum eigenen Jahresmittel sichtbar, nicht im Vergleich zu anderen Filialen.
 
 **Scheinmuster, die einer Prüfung nicht standhalten.** Die Kombination Burger und Bier kommt in 12,7 % der Burger-Bestellungen vor. Das wirkt wie ein Zusammenhang, entspricht aber fast genau dem Bier-Anteil über alle Bestellungen (12,3 %) — der Lift beträgt 1,03. Wer nur Support und Konfidenz betrachtet, findet hier eine Regel, die keine ist.
 

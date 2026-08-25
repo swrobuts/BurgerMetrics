@@ -108,28 +108,28 @@ Diese Muster sind in den Daten nachweisbar. Die Zahlen sind nachgerechnet — we
 
 | # | Muster | Befund |
 |---|--------|--------|
-| 1 | **Wochentage** | Samstag ist mit 278 Bestellungen/Tag der stärkste, Dienstag mit 195 der schwächste Tag (+43 %). Reihenfolge: Sa > Fr > So > Do > Mi > Mo > Di. |
-| 2 | **Tageszeit** | Klarer Mittagspeak: 12 Uhr (121.331) und 13 Uhr (104.250) dominieren, gefolgt von einem Abendpeak um 18–19 Uhr. Randzeiten 23 Uhr und 6 Uhr liegen bei rund 6.000–12.000. |
+| 1 | **Wochentage** | Samstag liegt mit 278 Bestellungen/Tag an erster, Dienstag mit 195 an letzter Stelle (+43 %). Reihenfolge: Sa > Fr > So > Do > Mi > Mo > Di. |
+| 2 | **Tageszeit** | Klarer Mittagspeak: 12 Uhr (121.331) und 13 Uhr (104.250) liegen vorn, gefolgt von einem Abendpeak um 18–19 Uhr. Randzeiten 23 Uhr und 6 Uhr liegen bei rund 6.000–12.000. |
 | 3 | **Saisonalität** | Eis (Ice Cream + Sundae) steigt im Sommer auf das **2,78-fache** des Winterwerts (58,5 vs. 21,0 Stück/Tag), Kaltgetränke auf das **1,50-fache** (431,6 vs. 287,1). Gegenläufig dazu die Heißgetränke: **114,1 im Winter gegenüber 74,5 im Sommer** (Faktor 1,53) und nur 65,5 im Frühling. |
 | 4 | **Events** | Kiliani **+34 %** gegenüber eventfreien Tagen (297 vs. 221 Bestellungen/Tag), Weinfest +27 %, Mainfranken Messe +24 %, Mozartfest +24 %. Der Weihnachtsmarkt fällt mit **+5 %** deutlich schwächer aus als die Sommerevents. |
-| 5 | **Sommerloch am Uni-Standort** | BM Sanderring bricht im August auf 18,4 Bestellungen/Tag ein — **−31 %** gegenüber dem eigenen Jahresmittel. Juli ist mit 20,5 ebenfalls schwach, Juni mit 34,7 der stärkste Monat. |
+| 5 | **Sommerloch am Uni-Standort** | BM Sanderring geht im August auf 18,4 Bestellungen/Tag zurück — **−31 %** gegenüber dem eigenen Jahresmittel. Juli ist mit 20,5 ebenfalls schwach, Juni mit 34,7 der stärkste Monat. |
 
 ### Standort- und Kanalmuster
 
 | # | Muster | Befund |
 |---|--------|--------|
-| 6 | **Kanalmix je Standort** | Der stärkste Standorteffekt im Datensatz, und er ist baulich bedingt: Europastern wickelt **53,6 %** über Drive-Through ab, die vier Filialen ohne Drive-Through zwangsläufig 0 %. Dort verschiebt sich das Volumen auf Counter (68–73 %) und Kiosk (21–23 %). |
+| 6 | **Kanalmix je Standort** | Der Standorteffekt mit der größten Spannweite, und er ist baulich bedingt: Europastern wickelt **53,6 %** über Drive-Through ab, die vier Filialen ohne Drive-Through zwangsläufig 0 %. Dort verschiebt sich das Volumen auf Counter (68–73 %) und Kiosk (21–23 %). |
 | 7 | **Drive-Through und Warenkorb** | Filialen mit Drive-Through haben einen höheren Bestellwert (19,53 € vs. 18,82 €) und mehr Artikel je Bestellung (4,64 vs. 4,34). Der Effekt ist real, aber klein — für eine belastbare Aussage muss gegen den Standorttyp kontrolliert werden. |
 | 8 | **Miete vs. Umsatz** | Positiv, aber weit von einem Automatismus entfernt (Korrelation **0,68**). Der Hauptbahnhof zahlt mit 8.500 € die höchste Miete und erreicht nur den zweithöchsten Umsatz sowie den **niedrigsten** Bestellwert aller Filialen (17,80 €). |
 | 9 | **Bestellwert je Standort** | Spannweite 17,80 € (Hauptbahnhof) bis 21,05 € (Zellerau). Die jüngeren, kleineren Standorte erzielen die höheren Bestellwerte. |
-| 10 | **Wochenendanteil** | Reicht von 23 % (Sanderring, Uni) bis 42 % (Mainfrankenpark, Shopping) — der Standorttyp schlägt klar durch. |
+| 10 | **Wochenendanteil** | Reicht von 23 % (Sanderring, Uni) bis 42 % (Mainfrankenpark, Shopping) — der Standorttyp wirkt hier deutlich. |
 
 ### Kunden- und Zahlungsmuster
 
 | # | Muster | Befund |
 |---|--------|--------|
-| 11 | **Bargeld-Rückgang** | Der stärkste Trend im Datensatz: Cash fällt von **48,6 % (2018) auf 20,4 % (2025)**. |
-| 12 | **Mobile Payment** | Wächst von **0,9 % (2018) auf 12,2 % (2025)**. EC Card ist mit 40,3 % (2025) die dominierende Zahlungsart. |
+| 11 | **Bargeld-Rückgang** | Der Trend mit der größten Veränderung im Datensatz: Cash fällt von **48,6 % (2018) auf 20,4 % (2025)**. |
+| 12 | **Mobile Payment** | Wächst von **0,9 % (2018) auf 12,2 % (2025)**. EC Card hat mit 40,3 % (2025) den größten Anteil. |
 | 13 | **Loyalty-Tiers** | Gold-Kunden bestellen **häufiger** (33,8 Bestellungen/Kopf vs. 30,4 ohne Programm) und geben insgesamt mehr aus (627 € vs. 590 € pro Kopf) — haben aber den **niedrigsten Bestellwert** (18,56 € vs. 19,40 €). Ein lehrreicher Fall: Frequenz und Bonhöhe zeigen in entgegengesetzte Richtungen. |
 | 14 | **Promotions** | Nur **8,2 %** aller Bestellungen sind einer Aktion zugeordnet (62.023 von 754.513). `promo_id = 0` bedeutet „keine Promotion" und macht die übrigen 91,8 % aus — ein Klassiker für falsch gezählte Kennzahlen. |
 
@@ -144,7 +144,7 @@ Diese Muster sind in den Daten nachweisbar. Die Zahlen sind nachgerechnet — we
 
 Einzelhäufigkeiten zum Nachrechnen: Burger 59,6 % · Fries 51,1 % · Cola 41,6 % · Nuggets 6,7 % · BBQ-Sauce 4,6 % · Breakfast 6,7 % · Coffee 16,9 % · Beer 12,3 %.
 
-Regel 18 ist das didaktisch wertvollste Beispiel: Bier taucht in 12,7 % der Burger-Bestellungen auf — das klingt nach einem Muster, entspricht aber fast exakt dem Bier-Anteil über alle Bestellungen (12,3 %). Der **Lift von 1,03** zeigt, dass beide Produkte praktisch unabhängig sind. Wer nur auf Support und Konfidenz schaut, findet hier eine Regel, die keine ist. Umgekehrt hat Regel 16 den kleinsten Support, aber mit Lift 8,93 den mit Abstand stärksten Zusammenhang.
+Regel 18 eignet sich besonders als Lehrbeispiel, weil sie den Unterschied zwischen Konfidenz und Lift sichtbar macht: Bier taucht in 12,7 % der Burger-Bestellungen auf — das klingt nach einem Muster, entspricht aber fast exakt dem Bier-Anteil über alle Bestellungen (12,3 %). Der **Lift von 1,03** zeigt, dass beide Produkte praktisch unabhängig sind. Wer nur auf Support und Konfidenz schaut, findet hier eine Regel, die keine ist. Umgekehrt hat Regel 16 den kleinsten Support, aber mit Lift 8,93 den mit Abstand stärksten Zusammenhang.
 
 > **Fallstrick bei der Produktauswahl:** Ein `LIKE '%Cola%'` trifft auch *Milkshake **Chocolate***, *Hot **Chocolate*** und *Cookie **Chocolate***; ein `LIKE '%BBQ%'` trifft neben der *BBQ Sauce* auch den Burger *BBQ Smokehouse*. Die Werte oben beruhen auf expliziten Produktlisten. Ein unsauberer Filter verschiebt die Konfidenz hier um mehrere Prozentpunkte.
 
