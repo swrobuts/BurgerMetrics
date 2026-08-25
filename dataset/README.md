@@ -291,6 +291,16 @@ Import im `psql`-Client (die Dateien sind UTF-8 mit BOM):
 3. DAX-Measures erstellen, z. B. `Total Revenue = SUM(fact_orders[net_total])`
 4. Visualisierungen erstellen
 
+### Miniaturbestand für schnelle Beispiele
+
+`burgermetrics_mini.sql` enthält 19 Bestellungen aus zehn Jahren, 55 Positionen und alle zugehörigen Dimensionszeilen — echte Namen und Beträge aus dem Vollbestand, 13 KB. Einmal kopieren, und jedes SQL-Beispiel dieser Dokumentation läuft, ohne 311 MB CSV zu laden:
+
+```bash
+duckdb -c ".read burgermetrics_mini.sql"       # oder in psql / MySQL einfügen
+```
+
+Kontrollzahlen: 19 Bestellungen, 55 Positionen, 200,85 € Nettoumsatz. Auch der Fan Trap ist darauf sichtbar — 649,16 € statt 200,85 €, Faktor 3,23.
+
 ### In eine Datenbank laden
 
 ```bash
