@@ -1,3 +1,7 @@
+# Editor-/OS-Artefakte
+.DS_Store
+.claude/
+
+# Backup-Dateien
 *.bak
 *.backup
-*.md
