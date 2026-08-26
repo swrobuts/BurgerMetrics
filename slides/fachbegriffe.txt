@@ -1,5 +1,6 @@
 # Aufruf: python3 sprache_check.py deck.pptx --whitelist BurgerMetrics_Fachbegriffe.txt
 # Fachbegriffe des BurgerMetrics-Decks — Whitelist fuer sprache_check.py
+Abschöpfung
 Abwanderungsgefährdet
 Abwanderungsgefährdete
 Anbieterwechsel
@@ -12,11 +13,14 @@ Basiseffekt
 Beantwortbarkeit
 Beraterberichte
 Beraterberichten
+Bestellknopf
+Bestellknöpfe
 Betriebsaufwand
 Betriebsdauer
 Betriebsmonate
 Beyond
 Big
+BigQuery
 Bindungsstelle
 Breakfast
 Burger
@@ -37,6 +41,7 @@ Darreichungsform
 Dashboard
 Dashboards
 Databricks
+Datenbank-Dump
 Datenprodukt
 Datenprodukten
 Dehghani
@@ -54,12 +59,17 @@ Durchrechnung
 ERP-Modell
 ETL
 Ebenenwechsel
+Entscheidungsrelevant
+Ereignisstrom
 Europastern
 Evidence
 Fact
+Fast-Food-Kette
 Filialfrage
+Filialreiters
 Filialtabelle
 Filialumsätze
+Filialvergleich
 Filialvergleiche
 Flächenleistung
 Fries
@@ -83,6 +93,7 @@ JOIN
 Kategoriename
 Kennzahlendefinitionen
 Kiosk
+Klickraten
 Klickstrecke
 Konfidenz
 Kundenkartenscan
@@ -91,6 +102,7 @@ Lakehouse
 Lakekeeper
 Layer
 Lengfeld
+Lernumgebung
 Lift
 Lightdash
 LookML
@@ -121,6 +133,7 @@ Orphan
 Pages
 Pages-Deploy
 Parquet
+Payment
 Pivot
 Polaris
 Positionsumsatzes
@@ -136,6 +149,7 @@ Roll-up
 Rumpfjahr
 SELECT
 SQL
+SQLite
 SUM
 Salad
 Sanderring
@@ -153,6 +167,8 @@ Support
 Swamp
 Tabellensemantik
 Table
+Technologiestapel
+Themenreitern
 Tragfähigkeit
 Trap
 Umsatzrisiko
@@ -171,6 +187,7 @@ Wuerzburg
 Würzburg
 Xin
 Zaharia
+Zahlart
 Zellerau
 Zusicherungen
 Zuständigkeitsgrenze
@@ -233,6 +250,7 @@ stg
 supplier
 time
 total
+unbar
 verify
 versionierte
 versionierten

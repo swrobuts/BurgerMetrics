@@ -1,0 +1,22 @@
+flowchart LR
+    subgraph S ["Shop und Kasse · Daten entstehen"]
+      direction TB
+      S1["Sitzungen, Klicks,<br/>Warenkörbe"]
+      S2["Belege:<br/>Kopf und Positionen"]
+    end
+    subgraph W ["Warenwirtschaft · Daten werden verbucht"]
+      direction TB
+      W1["26 Tabellen, 3NF<br/>konsistent, aktuell"]
+    end
+    subgraph A ["Auswertung · Daten werden befragt"]
+      direction TB
+      A1["Galaxy-Schema<br/>12 Tabellen, historisch"]
+      A2["Kennzahlen<br/>im Dashboard"]
+    end
+    S1 --> W1
+    S2 --> W1
+    W1 -. "nächtlicher Abzug" .-> A1
+    A1 --> A2
+    style S2 fill:#EAF0F5,stroke:#003E6E
+    style W1 fill:#003E6E,color:#FFFFFF,stroke:#003E6E
+    style A2 fill:#003E6E,color:#FFFFFF,stroke:#003E6E

@@ -71,7 +71,36 @@ B.band(s, D.Y0 + 244, 66, [
     "ist aus den Rohdaten nachgerechnet."])
 
 # ═══════════════════════════════════════════════════ Teil 1
-deck.kapitel("Was hier Business Intelligence heißt")
+deck.kapitel("Die Fallstudie: drei Systeme, eine Datenspur")
+
+# Vorstellung
+s = deck.neu("Tool_Slide")
+B.kopf(s, "Fallstudie", "Eine fiktive Kette, gebaut, um durchschaut zu werden", Q_FOTO)
+deck.einl(s, "BurgerMetrics ist eine erfundene Fast-Food-Kette: acht Filialen in Würzburg, "
+             "neun Jahre Geschichte, drei Anwendungen. Erfunden heißt nicht beliebig — der "
+             "Datenbestand ist so konstruiert, dass jede Kennzahl nachrechenbar ist und die "
+             "typischen Auswertungsfallen tatsächlich zuschnappen.", "Tool_Slide")
+bw, _ = deck.foto(s, "01_start", max_w=560, max_h=HOEHE)
+B.kachel(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 140, BLUE, "Die drei Anwendungen",
+         ["Online-Shop: die Kundensicht, mit Warenkorb und Speisekarte.",
+          "Kassensystem: die operative Sicht, an der die Belege entstehen.",
+          "BI-Dashboard: die Auswertungssicht mit 13 Themenreitern."])
+B.kachel(s, CL + bw + 24, Y0 + 156, CR - (CL + bw + 24), 122, METHOD, "Warum eine Lernumgebung",
+         ["Echte Unternehmensdaten sind vertraulich — hier darf jeder alles sehen.",
+          "Alle drei Systeme laufen im Browser, ohne Anmeldung und ohne Server."])
+
+# Rollen und Datenspur
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "Rollen", "Daten entstehen vorn, verbucht wird in der Mitte, befragt wird hinten", QUELLE)
+deck.einl(s, "Jedes der drei Systeme hat genau eine Rolle. Shop und Kasse erzeugen Daten als "
+             "Nebenprodukt ihrer eigentlichen Aufgabe, die Warenwirtschaft macht daraus "
+             "verbindliche Belege, und die Auswertung liest einen nächtlichen Abzug davon. "
+             "Kein System greift in die Zuständigkeit des anderen.")
+deck.bild(s, "16_datenspur", y=Y0 + 4, max_h=232)
+B.band(s, Y0 + 252, 68, [
+    "Der gestrichelte Pfeil ist die wichtigste Kante des Bildes: Links von ihm zählt "
+    "Konsistenz im laufenden Betrieb, rechts von ihm zählt Lesegeschwindigkeit über die "
+    "ganze Historie. Diese Grenze begründet fast jede Bauentscheidung des Projekts."])
 
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Einordnung", "Vier Fragen, und nur die letzte ändert etwas", QUELLE)
@@ -94,8 +123,26 @@ B.zuordnung(s, Y0, [
      "2025 rund 21.749 Bestellungen anfielen — die größte Stunde des Tages."),
 ], rh=54.0)
 
+# Website: zwei Sichten
+s = deck.neu("Slide")
+B.kopf(s, "System Website", "Dieselbe Seite, zwei Sichten: Speisekarte für Kunden, Datenspur für uns", Q_FOTO)
+wf = (CW - 18) / 2
+# Slide-Layout: Der Inhalt beginnt direkt unter dem Titel, nicht erst auf der
+# Lisa-Kante — die Fotos bekommen die gewonnene Hoehe.
+YS = 128
+B.textbox(s, CL, YS, wf, 18, [("Kundensicht", True, D.SEC)], 11.5)
+B.textbox(s, CL + wf + 18, YS, wf, 18, [("Datensicht — derselbe Moment", True, BLUE)], 11.5)
+bw2, bh2 = deck.foto(s, "02_shop", y=YS + 24, max_w=wf, max_h=246)
+deck.foto(s, "02b_shop_daten", y=YS + 24, x=CL + wf + 18, max_w=wf, max_h=246)
+B.band(s, YS + 24 + bh2 + 16, 76, [
+    "Der Kunde sieht Speisekarte und Bestellknopf. Die zuschaltbare Datensicht zeigt, was "
+    "derselbe Seitenaufruf nebenbei erzeugt: eine Sitzung mit Gerät, Herkunft und Standort, "
+    "einen Ereignisstrom je sichtbarer Sektion, die Klickraten der Bestellknöpfe. Dazu steht "
+    "dort, welche Rechtsgrundlage dieses Beobachten überhaupt erlaubt."])
+
+# Kasse: Datensicht
 s = deck.neu("Tool_Slide")
-B.kopf(s, "Datenspur", "Jeder Klick an der Kasse schreibt eine Zeile", Q_FOTO)
+B.kopf(s, "System Kasse", "Jeder Klick an der Kasse schreibt eine Zeile", Q_FOTO)
 deck.einl(s, "Die Kasse des Projekts hat einen zuschaltbaren Modus, der zu jedem Bedienschritt "
              "zeigt, welcher Datensatz dabei entsteht. Wer ein Produkt antippt, sieht die Zeile "
              "in fact_order_items; wer kassiert, sieht den Kopfsatz in fact_orders. Genau diese "
@@ -108,6 +155,29 @@ B.sprechblase(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 200, D.paras([
     ["Der Kundenkartenscan verbindet die Bestellung mit dim_customer — erst dadurch "
      "werden Segmentierung und Wiederkaufsraten überhaupt rechenbar."],
 ]), farbe=METHOD)
+
+# Abgrenzung operativ / analytisch
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "Abgrenzung", "Transaktionssysteme antworten je Vorgang, Analysesysteme je Frage", QUELLE)
+deck.einl(s, "Shop und Kasse sind Transaktionssysteme: Sie verarbeiten einen Vorgang nach dem "
+             "anderen und müssen dabei jederzeit widerspruchsfrei sein. Die Auswertung stellt "
+             "die umgekehrte Anforderung — eine Frage über Millionen vergangener Vorgänge. "
+             "Beide Anforderungen in einem System zu erfüllen, hieße, beide schlecht zu erfüllen.")
+B.gegenueber(s, Y0, 216,
+             (BLUE, "Operativ · OLTP",
+              ["Arbeitseinheit: ein Vorgang — eine Bestellung wird angelegt, geändert, bezahlt.",
+               "Datenstand: das Jetzt. Was erledigt ist, wird nicht mehr angefasst.",
+               "Modell: dritte Normalform, damit nichts doppelt steht und nichts widersprechen kann.",
+               "Lastprofil: sehr viele kleine Schreibzugriffe, Antwort in Millisekunden je Vorgang."]),
+             (GOOD, "Analytisch · OLAP",
+              ["Arbeitseinheit: eine Frage — Umsatz je Filiale über neun Jahre.",
+               "Datenstand: die Historie. Es wird gelesen und periodisch neu beladen, nie korrigiert.",
+               "Modell: bewusst redundant, damit wenige Verknüpfungen genügen.",
+               "Lastprofil: wenige große Lesezugriffe über Millionen Zeilen."]),
+             badge_l="⇄", badge_r="Σ")
+B.band(s, Y0 + 232, 54, [
+    "Entscheidungsrelevant sind Daten erst in der rechten Spalte: vollständig, historisch, "
+    "vergleichbar — und vom laufenden Betrieb entkoppelt, damit die Frage den Betrieb nicht stört."])
 
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Grundlage", "Der Bestand, über den in diesem Deck geredet wird", Q_MESS)
@@ -236,6 +306,20 @@ B.band(s, Y0 + 258, 64, [
     "den Verlauf. Ein Dashboard ist im Kern eine Handvoll solcher Abfragen — der Aufwand "
     "steckt in den Definitionen, nicht im SQL."])
 
+# GROUP BY: aus der Zahl wird eine Tabelle
+s = deck.neu("Tool_Slide")
+B.kopf(s, "Auflösung", "Ein GROUP BY mehr, und aus der Kachel wird ein Filialvergleich", Q_FOTO)
+deck.einl(s, "Dieselbe Abfrage, um GROUP BY branch_id ergänzt, liefert statt einer Zahl acht — "
+             "das Balkendiagramm des Filialreiters. Die Auflösung einer Kennzahl ist damit "
+             "keine Frage des Werkzeugs, sondern eine Zeile SQL. Gefährlich wird es erst bei "
+             "der Deutung des Ergebnisses.", "Tool_Slide")
+_, bh3 = deck.foto(s, "10_dash_filialen", y=Y0, max_h=190)
+B.kachel(s, CL, Y0 + bh3 + 12, CW, 112, WARN, "Der Basiseffekt steckt schon im Balken",
+         ["Das Diagramm zeigt kumulierten Umsatz 2017 bis 2026 — aber die Filialen eröffneten "
+          "gestaffelt: Europastern führt auch deshalb, weil es seit 2017 mitläuft.",
+          "BM Zellerau ist seit 2023 dabei und hat zugleich den höchsten Bestellwert (21,05 EUR).",
+          "Vergleichbar werden die Balken erst je Betriebsmonat oder je Quadratmeter."])
+
 s = deck.neu("Tool_Slide")
 B.kopf(s, "Darstellung", "Der Titel eines Diagramms ist seine Aussage, nicht sein Etikett", Q_FOTO)
 deck.einl(s, "Die Zeitreihe trägt keinen Titel wie Umsatzentwicklung, sondern einen Satz: "
@@ -361,6 +445,21 @@ B.ampel(s, xa, Y0 + 28, 17, [GOOD, HINT, WARN], D.paras([
     "Nicht enthalten: Reaktionen des Wettbewerbs und Ausweichkäufe auf andere Produkte.",
 ]), CR - xa - 32, gap=18)
 
+# Trends als Investitionsgrundlage
+s = deck.neu("Tool_Slide")
+B.kopf(s, "Trends", "Eine Momentaufnahme rechtfertigt keine Investition — ein Trend schon", Q_FOTO)
+deck.einl(s, "Dass 2026 noch 18,4 Prozent bar zahlen, ist eine Zahl. Dass es 2017 noch 48,9 "
+             "Prozent waren und die Kurve seit neun Jahren fällt, ist ein Trend — und erst der "
+             "trägt eine Entscheidung über Infrastruktur, weil er sagt, wohin sich die Lage "
+             "bewegt und wie schnell.", "Tool_Slide")
+bw4, _ = deck.foto(s, "11_dash_trends", max_w=560, max_h=HOEHE)
+B.klammer(s, CL + bw4 + 30, Y0, CR - (CL + bw4 + 30), 240, "Was aus der Kurve folgt",
+          D.paras(["Kartenterminals sind keine Option mehr, sondern Grundausstattung — "
+                   "81,6 Prozent zahlen 2026 unbar.",
+                   "Bargeldprozesse (Wechselgeld, Abschöpfung, Zählung) schrumpfen planbar mit.",
+                   "Mobile Payment wächst von 1,0 auf 13,7 Prozent — die jüngste Zahlart "
+                   "mit dem steilsten Anstieg gehört in jede neue Filiale."]), GOOD)
+
 s = deck.neu("Slide")
 B.kopf(s, "Ergebnis", "Vier Entscheidungen, die dieser Bestand tatsächlich trägt", Q_MESS)
 w4 = (CW - 3 * 14) / 4
@@ -419,7 +518,7 @@ for i, (t, b, c) in enumerate([
     B.kachel(s, CL + i * (w3 + 18), Y0, w3, 190, c, t, b)
 
 # ═══════════════════════════════════════════════════ Teil 5
-deck.kapitel("Architektur und Werkzeuge")
+deck.kapitel("Architektur, Werkzeuge, Nachbau")
 
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Bauarten", "Vier Wege von der Datenbank zum Bericht", Q_EIG)
@@ -461,6 +560,27 @@ B.band(s, Y0 + 234, 86, [
     "Plattformen; im Gartner-Quadranten vom Juni 2026 stehen Microsoft, Salesforce und Qlik "
     "im Führungsfeld. Für dieses Projekt zählt die zweite und dritte Zeile: Was im "
     "Versionsverwaltungssystem liegt, lässt sich in der Lehre zeigen und nachbauen."])
+
+# Bauanleitung, technologieoffen
+s = deck.neu("Slide")
+B.kopf(s, "Bauanleitung", "Vier Schritte, die in jedem Technologiestapel dieselben sind", Q_EIG)
+B.zuordnung(s, Y0, [
+    ("1 · Exportieren",
+     "Rohdaten aus dem Quellsystem ziehen, unverändert ablegen. Hier: 13 CSV-Dateien. "
+     "Anderswo: ein Datenbank-Dump, eine API, ein Excel-Export — jedes System kann das."),
+    ("2 · Laden",
+     "Die Rohdaten in eine analytische Datenbank übernehmen, eine Tabelle je Datei. "
+     "Hier: DuckDB. Alternativen: SQLite für den Anfang, PostgreSQL im Team, "
+     "BigQuery oder Snowflake, wenn der Bestand eine Maschine übersteigt."),
+    ("3 · Modellieren",
+     "Kennzahlen und Sichten als SQL in versionierten Dateien: raw unangetastet, stg "
+     "typisiert, mart denormalisiert. Dasselbe Prinzip heißt im Werkzeug dbt — "
+     "gebraucht wird das Werkzeug erst, wenn die Abhängigkeiten unübersichtlich werden."),
+    ("4 · Zeigen",
+     "Ein Frontend an die Datenbank hängen. Hier: eine statische Seite mit vorab "
+     "gerechneten Zahlen. Alternativen: Metabase oder Superset zum Klicken, Evidence "
+     "für Berichte als Code, Power BI oder Tableau im Unternehmensumfeld."),
+], rh=58.0)
 
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Nachbau", "Was davon an einem Nachmittag nachzubauen ist", Q_EIG)

@@ -44,10 +44,23 @@ const KASSE_DATENSICHT = OHNE_LADESCHIRM + `
 const OHNE_DEUTUNG =
   "document.querySelectorAll('.interpretation').forEach(e => e.remove());";
 
+// Der Datenmodus des Shops legt ein endlos animiertes Scanline-Overlay ueber
+// die Seite (body.data-mode::after). Fuer die Aufnahme wird es stillgelegt —
+// bei 1,5 Prozent Deckung ist es im Bild ohnehin unsichtbar, aber die
+// Endlosanimation kann den Screenshot-Pfad zum weissen Bild machen.
+const OHNE_ANIMATION = `
+  const st = document.createElement('style');
+  st.textContent = 'body.data-mode::after{display:none!important}'
+    + '*{animation:none!important;transition:none!important}';
+  document.head.appendChild(st);`;
+const SHOP_DATEN = OHNE_LADESCHIRM + OHNE_ANIMATION + "toggleDataMode();";
+
 const AUFNAHMEN = [
   { name: "01_start",          seite: "index.html", jpeg: true },
   { name: "02_shop",           seite: "shop.html", vor: OHNE_LADESCHIRM,
     warte: 1400, jpeg: true },
+  { name: "02b_shop_daten",    seite: "shop.html", vor: SHOP_DATEN,
+    warte: 2200, jpeg: true },
   { name: "03_pos",            seite: "pos.html", vor: OHNE_LADESCHIRM,
     warte: 900, jpeg: true },
   { name: "03b_pos_daten",     seite: "pos.html", vor: KASSE_DATENSICHT,
@@ -62,6 +75,10 @@ const AUFNAHMEN = [
   { name: "08_dash_simulation", seite: "dashboard.html", tab: "simulation",
     unter: "Preissimulation", wahl: ".chart-card", vor: OHNE_DEUTUNG },
   { name: "09_dash_summary",   seite: "dashboard.html", tab: "summary", zu: 260 },
+  { name: "10_dash_filialen",  seite: "dashboard.html", tab: "filialen",
+    wahl: ".chart-card", vor: OHNE_DEUTUNG },
+  { name: "11_dash_trends",    seite: "dashboard.html", tab: "trends",
+    wahl: ".chart-card", vor: OHNE_DEUTUNG },
 ];
 
 fs.mkdirSync(ZIEL, { recursive: true });
