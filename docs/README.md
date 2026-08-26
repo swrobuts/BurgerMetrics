@@ -52,6 +52,7 @@ Die Dashboard-Kennzahlen wurden zweimal vollständig gegen die Quelldaten geprü
 
 - [Validierungsbericht vom 10.04.2026](validierung-dashboard-2026-04-10.md) — 42 geprüfte Werte, erste Durchsicht
 - [Validierungsbericht vom 12.04.2026](validierung-dashboard-2026-04-12.md) — 185 geprüfte Werte, systematisch je Registerkarte
+- [Validierungsbericht vom 26.08.2026](validierung-dashboard-2026-08-26.md) — Vollprüfung aller 72 Karten und der Management Summary, fünf Korrekturen, Abschluss
 
 ## Sprachliche Konventionen
 
