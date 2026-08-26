@@ -14,3 +14,7 @@
 *.pptx
 *.potx
 BurgerMetrics_Fallstudie.pdf
+
+# Python-Zwischenstand
+__pycache__/
+*.pyc
