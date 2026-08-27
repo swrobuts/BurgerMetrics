@@ -15,7 +15,11 @@ Werkzeugen man so etwas sonst baut.
 Voraussetzungen: python-pptx, Skill thws-slides (THWS_SKILL), gerenderte
 Diagramme (node render_mermaid.mjs) und Bildschirmfotos (node screenshots.mjs).
 
-Alle Messwerte stammen aus einem Lauf gegen dataset/ mit DuckDB 1.5.5.
+Alle Messwerte sind gegen die Semantikschicht in PostgreSQL geprueft
+(Schema burgermetrics, db/aufbau/*.sql) — dieselbe Quelle, aus der das
+Dashboard liest. Wo eine Zahl hier von einer aelteren Fassung des Decks
+abweicht, ist die Semantikschicht massgeblich; die Abweichungen sind in
+db/README.md begruendet.
 """
 import argparse
 import sys
@@ -87,7 +91,8 @@ B.kachel(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 140, BLUE, "Die drei Anwendun
           "BI-Dashboard: die Auswertungssicht mit 13 Themenreitern."])
 B.kachel(s, CL + bw + 24, Y0 + 156, CR - (CL + bw + 24), 122, METHOD, "Warum eine Lernumgebung",
          ["Echte Unternehmensdaten sind vertraulich — hier darf jeder alles sehen.",
-          "Alle drei Systeme laufen im Browser, ohne Anmeldung und ohne Server."])
+          "Shop und Kasse laufen im Browser. Das Dashboard liest aus einer "
+          "Datenbank — lesend, ohne Anmeldung."])
 
 # Rollen und Datenspur
 s = deck.neu("Lisa_Slide")
@@ -359,26 +364,29 @@ B.sprechblase(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 232, D.paras([
 ]), farbe=METHOD)
 
 s = deck.neu("Lisa_Slide")
-B.kopf(s, "Bauweise", "Dieses Dashboard rechnet nicht — es zeigt Ausgerechnetes", Q_EIG)
-deck.einl(s, "Die Zahlen im Dashboard stehen fest im Quelltext der Seite. Das ist keine "
-             "Abkürzung aus Bequemlichkeit, sondern eine Entscheidung mit Vor- und Nachteilen — "
-             "und sie ist der Grund, warum die Seite ohne Server, ohne Datenbank und ohne "
-             "Anmeldung auf GitHub Pages läuft.")
-B.klammer(s, CL, Y0, w2, 170, "Was die feste Verdrahtung bringt",
-          D.paras(["Keine Infrastruktur: eine HTML-Datei, überall lauffähig, in Sekunden geladen.",
-                   "Nachvollziehbarkeit: Jede Zahl steht im Quelltext und ist gegen die "
-                   "Rohdaten prüfbar.",
-                   "Für die Lehre entfällt jede Hürde zwischen Studierenden und dem Ergebnis."]), GOOD)
-B.klammer(s, CL + w2 + 18, Y0, w2, 170, "Was sie kostet",
-          D.paras(["Neue Daten heißen neuer Bauschritt — im Betrieb aktualisiert sich nichts.",
-                   "Kein freies Filtern jenseits der vorbereiteten Sichten.",
-                   "In einem echten Betrieb gehörte hier ein BI-Werkzeug mit Verbindung "
-                   "zur Datenbank hin."]), HINT)
+B.kopf(s, "Bauweise", "Das Dashboard hält keine Zahlen — es fragt sie ab", Q_EIG)
+deck.einl(s, "In der ersten Fassung standen alle Zahlen fest im Quelltext der Seite. Das lief "
+             "ohne Server und ohne Zugangsdaten, hatte aber eine Eigenschaft, die sich auf Dauer "
+             "nicht aushalten ließ: Eine Zahl im HTML altert, ohne dass es jemand merkt. Heute "
+             "lädt die Seite beim Aufruf 35 Sichten aus der Datenbank und baut daraus alles, was "
+             "sie zeigt — Diagramme, Kennzahlen und die Deutungstexte darunter.")
+B.klammer(s, CL, Y0, w2, 170, "Was der Umbau bringt",
+          D.paras(["Eine Wahrheit: Diagramm, Kachel und Text lesen dieselbe Sicht. Ein "
+                   "Widerspruch zwischen ihnen ist damit ausgeschlossen.",
+                   "Neue Daten wirken sofort — ohne Bauschritt, ohne Änderung am HTML.",
+                   "Der Wechsel der Quelle ist eine Klasse mit 35 Methoden. Am Dashboard "
+                   "ändert sich dafür keine Zeile."]), GOOD)
+B.klammer(s, CL + w2 + 18, Y0, w2, 170, "Was er kostet",
+          D.paras(["Die Seite braucht eine erreichbare Datenbank. Fehlt sie, zeigt sie eine "
+                   "Fehlermeldung statt Zahlen — und das ist der gewollte Zustand.",
+                   "Rechte, Zugangsdaten und Antwortzeiten werden zum Thema: teure Aggregate "
+                   "müssen materialisiert vorliegen, sonst läuft die Abfrage in eine Zeitgrenze.",
+                   "Der Aufbau ist nicht mehr in einer einzigen Datei zu lesen."]), HINT)
 B.band(s, Y0 + 190, 84, [
-    "Die Entscheidung ist an die Aufgabe gebunden, nicht an den Geschmack: Für ein "
-    "Lehrmaterial, das jederzeit ohne Zugangsdaten laufen soll, ist die feste Verdrahtung "
-    "richtig. Für einen Betrieb, der morgens die Zahlen von gestern braucht, ist sie falsch. "
-    "Kapitel 5 zeigt, was dann an ihre Stelle tritt."])
+    "Der Umbau hat mehr über die Daten verraten als die Analyse davor: Erst als jede Zahl aus "
+    "einer Abfrage kommen musste, fiel auf, dass mehrere Aussagen des alten Dashboards sich "
+    "nicht nachrechnen ließen. Wer eine Kennzahl nicht als Abfrage hinschreiben kann, hat sie "
+    "noch nicht definiert."])
 
 # ═══════════════════════════════════════════════════ Teil 4
 deck.kapitel("Von der Zahl zur Entscheidung")
@@ -392,7 +400,7 @@ deck.einl(s, "Einzelne Kunden sind keine Entscheidungsgrundlage, der Durchschnit
 bw, _ = deck.foto(s, "07_dash_rfm", max_h=HOEHE)
 B.sprechblase(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 236, D.paras([
     [("Was die Grafik zur Entscheidung macht", True, GOOD)],
-    ["5.484 Kunden gelten als abwanderungsgefährdet — 21,9 Prozent des Bestands."],
+    ["4.998 Kunden gelten als abwanderungsgefährdet — 20,0 Prozent des Bestands."],
     ["Die Gruppe ist benannt, gezählt und adressierbar: eine Liste, kein Befund."],
     ["Die Empfehlung unter der Grafik nennt Maßnahme, erwarteten Effekt und Kosten. "
      "Ohne diesen letzten Schritt bliebe es eine Sortierung."],
@@ -406,16 +414,16 @@ deck.einl(s, "Eine Segmentierung ist nur so viel wert wie die Unterscheidung, di
              "betriebswirtschaftliche Entscheidung, keine statistische.")
 B.zuordnung(s, Y0, [
     ("Champions",
-     "4.082 Kunden, 16,3 Prozent, im Schnitt 842 EUR Lebenswert. Halten, nicht rabattieren — "
+     "4.183 Kunden, 16,7 Prozent, im Schnitt 836 EUR Lebenswert. Halten, nicht rabattieren — "
      "ein Rabatt an diese Gruppe kostet Marge ohne Verhaltensänderung."),
     ("Abwanderungsgefährdet",
-     "5.484 Kunden, seit 132 Tagen inaktiv, 4,07 Mio. EUR Umsatzrisiko. "
+     "4.998 Kunden, im Mittel 88 Tage ohne Kauf, 2,89 Mio. EUR bisheriger Umsatz. "
      "Reaktivierung lohnt hier am ehesten, weil die Kaufbereitschaft belegt ist."),
     ("Neukunden",
-     "2.027 Kunden mit erst wenigen Käufen. Ziel ist die zweite Bestellung — "
+     "1.881 Kunden mit erst wenigen Käufen. Ziel ist die zweite Bestellung — "
      "die Kennzahl dafür ist die Wiederkaufrate, nicht der Umsatz."),
     ("Verloren",
-     "4.396 Kunden, im Schnitt 249 Tage inaktiv. Hier ist die ehrlichste Entscheidung "
+     "4.998 Kunden, im Schnitt 276 Tage ohne Kauf. Hier ist die ehrlichste Entscheidung "
      "meist, kein Geld mehr auszugeben."),
 ], rh=54.0)
 
@@ -496,7 +504,7 @@ for i, (t4, b4) in enumerate([
     ("Standort", ["BM Hauptbahnhof 2.197 EUR je Quadratmeter und Jahr.",
                   "BM Zellerau 1.375 EUR bei größerer Fläche.",
                   "Nicht die Summe entscheidet, sondern die Flächenleistung."]),
-    ("Kundenbindung", ["5.484 gefährdete Kunden, 4,07 Mio. EUR Umsatzrisiko.",
+    ("Kundenbindung", ["4.998 gefährdete Kunden, 2,89 Mio. EUR bisheriger Umsatz.",
                        "Eine adressierbare Liste, kein Befund.",
                        "Der Reaktivierungsversuch ist gegen diesen Betrag rechenbar."]),
 ]):
@@ -576,7 +584,7 @@ deck.bewertung(s, Y0,
                [("Power BI · Tableau · Qlik", [1.00, 0.20, 0.55, 0.90], False),
                 ("Metabase · Superset", [0.80, 0.40, 0.60, 0.15], False),
                 ("Evidence · Rill · Lightdash", [0.35, 1.00, 0.35, 0.15], True),
-                ("Eigene Seite, vorab gerechnet", [0.15, 1.00, 0.10, 0.00], True)],
+                ("Eigene Seite auf eigener Datenbank", [0.15, 1.00, 0.35, 0.05], True)],
                rh=42.0, bw=236.0)
 B.band(s, Y0 + 234, 86, [
     "Marktlage 2026: Power BI und Tableau stellen zusammen rund 40 Prozent der eingesetzten "
@@ -600,9 +608,10 @@ B.zuordnung(s, Y0, [
      "typisiert, mart denormalisiert. Dasselbe Prinzip heißt im Werkzeug dbt — "
      "gebraucht wird das Werkzeug erst, wenn die Abhängigkeiten unübersichtlich werden."),
     ("4 · Zeigen",
-     "Ein Frontend an die Datenbank hängen. Hier: eine statische Seite mit vorab "
-     "gerechneten Zahlen. Alternativen: Metabase oder Superset zum Klicken, Evidence "
-     "für Berichte als Code, Power BI oder Tableau im Unternehmensumfeld."),
+     "Ein Frontend an die Datenbank hängen. Hier: eine Seite, die ihre Zahlen beim "
+     "Aufruf über eine REST-Schnittstelle aus PostgreSQL holt. Alternativen: Metabase "
+     "oder Superset zum Klicken, Evidence für Berichte als Code, Power BI oder Tableau "
+     "im Unternehmensumfeld."),
 ], rh=58.0)
 B.band(s, Y0 + 258, 62, [
     "Schritt 3 ist im Repo vorgeführt: dataset/wawi_mini.sql (operativer Ausschnitt, 14 Tabellen, "

@@ -90,11 +90,25 @@ const ctx = await browser.newContext({
 const page = await ctx.newPage();
 
 let ok = 0, fehler = 0;
-for (const a of AUFNAHMEN) {
-  try {
+// Seit das Dashboard seine Zahlen aus der Datenbank holt, haengt jede Aufnahme
+// an einer Netzantwort. Unter der Last von einem Dutzend Seitenaufrufen
+// hintereinander laeuft gelegentlich eine in den Zeitablauf. Ein zweiter
+// Versuch reicht — deshalb hier eine Wiederholung statt eines groesseren
+// Zeitfensters, das jeden Lauf verlangsamen wuerde.
+async function aufnehmen(a) {
     if (a.zu) await page.setViewportSize({ width: BREITE, height: HOEHE + a.zu });
     else await page.setViewportSize({ width: BREITE, height: HOEHE });
     await page.goto(`${BASIS}/${a.seite}`, { waitUntil: "networkidle" });
+    // Das Dashboard holt seine Zahlen beim Aufruf aus der Datenbank. Vor dem
+    // Klick auf einen Reiter muss das durch sein, sonst faengt die Aufnahme
+    // leere Kacheln ein. networkidle allein genuegt nicht: Chart.js zeichnet
+    // erst danach, und ein Fehlschlag der Quelle wuerde stumm durchlaufen.
+    if (a.seite.includes("dashboard")) {
+      await page.waitForFunction(() => {
+        const k = document.querySelector(".kpi-value");
+        return k && k.textContent.trim().length > 0;
+      }, { timeout: 30000 });
+    }
     if (a.tab) {
       await page.click(`[data-tab="${a.tab}"]`);
       await page.waitForTimeout(400);
@@ -126,12 +140,22 @@ for (const a of AUFNAHMEN) {
     } else {
       await page.screenshot(opt);
     }
-    const kb = Math.round(fs.statSync(datei).size / 1024);
-    console.log(`  OK      ${a.name.padEnd(20)} ${path.basename(datei).padEnd(24)} ${kb} KB`);
-    ok++;
-  } catch (e) {
-    console.log(`  FEHLER  ${a.name.padEnd(20)} ${String(e).split("\n")[0].slice(0, 90)}`);
+    return Math.round(fs.statSync(datei).size / 1024);
+}
+
+for (const a of AUFNAHMEN) {
+  let kb = null, letzter = null;
+  for (let versuch = 1; versuch <= 2 && kb === null; versuch++) {
+    try { kb = await aufnehmen(a); }
+    catch (e) { letzter = e; if (versuch === 1) await page.waitForTimeout(1500); }
+  }
+  if (kb === null) {
+    console.log(`  FEHLER  ${a.name.padEnd(20)} ${String(letzter).split("\n")[0].slice(0, 90)}`);
     fehler++;
+  } else {
+    const datei = a.name + (a.jpeg ? ".jpg" : ".png");
+    console.log(`  OK      ${a.name.padEnd(20)} ${datei.padEnd(24)} ${kb} KB`);
+    ok++;
   }
 }
 await browser.close();

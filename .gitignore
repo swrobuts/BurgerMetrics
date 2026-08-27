@@ -21,3 +21,6 @@ __pycache__/
 
 # Zugangsdaten (VPS-Supabase)
 .env
+
+# npm-Abhaengigkeiten der Bauskripte — reproduzierbar aus package.json
+node_modules/

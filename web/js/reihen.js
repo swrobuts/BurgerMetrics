@@ -182,7 +182,9 @@ export function baueReihen(d) {
   R.tempDays     = temp.map(x => x.tage);
   R.rainBins     = d.wetterRegen.map(x => x.klasse);
   R.rainRev      = d.wetterRegen.map(x => Math.round(x.umsatz_je_tag));
-  R.weatherScatter = d.wetterTage.map(x => ({ x: x.temperatur, y: x.bestellungen }));
+  // Die Achse ist mit "Tagesumsatz" beschriftet und die drei Nachbar-
+  // diagramme zeigen Umsatz; gezeichnet wurden bisher Bestellungen.
+  R.weatherScatter = d.wetterTage.map(x => ({ x: x.temperatur, y: Math.round(x.umsatz) }));
 
   // ── Kohorten ────────────────────────────────────────────────────────────
   R.cohortLabels = [...new Set(d.kohorten.map(x => x.kohorte))].sort();
@@ -199,10 +201,16 @@ export function baueReihen(d) {
   R.assocLift   = d.warenkorb.map(x => r2(x.lift));
 
   // ── RFM ─────────────────────────────────────────────────────────────────
+  // Die Farbe folgt der Recency, nicht der Position in der Liste: gruen, wo die
+  // letzte Bestellung nah liegt, rot, wo sie lange her ist. Eine feste
+  // Farbliste nach Position faerbte die Neukunden rot, sobald sich die
+  // Sortierung aendert — genau das war passiert.
+  const rfmFarbe = (tage) => tage <= 30 ? '#16a34a' : tage >= 180 ? '#dc2626' : '#5b7a9d';
   R.rfmSegments = d.rfm.map(x => ({
     seg: x.segment, count: x.kunden, pct: r2(x.anteil_pct, 1),
     avgR: Math.round(x.recency_tage), avgF: r2(x.frequenz, 1),
     avgM: Math.round(x.lebenswert), totalM: Math.round(x.umsatz_gesamt),
+    farbe: rfmFarbe(x.recency_tage),
   }));
 
   // ── Preissimulation ─────────────────────────────────────────────────────
@@ -210,6 +218,29 @@ export function baueReihen(d) {
     name: x.produkt, price: r2(x.preis), cost: r2(x.kosten),
     vol: x.menge, rev: Math.round(x.umsatz),
   }));
+
+  // ── Prognoseszenarien ───────────────────────────────────────────────────
+  // Wachstumsraten und Investitionsbetraege sind ANNAHMEN, keine Messwerte.
+  // Sie stehen hier an einer Stelle, damit Diagramm und Tabelle nicht
+  // auseinanderlaufen. Basis ist das letzte vollstaendige Jahr.
+  // Der Ruecklauf ist bewusst schlicht definiert: Mehrumsatz ueber drei Jahre
+  // gegenueber dem konservativen Fall, geteilt durch die Investition. Er sagt
+  // nichts ueber Marge oder Kapitalbindung, sondern nur, wie oft sich der
+  // eingesetzte Betrag im Zusatzumsatz wiederfindet.
+  const iBasis = R.yearLabels.findIndex(x => parseInt(x) === 2025);
+  const basis = R.yearRevenue[iBasis];
+  const reihe = (rate) => [1, 2, 3].map(k => basis * Math.pow(1 + rate, k));
+  const kons = reihe(0.03);
+  R.prognoseBasis = basis;
+  R.szenarien = [
+    { name: 'Konservativ',  rate: 0.03, investition: 0,       jahre: kons },
+    { name: 'Optimistisch', rate: 0.08, investition: 350000,  jahre: reihe(0.08) },
+    { name: 'Expansiv',     rate: 0.15, investition: 1200000, jahre: reihe(0.15) },
+  ].map(s => {
+    const mehr = s.jahre.reduce((a, v, i) => a + (v - kons[i]), 0);
+    return { ...s, mehrumsatz: mehr,
+             ruecklauf: s.investition ? mehr / s.investition : null };
+  });
 
   return R;
 }

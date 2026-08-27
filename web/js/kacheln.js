@@ -183,15 +183,25 @@ export function fuelleKacheln(B, roh) {
     kontext: `Von ${regeln.length} analysierten Paaren · signifikant` };
 
   // ── Simulation ──────────────────────────────────────────────────────────
-  const burgerUmsatz = roh.simulation.reduce((a, x) => a + x.umsatz, 0);
+  // Die Simulation rechnet mit Listenpreis mal Menge. Der tatsaechlich erloeste
+  // Positionsumsatz liegt darunter, weil Rabatte und Aktionen abgehen. Beide
+  // Groessen stehen nebeneinander, damit der Modellwert nicht fuer eine
+  // Messung gehalten wird.
   const burgerMenge  = roh.simulation.reduce((a, x) => a + x.menge, 0);
+  const burgerIst    = roh.simulation.reduce((a, x) => a + x.umsatz, 0);
+  const burgerListe  = roh.simulation.reduce((a, x) => a + x.preis * x.menge, 0);
   const burgerKosten = roh.simulation.reduce((a, x) => a + x.kosten * x.menge, 0);
-  const marge = burgerUmsatz - burgerKosten;
-  K.simulation1 = { wert: mio(burgerUmsatz), delta: '0%', gut: true, kontext: `Basis: ${mio(burgerUmsatz)} (2017–2026)` };
-  K.simulation2 = { wert: zahl(burgerMenge), delta: '0%', gut: true, kontext: `Basis: ${zahl(burgerMenge)} Stück` };
-  K.simulation3 = { wert: mio(marge), delta: '0%', gut: true,
-    kontext: `Basis: ${mio(marge)} (Marge ${proz(100 * marge / burgerUmsatz)})` };
-  K.simulation4 = { wert: euro(marge / burgerMenge), kontext: `pro Burger · Basis: ${euro(marge / burgerMenge)}` };
+  const margeListe   = burgerListe - burgerKosten;
+  const margeIst     = burgerIst - burgerKosten;
+  K.simulation1 = { wert: mio(burgerListe), delta: '0%', gut: true,
+    kontext: `Modell: Listenpreis × Menge · tatsächlich erlöst ${mio(burgerIst)}` };
+  K.simulation2 = { wert: zahl(burgerMenge), delta: '0%', gut: true,
+    kontext: `Basis: ${zahl(burgerMenge)} Stück (2017–2026)` };
+  K.simulation3 = { wert: mio(margeListe), delta: '0%', gut: true,
+    kontext: `zu Listenpreisen (${proz(100 * margeListe / burgerListe)}) · `
+      + `auf den Ist-Umsatz gerechnet ${mio(margeIst)} (${proz(100 * margeIst / burgerIst)})` };
+  K.simulation4 = { wert: euro(margeListe / burgerMenge),
+    kontext: `pro Burger zu Listenpreisen · auf Ist-Umsatz ${euro(margeIst / burgerMenge)}` };
 
   // ── Wetter ──────────────────────────────────────────────────────────────
   const tMax = roh.wetterTemperatur.filter(x => x.tage > 0).slice(-1)[0];
@@ -275,6 +285,26 @@ export function fuelleKacheln(B, roh) {
     if (c && k.kontext !== undefined) c.textContent = k.kontext;
     gesetzt++;
   });
+
+  // Die Kanalkachel hat keine einzelne Kennzahl, sondern vier Anteile neben
+  // ihren Beschriftungen. Zugeordnet wird ueber die Beschriftung, nicht ueber
+  // die Position — sonst verschiebt ein Umsortieren im HTML die Werte still.
+  const k25 = roh.kanaeleJahr.filter(x => x.jahr === 2025);
+  document.querySelectorAll('[data-kanal]').forEach(el => {
+    const name = el.parentElement.querySelector('span:not(.mono)');
+    const txt = name ? name.textContent.trim() : '';
+    const treffer = k25.find(x => x.kanal.toLowerCase().startsWith(txt.toLowerCase()));
+    if (treffer) { el.textContent = proz(treffer.anteil_pct); gesetzt++; }
+  });
+
+  // Kopfzeile der Seite.
+  const kopf = document.querySelector('[data-kopf]');
+  if (kopf) {
+    kopf.textContent = `Burger-Filial-Performance · ${zahl(kumBest)} Bestellungen · `
+      + `${B.yearLabels[0].replace('*', '')}–${B.yearLabels[B.yearLabels.length - 1].replace('*', '')}`;
+    gesetzt++;
+  }
+
   return { gesetzt, offen };
 }
 
@@ -439,9 +469,25 @@ export function fuelleSummary(B, roh) {
   const hero = [
     [zahl(kum / 1e6, 1), 'Mio. €'], [zahl(kumBest), ''], [zahl(kaufende), ''], [String(f.length), ''],
   ];
+  // Der Wert steht vor der Einheit (<span class="ms-hero-unit">). Im HTML gibt
+  // es dafuer keinen Platzhaltertext mehr, also wird der Textknoten angelegt,
+  // wenn er fehlt.
   document.querySelectorAll('#summary .ms-hero-val').forEach((e, k) => {
-    if (hero[k]) e.childNodes[0].nodeValue = hero[k][0];
+    if (!hero[k]) return;
+    const erst = e.firstChild;
+    if (erst && erst.nodeType === Node.TEXT_NODE) erst.nodeValue = hero[k][0];
+    else e.insertBefore(document.createTextNode(hero[k][0]), e.firstChild);
   });
+
+  // Spreizungs-Marke auf der Personalkarte und die Fusszeile.
+  const spreiz = document.querySelector('[data-tag="spreizung"]');
+  if (spreiz) spreiz.textContent =
+    zahl(pf[0].umsatz_je_ma / pf[pf.length - 1].umsatz_je_ma, 1) + '× GAP';
+  const fuss = document.querySelector('[data-fuss]');
+  if (fuss) fuss.textContent = 'Fiktives Unternehmen — BI-Kurs THWS Würzburg · '
+    + `Prof. Robert Butscher \u00a0|\u00a0 ${zahl(kumBest)} Bestellungen · `
+    + `${B.yearLabels[0].replace('*', '')}–${B.yearLabels[B.yearLabels.length - 1].replace('*', '')}`
+    + ' · Erstellt mit Chart.js';
 
   let gesetzt = 0;
   document.querySelectorAll('[data-ms]').forEach(karte => {

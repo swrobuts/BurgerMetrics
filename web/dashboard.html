@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BurgerMetrics – BI-Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BurgerMetrics – BI-Dashboard</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<style>
     :root {
       --ink: #1e293b;
       --ink-light: #475569;
@@ -682,1690 +683,1409 @@
   </style>
 </head>
 <body>
-
 <div class="site-header">
-  <div class="header-inner">
-    <div class="header-top">
-      <div class="brand">
-        <h1>BurgerMetrics</h1>
-        <p>Burger-Filial-Performance · 754.513 Bestellungen · 2017–2026</p>
-      </div>
-      <div class="filters">
-        <div class="filter-group">
-          <button class="filter-btn" onclick="toggleFilter('filterYear')">
-            <span class="filter-label">Jahr:</span><span id="filterYearLabel">Alle</span>
-            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
-          </button>
-          <div class="filter-dropdown" id="filterYear">
-            <button class="filter-option active" onclick="setFilter('year','Alle')">Alle</button>
-            <button class="filter-option" onclick="setFilter('year','2026')">2026 (Q1)</button>
-            <button class="filter-option" onclick="setFilter('year','2025')">2025</button>
-            <button class="filter-option" onclick="setFilter('year','2024')">2024</button>
-            <button class="filter-option" onclick="setFilter('year','2023')">2023</button>
-            <button class="filter-option" onclick="setFilter('year','2022')">2022</button>
-            <button class="filter-option" onclick="setFilter('year','2021')">2021</button>
-            <button class="filter-option" onclick="setFilter('year','2020')">2020</button>
-            <button class="filter-option" onclick="setFilter('year','2019')">2019</button>
-            <button class="filter-option" onclick="setFilter('year','2018')">2018</button>
-            <button class="filter-option" onclick="setFilter('year','2017')">2017</button>
-          </div>
-        </div>
-        <div class="filter-group">
-          <button class="filter-btn" onclick="toggleFilter('filterBranch')">
-            <span class="filter-label">Filiale:</span><span id="filterBranchLabel">Alle</span>
-            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
-          </button>
-          <div class="filter-dropdown" id="filterBranch">
-            <button class="filter-option active" onclick="setFilter('branch','Alle')">Alle</button>
-            <button class="filter-option" onclick="setFilter('branch','Europastern')">BM Europastern</button>
-            <button class="filter-option" onclick="setFilter('branch','Hauptbahnhof')">BM Hauptbahnhof</button>
-            <button class="filter-option" onclick="setFilter('branch','Mainfrankenpark')">BM Mainfrankenpark</button>
-            <button class="filter-option" onclick="setFilter('branch','Heuchelhof')">BM Heuchelhof</button>
-            <button class="filter-option" onclick="setFilter('branch','Sanderring')">BM Sanderring</button>
-            <button class="filter-option" onclick="setFilter('branch','Lengfeld')">BM Lengfeld</button>
-            <button class="filter-option" onclick="setFilter('branch','Grombühl')">BM Grombühl</button>
-            <button class="filter-option" onclick="setFilter('branch','Zellerau')">BM Zellerau</button>
-          </div>
-        </div>
-        <div class="filter-group">
-          <button class="filter-btn" onclick="toggleFilter('filterChannel')">
-            <span class="filter-label">Kanal:</span><span id="filterChannelLabel">Alle</span>
-            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"/></svg>
-          </button>
-          <div class="filter-dropdown" id="filterChannel">
-            <button class="filter-option active" onclick="setFilter('channel','Alle')">Alle</button>
-            <button class="filter-option" onclick="setFilter('channel','Counter')">Counter</button>
-            <button class="filter-option" onclick="setFilter('channel','Drive')">Drive-Through</button>
-            <button class="filter-option" onclick="setFilter('channel','App')">App</button>
-            <button class="filter-option" onclick="setFilter('channel','Kiosk')">Kiosk</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="nav-scroll-wrap">
-    <nav class="main-nav">
-      <button class="active" data-tab="uebersicht">Umsatz</button>
-      <button data-tab="filialen">Filialen</button>
-      <button data-tab="produkte">Produkte</button>
-      <button data-tab="kunden">Kunden</button>
-      <button data-tab="kanaele">Kanäle</button>
-      <button data-tab="zeitanalyse">Zeitanalyse</button>
-      <button data-tab="trends">Trends</button>
-      <button data-tab="datamining">Data Mining</button>
-      <button data-tab="simulation">Simulation</button>
-      <button data-tab="wetter">Wetter</button>
-      <button data-tab="personal">Personal</button>
-      <button data-tab="promotions">Promotions</button>
-      <button data-tab="summary">Management Summary</button>
-    </nav>
-    </div>
-  </div>
+<div class="header-inner">
+<div class="header-top">
+<div class="brand">
+<h1>BurgerMetrics</h1>
+<p data-kopf="1"></p>
 </div>
-
+<div class="filters">
+<div class="filter-group">
+<button class="filter-btn" onclick="toggleFilter('filterYear')">
+<span class="filter-label">Jahr:</span><span id="filterYearLabel">Alle</span>
+<svg fill="currentColor" viewbox="0 0 20 20"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
+</button>
+<div class="filter-dropdown" id="filterYear">
+<button class="filter-option active" onclick="setFilter('year','Alle')">Alle</button>
+<button class="filter-option" onclick="setFilter('year','2026')">2026 (Q1)</button>
+<button class="filter-option" onclick="setFilter('year','2025')">2025</button>
+<button class="filter-option" onclick="setFilter('year','2024')">2024</button>
+<button class="filter-option" onclick="setFilter('year','2023')">2023</button>
+<button class="filter-option" onclick="setFilter('year','2022')">2022</button>
+<button class="filter-option" onclick="setFilter('year','2021')">2021</button>
+<button class="filter-option" onclick="setFilter('year','2020')">2020</button>
+<button class="filter-option" onclick="setFilter('year','2019')">2019</button>
+<button class="filter-option" onclick="setFilter('year','2018')">2018</button>
+<button class="filter-option" onclick="setFilter('year','2017')">2017</button>
+</div>
+</div>
+<div class="filter-group">
+<button class="filter-btn" onclick="toggleFilter('filterBranch')">
+<span class="filter-label">Filiale:</span><span id="filterBranchLabel">Alle</span>
+<svg fill="currentColor" viewbox="0 0 20 20"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
+</button>
+<div class="filter-dropdown" id="filterBranch">
+<button class="filter-option active" onclick="setFilter('branch','Alle')">Alle</button>
+<button class="filter-option" onclick="setFilter('branch','Europastern')">BM Europastern</button>
+<button class="filter-option" onclick="setFilter('branch','Hauptbahnhof')">BM Hauptbahnhof</button>
+<button class="filter-option" onclick="setFilter('branch','Mainfrankenpark')">BM Mainfrankenpark</button>
+<button class="filter-option" onclick="setFilter('branch','Heuchelhof')">BM Heuchelhof</button>
+<button class="filter-option" onclick="setFilter('branch','Sanderring')">BM Sanderring</button>
+<button class="filter-option" onclick="setFilter('branch','Lengfeld')">BM Lengfeld</button>
+<button class="filter-option" onclick="setFilter('branch','Grombühl')">BM Grombühl</button>
+<button class="filter-option" onclick="setFilter('branch','Zellerau')">BM Zellerau</button>
+</div>
+</div>
+<div class="filter-group">
+<button class="filter-btn" onclick="toggleFilter('filterChannel')">
+<span class="filter-label">Kanal:</span><span id="filterChannelLabel">Alle</span>
+<svg fill="currentColor" viewbox="0 0 20 20"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
+</button>
+<div class="filter-dropdown" id="filterChannel">
+<button class="filter-option active" onclick="setFilter('channel','Alle')">Alle</button>
+<button class="filter-option" onclick="setFilter('channel','Counter')">Counter</button>
+<button class="filter-option" onclick="setFilter('channel','Drive')">Drive-Through</button>
+<button class="filter-option" onclick="setFilter('channel','App')">App</button>
+<button class="filter-option" onclick="setFilter('channel','Kiosk')">Kiosk</button>
+</div>
+</div>
+</div>
+</div>
+<div class="nav-scroll-wrap">
+<nav class="main-nav">
+<button class="active" data-tab="uebersicht">Umsatz</button>
+<button data-tab="filialen">Filialen</button>
+<button data-tab="produkte">Produkte</button>
+<button data-tab="kunden">Kunden</button>
+<button data-tab="kanaele">Kanäle</button>
+<button data-tab="zeitanalyse">Zeitanalyse</button>
+<button data-tab="trends">Trends</button>
+<button data-tab="datamining">Data Mining</button>
+<button data-tab="simulation">Simulation</button>
+<button data-tab="wetter">Wetter</button>
+<button data-tab="personal">Personal</button>
+<button data-tab="promotions">Promotions</button>
+<button data-tab="summary">Management Summary</button>
+</nav>
+</div>
+</div>
+</div>
 <div class="sub-nav" id="subNavContainer"><div class="sub-nav-inner" id="subNavInner"></div></div>
-
 <main>
-
 <!-- ═══════════════════ TAB: UMSATZ ═══════════════════ -->
-<div id="uebersicht" class="tab-content active">
-
-  <!-- ── Sub: Überblick ── -->
-  <div id="sub_uebersicht_overview" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="uebersicht1" onclick="toggleDetail('detailRevenue')">
-        <div class="kpi-label">Umsatz 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="uebersicht2">
-        <div class="kpi-label">Bestellungen 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="uebersicht3">
-        <div class="kpi-label">Ø Bestellwert 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="uebersicht4">
-        <div class="kpi-label">Kumuliert 2017–2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="uebersicht5" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Kanalverteilung 2025</div>
-        <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--bar);display:inline-block"></span>Counter</span>
-            <span class="mono" style="font-weight:700">51,2%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--bar-light);display:inline-block"></span>Drive-Through</span>
-            <span class="mono" style="font-weight:700">21,1%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>App</span>
-            <span class="mono" style="font-weight:700">10,6%</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
-            <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--orange);display:inline-block"></span>Kiosk</span>
-            <span class="mono" style="font-weight:700">17,1%</span>
-          </div>
-        </div>
-        <div class="kpi-context" style="margin-top:8px"></div>
-      </div>
-      <div class="kpi-card" data-kpi="uebersicht6" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Top-Burger 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="uebersicht7" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Wiederkehrende Kunden</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="uebersicht8" style="border-top:2px solid var(--border)">
-        <div class="kpi-label">Kundenzufriedenheit</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neutral"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="detail-panel" id="detailRevenue">
-      <div class="table-toolbar">
-        <input class="table-search" type="text" placeholder="Suchen…" oninput="filterTable('tblYears',this.value)">
-        <span class="table-count" id="tblYears_count">9 Zeilen</span>
-      </div>
-      <table class="data-table" id="tblYears">
-        <thead><tr><th>Jahr</th><th>Umsatz</th><th>YoY</th><th>Bestellungen</th><th>YoY</th><th>AOV</th><th>YoY</th></tr></thead>
-        <tbody>
-          <tr><td>2017</td><td class="mono">€189.699</td><td class="text-muted">—</td><td class="mono">13.086</td><td class="text-muted">—</td><td class="mono">€14,50</td><td class="text-muted">—</td></tr>
-          <tr><td>2018</td><td class="mono">€407.631</td><td class="text-pos">+114,8%</td><td class="mono">27.402</td><td class="text-pos">+109,3%</td><td class="mono">€14,88</td><td class="text-pos">+2,6%</td></tr>
-          <tr><td>2019</td><td class="mono">€831.495</td><td class="text-pos">+104,0%</td><td class="mono">53.307</td><td class="text-pos">+94,5%</td><td class="mono">€15,60</td><td class="text-pos">+4,8%</td></tr>
-          <tr><td>2020</td><td class="mono">€728.623</td><td class="text-neg">−12,4%</td><td class="mono">46.209</td><td class="text-neg">−13,3%</td><td class="mono">€15,77</td><td class="text-pos">+1,1%</td></tr>
-          <tr><td>2021</td><td class="mono">€1.232.130</td><td class="text-pos">+69,1%</td><td class="mono">73.415</td><td class="text-pos">+58,8%</td><td class="mono">€16,78</td><td class="text-pos">+6,4%</td></tr>
-          <tr><td>2022</td><td class="mono">€2.017.208</td><td class="text-pos">+63,6%</td><td class="mono">113.128</td><td class="text-pos">+54,1%</td><td class="mono">€17,83</td><td class="text-pos">+6,3%</td></tr>
-          <tr><td>2023</td><td class="mono">€2.581.072</td><td class="text-pos">+28,0%</td><td class="mono">127.022</td><td class="text-pos">+12,3%</td><td class="mono">€20,32</td><td class="text-pos">+13,9%</td></tr>
-          <tr><td>2024</td><td class="mono">€2.841.075</td><td class="text-pos">+10,1%</td><td class="mono">133.307</td><td class="text-pos">+5,0%</td><td class="mono">€21,31</td><td class="text-pos">+4,9%</td></tr>
-          <tr><td>2025</td><td class="mono">€2.994.771</td><td class="text-pos">+5,4%</td><td class="mono">136.557</td><td class="text-pos">+2,4%</td><td class="mono">€21,93</td><td class="text-pos">+2,9%</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Umsatz wächst seit 2021 kontinuierlich — Wachstum verlangsamt sich aber</div><div class="chart-sub">Monatlicher Umsatz in € · 109 Monate · März 2017 – März 2026 · Alle Filialen</div></div>
-        <div class="toggle-group" id="toggleRevenue">
-          <button class="toggle-btn active" data-mode="monat" onclick="switchRevenue('monat')">Monat</button>
-          <button class="toggle-btn" data-mode="quartal" onclick="switchRevenue('quartal')">Quartal</button>
-          <button class="toggle-btn" data-mode="jahr" onclick="switchRevenue('jahr')">Jahr</button>
-        </div>
-      </div>
-      <div class="chart-area tall"><canvas id="revenueChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Nach dem COVID-bedingten Rückgang im April 2020 (€23k, −62% MoM) erholte sich der Monatsumsatz schneller als erwartet. Seit Mitte 2022 liegt er stabil über €160k, seit 2024 über €200k. Das All-Time-High im Juli 2025 (€301k) markiert den Zenit der Sommersaison. Auffällig: Die YoY-Wachstumsrate sinkt von 104% (2019) auf 5,4% (2025) — die Expansion erreicht ein natürliches Plateau.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das organische Wachstum durch Neueröffnungen ist weitgehend ausgereizt (8 Filialen in Würzburg). Für weiteres Umsatzwachstum entweder: (1) AOV-Steigerung durch Premium-Bundles und Upselling-Kampagnen (Potenzial: +€1,50/Bestellung → +€205k p.a.) oder (2) Expansion in umliegende Städte (Schweinfurt, Aschaffenburg).</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Ø Bestellwert stieg um 51% seit Gründung</div><div class="chart-sub">AOV in € · Jahresdurchschnitte · 2017–2026</div></div>
-          <div class="toggle-group" id="toggleAOV">
-            <button class="toggle-btn active" data-mode="jahr" onclick="switchAOV('jahr')">Jahr</button>
-          </div>
-        </div>
-        <div class="chart-area"><canvas id="aovChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Der AOV stieg von €14,50 (2017) auf €22,48 (Q1 2026). Der größte Zuwachs entfiel auf 2023 (+13,9%), getrieben durch Premium-Produkte (Truffle Deluxe, Green Goddess Bowl) und die Energiekrise-bedingte Preisanpassung. Seit 2024 flacht die AOV-Kurve ab (+2,9%), was auf begrenzte Preissensitivität bei >€21 hinweist.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Statt Preiserhöhungen auf Basket-Size setzen: Die Warenkorbanalyse zeigt, dass 77,3% der Medium-Fries-Käufer auch Cola 0.5l bestellen. Ein „Combo-Deal" (Burger + Fries + Drink) für €12,99 könnte den AOV um €1–2 steigern, ohne die Preiswahrnehmung zu belasten.</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Bestellwachstum verlangsamt sich auf +2,4%</div><div class="chart-sub">Bestellungen pro Jahr · 2017–2026</div></div>
-          <div class="toggle-group" id="toggleOrders">
-            <button class="toggle-btn active" data-mode="jahr" onclick="switchOrders('jahr')">Jahr</button>
-          </div>
-        </div>
-        <div class="chart-area"><canvas id="ordersChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> 2025 wurden 136.557 Bestellungen verarbeitet — ein Rekord, aber nur +2,4% gegenüber 2024. Zum Vergleich: 2022 lag das Wachstum noch bei +54,1%. Der Markt in Würzburg nähert sich der Sättigung. 2026 sind nach Q1 bereits 31.080 Bestellungen verbucht — auf Jahresbasis hochgerechnet läge das bei ~124k (saisonbereinigt ~140k).
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Frequenzsteigerung durch Loyalty-Programm: Aktuell kaufen nur 38,6% der 25.000 Kunden im Loyalty-Programm. Eine Kampagne „Doppelte Punkte im Januar/Februar" könnte den saisonal schwachen Q1 stärken (aktuell −12% vs. Q3-Schnitt).</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Sub: Wachstumsraten ── -->
-  <div id="sub_uebersicht_yoy" class="sub-content">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Wachstum verlangsamt sich auf allen drei KPIs synchron</div><div class="chart-sub">Year-over-Year-Wachstum in % · Umsatz, Bestellungen, AOV · 2018–2025</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="yoyChart"></canvas></div>
-      <div class="legend-row">
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Umsatz YoY</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>Bestellungen YoY</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>AOV YoY</div>
-      </div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Alle drei Wachstumskurven zeigen dasselbe Muster: explosive Frühphase (2018/19: >100%), COVID-Delle (2020: −12,4%), starke Erholung (2021: +69,1%) und seither kontinuierliche Verlangsamung. 2025 wächst der Umsatz nur noch um 5,4% — davon 2,9 Prozentpunkte durch AOV-Steigerung und nur 2,4 Prozentpunkte durch Bestellvolumen. Das Wachstum ist primär preisgetrieben, nicht mengengetrieben.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Für nachhaltiges Wachstum muss das Mengenwachstum wiederbelebt werden. Zwei Hebel: (1) Kundenakquise über App-Marketing (App-Bestellungen wachsen 37,7% YoY — der am schnellsten wachsende Kanal) und (2) neue Standorte außerhalb Würzburgs.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Umsatz pro Filiale — Spreizung von €752k bis €3,39M, geprägt von der Betriebsdauer</div><div class="chart-sub">Kumulierter Umsatz in € · Alle 8 Standorte · 2017–2026</div></div>
-      </div>
-      <div class="chart-area"><canvas id="yoyBranchChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Europastern führt mit €3,39M (23,3% Anteil), gefolgt von Hauptbahnhof (€2,21M) und Mainfrankenpark (€2,16M). Allerdings: Europastern ist seit 2017 aktiv und hat den niedrigsten AOV (€18,62). Mainfrankenpark, erst seit 2021 offen, erzielt bereits €2,16M mit einem AOV von €21,03 — ein deutlich profitableres Profil.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das Mainfrankenpark-Modell (Shopping-Lage, hoher AOV) sollte als Blueprint für neue Standorte dienen. Europastern sollte durch Menü-Optimierung den AOV an den Netzwerk-Durchschnitt (€19,25) heranführen — das ergäbe bei 182k Bestellungen +€111k Mehrumsatz.</div>
-      </div>
-    </div>
-  </div>
+<div class="tab-content active" id="uebersicht">
+<!-- ── Sub: Überblick ── -->
+<div class="sub-content active" id="sub_uebersicht_overview">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="uebersicht1" onclick="toggleDetail('detailRevenue')">
+<div class="kpi-label">Umsatz 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="uebersicht2">
+<div class="kpi-label">Bestellungen 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="uebersicht3">
+<div class="kpi-label">Ø Bestellwert 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="uebersicht4">
+<div class="kpi-label">Kumuliert 2017–2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="uebersicht5" style="border-top:2px solid var(--border)">
+<div class="kpi-label">Kanalverteilung 2025</div>
+<div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+<span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--bar);display:inline-block"></span>Counter</span>
+<span class="mono" data-kanal="0" style="font-weight:700"></span>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+<span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--bar-light);display:inline-block"></span>Drive-Through</span>
+<span class="mono" data-kanal="1" style="font-weight:700"></span>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+<span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>App</span>
+<span class="mono" data-kanal="2" style="font-weight:700"></span>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px">
+<span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--orange);display:inline-block"></span>Kiosk</span>
+<span class="mono" data-kanal="3" style="font-weight:700"></span>
+</div>
+</div>
+<div class="kpi-context" style="margin-top:8px"></div>
+</div>
+<div class="kpi-card" data-kpi="uebersicht6" style="border-top:2px solid var(--border)">
+<div class="kpi-label">Top-Burger 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="uebersicht7" style="border-top:2px solid var(--border)">
+<div class="kpi-label">Wiederkehrende Kunden</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="uebersicht8" style="border-top:2px solid var(--border)">
+<div class="kpi-label">Kundenzufriedenheit</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neutral"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="detail-panel" id="detailRevenue">
+<div class="table-toolbar">
+<input class="table-search" oninput="filterTable('tblYears',this.value)" placeholder="Suchen…" type="text"/>
+<span class="table-count" id="tblYears_count">9 Zeilen</span>
+</div>
+<table class="data-table" id="tblYears">
+<thead><tr><th>Jahr</th><th>Umsatz</th><th>YoY</th><th>Bestellungen</th><th>YoY</th><th>AOV</th><th>YoY</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Umsatz wächst seit 2021 kontinuierlich — Wachstum verlangsamt sich aber</div><div class="chart-sub">Monatlicher Umsatz in € · 109 Monate · März 2017 – März 2026 · Alle Filialen</div></div>
+<div class="toggle-group" id="toggleRevenue">
+<button class="toggle-btn active" data-mode="monat" onclick="switchRevenue('monat')">Monat</button>
+<button class="toggle-btn" data-mode="quartal" onclick="switchRevenue('quartal')">Quartal</button>
+<button class="toggle-btn" data-mode="jahr" onclick="switchRevenue('jahr')">Jahr</button>
+</div>
+</div>
+<div class="chart-area tall"><canvas id="revenueChart"></canvas></div>
+<div class="interpretation" data-txt="revenueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="revenueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="grid-2">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="aovChart.titel"></div><div class="chart-sub">AOV in € · Jahresdurchschnitte · 2017–2026</div></div>
+<div class="toggle-group" id="toggleAOV">
+<button class="toggle-btn active" data-mode="jahr" onclick="switchAOV('jahr')">Jahr</button>
+</div>
+</div>
+<div class="chart-area"><canvas id="aovChart"></canvas></div>
+<div class="interpretation" data-txt="aovChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="aovChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="ordersChart.titel"></div><div class="chart-sub">Bestellungen pro Jahr · 2017–2026</div></div>
+<div class="toggle-group" id="toggleOrders">
+<button class="toggle-btn active" data-mode="jahr" onclick="switchOrders('jahr')">Jahr</button>
+</div>
+</div>
+<div class="chart-area"><canvas id="ordersChart"></canvas></div>
+<div class="interpretation" data-txt="ordersChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="ordersChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
+<!-- ── Sub: Wachstumsraten ── -->
+<div class="sub-content" id="sub_uebersicht_yoy">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Wachstum verlangsamt sich auf allen drei KPIs synchron</div><div class="chart-sub">Year-over-Year-Wachstum in % · Umsatz, Bestellungen, AOV · 2018–2025</div></div>
+</div>
+<div class="chart-area tall"><canvas id="yoyChart"></canvas></div>
+<div class="legend-row">
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Umsatz YoY</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>Bestellungen YoY</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>AOV YoY</div>
+</div>
+<div class="interpretation" data-txt="yoyChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="yoyChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="yoyBranchChart.titel"></div><div class="chart-sub">Kumulierter Umsatz in € · Alle 8 Standorte · 2017–2026</div></div>
+</div>
+<div class="chart-area"><canvas id="yoyBranchChart"></canvas></div>
+<div class="interpretation" data-txt="yoyBranchChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="yoyBranchChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: FILIALEN ═══════════════════ -->
-<div id="filialen" class="tab-content">
-
-  <div id="sub_filialen_ranking" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="filialen1">
-        <div class="kpi-label">Top-Filiale (Umsatz)</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="filialen2">
-        <div class="kpi-label">Top-Filiale (AOV)</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="filialen3">
-        <div class="kpi-label">Top-Filiale (Rating)</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="filialen4">
-        <div class="kpi-label">Netzwerk-Durchschnitt</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Europastern führt im Umsatz, Mainfrankenpark im Bestellwert</div><div class="chart-sub">Kumulierter Umsatz in € · 8 Standorte in Würzburg · 2017–2026</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="branchChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die drei Pionier-Filialen (Europastern, Hbf, Sanderring — alle vor 2020 eröffnet) vereinen 50% des Gesamtumsatzes. Mainfrankenpark (seit 2021) zeigt das stärkste Wachstum: in nur 5 Jahren fast gleichauf mit Hauptbahnhof (7 Jahre). Die jüngsten Filialen Grombühl und Zellerau sind noch im Aufbau, erzielen aber bereits überdurchschnittliche AOVs.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Europastern sollte vom Umsatzführer auch zum AOV-Leader entwickelt werden. Konkret: Test eines Premium-Menüs am Highway-Standort (reisende Kunden = höhere Zahlungsbereitschaft). Ziel: AOV von €18,62 auf €20+ bringen → +€251k Mehrumsatz bei gleichem Volumen.</div>
-      </div>
-    </div>
-
-    <div class="chart-card table-card" style="overflow-x:auto">
-      <div class="chart-title" style="margin-bottom:4px">Filial-Scorecard</div>
-      <div class="chart-sub" style="margin-bottom:10px">Alle KPIs je Standort · sortiert nach Umsatz</div>
-      <div class="table-toolbar">
-        <input class="table-search" type="text" placeholder="Suchen…" oninput="filterTable('tblBranch',this.value)">
-        <span class="group-label">Gruppieren:</span>
-        <select class="group-select" onchange="groupTable('tblBranch',this.value)">
-          <option value="">— keine —</option>
-          <option value="1">Typ</option>
-        </select>
-        <span class="table-count" id="tblBranch_count">8 Zeilen</span>
-      </div>
-      <table class="data-table" id="tblBranch">
-        <thead><tr><th>Filiale</th><th>Typ</th><th>Drive-Through</th><th>Eröffnet</th><th>Umsatz</th><th>Bestellungen</th><th>AOV</th><th>Rating</th></tr></thead>
-        <tbody>
-          <tr><td>BM Europastern</td><td>Highway</td><td style="color:var(--green);font-weight:700">✓ DT</td><td class="mono">03/2017</td><td class="mono">€3.391.529</td><td class="mono">182.120</td><td class="mono text-neg">€18,62</td><td>3,81 ★</td></tr>
-          <tr><td>BM Hauptbahnhof</td><td>City Center</td><td style="color:var(--muted)">—</td><td class="mono">06/2018</td><td class="mono">€2.205.646</td><td class="mono">123.929</td><td class="mono text-neg">€17,80</td><td>3,77 ★</td></tr>
-          <tr><td>BM Mainfrankenpark</td><td>Shopping</td><td style="color:var(--muted)">—</td><td class="mono">04/2021</td><td class="mono">€2.158.128</td><td class="mono">102.631</td><td class="mono text-pos">€21,03</td><td>3,82 ★</td></tr>
-          <tr><td>BM Heuchelhof</td><td>Residential</td><td style="color:var(--green);font-weight:700">✓ DT</td><td class="mono">09/2019</td><td class="mono">€2.029.699</td><td class="mono">100.783</td><td class="mono text-pos">€20,14</td><td>3,81 ★</td></tr>
-          <tr><td>BM Sanderring</td><td>University</td><td style="color:var(--muted)">—</td><td class="mono">02/2019</td><td class="mono">€1.683.541</td><td class="mono">89.366</td><td class="mono">€18,84</td><td>3,76 ★</td></tr>
-          <tr><td>BM Lengfeld</td><td>Commercial</td><td style="color:var(--green);font-weight:700">✓ DT</td><td class="mono">08/2020</td><td class="mono">€1.359.198</td><td class="mono">72.218</td><td class="mono">€18,82</td><td>3,81 ★</td></tr>
-          <tr><td>BM Grombühl</td><td>Hospital</td><td style="color:var(--muted)">—</td><td class="mono">01/2022</td><td class="mono">€942.419</td><td class="mono">47.734</td><td class="mono text-pos">€19,74</td><td class="text-pos">3,83 ★</td></tr>
-          <tr><td>BM Zellerau</td><td>Mixed</td><td style="color:var(--muted)">—</td><td class="mono">03/2023</td><td class="mono">€752.219</td><td class="mono">35.732</td><td class="mono text-pos">€21,05</td><td>3,82 ★</td></tr>
-        </tbody>
-      </table>
-      <div class="interpretation" style="font-size:11px"><em>Farbcodierung AOV: <span style="color:var(--green)">Grün</span> = über Netzwerk-Ø (€19,25), <span style="color:var(--red)">Rot</span> = unter Netzwerk-Ø. <strong>Drive-Through (DT):</strong> 3 von 8 Filialen — Europastern, Heuchelhof, Lengfeld. DT-Filialen erzielen im Schnitt €23,80 AOV (+24% vs. Counter) durch höheres Bestellvolumen pro Transaktion.</em></div>
-    </div>
-  </div>
-
-  <div id="sub_filialen_aov" class="sub-content">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Neuere Filialen erzielen systematisch höhere Bestellwerte</div><div class="chart-sub">AOV in € · Sortiert nach Eröffnungsdatum · 8 Standorte</div></div>
-      </div>
-      <div class="chart-area"><canvas id="branchAovChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Es gibt eine klare Korrelation: je neuer die Filiale, desto höher der AOV. Zellerau (2023) und Mainfrankenpark (2021) liegen bei €21+, während die Gründungsfiliale Europastern (2017) nur €18,62 erreicht. Dies erklärt sich durch aktuellere Menügestaltung, optimierte Standortwahl und die höhere Durchdringung von Premium-Produkten (Beyond Burger, Green Goddess Bowl).
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die Menükarten der älteren Filialen (Europastern, Hbf) sollten an das Premium-Portfolio der neueren Standorte angepasst werden. Konkretes Upselling-Potenzial bei Europastern: 182.120 Bestellungen × €2,41 AOV-Gap = €439k jährlich.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Umsatz pro Betriebsjahr — Mainfrankenpark ist der produktivste Standort</div><div class="chart-sub">Umsatz geteilt durch Anzahl aktiver Jahre · normalisierter Vergleich</div></div>
-      </div>
-      <div class="chart-area"><canvas id="branchEfficiencyChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Normalisiert auf die Betriebsdauer zeigt sich ein anderes Bild: Mainfrankenpark erzielt €431k/Jahr — doppelt so viel wie Europastern (€377k/Jahr bei 9 Jahren Laufzeit). Heuchelhof (€290k/Jahr) und Zellerau (€251k/Jahr bei erst 3 Jahren) sind ebenfalls überdurchschnittlich.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Bei zukünftigen Standortentscheidungen das Mainfrankenpark-Profil (Shopping-Center, hohe Laufkundschaft, Premium-Positionierung) replizieren. ROI-Prognose für vergleichbaren Standort: Break-even nach ~8 Monaten bei €400k/Jahr Umsatz.</div>
-      </div>
-    </div>
-  </div>
+<div class="tab-content" id="filialen">
+<div class="sub-content active" id="sub_filialen_ranking">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="filialen1">
+<div class="kpi-label">Top-Filiale (Umsatz)</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="filialen2">
+<div class="kpi-label">Top-Filiale (AOV)</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="filialen3">
+<div class="kpi-label">Top-Filiale (Rating)</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="filialen4">
+<div class="kpi-label">Netzwerk-Durchschnitt</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Europastern führt im Umsatz, Mainfrankenpark im Bestellwert</div><div class="chart-sub">Kumulierter Umsatz in € · 8 Standorte in Würzburg · 2017–2026</div></div>
+</div>
+<div class="chart-area tall"><canvas id="branchChart"></canvas></div>
+<div class="interpretation" data-txt="branchChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="branchChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card table-card" style="overflow-x:auto">
+<div class="chart-title" style="margin-bottom:4px">Filial-Scorecard</div>
+<div class="chart-sub" style="margin-bottom:10px">Alle KPIs je Standort · sortiert nach Umsatz</div>
+<div class="table-toolbar">
+<input class="table-search" oninput="filterTable('tblBranch',this.value)" placeholder="Suchen…" type="text"/>
+<span class="group-label">Gruppieren:</span>
+<select class="group-select" onchange="groupTable('tblBranch',this.value)">
+<option value="">— keine —</option>
+<option value="1">Typ</option>
+</select>
+<span class="table-count" id="tblBranch_count">8 Zeilen</span>
+</div>
+<table class="data-table" id="tblBranch">
+<thead><tr><th>Filiale</th><th>Typ</th><th>Drive-Through</th><th>Eröffnet</th><th>Umsatz</th><th>Bestellungen</th><th>AOV</th><th>Rating</th></tr></thead>
+<tbody></tbody>
+</table>
+<div class="interpretation" data-txt="filialen_tabelle1.deutung" style="font-size:11px"><strong>Drive-Through (DT):</strong></div>
+</div>
+</div>
+<div class="sub-content" id="sub_filialen_aov">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Neuere Filialen erzielen systematisch höhere Bestellwerte</div><div class="chart-sub">AOV in € · Sortiert nach Eröffnungsdatum · 8 Standorte</div></div>
+</div>
+<div class="chart-area"><canvas id="branchAovChart"></canvas></div>
+<div class="interpretation" data-txt="branchAovChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="branchAovChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Umsatz pro Betriebsjahr — Mainfrankenpark ist der produktivste Standort</div><div class="chart-sub">Umsatz geteilt durch Anzahl aktiver Jahre · normalisierter Vergleich</div></div>
+</div>
+<div class="chart-area"><canvas id="branchEfficiencyChart"></canvas></div>
+<div class="interpretation" data-txt="branchEfficiencyChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="branchEfficiencyChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: PRODUKTE ═══════════════════ -->
-<div id="produkte" class="tab-content">
-
-  <div id="sub_produkte_ranking" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="produkte1">
-        <div class="kpi-label">Umsatzstärkstes Produkt</div>
-        <div class="kpi-value" style="font-size:18px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="produkte2">
-        <div class="kpi-label">Stärkste Kategorie</div>
-        <div class="kpi-value" style="font-size:18px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="produkte3">
-        <div class="kpi-label">Veggie-Anteil 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="produkte4">
-        <div class="kpi-label">Top Cross-Sell</div>
-        <div class="kpi-value" style="font-size:14px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Beyond Burger und Green Goddess Bowl generieren 16% des Gesamtumsatzes</div><div class="chart-sub">Top 15 Produkte nach kumuliertem Umsatz · 2017–2026 · Alle Filialen</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="topProductsChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Top 3 (Beyond Burger €1,30M, Green Goddess Bowl €1,02M, Cola 0.5l €830k) machen 21,6% des Umsatzes aus. Auffällig: 2 der Top 3 sind pflanzliche Produkte — ein klarer Markttrend. Medium Fries (€597k, Rang 4) ist der wichtigste Cross-Sell-Artikel. Am unteren Ende: Side Salad (€362k) trotz niedrigem Preis hoch im Ranking durch hohes Volumen.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das pflanzliche Segment wächst überproportional. Einführung eines dritten Premium-Veggie-Produkts (z.B. „Mushroom Truffle Veggie") in der €9–11 Preisklasse. Prognostizierter Zusatzumsatz basierend auf Green-Goddess-Adoption: €200–300k im ersten Jahr.</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_produkte_kategorien" class="sub-content">
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Umsatzanteil nach Kategorie — Burger 43%, Drinks 35%</div><div class="chart-sub">Umsatzanteil nach Hauptkategorie · 2017–2026</div></div>
-        </div>
-        <div class="chart-area"><canvas id="categoryChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Burger (€6,29M, 42,9%) und Drinks (€5,13M, 35,0%) machen zusammen 78% des Umsatzes aus. Sides (€2,47M, 16,8%) sind die dritte Säule. Dessert (3,4%), Breakfast (1,7%) und Extras (0,4%) sind Nischenprodukte.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das Frühstückssegment (€244k, nur 1,7%) ist unterdimensioniert — morgens (06–09 Uhr) werden 105k Bestellungen verarbeitet, aber der Umsatz bleibt gering. Ein dediziertes Frühstücksmenü (€5–8) könnte dieses Segment verdreifachen (Benchmarks: 5–8% bei Wettbewerbern).</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Vegetarische Burger erreichen 2026 erstmals über 50% der verkauften Menge</div><div class="chart-sub">Anteil vegetarisch/veganer Bestellungen in % · 2017–2026</div></div>
-        </div>
-        <div class="chart-area"><canvas id="veggieChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Der Veggie-Anteil hat sich seit 2017 versechsfacht: von 8,9% auf 50,8%. Der größte Sprung kam 2023 (+15pp auf 44,3%) mit der Einführung des Green Goddess Bowl. Seit Q1 2026 bestellen erstmals mehr Kunden pflanzlich als klassisch — ein struktureller Wandel.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die Menü-Architektur sollte den Veggie-Trend reflektieren: Pflanzliche Optionen als Default-Position auf der Karte (nicht als Alternative). Lieferantenverträge für pflanzliche Patties auf 18 Monate verlängern, um Preisstabilität zu sichern.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="chart-card table-card" style="overflow-x:auto">
-      <div class="chart-title" style="margin-bottom:4px">Produktkombinationen mit der höchsten Konfidenz — Grundlage für Bundle-Pricing</div>
-      <div class="chart-sub" style="margin-bottom:10px">Top 10 Warenkörbe · Market-Basket-Analyse · Support & Confidence</div>
-      <div class="table-toolbar">
-        <input class="table-search" type="text" placeholder="Suchen…" oninput="filterTable('tblBasket',this.value)">
-        <span class="table-count" id="tblBasket_count">10 Zeilen</span>
-      </div>
-      <table class="data-table" id="tblBasket">
-        <thead><tr><th>Produktkombination</th><th>Häufigkeit</th><th>Support</th><th>Confidence</th></tr></thead>
-        <tbody>
-          <tr><td>Medium Fries + Cola 0.5l</td><td class="mono">155.282</td><td class="mono">20,6%</td><td class="mono text-pos">77,3%</td></tr>
-          <tr><td>Small Fries + Cola 0.3l</td><td class="mono">90.608</td><td class="mono">12,0%</td><td class="mono text-pos">66,1%</td></tr>
-          <tr><td>Cola 0.3l + Cola 0.5l</td><td class="mono">51.456</td><td class="mono">6,8%</td><td class="mono">33,9%</td></tr>
-          <tr><td>Medium Fries + Cola 0.3l</td><td class="mono">49.145</td><td class="mono">6,5%</td><td class="mono">24,5%</td></tr>
-          <tr><td>Beyond Burger + Cola 0.5l</td><td class="mono">47.680</td><td class="mono">6,3%</td><td class="mono">41,1%</td></tr>
-          <tr><td>Small Fries + Cola 0.5l</td><td class="mono">47.461</td><td class="mono">6,3%</td><td class="mono">34,6%</td></tr>
-          <tr><td>Beyond Burger + Medium Fries</td><td class="mono">46.334</td><td class="mono">6,1%</td><td class="mono">40,0%</td></tr>
-          <tr><td>Small Fries + Medium Fries</td><td class="mono">45.590</td><td class="mono">6,0%</td><td class="mono">33,3%</td></tr>
-          <tr><td>Beyond Burger + Side Salad</td><td class="mono">35.011</td><td class="mono">4,6%</td><td class="mono">30,2%</td></tr>
-          <tr><td>Large Fries + Cola 0.5l</td><td class="mono">32.765</td><td class="mono">4,3%</td><td class="mono">32,0%</td></tr>
-        </tbody>
-      </table>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Medium Fries + Cola 0.5l hat die höchste Konfidenz: 77,3% Confidence bedeutet, dass 3 von 4 Cola-0.5l-Käufern auch Medium Fries bestellen. Beyond Burger zeigt starke Cross-Sells zu Cola (41,1%), Fries (40,0%) und Salad (30,2%) — ein gesundheitsbewusstes Cluster.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Drei konkrete Bundle-Angebote einführen: (1) „Classic Combo" = Medium Fries + Cola 0.5l für €4,49 statt €5,20 (155k Transaktionen × €0,30 Marge-Reduktion = akzeptabel für Frequenzgewinn), (2) „Beyond Combo" = Beyond Burger + Fries + Cole für €12,99, (3) „Veggie Healthy" = Beyond Burger + Side Salad für €10,99.</div>
-      </div>
-    </div>
-  </div>
+<div class="tab-content" id="produkte">
+<div class="sub-content active" id="sub_produkte_ranking">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="produkte1">
+<div class="kpi-label">Umsatzstärkstes Produkt</div>
+<div class="kpi-value" style="font-size:18px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="produkte2">
+<div class="kpi-label">Stärkste Kategorie</div>
+<div class="kpi-value" style="font-size:18px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="produkte3">
+<div class="kpi-label">Veggie-Anteil 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="produkte4">
+<div class="kpi-label">Top Cross-Sell</div>
+<div class="kpi-value" style="font-size:14px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="topProductsChart.titel"></div><div class="chart-sub">Top 15 Produkte nach kumuliertem Umsatz · 2017–2026 · Alle Filialen</div></div>
+</div>
+<div class="chart-area tall"><canvas id="topProductsChart"></canvas></div>
+<div class="interpretation" data-txt="topProductsChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="topProductsChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+<div class="sub-content" id="sub_produkte_kategorien">
+<div class="grid-2">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="categoryChart.titel"></div><div class="chart-sub">Umsatzanteil nach Hauptkategorie · 2017–2026</div></div>
+</div>
+<div class="chart-area"><canvas id="categoryChart"></canvas></div>
+<div class="interpretation" data-txt="categoryChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="categoryChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="veggieChart.titel"></div><div class="chart-sub">Anteil vegetarisch/veganer Bestellungen in % · 2017–2026</div></div>
+</div>
+<div class="chart-area"><canvas id="veggieChart"></canvas></div>
+<div class="interpretation" data-txt="veggieChart.deutung"><strong>Interpretation:</strong><div class="recommendation"><strong>Handlungsempfehlung:</strong> Die Menü-Architektur sollte den Veggie-Trend reflektieren: Pflanzliche Optionen als Default-Position auf der Karte (nicht als Alternative). Lieferantenverträge für pflanzliche Patties auf 18 Monate verlängern, um Preisstabilität zu sichern.</div></div>
+</div>
+</div>
+<div class="chart-card table-card" style="overflow-x:auto">
+<div class="chart-title" style="margin-bottom:4px">Produktkombinationen mit der höchsten Konfidenz — Grundlage für Bundle-Pricing</div>
+<div class="chart-sub" style="margin-bottom:10px">Top 10 Warenkörbe · Market-Basket-Analyse · Support &amp; Confidence</div>
+<div class="table-toolbar">
+<input class="table-search" oninput="filterTable('tblBasket',this.value)" placeholder="Suchen…" type="text"/>
+<span class="table-count" id="tblBasket_count">10 Zeilen</span>
+</div>
+<table class="data-table" id="tblBasket">
+<thead><tr><th>Produktkombination</th><th>Häufigkeit</th><th>Support</th><th>Confidence</th></tr></thead>
+<tbody></tbody>
+</table>
+<div class="interpretation" data-txt="produkte_tabelle3.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="produkte_tabelle3.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: KUNDEN ═══════════════════ -->
-<div id="kunden" class="tab-content">
-
-  <div id="sub_kunden_demografie" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="kunden1">
-        <div class="kpi-label">Gesamtkunden</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kunden2">
-        <div class="kpi-label">Stärkste Altersgruppe</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kunden3">
-        <div class="kpi-label">Unter 35 Jahre</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kunden4">
-        <div class="kpi-label">Loyalty-Penetration</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">55% der Kunden sind unter 35 — Kernzielgruppe ist jung-urban</div><div class="chart-sub">Kundenverteilung nach Altersgruppe · 25.000 Kunden · 7 Kohorten</div></div>
-        </div>
-        <div class="chart-area"><canvas id="ageChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Die Altersstruktur zeigt ein klar junges Profil: 18–24 (21,6%) und 25–34 (25,3%) bilden zusammen 47% der Kundenbasis. Die Gruppe 35–44 (18,1%) ist ebenfalls stark. Auffällig: <18 (8,1%) und 65+ (6,1%) sind unterrepräsentiert, aber relevante Wachstumssegmente.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die 25–34-Jährigen sind die profitabelste Kohorte. Marketing-Budget stärker auf Instagram/TikTok verlagern (Reichweite 18–34: 82%). Für die vernachlässigte Gruppe 45+ ein familienfreundliches Angebot entwickeln (Kinder-Menü, Familiensonntag) — Potenzial: 6.738 Bestandskunden im Segment 45+.</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">61% der Kunden sind nicht im Loyalty-Programm — großes Potenzial</div><div class="chart-sub">Verteilung nach Loyalty-Tier · 4 Stufen · 25.000 Kunden</div></div>
-        </div>
-        <div class="chart-area"><canvas id="loyaltyChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Nur 38,6% der Kunden nehmen am Loyalty-Programm teil. Von den 9.661 Mitgliedern sind 43,6% Bronze, 36,6% Silber und 19,7% Gold. Die 15.339 Kunden ohne Programm stellen das größte Akquise-Potenzial dar — branchenüblich liegt die Loyalty-Quote bei 55–65%.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Ein „Welcome Bonus" (z.B. gratis Medium Fries bei Anmeldung) könnte die Penetration auf 55% steigern. Bei aktuell 15.339 Nicht-Mitgliedern und einer konservativen Conversion von 20% = 3.068 neue Mitglieder. Loyalty-Kunden bestellen erfahrungsgemäß 30% häufiger → geschätzter Zusatzumsatz: €180k/Jahr.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_kunden_herkunft" class="sub-content">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="kunden5">
-        <div class="kpi-label">Stärkster Bezirk</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kunden6">
-        <div class="kpi-label">Top-10-Bezirke</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kunden7">
-        <div class="kpi-label">Gleichverteilung</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kunden8">
-        <div class="kpi-label">Sonstige Bezirke</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Kunden gleichmäßig über Bezirke verteilt — Rottenbauer knapp vorne</div><div class="chart-sub">Kundenherkunft nach Würzburger Stadtbezirk · 25.000 Kunden · dim_customer.csv (home_district)</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="districtChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Kundenverteilung ist auffallend gleichmäßig über die Stadtbezirke verteilt. Rottenbauer (2.185), Frauenland (2.156) und Heidingsfeld (2.132) führen knapp, aber die Top 10 Bezirke liegen alle zwischen 2.038 und 2.185 Kunden — eine Spanne von nur 7%. Die restlichen 4.061 Kunden (16,2%) verteilen sich auf weitere Bezirke.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die gleichmäßige Verteilung zeigt, dass BurgerMetrics keine einzelne Kern-Region hat, sondern stadtweit penetriert. Marketing-Budgets sollten entsprechend breit gestreut werden. Bezirke mit Filiale haben keinen erkennbaren Kundenvorteil — die Marke wirkt überregional.</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_kunden_segmente" class="sub-content">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Gold-Kunden machen 7,7% der Basis, aber überproportional viel Umsatz</div><div class="chart-sub">Loyalty-Tier-Verteilung · Absolute Kundenzahlen</div></div>
-      </div>
-      <div class="chart-area"><canvas id="loyaltyBarChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die 1.908 Gold-Kunden (7,6% der Gesamtbasis) bestellen schätzungsweise 3–4× häufiger als Nicht-Mitglieder. Bronze (4.212) bildet die Eingangsebene — die Konversion von Bronze → Silber (84%) ist gut, aber Silber → Gold (54%) hat Verbesserungspotenzial.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Ein „Gold Rush"-Monat (z.B. November, saisonal schwach) mit doppelten Punkten für Silber-Kunden könnte die Gold-Conversion um 10pp steigern. Bei 3.541 Silber-Kunden = ~354 neue Gold-Kunden mit höherer Frequenz und Basket-Size.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Bestellfrequenz nach Altersgruppe — 25–34 an erster Stelle</div><div class="chart-sub">Geschätzter Umsatzanteil pro Kohorte · basierend auf Kundenzahl und Ø-Frequenz</div></div>
-      </div>
-      <div class="chart-area"><canvas id="ageRevenueChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Altersgruppe 25–34 generiert geschätzt 25–28% des Umsatzes. Obwohl die Gruppe 35–44 nur 18% der Kunden stellt, haben sie einen überdurchschnittlichen AOV (Familieneinkäufe). Die Gruppe 65+ (1.536 Kunden) bestellt seltener, aber mit hoher Loyalität (überdurchschnittlicher Gold-Anteil).
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Für die Gruppe 35–44 ein „Familien-Bundle" (2 Burger + 2 Kids-Menüs + Getränke) für €29,99 einführen. Erwarteter Effekt: AOV-Steigerung um 40% bei Familienbestellungen, Frequenzerhöhung von 1,8×/Monat auf 2,4×/Monat.</div>
-      </div>
-    </div>
-  </div>
+<div class="tab-content" id="kunden">
+<div class="sub-content active" id="sub_kunden_demografie">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="kunden1">
+<div class="kpi-label">Gesamtkunden</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="kunden2">
+<div class="kpi-label">Stärkste Altersgruppe</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="kunden3">
+<div class="kpi-label">Unter 35 Jahre</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="kunden4">
+<div class="kpi-label">Loyalty-Penetration</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="grid-2">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="ageChart.titel"></div><div class="chart-sub" data-txt="ageChart.sub"></div></div>
+</div>
+<div class="chart-area"><canvas id="ageChart"></canvas></div>
+<div class="interpretation" data-txt="ageChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="ageChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="loyaltyChart.titel"></div><div class="chart-sub" data-txt="loyaltyChart.sub"></div></div>
+</div>
+<div class="chart-area"><canvas id="loyaltyChart"></canvas></div>
+<div class="interpretation" data-txt="loyaltyChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="loyaltyChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
+<div class="sub-content" id="sub_kunden_herkunft">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="kunden5">
+<div class="kpi-label">Stärkster Bezirk</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="kunden6">
+<div class="kpi-label">Top-10-Bezirke</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="kunden7">
+<div class="kpi-label">Gleichverteilung</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="kunden8">
+<div class="kpi-label">Sonstige Bezirke</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Kunden gleichmäßig über Bezirke verteilt — Rottenbauer knapp vorne</div><div class="chart-sub" data-txt="districtChart.sub"></div></div>
+</div>
+<div class="chart-area tall"><canvas id="districtChart"></canvas></div>
+<div class="interpretation" data-txt="districtChart.deutung"><strong>Interpretation:</strong><div class="recommendation"><strong>Handlungsempfehlung:</strong> Die gleichmäßige Verteilung zeigt, dass BurgerMetrics keine einzelne Kern-Region hat, sondern stadtweit penetriert. Marketing-Budgets sollten entsprechend breit gestreut werden. Bezirke mit Filiale haben keinen erkennbaren Kundenvorteil — die Marke wirkt überregional.</div></div>
+</div>
+</div>
+<div class="sub-content" id="sub_kunden_segmente">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="loyaltyBarChart.titel"></div><div class="chart-sub">Loyalty-Tier-Verteilung · Absolute Kundenzahlen</div></div>
+</div>
+<div class="chart-area"><canvas id="loyaltyBarChart"></canvas></div>
+<div class="interpretation" data-txt="loyaltyBarChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="loyaltyBarChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Bestellfrequenz nach Altersgruppe — 25–34 an erster Stelle</div><div class="chart-sub">Geschätzter Umsatzanteil pro Kohorte · basierend auf Kundenzahl und Ø-Frequenz</div></div>
+</div>
+<div class="chart-area"><canvas id="ageRevenueChart"></canvas></div>
+<div class="interpretation" data-txt="ageRevenueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="ageRevenueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: KANÄLE ═══════════════════ -->
-<div id="kanaele" class="tab-content">
-
-  <div id="sub_kanaele_overview" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="kanaele1">
-        <div class="kpi-label">Counter 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kanaele2">
-        <div class="kpi-label">Drive-Through 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kanaele3">
-        <div class="kpi-label">App 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="kanaele4">
-        <div class="kpi-label">Kiosk 2025</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Kanäle 2025 — höchster Bestellwert im Drive-Through, höchstes Volumen am Counter</div><div class="chart-sub">Ø Bestellwert pro Kanal in € · 2025 · Alle Filialen</div></div>
-        </div>
-        <div class="chart-area"><canvas id="channelAOVChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Drive-Through erzielt mit €22,38 den höchsten AOV, gefolgt von Kiosk (€21,89), Counter (€21,86) und App (€21,47). Alle Kanäle liegen nahe am Gesamtdurchschnitt (€21,93). Die AOV-Spreizung zwischen Kanälen ist gering (€0,91).
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die geringe AOV-Spreizung zwischen Kanälen deutet auf einheitliches Bestellverhalten hin. Potenzial liegt eher in Volumensteigerung als in AOV-Optimierung einzelner Kanäle. Upselling-Maßnahmen in App und Kiosk könnten den AOV über das Netzwerk-Mittel heben.</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Umsatzanteil je Kanal — Counter mit dem größten Anteil, App Order mit steigendem Anteil</div><div class="chart-sub">Umsatzanteil in % · 2025 · 4 Kanäle · €2,99M Gesamtumsatz</div></div>
-        </div>
-        <div class="chart-area"><canvas id="channelRevenueChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Counter macht 51,1% des Umsatzes aus, Drive-Through 21,5%, Kiosk 17,1%, App 10,4%. App hat den niedrigsten Volumenanteil (10,6%) und den niedrigsten Umsatzanteil (10,4%). Drive-Through generiert 21,5% des Umsatzes mit 21,1% der Bestellungen.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die App ist der effizienteste Kanal (höchster AOV, geringste Betriebskosten). Investition in App-Akquise: Bei 25% App-Anteil (statt 10,6%) könnten durch den AOV-Lift ~€450k Mehrjahresumsatz generiert werden.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_kanaele_detail" class="sub-content">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Tageszeiten-Verteilung nach Kanal — Drive-Through mit höherem Morgenanteil, App Order mit höherem Abendanteil</div><div class="chart-sub">Anteil der Bestellungen in % · 4 Kanäle · 06:00–22:00 Uhr</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="channelTodChart"></canvas></div>
-      <div class="legend-row">
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Counter</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>Drive-Through</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>App</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Kiosk</div>
-      </div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Kanalnutzung variiert stark nach Tageszeit. Drive-Through hat morgens den höchsten Anteil (06–09 Uhr: 35% der Frühbestellungen) — klassisches Pendler-Muster. Counter ist über den Tag gleichmäßig verteilt (40–55%). App-Nutzung steigt abends (18–22 Uhr: bis zu 22%) — Kunden bestellen vom Sofa. Kiosk wird bevorzugt zur Mittagszeit (11–14 Uhr: 22%) genutzt, wenn es voll ist und Warteschlangen entstehen.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Morgens (06–09h) Drive-Through-Spezialangebote einführen (Frühstücks-Kombi), da 35% der Frühkunden Drive-Through nutzen. Abends App-Push-Notifications (18–19h): Wenn 22% der Abendkunden die App nutzen, können personalisierte Angebote den AOV weiter steigern.</div>
-      </div>
-    </div>
-
-    <div class="chart-card table-card" style="overflow-x:auto">
-      <div class="chart-title" style="margin-bottom:4px">Top-5 Produkte je Kanal — Bestellpräferenzen unterscheiden sich deutlich</div>
-      <div class="chart-sub" style="margin-bottom:14px">Ranking nach Bestellhäufigkeit · Musterdaten kompatibel mit fact_orders.csv × dim_product.csv</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar)">Counter</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Beyond Burger</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar-light)">Drive-Through</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Small Fries</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--green)">App</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Beyond Burger</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--orange)">Kiosk</div>
-          <div style="font-size:11px;line-height:2;color:var(--ink-light)">
-            <div>1. Cola 0,5l</div>
-            <div>2. Medium Fries</div>
-            <div>3. Cola 0,3l</div>
-            <div>4. Coffee</div>
-            <div>5. Beyond Burger</div>
-          </div>
-        </div>
-      </div>
-      <div class="interpretation" style="margin-top:16px">
-        <strong>Interpretation:</strong> Die Kanalprofile zeigen überraschend geringe Unterschiede: Alle vier Kanäle haben dieselben Top-3 (Cola 0,5l, Medium Fries, Cola 0,3l). Die Bestellpräferenzen variieren kaum nach Kanal — die Kunden bestellen kanalübergreifend ähnlich.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Kanalspezifisches Merchandising: App-Startseite mit Beyond Burger und Green Goddess als Featured Products. Drive-Through-Board-Optimierung: Large Fries und Shakes prominent platzieren (höhere Marge). Kiosk: Upsell-Vorschlag beim Classic Burger (Kombi-Angebot +€2,50 = Fries + Drink).</div>
-      </div>
-    </div>
-  </div>
+<div class="tab-content" id="kanaele">
+<div class="sub-content active" id="sub_kanaele_overview">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="kanaele1">
+<div class="kpi-label">Counter 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="kanaele2">
+<div class="kpi-label">Drive-Through 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="kanaele3">
+<div class="kpi-label">App 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="kanaele4">
+<div class="kpi-label">Kiosk 2025</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="grid-2">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Kanäle 2025 — höchster Bestellwert im Drive-Through, höchstes Volumen am Counter</div><div class="chart-sub">Ø Bestellwert pro Kanal in € · 2025 · Alle Filialen</div></div>
+</div>
+<div class="chart-area"><canvas id="channelAOVChart"></canvas></div>
+<div class="interpretation" data-txt="channelAOVChart.deutung"><strong>Interpretation:</strong><div class="recommendation"><strong>Handlungsempfehlung:</strong> Die geringe AOV-Spreizung zwischen Kanälen deutet auf einheitliches Bestellverhalten hin. Potenzial liegt eher in Volumensteigerung als in AOV-Optimierung einzelner Kanäle. Upselling-Maßnahmen in App und Kiosk könnten den AOV über das Netzwerk-Mittel heben.</div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Umsatzanteil je Kanal — Counter mit dem größten Anteil, App Order mit steigendem Anteil</div><div class="chart-sub" data-txt="channelRevenueChart.sub"></div></div>
+</div>
+<div class="chart-area"><canvas id="channelRevenueChart"></canvas></div>
+<div class="interpretation" data-txt="channelRevenueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="channelRevenueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
+<div class="sub-content" id="sub_kanaele_detail">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Tageszeiten-Verteilung nach Kanal — Drive-Through mit höherem Morgenanteil, App Order mit höherem Abendanteil</div><div class="chart-sub">Anteil der Bestellungen in % · 4 Kanäle · 06:00–22:00 Uhr</div></div>
+</div>
+<div class="chart-area tall"><canvas id="channelTodChart"></canvas></div>
+<div class="legend-row">
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Counter</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>Drive-Through</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>App</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Kiosk</div>
+</div>
+<div class="interpretation" data-txt="channelTodChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="channelTodChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card table-card" style="overflow-x:auto">
+<div class="chart-title" style="margin-bottom:4px">Top-5 Produkte je Kanal — Bestellpräferenzen unterscheiden sich deutlich</div>
+<div class="chart-sub" style="margin-bottom:14px">Ranking nach Bestellhäufigkeit · Musterdaten kompatibel mit fact_orders.csv × dim_product.csv</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
+<div>
+<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar)">Counter</div>
+<div style="font-size:11px;line-height:2;color:var(--ink-light)">
+<div>1. Cola 0,5l</div>
+<div>2. Medium Fries</div>
+<div>3. Cola 0,3l</div>
+<div>4. Coffee</div>
+<div>5. Beyond Burger</div>
+</div>
+</div>
+<div>
+<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar-light)">Drive-Through</div>
+<div style="font-size:11px;line-height:2;color:var(--ink-light)">
+<div>1. Cola 0,5l</div>
+<div>2. Medium Fries</div>
+<div>3. Cola 0,3l</div>
+<div>4. Coffee</div>
+<div>5. Small Fries</div>
+</div>
+</div>
+<div>
+<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--green)">App</div>
+<div style="font-size:11px;line-height:2;color:var(--ink-light)">
+<div>1. Cola 0,5l</div>
+<div>2. Medium Fries</div>
+<div>3. Cola 0,3l</div>
+<div>4. Coffee</div>
+<div>5. Beyond Burger</div>
+</div>
+</div>
+<div>
+<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--orange)">Kiosk</div>
+<div style="font-size:11px;line-height:2;color:var(--ink-light)">
+<div>1. Cola 0,5l</div>
+<div>2. Medium Fries</div>
+<div>3. Cola 0,3l</div>
+<div>4. Coffee</div>
+<div>5. Beyond Burger</div>
+</div>
+</div>
+</div>
+<div class="interpretation" style="margin-top:16px">
+<strong>Interpretation:</strong> Die Kanalprofile zeigen überraschend geringe Unterschiede: Alle vier Kanäle haben dieselben Top-3 (Cola 0,5l, Medium Fries, Cola 0,3l). Die Bestellpräferenzen variieren kaum nach Kanal — die Kunden bestellen kanalübergreifend ähnlich.
+        <div class="recommendation" data-txt="kanaele_tabelle3.empfehlung"><strong>Handlungsempfehlung:</strong></div>
+</div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: ZEITANALYSE ═══════════════════ -->
-<div id="zeitanalyse" class="tab-content">
-
-  <div id="sub_zeit_wochentag" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="zeitanalyse1">
-        <div class="kpi-label">Stärkster Tag</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="zeitanalyse2">
-        <div class="kpi-label">Schwächster Tag</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="zeitanalyse3">
-        <div class="kpi-label">Peak-Stunde</div>
-        <div class="kpi-value" style="font-size:20px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="zeitanalyse4">
-        <div class="kpi-label">Sa/Di-Verhältnis</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Samstag mit 43% mehr Umsatz als Dienstag</div><div class="chart-sub">Bestellungen pro Wochentag · Mo–So · 2017–2026</div></div>
-        </div>
-        <div class="chart-area"><canvas id="dowChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Die Wochenverteilung zeigt ein klares Muster: Mo–Mi sind die umsatzschwächsten Tage (12,2–13,0%), Donnerstag leitet den Anstieg ein (13,8%), Freitag (16,0%) und Samstag (17,4%) sind die Spitzentage, Sonntag fällt leicht ab (15,3%). Der AOV ist über alle Tage nahezu identisch (€19,19–€19,31) — die Unterschiede sind rein frequenzgetrieben.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> „Dienstag-Deal" einführen (z.B. 20% auf alle Burger), um den umsatzschwächsten Tag anzuheben. Wenn dies den Dienstag um 15% anhebt (von 92k auf 106k Bestellungen), generiert das €265k Zusatzumsatz bei minimalem Kannibalisierungsrisiko (die Wochenendkunden kommen ohnehin).</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Mittagspeak ist 3× so stark wie der Morgenumsatz</div><div class="chart-sub">Bestellungen pro Stunde · 06:00–23:00 · Gesamtzeitraum</div></div>
-        </div>
-        <div class="chart-area"><canvas id="hourChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Zwei klare Peaks: Mittagessen 12–13 Uhr (121k + 104k = 30% aller Bestellungen) und Abendessen 18–19 Uhr (82k + 64k = 19%). Zwischen den Peaks liegt ein „Valley" um 15 Uhr (26k). Morgens (06–09 Uhr) werden nur 14% der Bestellungen aufgegeben — das Frühstücksgeschäft ist stark unterentwickelt.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das 15-Uhr-Tal mit einem „Afternoon Special" füllen (Kaffee + Snack für €3,99). Potenzial: wenn die 15-Uhr-Frequenz auf das Niveau von 16 Uhr steigt (+10%), sind das ~2.600 zusätzliche Bestellungen × €4 = €10k Mehrumsatz über den Gesamtzeitraum.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_zeit_heatmap" class="sub-content">
-    <div class="chart-card">
-      <div class="chart-title" style="margin-bottom:4px">Samstag 12 Uhr ist der absolute Hotspot mit 21.040 Bestellungen</div>
-      <div class="chart-sub" style="margin-bottom:16px">Bestellungen nach Wochentag × Stunde · Farbintensität = Volumen · 2017–2026</div>
-      <div class="heatmap-grid" id="heatmapGrid"></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Heatmap bestätigt das Doppel-Peak-Muster an allen Wochentagen: 12 Uhr (dunkelste Spalte) und 18 Uhr (zweitstärkste). Samstag 12:00 (21.040) und Freitag 12:00 (19.484) sind die absoluten Spitzen. Dienstag 23:00 (730) markiert den Tiefpunkt. Das Wochenende (Fr–So) hat durchgehend höhere Werte als Mo–Mi.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Personalplanung auf die Heatmap abstimmen: Sa 11–14 Uhr braucht maximale Besetzung (21k Bestellungen in 3 Stunden). Mo/Di 21–23 Uhr kann auf Minimalbetrieb fahren (<5k Bestellungen). Dynamische Schichtpläne könnten die Personalkosten um 8–12% senken bei gleichbleibender Servicequalität.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Wochenendanteil liegt bei 48,7% — fast die Hälfte des Geschäfts</div><div class="chart-sub">Umsatz pro Wochentag in € · Gesamtzeitraum · 2017–2026</div></div>
-      </div>
-      <div class="chart-area"><canvas id="dowRevenueChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Freitag (€2,32M), Samstag (€2,54M) und Sonntag (€2,23M) vereinen 48,7% des Gesamtumsatzes (€7,08M von €14,52M). Montag bis Donnerstag teilen sich die verbleibenden 51,3%. Der höchste AOV liegt am Samstag (€19,31), der niedrigste am Mittwoch (€19,19) — die Differenz ist marginal.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die Wochentagsschwäche (Mo–Do) gezielt mit Business-Lunch-Angeboten adressieren. Ein „Mittagstisch-Deal" (11:30–13:30 Uhr, Mo–Do) mit Tagesangebot für €8,99 könnte den Mittagstisch-Umsatz um 20% steigern — Potenzial: €120k/Jahr bei 4 Tagen × 50 Wochen × 60 Zusatzbestellungen/Tag × €10.</div>
-      </div>
-    </div>
-  </div>
+<div class="tab-content" id="zeitanalyse">
+<div class="sub-content active" id="sub_zeit_wochentag">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="zeitanalyse1">
+<div class="kpi-label">Stärkster Tag</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="zeitanalyse2">
+<div class="kpi-label">Schwächster Tag</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="zeitanalyse3">
+<div class="kpi-label">Peak-Stunde</div>
+<div class="kpi-value" style="font-size:20px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="zeitanalyse4">
+<div class="kpi-label">Sa/Di-Verhältnis</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="grid-2">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="dowChart.titel"></div><div class="chart-sub">Bestellungen pro Wochentag · Mo–So · 2017–2026</div></div>
+</div>
+<div class="chart-area"><canvas id="dowChart"></canvas></div>
+<div class="interpretation" data-txt="dowChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="dowChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="hourChart.titel"></div><div class="chart-sub">Bestellungen pro Stunde · 06:00–23:00 · Gesamtzeitraum</div></div>
+</div>
+<div class="chart-area"><canvas id="hourChart"></canvas></div>
+<div class="interpretation" data-txt="hourChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="hourChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
+<div class="sub-content" id="sub_zeit_heatmap">
+<div class="chart-card">
+<div class="chart-title" data-txt="zeitanalyse_tabelle2.titel" style="margin-bottom:4px"></div>
+<div class="chart-sub" style="margin-bottom:16px">Bestellungen nach Wochentag × Stunde · Farbintensität = Volumen · 2017–2026</div>
+<div class="heatmap-grid" id="heatmapGrid"></div>
+<div class="interpretation" data-txt="zeitanalyse_tabelle2.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="zeitanalyse_tabelle2.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="dowRevenueChart.titel"></div><div class="chart-sub">Umsatz pro Wochentag in € · Gesamtzeitraum · 2017–2026</div></div>
+</div>
+<div class="chart-area"><canvas id="dowRevenueChart"></canvas></div>
+<div class="interpretation" data-txt="dowRevenueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="dowRevenueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: TRENDS ═══════════════════ -->
-<div id="trends" class="tab-content">
-
-  <div id="sub_trends_zahlung" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="trends1">
-        <div class="kpi-label">Bargeld-Anteil 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="trends2">
-        <div class="kpi-label">EC-Karte 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="trends3">
-        <div class="kpi-label">Mobile Pay 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="trends4">
-        <div class="kpi-label">Digital-Quote</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Bargeldanteil sinkt von 49% (2017) auf 18% (2026)</div><div class="chart-sub">Anteil in % · 4 Zahlungsarten · 2017–2026 · Alle Filialen</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="paymentChart"></canvas></div>
-      <div class="legend-row">
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Bargeld</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>EC-Karte</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Kreditkarte</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Mobile Pay</div>
-      </div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Digitalisierung der Zahlungen vollzog sich in zwei Phasen: (1) 2017–2020: COVID beschleunigte den Shift von Bargeld (−14,6pp) zu EC-Karte (+7,2pp), (2) 2020–2026: Mobile Payment wuchs von 2,7% auf 13,7% — getrieben durch Apple Pay und die BurgerMetrics-App. EC-Karte stabilisierte sich bei ~40% als Standardzahlart.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Bei nur noch 18,4% Bargeldquote die Anzahl der Kassen mit Bargeldannahme auf 50% reduzieren und stattdessen Self-Service-Kiosks (nur digital) aufstellen. Erwartete Einsparung: €15k/Jahr pro Filiale an Bargeld-Handling-Kosten (Wechselgeld, Abtransport, Versicherung). Langfristiges Ziel: 100% cashless bis 2028.</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_trends_kanal" class="sub-content">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="trends5">
-        <div class="kpi-label">Counter 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="trends6">
-        <div class="kpi-label">Drive-Through 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="trends7">
-        <div class="kpi-label">App 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="trends8">
-        <div class="kpi-label">Kiosk 2026</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">App-Bestellungen verdoppeln sich alle 2 Jahre — Counter verliert stetig</div><div class="chart-sub">Anteil in % · 4 Kanäle · 2017–2026 · Omnichannel-Transformation</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="channelChart"></canvas></div>
-      <div class="legend-row">
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Counter</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>Drive-Through</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>App</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Kiosk</div>
-      </div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Kanalstruktur hat sich fundamental gewandelt. 2017 verteilten sich die Bestellungen auf Counter (44,7%) und Drive-Through (55,3%). Mit Kiosk-Einführung 2019 (18,4%) brach Drive-Through ein (auf 24,9%). Die App wuchs von 0,3% (2019) auf 12,9% (2026) — Verdopplung alle ~2 Jahre. Counter hält sich bei 50%, aber der Trend ist fallend. Prognose: App wird bis 2028 den Kiosk überholen.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> App-Bestellungen haben den höchsten AOV (Upselling durch Algorithmen) und die niedrigsten Bedienkosten. Investition in App-Funktionalität: (1) Pre-Order &amp; Skip-the-Line (12:00-Peak entlasten), (2) Personalisierte Empfehlungen (prognostizierter AOV-Lift: +8%), (3) App-exklusive Angebote zur Steigerung von 12,9% auf 25% bis 2028.</div>
-      </div>
-    </div>
-  </div>
+<div class="tab-content" id="trends">
+<div class="sub-content active" id="sub_trends_zahlung">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="trends1">
+<div class="kpi-label">Bargeld-Anteil 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="trends2">
+<div class="kpi-label">EC-Karte 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="trends3">
+<div class="kpi-label">Mobile Pay 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="trends4">
+<div class="kpi-label">Digital-Quote</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="paymentChart.titel"></div><div class="chart-sub">Anteil in % · 4 Zahlungsarten · 2017–2026 · Alle Filialen</div></div>
+</div>
+<div class="chart-area tall"><canvas id="paymentChart"></canvas></div>
+<div class="legend-row">
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Bargeld</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>EC-Karte</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Kreditkarte</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Mobile Pay</div>
+</div>
+<div class="interpretation" data-txt="paymentChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="paymentChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+<div class="sub-content" id="sub_trends_kanal">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="trends5">
+<div class="kpi-label">Counter 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="trends6">
+<div class="kpi-label">Drive-Through 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="trends7">
+<div class="kpi-label">App 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="trends8">
+<div class="kpi-label">Kiosk 2026</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">App-Bestellungen verdoppeln sich alle 2 Jahre — Counter verliert stetig</div><div class="chart-sub">Anteil in % · 4 Kanäle · 2017–2026 · Omnichannel-Transformation</div></div>
+</div>
+<div class="chart-area tall"><canvas id="channelChart"></canvas></div>
+<div class="legend-row">
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Counter</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar-light)"></span>Drive-Through</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>App</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Kiosk</div>
+</div>
+<div class="interpretation" data-txt="channelChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="channelChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: DATA MINING ═══════════════════ -->
-<div id="datamining" class="tab-content">
-
-  <div id="sub_dm_rfm" class="sub-content active">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="datamining1">
-        <div class="kpi-label">Champions</div>
-        <div class="kpi-value" style="font-size:20px;color:var(--green)"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="datamining2">
-        <div class="kpi-label">Abwanderungsgefahr</div>
-        <div class="kpi-value" style="font-size:20px;color:var(--red)"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="datamining3">
-        <div class="kpi-label">Verloren</div>
-        <div class="kpi-value" style="font-size:20px;color:var(--red)"></div>
-        <div class="kpi-delta neg"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="datamining4">
-        <div class="kpi-label">CLV-Spreizung</div>
-        <div class="kpi-value" style="font-size:18px"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">RFM-Segmente — 22% der Kunden gelten als abwanderungsgefährdet</div><div class="chart-sub">RFM-Segmentierung · 24.992 Kunden · 7 Cluster</div></div>
-        </div>
-        <div class="chart-area tall"><canvas id="rfmSegmentChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Die RFM-Analyse (Recency × Frequency × Monetary) teilt 24.992 Kunden in 7 Segmente. Das größte Segment ist „Abwanderungsgefahr" (5.484 Kunden, 21,9%): Diese waren früher aktive Käufer (Ø 39,5 Bestellungen) aber sind seit Ø 132 Tagen inaktiv. Sie repräsentieren €4,07M Umsatzrisiko. Die „Champions" (4.082, 16,3%) hingegen kaufen Ø alle 17 Tage mit Ø €842 Lifetime-Value.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Sofortige Reaktivierungskampagne für die 5.484 abwanderungsgefährdeten Kunden: personalisierte E-Mail mit „Wir vermissen dich"-Gutschein (€5 ab €15 Bestellung). Bei 10% Reaktivierung = 548 Kunden × Ø €742 CLV = €407k gesicherter Umsatz. Kosten: €2.740 (548 × €5).</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Champions generieren €842 pro Kopf — 3,7× mehr als Neukunden</div><div class="chart-sub">Ø Customer Lifetime Value pro Segment in €</div></div>
-        </div>
-        <div class="chart-area tall"><canvas id="rfmValueChart"></canvas></div>
-        <div class="interpretation">
-          <strong>Interpretation:</strong> Der CLV variiert stark: Champions (€842), Potenzial (€766) und Abwanderungsgefahr (€742) haben ähnlich hohe Werte — der Unterschied liegt in der Recency. Die „Potenzial"-Gruppe (2.956 Kunden) hat solide Frequenz, ist aber seit Ø 51 Tagen inaktiv — eine Zwischenstufe, die in beide Richtungen kippen kann.
-          <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die 2.956 „Potenzial"-Kunden mit einer gezielten Loyalty-Upgrade-Kampagne ansprechen: „Jetzt Gold werden und 15% auf die nächste Bestellung sparen". Conversion-Ziel: 30% = 887 Kunden, die zu Champions aufsteigen. Erwarteter Mehrumsatz: €87k/Jahr.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="chart-card table-card" style="overflow-x:auto">
-      <div class="chart-title" style="margin-bottom:4px">RFM-Segment-Profiling — Basis für CRM-Maßnahmen</div>
-      <div class="chart-sub" style="margin-bottom:10px">7 Segmente · Recency, Frequency, Monetary · Handlungscluster</div>
-      <div class="table-toolbar">
-        <input class="table-search" type="text" placeholder="Suchen…" oninput="filterTable('tblRFM',this.value)">
-        <span class="table-count" id="tblRFM_count">7 Zeilen</span>
-      </div>
-      <table class="data-table" id="tblRFM">
-        <thead><tr><th>Segment</th><th>Kunden</th><th>Anteil</th><th>Ø Recency</th><th>Ø Frequenz</th><th>Ø CLV</th><th>Σ Umsatz</th></tr></thead>
-        <tbody>
-          <tr><td style="color:var(--green)">Champions</td><td class="mono">4.082</td><td class="mono">16,3%</td><td class="mono text-pos">17 Tage</td><td class="mono">44,7</td><td class="mono">€842</td><td class="mono">€3.437.357</td></tr>
-          <tr><td style="color:var(--green)">Loyal</td><td class="mono">3.972</td><td class="mono">15,9%</td><td class="mono text-pos">17 Tage</td><td class="mono">27,0</td><td class="mono">€541</td><td class="mono">€2.150.168</td></tr>
-          <tr><td style="color:var(--blue)">Potenzial</td><td class="mono">2.956</td><td class="mono">11,8%</td><td class="mono">51 Tage</td><td class="mono">40,4</td><td class="mono">€766</td><td class="mono">€2.263.300</td></tr>
-          <tr><td style="color:var(--blue)">Neukunden</td><td class="mono">2.027</td><td class="mono">8,1%</td><td class="mono text-pos">17 Tage</td><td class="mono">11,0</td><td class="mono">€225</td><td class="mono">€455.520</td></tr>
-          <tr><td style="color:var(--muted)">Schläfer</td><td class="mono">2.075</td><td class="mono">8,3%</td><td class="mono">51 Tage</td><td class="mono">16,7</td><td class="mono">€338</td><td class="mono">€700.609</td></tr>
-          <tr><td style="color:var(--red)">Abwanderungsgefahr</td><td class="mono">5.484</td><td class="mono">21,9%</td><td class="mono text-neg">132 Tage</td><td class="mono">39,5</td><td class="mono">€742</td><td class="mono">€4.067.072</td></tr>
-          <tr><td style="color:var(--red)">Verloren</td><td class="mono">4.396</td><td class="mono">17,6%</td><td class="mono text-neg">249 Tage</td><td class="mono">16,4</td><td class="mono">€329</td><td class="mono">€1.448.353</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div id="sub_dm_assoc" class="sub-content">
-    <div class="kpi-row">
-      <div class="kpi-card" data-kpi="datamining5">
-        <div class="kpi-label">Stärkste Regel (Lift)</div>
-        <div class="kpi-value" style="font-size:16px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="datamining6">
-        <div class="kpi-label">Häufigste Kombination</div>
-        <div class="kpi-value" style="font-size:16px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="datamining7">
-        <div class="kpi-label">Stärkster Cross-Sell</div>
-        <div class="kpi-value" style="font-size:16px"></div>
-        <div class="kpi-delta pos"></div>
-        <div class="kpi-context"></div>
-      </div>
-      <div class="kpi-card" data-kpi="datamining8">
-        <div class="kpi-label">Regeln mit Lift >2</div>
-        <div class="kpi-value"></div>
-        <div class="kpi-context"></div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Lift-Analyse — drei Produktpaare mit Lift über 1, übrige ohne nachweisbaren Zusammenhang</div><div class="chart-sub">Top 15 Assoziationsregeln · Support, Confidence & Lift · 754.513 Bestellungen</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="liftChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Nur 3 von 15 Top-Regeln haben einen Lift &gt; 2,0 (= starke Assoziation): Small Fries + Cola 0.3l (3,29), Medium Fries + Cola 0.5l (2,73) und Beyond Burger + Side Salad (2,28). Die restlichen Regeln (Lift 1,1–1,5) zeigen nur moderate Abhängigkeiten — die Produkte werden häufig zusammen gekauft, aber nicht signifikant häufiger als zufällig zu erwarten wäre. Der Beyond-Salad-Cluster ist besonders interessant: gesundheitsbewusste Käufer zeigen ein eigenständiges Kaufmuster.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Drei konkrete Bundle-Aktionen basierend auf Lift-Werten: (1) „Fries+Drink Combo" in zwei Größen (Small €3,99 / Medium €4,49) — Lift &gt;2,7 garantiert hohe Annahme. (2) „Beyond Healthy" = Beyond Burger + Side Salad für €13,99 (Lift 2,28). (3) Kiosk/App-Algorithmus: bei Beyond-Burger-Auswahl automatisch Side Salad als Top-Empfehlung anzeigen.</div>
-      </div>
-    </div>
-
-    <div class="chart-card table-card" style="overflow-x:auto">
-      <div class="chart-title" style="margin-bottom:4px">Assoziationsregeln mit Lift-Metrik — vollständige Übersicht</div>
-      <div class="chart-sub" style="margin-bottom:10px">15 Regeln · sortiert nach Häufigkeit · Lift &gt; 2 = starke Assoziation</div>
-      <div class="table-toolbar">
-        <input class="table-search" type="text" placeholder="Suchen…" oninput="filterTable('tblAssoc',this.value)">
-        <span class="table-count" id="tblAssoc_count">15 Zeilen</span>
-      </div>
-      <table class="data-table" id="tblAssoc">
-        <thead><tr><th>Regel (A → B)</th><th>Häufigkeit</th><th>Support</th><th>Confidence</th><th>Lift</th><th>Stärke</th></tr></thead>
-        <tbody>
-          <tr><td>Medium Fries → Cola 0.5l</td><td class="mono">155.282</td><td class="mono">20,6%</td><td class="mono">77,3%</td><td class="mono text-pos">2,73</td><td style="color:var(--green)">★★★</td></tr>
-          <tr><td>Small Fries → Cola 0.3l</td><td class="mono">90.608</td><td class="mono">12,0%</td><td class="mono">66,1%</td><td class="mono text-pos">3,29</td><td style="color:var(--green)">★★★</td></tr>
-          <tr><td>Cola 0.3l → Cola 0.5l</td><td class="mono">51.456</td><td class="mono">6,8%</td><td class="mono">33,9%</td><td class="mono">1,20</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Cola 0.3l → Medium Fries</td><td class="mono">49.145</td><td class="mono">6,5%</td><td class="mono">32,4%</td><td class="mono">1,22</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Beyond Burger → Cola 0.5l</td><td class="mono">47.680</td><td class="mono">6,3%</td><td class="mono">41,1%</td><td class="mono">1,45</td><td style="color:var(--orange)">★★</td></tr>
-          <tr><td>Small Fries → Cola 0.5l</td><td class="mono">47.461</td><td class="mono">6,3%</td><td class="mono">34,6%</td><td class="mono">1,22</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Beyond Burger → Medium Fries</td><td class="mono">46.334</td><td class="mono">6,1%</td><td class="mono">40,0%</td><td class="mono">1,50</td><td style="color:var(--orange)">★★</td></tr>
-          <tr><td>Small Fries → Medium Fries</td><td class="mono">45.590</td><td class="mono">6,0%</td><td class="mono">33,3%</td><td class="mono">1,25</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Beyond Burger → Side Salad</td><td class="mono">35.011</td><td class="mono">4,6%</td><td class="mono">35,0%</td><td class="mono text-pos">2,28</td><td style="color:var(--green)">★★★</td></tr>
-          <tr><td>Large Fries → Cola 0.5l</td><td class="mono">32.765</td><td class="mono">4,3%</td><td class="mono">32,0%</td><td class="mono">1,13</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Side Salad → Cola 0.5l</td><td class="mono">32.431</td><td class="mono">4,3%</td><td class="mono">32,4%</td><td class="mono">1,14</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Green Goddess → Cola 0.5l</td><td class="mono">32.028</td><td class="mono">4,2%</td><td class="mono">41,3%</td><td class="mono">1,46</td><td style="color:var(--orange)">★★</td></tr>
-          <tr><td>Large Fries → Medium Fries</td><td class="mono">31.267</td><td class="mono">4,1%</td><td class="mono">30,6%</td><td class="mono">1,15</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Beyond Burger → Cola 0.3l</td><td class="mono">31.247</td><td class="mono">4,1%</td><td class="mono">27,0%</td><td class="mono">1,34</td><td style="color:var(--muted)">★</td></tr>
-          <tr><td>Side Salad → Medium Fries</td><td class="mono">30.935</td><td class="mono">4,1%</td><td class="mono">30,9%</td><td class="mono">1,16</td><td style="color:var(--muted)">★</td></tr>
-        </tbody>
-      </table>
-      <div class="interpretation" style="font-size:11px"><em>Lift-Bewertung: <span style="color:var(--green)">★★★</span> = Lift &gt; 2 (stark), <span style="color:var(--orange)">★★</span> = Lift 1,3–2 (moderat), <span style="color:var(--muted)">★</span> = Lift &lt; 1,3 (schwach)</em></div>
-    </div>
-  </div>
+<div class="tab-content" id="datamining">
+<div class="sub-content active" id="sub_dm_rfm">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="datamining1">
+<div class="kpi-label">Champions</div>
+<div class="kpi-value" style="font-size:20px;color:var(--green)"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
 </div>
-
+<div class="kpi-card" data-kpi="datamining2">
+<div class="kpi-label">Abwanderungsgefahr</div>
+<div class="kpi-value" style="font-size:20px;color:var(--red)"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="datamining3">
+<div class="kpi-label">Verloren</div>
+<div class="kpi-value" style="font-size:20px;color:var(--red)"></div>
+<div class="kpi-delta neg"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="datamining4">
+<div class="kpi-label">CLV-Spreizung</div>
+<div class="kpi-value" style="font-size:18px"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="grid-2">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="rfmSegmentChart.titel"></div><div class="chart-sub" data-txt="rfmSegmentChart.sub"></div></div>
+</div>
+<div class="chart-area tall"><canvas id="rfmSegmentChart"></canvas></div>
+<div class="interpretation" data-txt="rfmSegmentChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="rfmSegmentChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title" data-txt="rfmValueChart.titel"></div><div class="chart-sub">Ø Customer Lifetime Value pro Segment in €</div></div>
+</div>
+<div class="chart-area tall"><canvas id="rfmValueChart"></canvas></div>
+<div class="interpretation" data-txt="rfmValueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="rfmValueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+<div class="chart-card table-card" style="overflow-x:auto">
+<div class="chart-title" style="margin-bottom:4px">RFM-Segment-Profiling — Basis für CRM-Maßnahmen</div>
+<div class="chart-sub" style="margin-bottom:10px">7 Segmente · Recency, Frequency, Monetary · Handlungscluster</div>
+<div class="table-toolbar">
+<input class="table-search" oninput="filterTable('tblRFM',this.value)" placeholder="Suchen…" type="text"/>
+<span class="table-count" id="tblRFM_count">7 Zeilen</span>
+</div>
+<table class="data-table" id="tblRFM">
+<thead><tr><th>Segment</th><th>Kunden</th><th>Anteil</th><th>Ø Recency</th><th>Ø Frequenz</th><th>Ø CLV</th><th>Σ Umsatz</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+<div class="sub-content" id="sub_dm_assoc">
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="datamining5">
+<div class="kpi-label">Stärkste Regel (Lift)</div>
+<div class="kpi-value" style="font-size:16px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="datamining6">
+<div class="kpi-label">Häufigste Kombination</div>
+<div class="kpi-value" style="font-size:16px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="datamining7">
+<div class="kpi-label">Stärkster Cross-Sell</div>
+<div class="kpi-value" style="font-size:16px"></div>
+<div class="kpi-delta pos"></div>
+<div class="kpi-context"></div>
+</div>
+<div class="kpi-card" data-kpi="datamining8">
+<div class="kpi-label">Regeln mit Lift &gt;2</div>
+<div class="kpi-value"></div>
+<div class="kpi-context"></div>
+</div>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Lift-Analyse — drei Produktpaare mit Lift über 1, übrige ohne nachweisbaren Zusammenhang</div><div class="chart-sub" data-txt="liftChart.sub"></div></div>
+</div>
+<div class="chart-area tall"><canvas id="liftChart"></canvas></div>
+<div class="interpretation" data-txt="liftChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="liftChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card table-card" style="overflow-x:auto">
+<div class="chart-title" style="margin-bottom:4px">Assoziationsregeln mit Lift-Metrik — vollständige Übersicht</div>
+<div class="chart-sub" style="margin-bottom:10px">15 Regeln · sortiert nach Häufigkeit · Lift &gt; 2 = starke Assoziation</div>
+<div class="table-toolbar">
+<input class="table-search" oninput="filterTable('tblAssoc',this.value)" placeholder="Suchen…" type="text"/>
+<span class="table-count" id="tblAssoc_count">15 Zeilen</span>
+</div>
+<table class="data-table" id="tblAssoc">
+<thead><tr><th>Regel (A → B)</th><th>Häufigkeit</th><th>Support</th><th>Confidence</th><th>Lift</th><th>Stärke</th></tr></thead>
+<tbody></tbody>
+</table>
+<div class="interpretation" data-txt="datamining_tabelle4.deutung" style="font-size:11px"></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ TAB: SIMULATION ═══════════════════ -->
-<div id="simulation" class="tab-content">
-
-  <div id="sub_sim_preis" class="sub-content active">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Preissimulation — Wie wirken Preisänderungen auf Umsatz und Marge?</div><div class="chart-sub">14 Burger-Produkte · Elastizität ε = −1,2 (geschätzt) · Basisjahr 2025</div></div>
-      </div>
-      <div style="margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-          <span class="group-label" style="min-width:100px">Preisänderung:</span>
-          <input type="range" id="priceSlider" min="-20" max="20" value="0" step="1" style="flex:1;max-width:400px;accent-color:var(--blue)" oninput="updatePriceSim()">
-          <span id="priceSliderValue" class="mono" style="font-size:14px;font-weight:600;min-width:50px;text-align:center">0%</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-          <span class="group-label" style="min-width:100px">Elastizität (ε):</span>
-          <input type="range" id="elastSlider" min="-25" max="-5" value="-12" step="1" style="flex:1;max-width:400px;accent-color:var(--blue)" oninput="updatePriceSim()">
-          <span id="elastSliderValue" class="mono" style="font-size:14px;font-weight:600;min-width:50px;text-align:center">−1,2</span>
-        </div>
-      </div>
-      <div class="kpi-row" id="simKPIs">
-        <div class="kpi-card" data-kpi="simulation1">
-          <div class="kpi-label">Neuer Umsatz (Burger)</div>
-          <div class="kpi-value" id="simRevenue" style="font-size:22px"></div>
-          <div class="kpi-delta" id="simRevDelta"></div>
-          <div class="kpi-context" id="simRevCtx"></div>
-        </div>
-        <div class="kpi-card" data-kpi="simulation2">
-          <div class="kpi-label">Neues Volumen</div>
-          <div class="kpi-value" id="simVolume" style="font-size:22px"></div>
-          <div class="kpi-delta" id="simVolDelta"></div>
-          <div class="kpi-context" id="simVolCtx"></div>
-        </div>
-        <div class="kpi-card" data-kpi="simulation3">
-          <div class="kpi-label">Neue Bruttomarge</div>
-          <div class="kpi-value" id="simMargin" style="font-size:22px"></div>
-          <div class="kpi-delta" id="simMarDelta"></div>
-          <div class="kpi-context" id="simMarCtx"></div>
-        </div>
-        <div class="kpi-card" data-kpi="simulation4">
-          <div class="kpi-label">Ø Deckungsbeitrag</div>
-          <div class="kpi-value" id="simDB" style="font-size:22px"></div>
-          <div class="kpi-context" id="simDBCtx"></div>
-        </div>
-      </div>
-      <div class="chart-area xtall"><canvas id="simChart"></canvas></div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Die Simulation modelliert den Trade-off zwischen Preiserhöhung und Nachfragerückgang. Bei einer Preiselastizität von ε = −1,2 (typisch für Fast Food) führt eine 10%-Preiserhöhung zu einem 12%-Volumenrückgang, aber einem Netto-Umsatzeffekt von ca. −3,2%. Der „Sweet Spot" liegt bei moderaten Erhöhungen von 3–5%, wo die Marge steigt ohne signifikanten Volumenverlust.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Die Schieberegler nutzen, um verschiedene Szenarien durchzuspielen. Besonders aufschlussreich: Premium-Produkte (Truffle Deluxe, Beyond Burger) haben typischerweise niedrigere Elastizität (ε ≈ −0,8) als Basis-Produkte (Classic Burger: ε ≈ −1,5). Eine selektive Preiserhöhung von 5% nur auf Premium-Burger könnte €85k Mehrumsatz generieren.</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="sub_sim_prognose" class="sub-content">
-    <div class="chart-card">
-      <div class="chart-header">
-        <div><div class="chart-title">Umsatzprognose 2026–2028 — drei Wachstumsszenarien</div><div class="chart-sub">Basis: Ø Wachstum 2023–2025 (14,5%) · Konservativ (3%) · Optimistisch (8%) · Expansiv (15%)</div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="forecastChart"></canvas></div>
-      <div class="legend-row">
-        <div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Historisch</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Optimistisch (+8%)</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Konservativ (+3%)</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Expansiv (+15%, 9. Filiale)</div>
-      </div>
-      <div class="interpretation">
-        <strong>Interpretation:</strong> Drei Szenarien basierend auf den Wachstumsraten 2023–2025 (28%, 10,1%, 5,4% → Ø 14,5%): <strong>Konservativ (3%):</strong> Organisches Wachstum verlangsamt sich weiter auf Inflationsniveau → €3,18M in 2028. <strong>Optimistisch (8%):</strong> App-Wachstum und Premium-Strategie greifen → €3,77M in 2028. <strong>Expansiv (15%):</strong> Eröffnung einer 9. Filiale (z.B. Schweinfurt) liefert Volumensprung → €4,55M in 2028.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Das konservative Szenario (3%) bildet den Floor — selbst ohne Maßnahmen ist leichtes Wachstum wahrscheinlich. Der Sprung auf 8%+ erfordert konkrete Investitionen: (1) App-Ausbau auf 25% Kanalanteil (+€200k), (2) Premium-Menü-Erweiterung (+€150k), (3) Reaktivierung der 5.484 abwanderungsgefährdeten Kunden (+€400k). Expansion: Standortanalyse Schweinfurt/Aschaffenburg starten, ROI-Prognose basierend auf Mainfrankenpark-Blueprint (Break-even nach 8 Monaten).</div>
-      </div>
-    </div>
-
-    <div class="chart-card table-card" style="overflow-x:auto">
-      <div class="chart-title" style="margin-bottom:4px">Szenario-Vergleich — Umsatz, Bestellungen, Investitionsbedarf</div>
-      <div class="chart-sub" style="margin-bottom:10px">Drei Szenarien für 2026–2028 · basierend auf historischen Wachstumsmustern</div>
-      <table class="data-table" id="tblForecast">
-        <thead><tr><th>Szenario</th><th>Wachstum</th><th>Umsatz 2026</th><th>Umsatz 2027</th><th>Umsatz 2028</th><th>Investition</th><th>ROI (3J)</th></tr></thead>
-        <tbody>
-          <tr><td>Konservativ</td><td class="mono">+3% p.a.</td><td class="mono">€3,08M</td><td class="mono">€3,18M</td><td class="mono">€3,27M</td><td class="mono">€0</td><td class="mono text-muted">—</td></tr>
-          <tr><td style="color:var(--green)">Optimistisch</td><td class="mono">+8% p.a.</td><td class="mono">€3,23M</td><td class="mono">€3,49M</td><td class="mono">€3,77M</td><td class="mono">€350k</td><td class="mono text-pos">2,2×</td></tr>
-          <tr><td style="color:var(--red)">Expansiv</td><td class="mono">+15% p.a.</td><td class="mono">€3,44M</td><td class="mono">€3,96M</td><td class="mono">€4,55M</td><td class="mono">€800k</td><td class="mono text-pos">1,9×</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+<div class="tab-content" id="simulation">
+<div class="sub-content active" id="sub_sim_preis">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Preissimulation — Wie wirken Preisänderungen auf Umsatz und Marge?</div><div class="chart-sub" data-txt="simChart.sub"></div></div>
 </div>
-
+<div style="margin-bottom:16px">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+<span class="group-label" style="min-width:100px">Preisänderung:</span>
+<input id="priceSlider" max="20" min="-20" oninput="updatePriceSim()" step="1" style="flex:1;max-width:400px;accent-color:var(--blue)" type="range" value="0"/>
+<span class="mono" id="priceSliderValue" style="font-size:14px;font-weight:600;min-width:50px;text-align:center">0%</span>
+</div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+<span class="group-label" style="min-width:100px">Elastizität (ε):</span>
+<input id="elastSlider" max="-5" min="-25" oninput="updatePriceSim()" step="1" style="flex:1;max-width:400px;accent-color:var(--blue)" type="range" value="-12"/>
+<span class="mono" id="elastSliderValue" style="font-size:14px;font-weight:600;min-width:50px;text-align:center">−1,2</span>
+</div>
+</div>
+<div class="kpi-row" id="simKPIs">
+<div class="kpi-card" data-kpi="simulation1">
+<div class="kpi-label">Neuer Umsatz (Burger)</div>
+<div class="kpi-value" id="simRevenue" style="font-size:22px"></div>
+<div class="kpi-delta" id="simRevDelta"></div>
+<div class="kpi-context" id="simRevCtx"></div>
+</div>
+<div class="kpi-card" data-kpi="simulation2">
+<div class="kpi-label">Neues Volumen</div>
+<div class="kpi-value" id="simVolume" style="font-size:22px"></div>
+<div class="kpi-delta" id="simVolDelta"></div>
+<div class="kpi-context" id="simVolCtx"></div>
+</div>
+<div class="kpi-card" data-kpi="simulation3">
+<div class="kpi-label">Neue Bruttomarge</div>
+<div class="kpi-value" id="simMargin" style="font-size:22px"></div>
+<div class="kpi-delta" id="simMarDelta"></div>
+<div class="kpi-context" id="simMarCtx"></div>
+</div>
+<div class="kpi-card" data-kpi="simulation4">
+<div class="kpi-label">Ø Deckungsbeitrag</div>
+<div class="kpi-value" id="simDB" style="font-size:22px"></div>
+<div class="kpi-context" id="simDBCtx"></div>
+</div>
+</div>
+<div class="chart-area xtall"><canvas id="simChart"></canvas></div>
+<div class="interpretation" data-txt="simChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="simChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+</div>
+<div class="sub-content" id="sub_sim_prognose">
+<div class="chart-card">
+<div class="chart-header">
+<div><div class="chart-title">Umsatzprognose 2026–2028 — drei Wachstumsszenarien</div><div class="chart-sub" data-txt="forecastChart.sub"></div></div>
+</div>
+<div class="chart-area tall"><canvas id="forecastChart"></canvas></div>
+<div class="legend-row">
+<div class="legend-item"><span class="legend-dot" style="background:var(--bar)"></span>Historisch</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Optimistisch (+8%)</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--orange)"></span>Konservativ (+3%)</div>
+<div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Expansiv (+15%, 9. Filiale)</div>
+</div>
+<div class="interpretation" data-txt="forecastChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="forecastChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card table-card" style="overflow-x:auto">
+<div class="chart-title" style="margin-bottom:4px">Szenario-Vergleich — Umsatz, Bestellungen, Investitionsbedarf</div>
+<div class="chart-sub" style="margin-bottom:10px">Drei Szenarien für 2026–2028 · basierend auf historischen Wachstumsmustern</div>
+<table class="data-table" id="tblForecast">
+<thead><tr><th>Szenario</th><th>Wachstum</th><th>Umsatz 2026</th><th>Umsatz 2027</th><th>Umsatz 2028</th><th>Investition</th><th>ROI (3J)</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
 <!-- ═══════════ TAB: WETTER ═══════════ -->
-<div id="wetter" class="tab-content">
-
-  <!-- Sub: Temperatur-Impact -->
-  <div id="sub_wetter_temp" class="sub-content active">
-    <div class="chart-card">
-      <div><div class="chart-title">Temperatur bestimmt den Tagesumsatz — Sommer-Boost ab 15 °C</div>
-      <div class="chart-sub">Ø Tagesumsatz & Bestellungen nach 5°C-Intervallen · 3.304 Betriebstage · 2017–2026</div></div>
-      <div class="kpi-row">
-        <div class="kpi-card" data-kpi="wetter1"><div class="kpi-label">WÄRMSTE TAGE (25–30°C)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="wetter2"><div class="kpi-label">KÄLTESTE TAGE (&lt;-5°C)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta neg"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="wetter3"><div class="kpi-label">SONNIG VS. SCHNEE</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="wetter4"><div class="kpi-label">KORRELATION TEMP↔UMSATZ</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-      </div>
-      <div class="chart-area tall"><canvas id="tempBinChart"></canvas></div>
-      <div class="interpretation"><strong>Interpretation:</strong> Der Temperatur-Effekt zeigt einen klaren U-förmigen Verlauf: Extrem kalte Tage (&lt;-10°C) und extrem warme Tage (&gt;25°C) haben beide überdurchschnittliche Umsätze — letztere sind jedoch die klaren Gewinner. Der Sweet Spot liegt bei 15–20°C mit stabilen €4.686 Tagesumsatz. Die niedrige Korrelation (r=0,056) zeigt, dass Temperatur allein den Umsatz nicht erklärt — der Wachstumstrend über die Jahre überlagert den Wettereffekt.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Saisonale Personalplanung an Wetterdaten koppeln: An Sommertagen (+25°C) 15% mehr Schichtpersonal einplanen. Kälteaktionen (&lt;0°C) wie „Winter Warmer Deals" könnten den Umsatz an Frost-Tagen stabilisieren.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div><div class="chart-title">Wetterlage beeinflusst Besuchsfrequenz stärker als Zufriedenheit</div>
-      <div class="chart-sub">Ø Tagesumsatz nach Wetterkondition · 5 Kategorien</div></div>
-      <div class="chart-area"><canvas id="weatherCondChart"></canvas></div>
-    </div>
-  </div>
-
-  <!-- Sub: Scatter & Niederschlag -->
-  <div id="sub_wetter_scatter" class="sub-content">
-    <div class="chart-card">
-      <div><div class="chart-title">Temperatur vs. Tagesumsatz — der Wachstumstrend überlagert den Wettereffekt</div>
-      <div class="chart-sub">1.102 Datenpunkte (jeder 3. Tag) · Farbe = Umsatzhöhe</div></div>
-      <div class="chart-area xtall"><canvas id="weatherScatterChart"></canvas></div>
-      <div class="interpretation"><strong>Interpretation:</strong> Der Scatter-Plot zeigt den Grund für die niedrige Korrelation: Die vertikale Streuung zeigt, dass identische Temperaturen 2017 vs. 2025 völlig unterschiedliche Umsätze erzeugen — der Wachstumstrend dominiert. Innerhalb eines Jahres wäre die Temperatur-Korrelation deutlich stärker.</div>
-    </div>
-
-    <div class="chart-card">
-      <div><div class="chart-title">Niederschlag zeigt keinen klaren negativen Effekt</div>
-      <div class="chart-sub">Ø Tagesumsatz nach Niederschlagsmenge · 5 Klassen</div></div>
-      <div class="chart-area"><canvas id="rainChart"></canvas></div>
-      <div class="interpretation"><strong>Interpretation:</strong> Überraschenderweise sinkt der Umsatz nicht mit steigendem Regen. Die Kategorie &gt;10mm zeigt sogar den höchsten Wert — allerdings basierend auf nur 7 Tagen. Regen treibt vermutlich Drive-Through-Nutzung, was den Counter-Verlust kompensiert.</div>
-    </div>
-  </div>
+<div class="tab-content" id="wetter">
+<!-- Sub: Temperatur-Impact -->
+<div class="sub-content active" id="sub_wetter_temp">
+<div class="chart-card">
+<div><div class="chart-title">Temperatur bestimmt den Tagesumsatz — Sommer-Boost ab 15 °C</div>
+<div class="chart-sub" data-txt="tempBinChart.sub"></div></div>
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="wetter1"><div class="kpi-label">WÄRMSTE TAGE (25–30°C)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="wetter2"><div class="kpi-label">KÄLTESTE TAGE (&lt;-5°C)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta neg"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="wetter3"><div class="kpi-label">SONNIG VS. SCHNEE</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="wetter4"><div class="kpi-label">KORRELATION TEMP↔UMSATZ</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
 </div>
-
+<div class="chart-area tall"><canvas id="tempBinChart"></canvas></div>
+<div class="interpretation" data-txt="tempBinChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="tempBinChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div><div class="chart-title">Wetterlage beeinflusst Besuchsfrequenz stärker als Zufriedenheit</div>
+<div class="chart-sub">Ø Tagesumsatz nach Wetterkondition · 5 Kategorien</div></div>
+<div class="chart-area"><canvas id="weatherCondChart"></canvas></div>
+</div>
+</div>
+<!-- Sub: Scatter & Niederschlag -->
+<div class="sub-content" id="sub_wetter_scatter">
+<div class="chart-card">
+<div><div class="chart-title">Temperatur vs. Tagesumsatz — der Wachstumstrend überlagert den Wettereffekt</div>
+<div class="chart-sub" data-txt="weatherScatterChart.sub"></div></div>
+<div class="chart-area xtall"><canvas id="weatherScatterChart"></canvas></div>
+<div class="interpretation"><strong>Interpretation:</strong> Der Scatter-Plot zeigt den Grund für die niedrige Korrelation: Die vertikale Streuung zeigt, dass identische Temperaturen 2017 vs. 2025 völlig unterschiedliche Umsätze erzeugen — der Wachstumstrend dominiert. Innerhalb eines Jahres wäre die Temperatur-Korrelation deutlich stärker.</div>
+</div>
+<div class="chart-card">
+<div><div class="chart-title">Niederschlag zeigt keinen klaren negativen Effekt</div>
+<div class="chart-sub">Ø Tagesumsatz nach Niederschlagsmenge · 5 Klassen</div></div>
+<div class="chart-area"><canvas id="rainChart"></canvas></div>
+<div class="interpretation"><strong>Interpretation:</strong> Überraschenderweise sinkt der Umsatz nicht mit steigendem Regen. Die Kategorie &gt;10mm zeigt sogar den höchsten Wert — allerdings basierend auf nur 7 Tagen. Regen treibt vermutlich Drive-Through-Nutzung, was den Counter-Verlust kompensiert.</div>
+</div>
+</div>
+</div>
 <!-- ═══════════ TAB: PERSONAL ═══════════ -->
-<div id="personal" class="tab-content">
-
-  <!-- Sub: Produktivität -->
-  <div id="sub_personal_prod" class="sub-content active">
-    <div class="chart-card">
-      <div><div class="chart-title">Europastern und Hauptbahnhof liefern doppelte Produktivität pro Mitarbeiter</div>
-      <div class="chart-sub">Umsatz pro Mitarbeiter (kum. 2017–2026) · 8 Filialen · 188 Mitarbeiter</div></div>
-      <div class="kpi-row">
-        <div class="kpi-card" data-kpi="personal1"><div class="kpi-label">TOP: EUROPASTERN</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="personal2"><div class="kpi-label">BOTTOM: ZELLERAU</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="personal3"><div class="kpi-label">Ø WARTEZEIT ↔ ZUFRIEDENHEIT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="personal4"><div class="kpi-label">GESAMT MITARBEITER</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-      </div>
-      <div class="chart-area xtall"><canvas id="empProdChart"></canvas></div>
-      <div class="interpretation"><strong>Interpretation:</strong> Die Produktivitätsunterschiede sind enorm: Europastern (Highway) erwirtschaftet €113k pro MA — dreimal so viel wie Zellerau (€36k). Treiber sind Standort-Traffic und Filialtyp, nicht Personalkosten (Lohnspanne nur €11,1–12,1/h). Die negative Korrelation Wartezeit↔Zufriedenheit (r=−0,48) zeigt: Schnellere Bedienung = zufriedenere Kunden.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Zellerau und Grombühl auf Teilzeit-Optimierung prüfen — hohe MA-Zahl bei niedrigem Volumen deutet auf Überstaffing hin. Best Practices von Europastern (kürzeste Wartezeit: 5,4 min) auf andere Filialen übertragen.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div><div class="chart-title">Rollenverteilung & Vergütung — Kassierer und Köche bilden das Rückgrat</div>
-      <div class="chart-sub">5 Rollen · Ø-Stundenlohn · Vollzeitquote</div></div>
-      <div class="chart-area"><canvas id="empRoleChart"></canvas></div>
-    </div>
-  </div>
-
-  <!-- Sub: Zufriedenheit -->
-  <div id="sub_personal_sat" class="sub-content">
-    <div class="chart-card">
-      <div><div class="chart-title">App-Bestellungen generieren signifikant höhere Zufriedenheit</div>
-      <div class="chart-sub">Ø Satisfaction Score (1–5) nach Bestellkanal · 754.513 Bestellungen</div></div>
-      <div class="kpi-row">
-        <div class="kpi-card" data-kpi="personal5"><div class="kpi-label">GESAMT Ø ZUFRIEDENHEIT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="personal6"><div class="kpi-label">APP ORDER</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="personal7"><div class="kpi-label">COUNTER (SCHLECHTESTER)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta neg"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="personal8"><div class="kpi-label">KORR. DAUER ↔ SAT.</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-      </div>
-      <div class="chart-area"><canvas id="satChannelChart"></canvas></div>
-    </div>
-
-    <div class="chart-card">
-      <div><div class="chart-title">Zufriedenheit bleibt bis 12 Min. stabil und fällt ab 13 Min. deutlich</div>
-      <div class="chart-sub">Ø Satisfaction Score nach Bearbeitungsdauer · 6 Klassen</div></div>
-      <div class="chart-area"><canvas id="satDurationChart"></canvas></div>
-      <div class="interpretation"><strong>Interpretation:</strong> Die Zufriedenheit bleibt bis 12 Min. nahezu unverändert (3,78–3,83) und fällt ab 13 Min. auf 3,44–3,48. Es handelt sich um einen Sprung, nicht um einen gleichmäßigen Rückgang. Klassen ab 15 Min. sind mit zusammen unter 700 Bestellungen dünn besetzt. Die Tageszeit zeigt ein klares Mittagstief (12–13 Uhr: 3,77–3,78) — genau wenn Rush Hour und Wartezeiten zusammentreffen.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Zielgröße „Bestelldauer &lt;5 Min." für alle Filialen einführen. Mittagspeak (12–13h) mit Express-Lane oder Vorbestellfunktion entlasten. App-Zufriedenheit (4,0) als Benchmark für alle Kanäle nutzen.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div><div class="chart-title">Zufriedenheit nach Tageszeit — Mittagstief bei 12–13 Uhr</div>
-      <div class="chart-sub">Ø Satisfaction Score pro Stunde · 06:00–23:00</div></div>
-      <div class="chart-area tall"><canvas id="satHourChart"></canvas></div>
-    </div>
-  </div>
+<div class="tab-content" id="personal">
+<!-- Sub: Produktivität -->
+<div class="sub-content active" id="sub_personal_prod">
+<div class="chart-card">
+<div><div class="chart-title">Europastern und Hauptbahnhof liefern doppelte Produktivität pro Mitarbeiter</div>
+<div class="chart-sub">Umsatz pro Mitarbeiter (kum. 2017–2026) · 8 Filialen · 188 Mitarbeiter</div></div>
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="personal1"><div class="kpi-label">TOP: EUROPASTERN</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="personal2"><div class="kpi-label">BOTTOM: ZELLERAU</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="personal3"><div class="kpi-label">Ø WARTEZEIT ↔ ZUFRIEDENHEIT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="personal4"><div class="kpi-label">GESAMT MITARBEITER</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
 </div>
-
+<div class="chart-area xtall"><canvas id="empProdChart"></canvas></div>
+<div class="interpretation" data-txt="empProdChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="empProdChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div><div class="chart-title">Rollenverteilung &amp; Vergütung — Kassierer und Köche bilden das Rückgrat</div>
+<div class="chart-sub">5 Rollen · Ø-Stundenlohn · Vollzeitquote</div></div>
+<div class="chart-area"><canvas id="empRoleChart"></canvas></div>
+</div>
+</div>
+<!-- Sub: Zufriedenheit -->
+<div class="sub-content" id="sub_personal_sat">
+<div class="chart-card">
+<div><div class="chart-title">App-Bestellungen generieren signifikant höhere Zufriedenheit</div>
+<div class="chart-sub" data-txt="satChannelChart.sub"></div></div>
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="personal5"><div class="kpi-label">GESAMT Ø ZUFRIEDENHEIT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="personal6"><div class="kpi-label">APP ORDER</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="personal7"><div class="kpi-label">COUNTER (SCHLECHTESTER)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta neg"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="personal8"><div class="kpi-label">KORR. DAUER ↔ SAT.</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+</div>
+<div class="chart-area"><canvas id="satChannelChart"></canvas></div>
+</div>
+<div class="chart-card">
+<div><div class="chart-title">Zufriedenheit bleibt bis 12 Min. stabil und fällt ab 13 Min. deutlich</div>
+<div class="chart-sub">Ø Satisfaction Score nach Bearbeitungsdauer · 6 Klassen</div></div>
+<div class="chart-area"><canvas id="satDurationChart"></canvas></div>
+<div class="interpretation" data-txt="satDurationChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="satDurationChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div><div class="chart-title">Zufriedenheit nach Tageszeit — Mittagstief bei 12–13 Uhr</div>
+<div class="chart-sub">Ø Satisfaction Score pro Stunde · 06:00–23:00</div></div>
+<div class="chart-area tall"><canvas id="satHourChart"></canvas></div>
+</div>
+</div>
+</div>
 <!-- ═══════════ TAB: PROMOTIONS ═══════════ -->
-<div id="promotions" class="tab-content">
-
-  <!-- Sub: Promo-Effektivität -->
-  <div id="sub_promo_effekt" class="sub-content active">
-    <div class="chart-card">
-      <div><div class="chart-title">Nur 8,2% der Bestellungen nutzen Promotions — aber mit höherer Zufriedenheit</div>
-      <div class="chart-sub">9 Aktionstypen · ROI & Uplift vs. Baseline (€19,45 Ø ohne Promo)</div></div>
-      <div class="kpi-row">
-        <div class="kpi-card" data-kpi="promotions1"><div class="kpi-label">PROMO-BESTELLUNGEN</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="promotions2"><div class="kpi-label">GESAMTRABATT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="promotions3"><div class="kpi-label">BESTER ROI</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="promotions4"><div class="kpi-label">HÖCHSTE ZUFRIEDENHEIT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
-      </div>
-      <div class="chart-area xtall"><canvas id="promoROIChart"></canvas></div>
-      <div class="interpretation"><strong>Interpretation:</strong> Alle Promotions zeigen negative Uplift-Werte vs. Baseline — das ist methodisch korrekt, denn Promotions reduzieren per Definition den Netto-Preis. Der ROI zeigt, wie viel Umsatz pro Rabatt-Euro generiert wird: Student Discount (11,5x) und App Welcome (9,0x) sind am effizientesten. Grand Opening hat den niedrigsten Netto-AOV (€13,39) — hier dominieren Neukunden mit kleinen Erstbestellungen.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Student Discount ausweiten (8% Rabatt bei 11,5x ROI ist hochprofitabel). Birthday Offer trotz niedrigem ROI (3,0x) beibehalten — höchste Zufriedenheit (3,98) bindet Kunden langfristig. COVID Delivery einfrieren — niedrigster Sat-Score (3,77) bei mäßigem Uplift.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div><div class="chart-title">Promo-Zufriedenheit liegt überall über Baseline — außer COVID Delivery</div>
-      <div class="chart-sub">Ø Satisfaction Score pro Promotion vs. Baseline (3,79)</div></div>
-      <div class="chart-area xtall"><canvas id="promoSatChart"></canvas></div>
-    </div>
-  </div>
-
-  <!-- Sub: Kohorten & Standorte -->
-  <div id="sub_promo_kohorten" class="sub-content">
-    <div class="chart-card">
-      <div><div class="chart-title">Kohortenanalyse — Retention liegt bei 98–100% über alle Jahrgänge</div>
-      <div class="chart-sub">Anteil aktiver Kunden pro Kohorte (Erstbesuchsjahr) · 24.992 Kunden</div></div>
-      <div class="kpi-row">
-        <div class="kpi-card" data-kpi="promotions5"><div class="kpi-label">GRÖSSTE KOHORTE</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="promotions6"><div class="kpi-label">Ø RETENTION (VOLLE JAHRE)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="promotions7"><div class="kpi-label">2026 BISHER AKTIV</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-        <div class="kpi-card" data-kpi="promotions8"><div class="kpi-label">KUNDEN GESAMT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
-      </div>
-      <div class="chart-area xtall"><canvas id="cohortChart"></canvas></div>
-      <div class="interpretation"><strong>Interpretation:</strong> Die extrem hohe Retention (98–100%) zeigt eine sehr loyale Kundenbasis. Der 2026-Wert von ~71% ist kein Warnsignal — das Jahr ist erst zu 27% vorbei (April). Die 2020-Kohorte zeigt einen leichten Dip auf 98,5% — vermutlich COVID-bedingte Verhaltensänderung. Erst wenn eine Kohorte dauerhaft unter 90% fällt, besteht Handlungsbedarf.
-        <div class="recommendation"><strong>Handlungsempfehlung:</strong> Monitoring der 2026-Kohorte im Quartalsrhythmus. Wenn die Retention bis Q3 nicht auf 95%+ steigt, gezielte Reaktivierungskampagne für inaktive Kunden starten.</div>
-      </div>
-    </div>
-
-    <div class="chart-card">
-      <div><div class="chart-title">Filial-Scorecard — Europastern mit dem höchsten Umsatz, Zellerau mit dem höchsten Bestellwert</div>
-      <div class="chart-sub">8 Standorte · Umsatz, Effizienz, Miete · Lat/Lon Würzburg</div></div>
-      <div class="chart-card table-card">
-        <table class="data-table" id="tblGeo">
-          <thead><tr><th>Filiale</th><th>Typ</th><th>Umsatz</th><th>€/m²</th><th>Mietquote</th><th>AOV</th><th>Sat.</th><th>Sitze</th><th>Drive-Thr.</th></tr></thead>
-          <tbody>
-            <tr><td>BM Europastern</td><td>Highway</td><td class="mono">€3.391.529</td><td class="mono">9.690</td><td class="mono">2,4%</td><td class="mono">€18,62</td><td class="mono">3,81</td><td class="mono">130</td><td>Ja</td></tr>
-            <tr><td>BM Hauptbahnhof</td><td>City Center</td><td class="mono">€2.205.646</td><td class="mono">12.254</td><td class="mono">4,6%</td><td class="mono">€17,80</td><td class="mono">3,77</td><td class="mono">60</td><td>Nein</td></tr>
-            <tr><td>BM Mainfrankenpark</td><td>Shopping</td><td class="mono">€2.158.128</td><td class="mono">7.708</td><td class="mono">4,0%</td><td class="mono">€21,03</td><td class="mono">3,82</td><td class="mono">115</td><td>Ja</td></tr>
-            <tr><td>BM Heuchelhof</td><td>Residential</td><td class="mono">€2.029.699</td><td class="mono">8.457</td><td class="mono">2,8%</td><td class="mono">€20,14</td><td class="mono">3,81</td><td class="mono">115</td><td>Ja</td></tr>
-            <tr><td>BM Sanderring</td><td>University</td><td class="mono">€1.683.541</td><td class="mono">7.652</td><td class="mono">3,7%</td><td class="mono">€18,84</td><td class="mono">3,76</td><td class="mono">100</td><td>Nein</td></tr>
-            <tr><td>BM Lengfeld</td><td>Commercial</td><td class="mono">€1.359.198</td><td class="mono">6.796</td><td class="mono">4,9%</td><td class="mono">€18,82</td><td class="mono">3,81</td><td class="mono">85</td><td>Ja</td></tr>
-            <tr><td>BM Grombühl</td><td>Hospital</td><td class="mono">€942.419</td><td class="mono">5.890</td><td class="mono">5,7%</td><td class="mono">€19,74</td><td class="mono">3,83</td><td class="mono">60</td><td>Nein</td></tr>
-            <tr><td>BM Zellerau</td><td>Mixed</td><td class="mono">€752.219</td><td class="mono">3.959</td><td class="mono">6,4%</td><td class="mono">€21,05</td><td class="mono">3,82</td><td class="mono">85</td><td>Nein</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="interpretation"><strong>Interpretation:</strong> Hauptbahnhof hat die höchste Raumproduktivität (€12.254/m²) — trotz kleinster Fläche (180m²) und fehlendem Drive-Through. Zellerau hat den höchsten AOV (€21,05) aber die schlechteste Mietquote (6,4%). Nur 5,1% der Bestellungen kommen aus dem „Heimat-Stadtteil" der Kunden — die Filialen bedienen großräumige Einzugsgebiete, nicht nur lokale Anwohner.</div>
-    </div>
-  </div>
+<div class="tab-content" id="promotions">
+<!-- Sub: Promo-Effektivität -->
+<div class="sub-content active" id="sub_promo_effekt">
+<div class="chart-card">
+<div><div class="chart-title" data-txt="promoROIChart.titel"></div>
+<div class="chart-sub" data-txt="promoROIChart.sub"></div></div>
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="promotions1"><div class="kpi-label">PROMO-BESTELLUNGEN</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="promotions2"><div class="kpi-label">GESAMTRABATT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="promotions3"><div class="kpi-label">BESTER ROI</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="promotions4"><div class="kpi-label">HÖCHSTE ZUFRIEDENHEIT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
 </div>
-
+<div class="chart-area xtall"><canvas id="promoROIChart"></canvas></div>
+<div class="interpretation" data-txt="promoROIChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="promoROIChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div><div class="chart-title">Promo-Zufriedenheit liegt überall über Baseline — außer COVID Delivery</div>
+<div class="chart-sub" data-txt="promoSatChart.sub"></div></div>
+<div class="chart-area xtall"><canvas id="promoSatChart"></canvas></div>
+</div>
+</div>
+<!-- Sub: Kohorten & Standorte -->
+<div class="sub-content" id="sub_promo_kohorten">
+<div class="chart-card">
+<div><div class="chart-title" data-txt="cohortChart.titel"></div>
+<div class="chart-sub" data-txt="cohortChart.sub"></div></div>
+<div class="kpi-row">
+<div class="kpi-card" data-kpi="promotions5"><div class="kpi-label">GRÖSSTE KOHORTE</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="promotions6"><div class="kpi-label">Ø RETENTION (VOLLE JAHRE)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="promotions7"><div class="kpi-label">2026 BISHER AKTIV</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+<div class="kpi-card" data-kpi="promotions8"><div class="kpi-label">KUNDEN GESAMT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
+</div>
+<div class="chart-area xtall"><canvas id="cohortChart"></canvas></div>
+<div class="interpretation" data-txt="cohortChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="cohortChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
+</div>
+<div class="chart-card">
+<div><div class="chart-title">Filial-Scorecard — Europastern mit dem höchsten Umsatz, Zellerau mit dem höchsten Bestellwert</div>
+<div class="chart-sub">8 Standorte · Umsatz, Effizienz, Miete · Lat/Lon Würzburg</div></div>
+<div class="chart-card table-card">
+<table class="data-table" id="tblGeo">
+<thead><tr><th>Filiale</th><th>Typ</th><th>Umsatz</th><th>€/m²</th><th>Mietquote</th><th>AOV</th><th>Sat.</th><th>Sitze</th><th>Drive-Thr.</th></tr></thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="interpretation" data-txt="promotions_tabelle3.deutung"><strong>Interpretation:</strong></div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ MANAGEMENT SUMMARY ═══════════════════ -->
-<div id="summary" class="tab-content">
-
-  <!-- ── Sub: Insights ── -->
-  <div id="sub_summary_insights" class="sub-content active">
-
-    <!-- Hero KPIs -->
-    <div class="ms-hero">
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">14,5<span class="ms-hero-unit">Mio. €</span></div>
-        <div class="ms-hero-label">Gesamtumsatz netto</div>
-      </div>
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">754.513</div>
-        <div class="ms-hero-label">Bestellungen</div>
-      </div>
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">24.992</div>
-        <div class="ms-hero-label">Unique Kunden</div>
-      </div>
-      <div class="ms-hero-cell">
-        <div class="ms-hero-val">8<span class="ms-hero-unit"> Filialen</span></div>
-        <div class="ms-hero-label">Würzburg · 2017–2026</div>
-      </div>
-    </div>
-
-    <!-- 01 Umsatz & Wachstum -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">01</span><span class="ms-block-title">Umsatz &amp; Wachstum</span></div>
-      <div class="ms-grid">
-        <div class="ms-card" data-ms="1">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="2">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="3">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="4">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 02 Filialperformance -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">02</span><span class="ms-block-title">Filialperformance</span></div>
-      <div class="ms-grid">
-        <div class="ms-card" data-ms="5">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="6">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">BEST</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="7">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag r">3× GAP</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="8">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card full" data-ms="25">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 03 Kunden & Loyalität -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">03</span><span class="ms-block-title">Kundenstruktur &amp; Loyalität</span></div>
-      <div class="ms-grid">
-        <div class="ms-card" data-ms="9">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">EXZELLENT</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="10">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="11">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">TOP</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="12">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag r">RISIKO</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card full" data-ms="26">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 04 Produkte & Warenkörbe -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">04</span><span class="ms-block-title">Produkte &amp; Warenkörbe</span></div>
-      <div class="ms-grid">
-        <div class="ms-card full" data-ms="27">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="13">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="14">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 05 Kanäle -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">05</span><span class="ms-block-title">Kanäle &amp; Zahlungsarten</span></div>
-      <div class="ms-grid">
-        <div class="ms-card" data-ms="15">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag o">UNTERPENETR.</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="16">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card full" data-ms="28">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 06 Wetter -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">06</span><span class="ms-block-title">Wetter &amp; externe Faktoren</span></div>
-      <div class="ms-grid">
-        <div class="ms-card" data-ms="17">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="18">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card full" data-ms="29">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 07 Personal -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">07</span><span class="ms-block-title">Personal &amp; Zufriedenheit</span></div>
-      <div class="ms-grid">
-        <div class="ms-card" data-ms="19">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag r">KRITISCH</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="20">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card full" data-ms="30">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 08 Promotions -->
-    <div class="ms-block">
-      <div class="ms-block-head"><span class="ms-block-num">08</span><span class="ms-block-title">Promotions</span></div>
-      <div class="ms-grid">
-        <div class="ms-card" data-ms="21">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">GESUND</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="22">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="23">
-          <div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">BEST</span></div>
-          <div class="ms-card-text"></div>
-        </div>
-        <div class="ms-card" data-ms="24">
-          <div class="ms-card-top"><span class="ms-card-val"></span></div>
-          <div class="ms-card-text"></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ── Sub: Empfehlungen ── -->
-  <div id="sub_summary_empfehlungen" class="sub-content">
-
-    <!-- S1 Filialnetz -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">01</div>
-        <div class="ms-strat-title">Filialnetz &amp; Flächenproduktivität</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Zellerau: Standort-Review einleiten</div>
-          <div class="ms-action-text">Niedrigster Umsatz (<strong>€752k</strong>), höchste Mietquote (<strong>6,4 %</strong>), niedrigste MA-Produktivität (<strong>€36k/MA</strong>). Der hohe AOV (€21,05) kompensiert die Frequenzschwäche nicht.</div>
-          <div class="ms-action-impl">Vergleichsrechnung Standortschließung vs. Relaunch (Flächenverkleinerung, Mietverhandlung, Konzeptanpassung) innerhalb Q3 durchführen.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Hauptbahnhof-Modell skalieren</div>
-          <div class="ms-action-text">Höchste Raumproduktivität (<strong>€12.254/m²</strong>) auf nur 180 m² — ohne Drive-Through. Kompaktformat als Vorlage für weitere High-Frequency-Standorte.</div>
-          <div class="ms-action-impl">Standort-Screening für zweites Kompaktformat in der Region Mainfranken.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Einzugsgebiet ist überregional</div>
-          <div class="ms-action-text">Nur <strong>5,1 %</strong> der Bestellungen aus dem Stadtteil der Filiale. Standortwahl primär nach Verkehrsanbindung und Lauffrequenz, nicht nach Wohnortdichte.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S2 Digitalisierung -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">02</div>
-        <div class="ms-strat-title">Digitalisierung &amp; Kanalsteuerung</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">App-Penetration verdreifachen — Ziel: 18 % in 18 Monaten</div>
-          <div class="ms-action-text">App-Zufriedenheit <strong>4,0</strong> (höchste aller Kanäle), aber nur <strong>5,9 %</strong> Anteil. Jede App-Migration reduziert Counter-Last (niedrigste Zufriedenheit: 3,77).</div>
-          <div class="ms-action-impl">App-First-Aktionen: exklusive Coupons, Loyalty-Punkte, Pre-Order. Student Discount (ROI 11,5×) exklusiv in der App.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Kiosk-Ausbau in Hauptbahnhof und Sanderring</div>
-          <div class="ms-action-text">Kiosk-Zufriedenheit (<strong>3,78</strong>) über Counter (<strong>3,77</strong>) — entlastet Personal. Beide Standorte ohne Drive-Through, Kiosks als Alternative.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Mobile-Payment-Infrastruktur vorziehen</div>
-          <div class="ms-action-text">Bargeldanteil strukturell rückläufig. Kontaktlose Zahlungsterminals priorisiert in Filialen mit hohem Counter-Anteil.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S3 Kundenmanagement -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">03</div>
-        <div class="ms-strat-title">Kundenmanagement &amp; Retention</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Reaktivierungskampagne für 21,9 % „at Risk"-Segment</div>
-          <div class="ms-action-text"><strong>5.479 Kunden</strong> mit rückläufiger Aktivität. Bei Ø 30,2 Bestellungen/Kunde und €19,27 AOV repräsentiert dieses Segment ca. <strong>€3,2 Mio.</strong> Lifetime-Revenue-Potenzial.</div>
-          <div class="ms-action-impl">Win-Back-Kampagne via App-Push + E-Mail mit gestaffeltem Incentive (5 % → 10 % → 15 %) über 90 Tage.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Champions-Programm aufbauen (16,3 % = 4.074 Kunden)</div>
-          <div class="ms-action-text">Überproportionaler Umsatzanteil. Ziel: Advocacy und Weiterempfehlung monetarisieren.</div>
-          <div class="ms-action-impl">Exklusives Loyalty-Tier mit Early Access, Birthday-Upgrade (Premium-Menü statt 25 %-Rabatt — höherer perceived value, niedrigerer Margenverlust).</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Kohorten-Retention 98–100 % ist exzellent</div>
-          <div class="ms-action-text">Kein strukturelles Churn-Problem. Fokus auf Frequenzsteigerung bestehender Kunden, nicht auf Neukundengewinnung.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S4 Sortiment & Pricing -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">04</div>
-        <div class="ms-strat-title">Sortiment &amp; Pricing</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Cross-Selling-Bundles auf Basis Assoziationsanalyse</div>
-          <div class="ms-action-text">Pommes + Cola (<strong>Lift 2,38</strong>) und Beyond Burger + Salat (<strong>Lift 2,03</strong>) sind die einzigen signifikanten Affinitäten.</div>
-          <div class="ms-action-impl">Combo-Menüs mit 3–5 % Bundle-Rabatt — erhöht Warenkorbgröße bei minimalem Marginverlust.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Beyond-Burger-Segment als Premium-Linie ausbauen</div>
-          <div class="ms-action-text">Signifikante Affinität zu Salat (Lift 2,03) zeigt gesundheitsbewusstes Kundensegment.</div>
-          <div class="ms-action-impl">„Green Line"-Erweiterung (Plant-Based-Menüs) mit höherer Marge evaluieren.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Preiserhöhung mit Augenmaß möglich</div>
-          <div class="ms-action-text">Promo-Quote <strong>8,2 %</strong> zeigt geringe Preissensitivität. Moderate Anpassung (2–3 %) sollte Nachfrage kaum beeinflussen — verifizierbar über Preissimulation.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S5 Promotions -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">05</div>
-        <div class="ms-strat-title">Promotions &amp; Incentivierung</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Birthday Offer (25 %) reformieren oder einstellen</div>
-          <div class="ms-action-text">Niedrigster ROI (<strong>3,0×</strong>). Ein 25 %-Rabatt ohne nachweisbaren Frequenz- oder Cross-Selling-Effekt ist Margenvernichtung.</div>
-          <div class="ms-action-impl">Umstellen auf „Birthday Special" (exklusives Produkt statt Rabatt) oder Reduktion auf 15 % bei App-Bindung.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Student Discount (11,5× ROI) ausweiten</div>
-          <div class="ms-action-text">Best-Performer: geringe Rabatthöhe (<strong>8 %</strong>) bei hoher Wiederholungsrate. Aktuell primär Sanderring.</div>
-          <div class="ms-action-impl">Kooperation mit Studierendenwerk für App-Integration (Mensacard-Verknüpfung). Ausweitung auf alle Uni-nahen Filialen.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Promo-Gesamtquote bei 8,2 % halten</div>
-          <div class="ms-action-text">Keine Indikation für aggressive Rabattierung. Gesunde Preispositionierung — Promotions gezielt als Frequenztreiber, nicht als Margenkiller.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S6 Operations -->
-    <div class="ms-strat">
-      <div class="ms-strat-head">
-        <div class="ms-strat-icon">06</div>
-        <div class="ms-strat-title">Operations &amp; Wartezeit</div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio high">HOCH</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Wartezeit unter 10 Minuten halten — harte Grenze</div>
-          <div class="ms-action-text">Zufriedenheit bleibt bis 12 Min. stabil (<strong>Ø 3,78–3,83</strong>) und fällt ab 13 Min. auf <strong>Ø 3,48</strong>. Rohkorrelation über alle Bestellungen <strong>r = −0,06</strong>, über Minutenmittelwerte <strong>r = −0,88</strong>.</div>
-          <div class="ms-action-impl">SLA einführen: 95 % der Bestellungen unter 10 Min. Monitoring per POS-System, wöchentliches Reporting an Filialleiter.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio med">MITTEL</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Peak-Hour-Staffing optimieren</div>
-          <div class="ms-action-text">Umsatzkonzentration <strong>11:30–13:30</strong> und <strong>17:30–19:30</strong> laut Heatmap.</div>
-          <div class="ms-action-impl">Personalbesetzung in Peak-Fenstern erhöhen — Schichtteilung oder Teilzeitkräfte.</div>
-        </div>
-      </div>
-
-      <div class="ms-action">
-        <div class="ms-action-prio low">INFO</div>
-        <div class="ms-action-body">
-          <div class="ms-action-title">Produktivitätsgefälle ist standortbedingt</div>
-          <div class="ms-action-text">3× Spreizung (<strong>€113k vs. €36k</strong>) korreliert mit Standorttyp (Highway/City &gt; Residential/Mixed). Filialvergleiche für Personalbewertung müssen nach Standorttyp normalisiert werden.</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
+<div class="tab-content" id="summary">
+<!-- ── Sub: Insights ── -->
+<div class="sub-content active" id="sub_summary_insights">
+<!-- Hero KPIs -->
+<div class="ms-hero">
+<div class="ms-hero-cell">
+<div class="ms-hero-val"><span class="ms-hero-unit">Mio. €</span></div>
+<div class="ms-hero-label">Gesamtumsatz netto</div>
 </div>
-
+<div class="ms-hero-cell">
+<div class="ms-hero-val"></div>
+<div class="ms-hero-label">Bestellungen</div>
+</div>
+<div class="ms-hero-cell">
+<div class="ms-hero-val"></div>
+<div class="ms-hero-label">Unique Kunden</div>
+</div>
+<div class="ms-hero-cell">
+<div class="ms-hero-val"><span class="ms-hero-unit"> Filialen</span></div>
+<div class="ms-hero-label">Würzburg · 2017–2026</div>
+</div>
+</div>
+<!-- 01 Umsatz & Wachstum -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">01</span><span class="ms-block-title">Umsatz &amp; Wachstum</span></div>
+<div class="ms-grid">
+<div class="ms-card" data-ms="1">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="2">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="3">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="4">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+<!-- 02 Filialperformance -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">02</span><span class="ms-block-title">Filialperformance</span></div>
+<div class="ms-grid">
+<div class="ms-card" data-ms="5">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="6">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">BEST</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="7">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag r" data-tag="spreizung"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="8">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card full" data-ms="25">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+<!-- 03 Kunden & Loyalität -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">03</span><span class="ms-block-title">Kundenstruktur &amp; Loyalität</span></div>
+<div class="ms-grid">
+<div class="ms-card" data-ms="9">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">EXZELLENT</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="10">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="11">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">TOP</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="12">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag r">RISIKO</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card full" data-ms="26">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+<!-- 04 Produkte & Warenkörbe -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">04</span><span class="ms-block-title">Produkte &amp; Warenkörbe</span></div>
+<div class="ms-grid">
+<div class="ms-card full" data-ms="27">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="13">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="14">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+<!-- 05 Kanäle -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">05</span><span class="ms-block-title">Kanäle &amp; Zahlungsarten</span></div>
+<div class="ms-grid">
+<div class="ms-card" data-ms="15">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag o">UNTERPENETR.</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="16">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card full" data-ms="28">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+<!-- 06 Wetter -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">06</span><span class="ms-block-title">Wetter &amp; externe Faktoren</span></div>
+<div class="ms-grid">
+<div class="ms-card" data-ms="17">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="18">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card full" data-ms="29">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+<!-- 07 Personal -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">07</span><span class="ms-block-title">Personal &amp; Zufriedenheit</span></div>
+<div class="ms-grid">
+<div class="ms-card" data-ms="19">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag r">KRITISCH</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="20">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card full" data-ms="30">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+<!-- 08 Promotions -->
+<div class="ms-block">
+<div class="ms-block-head"><span class="ms-block-num">08</span><span class="ms-block-title">Promotions</span></div>
+<div class="ms-grid">
+<div class="ms-card" data-ms="21">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">GESUND</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="22">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="23">
+<div class="ms-card-top"><span class="ms-card-val"></span><span class="ms-card-tag g">BEST</span></div>
+<div class="ms-card-text"></div>
+</div>
+<div class="ms-card" data-ms="24">
+<div class="ms-card-top"><span class="ms-card-val"></span></div>
+<div class="ms-card-text"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- ── Sub: Empfehlungen ── -->
+<div class="sub-content" id="sub_summary_empfehlungen">
+<!-- S1 Filialnetz -->
+<div class="ms-strat">
+<div class="ms-strat-head">
+<div class="ms-strat-icon">01</div>
+<div class="ms-strat-title">Filialnetz &amp; Flächenproduktivität</div>
+</div>
+<div class="ms-action" data-akt="0">
+<div class="ms-action-prio high">HOCH</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="1">
+<div class="ms-action-prio med">MITTEL</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="2">
+<div class="ms-action-prio low">INFO</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+</div>
+</div>
+</div>
+<!-- S2 Digitalisierung -->
+<div class="ms-strat">
+<div class="ms-strat-head">
+<div class="ms-strat-icon">02</div>
+<div class="ms-strat-title">Digitalisierung &amp; Kanalsteuerung</div>
+</div>
+<div class="ms-action" data-akt="3">
+<div class="ms-action-prio high">HOCH</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="4">
+<div class="ms-action-prio med">MITTEL</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="5">
+<div class="ms-action-prio low">INFO</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+</div>
+</div>
+</div>
+<!-- S3 Kundenmanagement -->
+<div class="ms-strat">
+<div class="ms-strat-head">
+<div class="ms-strat-icon">03</div>
+<div class="ms-strat-title">Kundenmanagement &amp; Retention</div>
+</div>
+<div class="ms-action" data-akt="6">
+<div class="ms-action-prio high">HOCH</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="7">
+<div class="ms-action-prio med">MITTEL</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="8">
+<div class="ms-action-prio low">INFO</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+</div>
+</div>
+</div>
+<!-- S4 Sortiment & Pricing -->
+<div class="ms-strat">
+<div class="ms-strat-head">
+<div class="ms-strat-icon">04</div>
+<div class="ms-strat-title">Sortiment &amp; Pricing</div>
+</div>
+<div class="ms-action" data-akt="9">
+<div class="ms-action-prio med">MITTEL</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="10">
+<div class="ms-action-prio med">MITTEL</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="11">
+<div class="ms-action-prio low">INFO</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+</div>
+</div>
+</div>
+<!-- S5 Promotions -->
+<div class="ms-strat">
+<div class="ms-strat-head">
+<div class="ms-strat-icon">05</div>
+<div class="ms-strat-title">Promotions &amp; Incentivierung</div>
+</div>
+<div class="ms-action" data-akt="12">
+<div class="ms-action-prio high">HOCH</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="13">
+<div class="ms-action-prio med">MITTEL</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="14">
+<div class="ms-action-prio low">INFO</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+</div>
+</div>
+</div>
+<!-- S6 Operations -->
+<div class="ms-strat">
+<div class="ms-strat-head">
+<div class="ms-strat-icon">06</div>
+<div class="ms-strat-title">Operations &amp; Wartezeit</div>
+</div>
+<div class="ms-action" data-akt="15">
+<div class="ms-action-prio high">HOCH</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="16">
+<div class="ms-action-prio med">MITTEL</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+<div class="ms-action-impl"></div>
+</div>
+</div>
+<div class="ms-action" data-akt="17">
+<div class="ms-action-prio low">INFO</div>
+<div class="ms-action-body">
+<div class="ms-action-title"></div>
+<div class="ms-action-text"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </main>
-
-<footer>Fiktives Unternehmen — BI-Kurs THWS Würzburg · Prof. Robert Butscher &nbsp;|&nbsp; 754.513 Bestellungen · 2017–2026 · Erstellt mit Chart.js</footer>
-
+<footer data-fuss="1"></footer>
 <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
-<script>
+</body></html><script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════
  * Der gesamte Dashboard-Code liegt in dieser Funktion. Sie wird erst
@@ -2833,10 +2553,15 @@ function toggleDetail(id){document.getElementById(id).classList.toggle('open')}
 
 /* ═══════════ DATA MINING & SIMULATION DATA ═══════════ */
 const rfmSegments = BM.rfmSegments;
-const rfmColors=['#16a34a','#16a34a','#5b7a9d','#5b7a9d','#94a3b8','#dc2626','#dc2626'];
+const rfmColors=rfmSegments.map(function(s){return s.farbe});
 
 const simProducts = BM.simProducts;
-const baseBurgerRev=simProducts.reduce(function(s,p){return s+p.rev},0);
+// Die Simulation rechnet mit Listenpreis mal Menge. Der Vergleichswert muss
+// genauso gerechnet sein, sonst zeigt der Regler schon bei 0 % eine
+// Aenderung — p.rev ist der tatsaechliche Positionsumsatz und liegt wegen
+// Rabatten rund 9 % darunter.
+const baseBurgerRev=simProducts.reduce(function(s,p){return s+p.price*p.vol},0);
+const istBurgerRev=simProducts.reduce(function(s,p){return s+p.rev},0);
 const baseBurgerVol=simProducts.reduce(function(s,p){return s+p.vol},0);
 const baseBurgerMargin=simProducts.reduce(function(s,p){return s+(p.price-p.cost)*p.vol},0);
 const baseDB=baseBurgerMargin/baseBurgerVol;
@@ -2927,13 +2652,16 @@ function updatePriceSim(){
 }
 
 function createForecastChart(){
-  var base = BM.yearRevenue[8];
+  // Die Szenarien stehen in reihen.js, damit Diagramm und Tabelle dieselben
+  // Annahmen benutzen.
+  var base = BM.prognoseBasis;
   var histLabels = BM.yearLabels.slice(0, 9);
   var histData = BM.yearRevenue.slice(0, 9);
-  var foreLabels=['2025','2026','2027','2028'];
-  var conservative=[base,base*1.03,base*1.03*1.03,base*1.03*1.03*1.03];
-  var optimistic=[base,base*1.08,base*1.08*1.08,base*1.08*1.08*1.08];
-  var expansive=[base,base*1.15,base*1.15*1.15,base*1.15*1.15*1.15];
+  var szen = function(n){ return BM.szenarien.find(function(s){return s.name===n}) };
+  var reihe = function(n){ return [base].concat(szen(n).jahre) };
+  var conservative=reihe('Konservativ');
+  var optimistic=reihe('Optimistisch');
+  var expansive=reihe('Expansiv');
   var allLabels=histLabels.concat(['2026','2027','2028']);
   var pad=new Array(histLabels.length-1).fill(null);
 
@@ -3302,6 +3030,9 @@ import { QUELLE } from './js/konfiguration.js';
 import { waehleQuelle } from './js/datenquelle.js';
 import { ladeAlles, baueReihen } from './js/reihen.js';
 import { fuelleKacheln, fuelleSummary } from './js/kacheln.js';
+import { fuelleTexte } from './js/texte.js';
+import { fuelleTabellen } from './js/tabellen.js';
+import { fuelleAktionen } from './js/aktionen.js';
 
 const anzeige = document.createElement('div');
 anzeige.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;'
@@ -3317,12 +3048,18 @@ try {
   const BM = baueReihen(roh);
   const kacheln = fuelleKacheln(BM, roh);
   const summary = fuelleSummary(BM, roh);
+  const texte = fuelleTexte(BM, roh);
+  const tabellen = fuelleTabellen(BM, roh);
+  const aktionen = fuelleAktionen(BM, roh);
   anzeige.remove();
   window.dashboardAufbauen(BM);
   console.info(`BurgerMetrics: Daten aus ${QUELLE.art} geladen `
     + `(${Math.round(performance.now() - t0)} ms, ${Object.keys(BM).length} Reihen, `
-    + `${kacheln.gesetzt} Kacheln, ${summary} Summary-Karten gefüllt).`);
+    + `${kacheln.gesetzt} Kacheln, ${summary} Summary-Karten, `
+    + `${texte.gesetzt} Textfelder, ${tabellen} Tabellenzeilen, `
+    + `${aktionen} Maßnahmen gefüllt).`);
   if (kacheln.offen.length) console.warn('Kacheln ohne Vorschrift:', kacheln.offen);
+  if (texte.fehlend.length) console.warn('Textfelder ohne Vorschrift:', texte.fehlend);
 } catch (fehler) {
   anzeige.innerHTML = '<div><b style="color:#dc2626">Die Datenquelle antwortet nicht.</b><br><br>'
     + String(fehler.message).replace(/</g, '&lt;')

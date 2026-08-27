@@ -17,6 +17,9 @@ bleiben die Quelle der Wahrheit; die Datenbank ist ihr Abbild.
 | `aufbau/0006_semantik_ergaenzung.sql` | RFM, Kanal je Stunde, Niederschlag, Aktions-ROI |
 | `aufbau/0007_kennzahlen_einzeln.sql` | Produkte je Jahr und die Einzelwerte der Kacheln |
 | `aufbau/0008_summary_luecken.sql` | Umsatz je Altersgruppe, Anteil Heimatbezirk |
+| `aufbau/0009_rfm_deterministisch.sql` | Zweitschlüssel für die Quintile, damit RFM reproduzierbar wird |
+| `aufbau/0010_filiale_tabellenspalten.sql` | Drive-Through, Sitzplätze, Mietquote |
+| `aufbau/0011_promotion_uplift.sql` | Warenkorb vor Rabatt statt des tautologischen ROI |
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
@@ -96,8 +99,64 @@ Reihen und füllt 72 Kacheln und 30 Summary-Karten — in rund drei Sekunden.
 | `web/js/datenquelle.js` | der Vertrag: 35 benannte Fragen; `PostgrestQuelle` als erste Umsetzung |
 | `web/js/reihen.js` | übersetzt die Antworten in die Reihen, die Chart.js erwartet |
 | `web/js/kacheln.js` | füllt Kennzahlkacheln und Management Summary |
+| `web/js/texte.js` | baut die Deutungs- und Empfehlungstexte unter den Diagrammen |
 
-**Eine zweite Datenquelle** braucht eine Klasse mit denselben 33 Methoden und
+### Drei Befunde, die erst der Umbau sichtbar gemacht hat
+
+**Die RFM-Segmente waren nicht reproduzierbar.** Vier Abfragen hintereinander
+lieferten vier Ergebnisse: Champions zwischen 4.179 und 4.187, Loyal zwischen
+5.037 und 5.051. Ursache ist `ntile()`. Die Funktion füllt fünf gleich große
+Fächer und muss dafür auch dort trennen, wo Werte gleich sind — an jeder
+Quintilsgrenze stehen hunderte Kunden mit identischer Bestellhäufigkeit. Wer
+davon ins vierte und wer ins fünfte Fach fällt, entschied die Reihenfolge des
+Scans. `customer_id` als Zweitschlüssel in der `ORDER BY` macht die Zuordnung
+eindeutig (`0009`).
+
+**Der ROI der Aktionen ist keine Messung.** `roi = umsatz / rabattsumme` kürzt
+sich zu `(1 − r) / r` — einer Funktion allein des Rabattsatzes, auf sechs
+Nachkommastellen exakt für alle neun Aktionen. Drei Aktionen mit 10 Prozent
+Rabatt haben deshalb denselben Wert 9,00, obwohl ihr Warenkorb vor Rabatt
+zwischen 16,36 und 21,00 Euro liegt. Wer danach sortiert, sortiert nach dem
+Rabattsatz und nennt es Wirtschaftlichkeit. `0011` stellt `uplift_pct` daneben:
+den Warenkorb vor Rabatt gegen den Bestellwert ohne Aktion. Damit dreht sich
+das Ergebnis — nicht der Student Discount steht am besten da, sondern App
+Welcome (+8,0 Prozent Warenkorb, nach Rabatt −2,8 Prozent).
+
+**Die Mietquote verglich Ungleiches.** Sie setzte eine Jahresmiete ins
+Verhältnis zum kumulierten Umsatz aller Betriebsjahre und wies für die älteste
+Filiale 2,4 Prozent aus. Auf das Jahr bezogen sind es 15,2 Prozent, und die
+teuerste Lage ist nicht die, die die Tabelle nannte (`0010`).
+
+### Auch die Fließtexte rechnen
+
+Der erste Durchgang nahm den Kacheln und Datenreihen ihre festen Zahlen, ließ
+aber die Deutungs- und Empfehlungstexte unter den Diagrammen stehen. Das war
+zu wenig: In 104 Textfeldern standen weiterhin echte Werte als Buchstaben im
+HTML — darunter Sätze über 5.484 abwanderungsgefährdete Kunden, während das
+Diagramm daneben bereits 4.998 zeichnete. Ein Text, der der Grafik über sich
+widerspricht, ist schlimmer als kein Text: Er sieht aus wie eine Quelle.
+
+`texte.js` baut diese Felder jetzt aus denselben Sichten, aus denen die
+Diagramme kommen. Der Schlüssel ist ein `data-txt`-Attribut in der Form
+`<canvas-id>.<feld>`. Sätze **ohne** Zahlen bleiben im HTML — sie sind
+Methodik, keine Daten, und altern nicht.
+
+Dasselbe gilt für die sieben Datentabellen (`tabellen.js`, 60 Zeilen aus
+265 getippten Zellen) und den Maßnahmenplan der Management Summary
+(`aktionen.js`, 18 Karten). Im sichtbaren HTML stehen jetzt noch **zwei**
+Zahlen: die Anfangsstellungen der beiden Schieberegler in der Simulation. Das
+ist Bedienzustand, keine Aussage über das Geschäft.
+
+Beim Nachrechnen fielen über sechzig Aussagen durch, die sich nicht halten
+ließen. Die folgenreichsten: Die App galt als „effizientester Kanal wegen des
+höchsten Bestellwerts" — sie hat 2025 den **niedrigsten**. Das Tagesverlaufs-
+Profil („Drive-Through morgens 35 Prozent, App abends 22 Prozent") existiert
+nicht; der Kanalmix ist über alle 18 Öffnungsstunden nahezu konstant. Die
+Altersgruppen unterscheiden sich in der Bestellhäufigkeit praktisch nicht
+(29,9 bis 30,4 je Kunde) — der Unterschied liegt allein im Bestellwert. Und
+das Streudiagramm „Temperatur gegen Tagesumsatz" zeichnete Bestellungen.
+
+**Eine zweite Datenquelle** braucht eine Klasse mit denselben 35 Methoden und
 einen Zweig in `waehleQuelle()`. Am Dashboard ändert sich dabei keine Zeile.
 Wer MySQL, Snowflake oder ein Lakehouse anschließt, baut dort die Sichten nach
 — die Feldnamen sind die Schnittstelle.
