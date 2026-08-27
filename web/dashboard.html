@@ -696,18 +696,18 @@
 <span class="filter-label">Jahr:</span><span id="filterYearLabel">Alle</span>
 <svg fill="currentColor" viewbox="0 0 20 20"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
 </button>
-<div class="filter-dropdown" id="filterYear">
+<div class="filter-dropdown" data-filter="year" id="filterYear">
 <button class="filter-option active" onclick="setFilter('year','Alle')">Alle</button>
-<button class="filter-option" onclick="setFilter('year','2026')">2026 (Q1)</button>
-<button class="filter-option" onclick="setFilter('year','2025')">2025</button>
-<button class="filter-option" onclick="setFilter('year','2024')">2024</button>
-<button class="filter-option" onclick="setFilter('year','2023')">2023</button>
-<button class="filter-option" onclick="setFilter('year','2022')">2022</button>
-<button class="filter-option" onclick="setFilter('year','2021')">2021</button>
-<button class="filter-option" onclick="setFilter('year','2020')">2020</button>
-<button class="filter-option" onclick="setFilter('year','2019')">2019</button>
-<button class="filter-option" onclick="setFilter('year','2018')">2018</button>
-<button class="filter-option" onclick="setFilter('year','2017')">2017</button>
+
+
+
+
+
+
+
+
+
+
 </div>
 </div>
 <div class="filter-group">
@@ -715,16 +715,16 @@
 <span class="filter-label">Filiale:</span><span id="filterBranchLabel">Alle</span>
 <svg fill="currentColor" viewbox="0 0 20 20"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
 </button>
-<div class="filter-dropdown" id="filterBranch">
+<div class="filter-dropdown" data-filter="branch" id="filterBranch">
 <button class="filter-option active" onclick="setFilter('branch','Alle')">Alle</button>
-<button class="filter-option" onclick="setFilter('branch','Europastern')">BM Europastern</button>
-<button class="filter-option" onclick="setFilter('branch','Hauptbahnhof')">BM Hauptbahnhof</button>
-<button class="filter-option" onclick="setFilter('branch','Mainfrankenpark')">BM Mainfrankenpark</button>
-<button class="filter-option" onclick="setFilter('branch','Heuchelhof')">BM Heuchelhof</button>
-<button class="filter-option" onclick="setFilter('branch','Sanderring')">BM Sanderring</button>
-<button class="filter-option" onclick="setFilter('branch','Lengfeld')">BM Lengfeld</button>
-<button class="filter-option" onclick="setFilter('branch','Grombühl')">BM Grombühl</button>
-<button class="filter-option" onclick="setFilter('branch','Zellerau')">BM Zellerau</button>
+
+
+
+
+
+
+
+
 </div>
 </div>
 <div class="filter-group">
@@ -732,12 +732,12 @@
 <span class="filter-label">Kanal:</span><span id="filterChannelLabel">Alle</span>
 <svg fill="currentColor" viewbox="0 0 20 20"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" fill-rule="evenodd"></path></svg>
 </button>
-<div class="filter-dropdown" id="filterChannel">
+<div class="filter-dropdown" data-filter="channel" id="filterChannel">
 <button class="filter-option active" onclick="setFilter('channel','Alle')">Alle</button>
-<button class="filter-option" onclick="setFilter('channel','Counter')">Counter</button>
-<button class="filter-option" onclick="setFilter('channel','Drive')">Drive-Through</button>
-<button class="filter-option" onclick="setFilter('channel','App')">App</button>
-<button class="filter-option" onclick="setFilter('channel','Kiosk')">Kiosk</button>
+
+
+
+
 </div>
 </div>
 </div>
@@ -2197,10 +2197,10 @@ function createRevenueChart(mode) {
   if (mode === 'monat') {
     labels = mLabels; data = mRevenue; type = 'line';
     annotations = {
-      covidDip: {type:'point',xValue:37,yValue:23154,backgroundColor:'#dc2626',radius:6,borderWidth:2,borderColor:'#fff',
-        label:{display:true,content:['COVID-Tief','€23k (−62%)'],position:'start',font:{size:10,weight:'600'},backgroundColor:'rgba(220,38,38,.9)',color:'#fff',padding:6,borderRadius:4}},
-      allTimeHigh: {type:'point',xValue:100,yValue:300584,backgroundColor:'#16a34a',radius:6,borderWidth:2,borderColor:'#fff',
-        label:{display:true,content:['All-time High','€301k'],position:'start',font:{size:10,weight:'600'},backgroundColor:'rgba(22,163,74,.9)',color:'#fff',padding:6,borderRadius:4}}
+      covidDip: {type:'point',xValue:BM.monatTief.index,yValue:BM.monatTief.wert,backgroundColor:'#dc2626',radius:6,borderWidth:2,borderColor:'#fff',
+        label:{display:true,content:['COVID-Tief','\u20ac'+fmtShort(BM.monatTief.wert)+' ('+BM.monatTief.mom.toLocaleString('de-DE').replace('-','\u2212')+'%)'],position:'start',font:{size:10,weight:'600'},backgroundColor:'rgba(220,38,38,.9)',color:'#fff',padding:6,borderRadius:4}},
+      allTimeHigh: {type:'point',xValue:BM.monatHoch.index,yValue:BM.monatHoch.wert,backgroundColor:'#16a34a',radius:6,borderWidth:2,borderColor:'#fff',
+        label:{display:true,content:['All-time High','\u20ac'+fmtShort(BM.monatHoch.wert)],position:'start',font:{size:10,weight:'600'},backgroundColor:'rgba(22,163,74,.9)',color:'#fff',padding:6,borderRadius:4}}
     };
   } else if (mode === 'quartal') {
     labels = qRevenue.labels; data = qRevenue.values; type = 'bar';
@@ -2286,13 +2286,13 @@ function createBranchChart(){
 }
 
 function createBranchAovChart(){
-  var avgAOV=19.25;
+  var avgAOV=BM.aovNetz;
   var colors=branchAOV.map(function(v){return v>=avgAOV?'#16a34a':'#dc2626'});
   mkHBar('branchAovChart', branchLabels, branchAOV, colors, function(v){return '€'+v.toFixed(2)}, {
     xOpts:{beginAtZero:false,suggestedMin:16},
     xFmt:function(v){return '€'+v},
     annotation:{annotations:{avg:{type:'line',xMin:avgAOV,xMax:avgAOV,borderColor:'#64748b',borderWidth:1,borderDash:[4,4],
-      label:{display:true,content:'Ø €19,25',position:'start',font:{size:10},backgroundColor:'rgba(100,116,139,.8)',color:'#fff',padding:4}}}}
+      label:{display:true,content:'Ø €'+avgAOV.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2}),position:'start',font:{size:10},backgroundColor:'rgba(100,116,139,.8)',color:'#fff',padding:4}}}}
   });
 }
 
@@ -2437,10 +2437,10 @@ function createChannelTodChart(){
   new Chart(document.getElementById('channelTodChart'), {type:'line',
     data:{labels:channelTodHours.map(function(h){return h+':00'}),
       datasets:[
-        makeDs(channelTodCounter,barBlue,'Counter'),
-        makeDs(channelTodDrive,barLight,'Drive-Through'),
-        makeDs(channelTodApp,'#16a34a','App'),
-        makeDs(channelTodKiosk,'#d97706','Kiosk')
+        makeDs(channelTodCounter,barBlue,BM.channelLabels[0]),
+        makeDs(channelTodDrive,barLight,BM.channelLabels[1]),
+        makeDs(channelTodApp,'#16a34a',BM.channelLabels[2]),
+        makeDs(channelTodKiosk,'#d97706',BM.channelLabels[3])
       ]},
     options: mkOpts({legend:{display:false}, datalabels:{display:false}},
       {y:yScale({beginAtZero:true,max:60,ticks:Object.assign({},monoTicks,{callback:function(v){return v+'%'}})}),
@@ -2771,7 +2771,7 @@ function createSatChannelChart(){
   paired.sort(function(a,b){return b.v-a.v});
   var sortedLabels = paired.map(function(p){return p.l});
   var sortedData = paired.map(function(p){return p.v});
-  var colors=sortedData.map(function(v){return v>=4?'#16a34a':v>=3.79?barBlue:'#dc2626'});
+  var colors=sortedData.map(function(v){return v>=BM.satStunde.max?'#16a34a':v>=BM.satStunde.mitte?barBlue:'#dc2626'});
   new Chart(document.getElementById('satChannelChart'),{type:'bar',
     data:{labels:sortedLabels,datasets:[{label:'Ø Zufriedenheit',data:sortedData,backgroundColor:colors,borderRadius:3,maxBarThickness:40}]},
     options:mkOpts({legend:{display:false},datalabels:dlBar(function(v){return v.toFixed(2).replace('.',',')})},
@@ -2792,7 +2792,7 @@ function createSatHourChart(){
       {label:'Ø Zufriedenheit',data:satHourVal,borderColor:barBlue,backgroundColor:'rgba(127,149,182,0.1)',fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:satHourVal.map(function(v){return v<3.79?'#dc2626':barBlue})}
     ]},
     options:mkOpts({legend:{display:false},datalabels:{display:false}},
-      {y:yScale({min:3.74,max:3.85,ticks:monoTicks}),x:xScale({})})
+      {y:yScale({min:BM.satStunde.min,max:BM.satStunde.max,ticks:monoTicks}),x:xScale({})})
   });
 }
 
@@ -2817,12 +2817,12 @@ function createPromoROIChart(){
   mkHBar('promoROIChart',sortedLabels,sortedData,colors,function(v){return v.toFixed(1)+'x'},{hideAxis:true});
 }
 function createPromoSatChart(){
-  var baselineVal=3.785;
+  var baselineVal=BM.satBasis;
   var paired = promoNames.map(function(l,i){return {l:l,v:promoAvgSat[i]}});
   paired.sort(function(a,b){return b.v-a.v});
   var sortedLabels = paired.map(function(p){return p.l});
   var sortedData = paired.map(function(p){return p.v});
-  var colors=sortedData.map(function(v){return v>=3.95?'#16a34a':v>=3.85?barBlue:'#dc2626'});
+  var colors=sortedData.map(function(v){return v>=BM.satPromo.mitte?'#16a34a':v>=BM.satBasis?barBlue:'#dc2626'});
   mkHBar('promoSatChart',sortedLabels,sortedData,colors,function(v){return v.toFixed(2).replace('.',',')},{
     annotation:{annotations:{baseline:{type:'line',xMin:baselineVal,xMax:baselineVal,borderColor:'#dc2626',borderWidth:1.5,borderDash:[4,3],
       label:{display:true,content:'Baseline 3,79',position:'start',font:{size:9},backgroundColor:'rgba(220,38,38,.85)',color:'#fff',padding:3}}}}
@@ -2866,10 +2866,10 @@ createLineChart('paymentChart',paymentYears,[
   {label:'Mobile',data:mobileData,color:'#dc2626'}
 ],55);
 createLineChart('channelChart',paymentYears,[
-  {label:'Counter',data:counterData,color:barBlue},
-  {label:'Drive-Through',data:driveData,color:barLight},
-  {label:'App',data:appData,color:'#16a34a'},
-  {label:'Kiosk',data:kioskData,color:'#dc2626'}
+  {label:BM.channelLabels[0],data:counterData,color:barBlue},
+  {label:BM.channelLabels[1],data:driveData,color:barLight},
+  {label:BM.channelLabels[2],data:appData,color:'#16a34a'},
+  {label:BM.channelLabels[3],data:kioskData,color:'#dc2626'}
 ],70);
 createAgeChart();
 createLoyaltyChart();

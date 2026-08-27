@@ -219,6 +219,46 @@ export function baueReihen(d) {
     vol: x.menge, rev: Math.round(x.umsatz),
   }));
 
+  // ── Markierungen und Vergleichslinien in Diagrammen ─────────────────────
+  // Vier Werte standen bis August 2026 als Zahl im Skript des Dashboards.
+  // Sie gehoeren nicht zu einer Reihe, sondern markieren einzelne Punkte —
+  // und altern deshalb besonders unauffaellig. Die Beschriftung des
+  // Pandemie-Punktes lautete "−62 %", der tatsaechliche Rueckgang betraegt
+  // 54,8 Prozent.
+  const netzAov = R.yearRevenue.reduce((a, b) => a + b, 0)
+                / R.yearOrders.reduce((a, b) => a + b, 0);
+  R.aovNetz = r2(netzAov);
+
+  // Der Einbruch wird nicht ueber den Monat gesucht, sondern ueber die
+  // Eigenschaft: der groesste Rueckgang gegenueber dem Vormonat.
+  let tief = { i: 1, mom: 0 };
+  for (let i = 1; i < R.mRevenue.length; i++) {
+    const mom = (R.mRevenue[i] / R.mRevenue[i - 1] - 1) * 100;
+    if (mom < tief.mom) tief = { i, mom };
+  }
+  R.monatTief = { index: tief.i, wert: R.mRevenue[tief.i],
+                  label: R.mLabels[tief.i], mom: r2(tief.mom, 1) };
+  const hoch = R.mRevenue.indexOf(Math.max(...R.mRevenue));
+  R.monatHoch = { index: hoch, wert: R.mRevenue[hoch], label: R.mLabels[hoch] };
+
+  // Basislinie der Zufriedenheit: der Mittelwert ohne Aktion, gemessen, nicht
+  // gesetzt — siehe db/aufbau/0012_diagrammwerte.sql.
+  const ohneAktion = d.einzelwerteZusatz.find(x => x.kennung === 'zufriedenheit_ohne_aktion');
+  R.satBasis = ohneAktion ? Number(ohneAktion.wert) : null;
+
+  // Achsengrenzen und Farbschwellen der Zufriedenheitsdiagramme folgen den
+  // Daten. Fest gesetzte Grenzen schneiden Werte ab, sobald sich der Bestand
+  // aendert — und niemand sieht es.
+  const spanne = (werte, luft = 0.05) => {
+    const gueltig = werte.filter(v => v !== null && isFinite(v));
+    const lo = Math.min(...gueltig), hi = Math.max(...gueltig);
+    return { min: r2(lo - luft, 2), max: r2(hi + luft, 2),
+             mitte: r2((lo + hi) / 2, 2) };
+  };
+  R.satStunde = spanne(R.satHourVal);
+  R.satKanal  = spanne(R.satChannelVal);
+  R.satPromo  = spanne(R.promoAvgSat);
+
   // ── Prognoseszenarien ───────────────────────────────────────────────────
   // Wachstumsraten und Investitionsbetraege sind ANNAHMEN, keine Messwerte.
   // Sie stehen hier an einer Stelle, damit Diagramm und Tabelle nicht

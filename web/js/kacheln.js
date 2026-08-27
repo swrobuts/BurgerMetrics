@@ -297,6 +297,28 @@ export function fuelleKacheln(B, roh) {
     if (treffer) { el.textContent = proz(treffer.anteil_pct); gesetzt++; }
   });
 
+  // Die drei Filterlisten. Sie standen als 22 Eintraege im HTML — Jahre,
+  // Filialnamen, Kanalnamen. Benennt jemand eine Filiale um, zeigte die Liste
+  // weiter den alten Namen, ohne dass es auffaellt.
+  const listen = {
+    year:    B.yearLabels.map(x => x.replace('*', ' (Teiljahr)')).slice().reverse(),
+    branch:  B.branchLabels,
+    channel: B.channelLabels,
+  };
+  document.querySelectorAll('[data-filter]').forEach(dd => {
+    const werte = listen[dd.dataset.filter] || [];
+    const vorlage = dd.querySelector('.filter-option');
+    werte.forEach(w => {
+      const b = document.createElement('button');
+      b.className = 'filter-option';
+      b.textContent = w;
+      b.setAttribute('onclick', `setFilter('${dd.dataset.filter}','${w}')`);
+      dd.appendChild(b);
+    });
+    if (vorlage) vorlage.setAttribute('onclick', `setFilter('${dd.dataset.filter}','Alle')`);
+    gesetzt += werte.length;
+  });
+
   // Kopfzeile der Seite.
   const kopf = document.querySelector('[data-kopf]');
   if (kopf) {
