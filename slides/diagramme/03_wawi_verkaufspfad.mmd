@@ -1,7 +1,0 @@
-%%{init: {"er": {"nodeSpacing": 40, "rankSpacing": 56, "minEntityHeight": 42, "minEntityWidth": 90, "entityPadding": 12, "diagramPadding": 6}}}%%
-erDiagram
-    filiale          ||--o{ kundenbestellung : "findet statt in"
-    kunde            ||--o{ kundenbestellung : "gibt auf"
-    zahlungsart      ||--o{ kundenbestellung : "begleicht"
-    kundenbestellung ||--|{ bestellposition  : "besteht aus"
-    artikel          ||--o{ bestellposition  : "verkauft als"

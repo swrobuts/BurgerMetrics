@@ -12,11 +12,6 @@ Auswertungsmodell, die Semantikschicht und das Dashboard selbst.
 
 **Live:** <https://swrobuts.github.io/BurgerMetrics/>
 
-Dieses Repository und <https://github.com/swrobuts/burger> haben denselben
-Inhalt. `burger` ist die ältere Adresse und wird mitgeführt, damit
-bestehende Verweise nicht ins Leere laufen; hier liegen zusätzlich die
-Quellen der Foliensammlung unter `slides/`.
-
 ---
 
 ## Klonen
@@ -49,7 +44,6 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 | `db/` | der Aufbau der Datenbank: Schema, Fakten, Semantikschicht, Sicherheit — als nummerierte SQL-Dateien in der Reihenfolge, in der sie laufen |
 | `web/` | Online-Shop, Kassensystem und BI-Dashboard |
 | `docs/` | die ausführliche Dokumentation zu Modell, Kennzahlen und Betrieb |
-| `slides/` | das Bauskript der Foliensammlung, die Mermaid-Quellen und die Bildschirmfotos |
 
 ---
 

@@ -1,9 +1,0 @@
-flowchart LR
-    W0["Data Warehouse"] ~~~ W1["eigener Speicher"] --> W2["eigenes Format"] --> W3["eigenes Rechenwerk"]
-    L0["Data Lake"] ~~~ L1["Objektspeicher"] --> L2["Dateien ohne<br/>Tabellensemantik"] --> L3["Rechenwerk<br/>austauschbar"]
-    H0["Lakehouse"] ~~~ H1["Objektspeicher"] --> H2["Tabellenformat<br/>Iceberg · Delta"] --> H3["Katalog"] --> H4["Rechenwerk<br/>austauschbar"]
-    style W0 fill:#FFFFFF,stroke:#FFFFFF,color:#8A8A8A
-    style L0 fill:#FFFFFF,stroke:#FFFFFF,color:#8A8A8A
-    style H0 fill:#FFFFFF,stroke:#FFFFFF,color:#003E6E
-    style H2 fill:#003E6E,color:#FFFFFF,stroke:#003E6E
-    style H3 fill:#003E6E,color:#FFFFFF,stroke:#003E6E
