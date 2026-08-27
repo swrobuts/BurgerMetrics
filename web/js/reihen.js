@@ -258,6 +258,14 @@ export function baueReihen(d) {
   R.satStunde = spanne(R.satHourVal);
   R.satKanal  = spanne(R.satChannelVal);
   R.satPromo  = spanne(R.promoAvgSat);
+  R.satDauer  = spanne(R.satDurVal);
+  // Der Ruecklauf der Aktionen ist (100 - Rabattsatz) / Rabattsatz und damit
+  // eine Umformung des Rabattsatzes — die Schwellen folgen der Reihe selbst.
+  R.roiSpanne = spanne(R.promoROI, 0);
+  // Achse der Kohortenkurve. Sie stand auf 60 bis 102 Prozent, waehrend die
+  // Werte zwischen 97,7 und 100 liegen — vier Fuenftel der Flaeche waren leer,
+  // und der eigentliche Verlauf lag als flache Linie am oberen Rand.
+  R.kohorteSpanne = spanne(R.cohortMatrix.flat().filter(v => v !== null), 1);
 
   // ── Prognoseszenarien ───────────────────────────────────────────────────
   // Wachstumsraten und Investitionsbetraege sind ANNAHMEN, keine Messwerte.

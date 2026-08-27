@@ -2320,13 +2320,22 @@ function createCategoryChart(){
 
 function createVeggieChart(){
   var colors=veggiePercent.map(function(v){return v>=50?'#16a34a':barBlue});
+  var veggieMax=Math.ceil(Math.max.apply(null,veggiePercent)/10)*10;
   new Chart(document.getElementById('veggieChart'), {type:'bar', data:{labels:veggieYears, datasets:[{label:'Veggie %',data:veggiePercent,backgroundColor:colors,borderRadius:3,maxBarThickness:32}]},
     options: mkOpts({legend:{display:false}, datalabels:dlBar(function(v){return v.toFixed(1)+'%'})},
-      {y:yScale({beginAtZero:true,max:60,ticks:Object.assign({},monoTicks,{callback:function(v){return v+'%'}})}), x:xScale({})})
+      {y:yScale({beginAtZero:true,max:veggieMax,ticks:Object.assign({},monoTicks,{callback:function(v){return v+'%'}})}), x:xScale({})})
   });
 }
 
+// maxY darf fehlen: Dann folgt die Obergrenze dem groessten gezeigten Wert,
+// aufgerundet auf fuenf Prozentpunkte. Fest gesetzte Grenzen schneiden ab,
+// sobald sich der Bestand aendert.
 function createLineChart(id,labels,datasets,maxY){
+  if(maxY===undefined){
+    var alle=datasets.reduce(function(a,d){return a.concat(d.data)},[])
+                     .filter(function(v){return v!==null&&isFinite(v)});
+    maxY=Math.ceil(Math.max.apply(null,alle)/5)*5;
+  }
   var mkLine=function(data,color){return {data:data,borderColor:color,borderWidth:2,fill:false,tension:0.35,pointRadius:3,pointBackgroundColor:color,pointBorderColor:'#f4f5f7',pointBorderWidth:1.5}};
   new Chart(document.getElementById(id), {type:'line',
     data:{labels:labels, datasets:datasets.map(function(d){return Object.assign({label:d.label},mkLine(d.data,d.color))})},
@@ -2433,6 +2442,7 @@ function createChannelRevenueChart(){
 }
 
 function createChannelTodChart(){
+  var todMax=Math.ceil(Math.max.apply(null,[].concat(channelTodCounter,channelTodDrive,channelTodApp,channelTodKiosk))/10)*10;
   var makeDs=function(data,color,label){return{label:label,data:data,borderColor:color,backgroundColor:'transparent',borderWidth:2,fill:false,tension:0.35,pointRadius:2,pointHoverRadius:4}};
   new Chart(document.getElementById('channelTodChart'), {type:'line',
     data:{labels:channelTodHours.map(function(h){return h+':00'}),
@@ -2443,7 +2453,7 @@ function createChannelTodChart(){
         makeDs(channelTodKiosk,'#d97706',BM.channelLabels[3])
       ]},
     options: mkOpts({legend:{display:false}, datalabels:{display:false}},
-      {y:yScale({beginAtZero:true,max:60,ticks:Object.assign({},monoTicks,{callback:function(v){return v+'%'}})}),
+      {y:yScale({beginAtZero:true,max:todMax,ticks:Object.assign({},monoTicks,{callback:function(v){return v+'%'}})}),
        x:xScale({ticks:{font:{size:10}}})})
   });
 }
@@ -2779,7 +2789,7 @@ function createSatChannelChart(){
   });
 }
 function createSatDurationChart(){
-  var colors=satDurVal.map(function(v){return v>=3.8?'#16a34a':v>=3.7?'#d97706':'#dc2626'});
+  var colors=satDurVal.map(function(v){return v>=BM.satDauer.mitte?'#16a34a':v>=BM.satDauer.min?'#d97706':'#dc2626'});
   new Chart(document.getElementById('satDurationChart'),{type:'bar',
     data:{labels:satDurBins.map(function(b){return b+' Min.'}),datasets:[{label:'Ø Zufriedenheit',data:satDurVal,backgroundColor:colors,borderRadius:3,maxBarThickness:40}]},
     options:mkOpts({legend:{display:false},datalabels:dlBar(function(v){return v.toFixed(3).replace('.',',')})},
@@ -2789,7 +2799,7 @@ function createSatDurationChart(){
 function createSatHourChart(){
   new Chart(document.getElementById('satHourChart'),{type:'line',
     data:{labels:satHours.map(function(h){return h+':00'}),datasets:[
-      {label:'Ø Zufriedenheit',data:satHourVal,borderColor:barBlue,backgroundColor:'rgba(127,149,182,0.1)',fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:satHourVal.map(function(v){return v<3.79?'#dc2626':barBlue})}
+      {label:'Ø Zufriedenheit',data:satHourVal,borderColor:barBlue,backgroundColor:'rgba(127,149,182,0.1)',fill:true,tension:0.3,pointRadius:3,pointBackgroundColor:satHourVal.map(function(v){return v<BM.satStunde.mitte?'#dc2626':barBlue})}
     ]},
     options:mkOpts({legend:{display:false},datalabels:{display:false}},
       {y:yScale({min:BM.satStunde.min,max:BM.satStunde.max,ticks:monoTicks}),x:xScale({})})
@@ -2813,7 +2823,7 @@ function createPromoROIChart(){
   paired.sort(function(a,b){return b.v-a.v});
   var sortedLabels = paired.map(function(p){return p.l});
   var sortedData = paired.map(function(p){return p.v});
-  var colors=sortedData.map(function(r){return r>=9?'#16a34a':r>=5?'#d97706':'#dc2626'});
+  var colors=sortedData.map(function(r){return r>=BM.roiSpanne.mitte?'#16a34a':r>=BM.roiSpanne.min?'#d97706':'#dc2626'});
   mkHBar('promoROIChart',sortedLabels,sortedData,colors,function(v){return v.toFixed(1)+'x'},{hideAxis:true});
 }
 function createPromoSatChart(){
@@ -2841,7 +2851,7 @@ function createCohortChart(){
   new Chart(document.getElementById('cohortChart'),{type:'line',
     data:{datasets:datasets},
     options:mkOpts({legend:{display:true,position:'bottom',labels:{padding:8,usePointStyle:true,pointStyle:'circle',font:{size:8}}},datalabels:{display:false}},
-      {y:yScale({min:60,max:102,title:{display:true,text:'Aktive Kunden (%)',font:{size:10}},ticks:monoTicks}),
+      {y:yScale({min:BM.kohorteSpanne.min,max:Math.min(100,BM.kohorteSpanne.max),title:{display:true,text:'Aktive Kunden (%)',font:{size:10}},ticks:monoTicks}),
        x:{type:'linear',min:2017,max:2026,ticks:Object.assign({},monoTicks,{stepSize:1,callback:function(v){return v}})}})
   });
 }
@@ -2864,13 +2874,13 @@ createLineChart('paymentChart',paymentYears,[
   {label:'EC-Karte',data:ecData,color:barLight},
   {label:'Kreditkarte',data:ccData,color:'#16a34a'},
   {label:'Mobile',data:mobileData,color:'#dc2626'}
-],55);
+]);
 createLineChart('channelChart',paymentYears,[
   {label:BM.channelLabels[0],data:counterData,color:barBlue},
   {label:BM.channelLabels[1],data:driveData,color:barLight},
   {label:BM.channelLabels[2],data:appData,color:'#16a34a'},
   {label:BM.channelLabels[3],data:kioskData,color:'#dc2626'}
-],70);
+]);
 createAgeChart();
 createLoyaltyChart();
 createLoyaltyBarChart();
