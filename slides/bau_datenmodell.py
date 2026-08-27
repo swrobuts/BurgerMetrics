@@ -82,14 +82,14 @@ B.band(s, Y0 + 242, 66, [
     "dritten Kostenart drehen — und was sie dafür verlangen."])
 
 # ═══════════════════════════════════════════════════ Teil 1
-deck.kapitel("Ein Geschäftsvorfall, drei Systeme")
+deck.kapitel("Vom Geschäftsvorfall zum ersten Schema")
 
 # Systemkontext
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Überblick", "Eine Bestellung durchläuft drei Systeme mit drei Aufgaben", QUELLE)
 deck.einl(s, "Wer eine Bestellung aufgibt, löst eine Kette aus: Der Shop nimmt sie entgegen, die "
         "Warenwirtschaft verbucht sie, die Auswertung zählt sie später mit. Im Datenbestand "
-        "sind das 754.513 Bestellungen aus neun Jahren, acht Filialen und zwei Kanälen — "
+        "sind das 754.513 Bestellungen aus neun Jahren, acht Filialen und vier Bestellkanälen — "
         "erfasst zwischen dem 15. März 2017 und dem 31. März 2026.")
 deck.bild(s, "01_systemkontext", y=Y0 + 10, max_h=175)
 B.band(s, Y0 + 200, 62, [
@@ -97,19 +97,110 @@ B.band(s, Y0 + 200, 62, [
     "operativen System, sondern aus einem periodisch erzeugten Abzug. Sonst würde eine "
     "Jahresauswertung über 3,7 Millionen Zeilen den laufenden Kassenbetrieb ausbremsen."])
 
-# Shop-Modell
+# Modellierungsweg 1: vom Satz zum Modell
 s = deck.neu("Lisa_Slide")
-B.kopf(s, "System 1 · Website", "Der Shop speichert nur, was bis zum Kaufabschluss gebraucht wird", QUELLE)
-deck.einl(s, "Ein Warenkorb ist kein Beleg. Er lebt in einer Sitzung, ändert sich mit jedem Klick "
-        "und verschwindet, wenn nichts daraus wird. Entsprechend schmal ist das Modell: drei "
-        "Tabellen für Sitzung, Positionen und Artikelstamm. Ein Kunde ist optional — "
-        "bestellen kann man auch ohne Anmeldung.")
+B.kopf(s, "Modellierung · Schritt 1", "Vier Sätze Fachlichkeit, vier Entscheidungen im Modell", QUELLE)
+deck.einl(s, "Ein Datenmodell beginnt nicht im Werkzeug, sondern in der Fachsprache. Am Beispiel "
+        "des Online-Shops: Vier Sätze, wie sie in jedem Anforderungsgespräch fallen, tragen "
+        "bereits alle Entscheidungen des Modells. Die Substantive werden zu Entitäten, die "
+        "Verben zu Beziehungen — und die Nebensätze zu Kardinalitäten.")
+B.zuordnung(s, Y0, [
+    ("Ein Besucher öffnet die Speisekarte.",
+     "Ein Substantiv mit eigenen Merkmalen wird eine Entität: SITZUNG, mit Kennung, "
+     "Beginn, Gerät und Herkunft."),
+    ("Er legt Artikel in den Warenkorb.",
+     "Ein Verb zwischen zwei Entitäten wird eine Beziehung: Sitzung–Artikel. Die Menge "
+     "gehört zur Beziehung, nicht zum Artikel — derselbe Artikel liegt in vielen Körben."),
+    ("Angemeldet ist er nur manchmal.",
+     "Eine Kann-Formulierung wird eine optionale Beziehung: der Kreis am Kundenende "
+     "der Verbindungslinie."),
+    ("Wird nichts bestellt, verfällt alles.",
+     "Eine Aussage über Lebensdauer wird eine Modellgrenze: keine Historie, keine "
+     "Archivpflicht — der Warenkorb ist kein Beleg."),
+], rh=52.0, bw=286.0)
+
+# Modellierungsweg 2: das ER-Diagramm (bisherige Shop-Folie, neu gerahmt)
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "Modellierung · Schritt 2", "Der Shop speichert nur, was bis zum Kaufabschluss gebraucht wird", QUELLE)
+deck.einl(s, "Aus den vier Sätzen entsteht dieses Entity-Relationship-Diagramm: drei Kernentitäten, "
+        "eine optionale Beziehung zum Kunden. Es ist bewusst schmal — jede weitere Tabelle "
+        "müsste eine fachliche Frage beantworten, die der Shop vor dem Kaufabschluss "
+        "tatsächlich stellt.")
 bw, _ = deck.bild(s, "02_shop_modell", max_w=470)
 B.kachel(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 190, METHOD, "Worauf dieses Modell optimiert ist",
          ["Sehr viele kleine Schreibvorgänge: jeder Klick ändert den Warenkorb.",
           "Kurze Lebensdauer — abgebrochene Sitzungen werden verworfen.",
           "Keine Historie, kein Bezug zu früheren Käufen.",
           "Mit dem Kaufabschluss übergibt der Shop an die Warenwirtschaft und ist fertig."])
+
+# Modellierungsweg 3: Ueberfuehrungsregeln
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "Modellierung · Schritt 3", "Vier Regeln überführen jedes ER-Diagramm in Tabellen", QUELLE)
+deck.einl(s, "Der Weg vom Diagramm zum relationalen Schema folgt festen Abbildungsregeln — er ist "
+        "Handwerk, keine Kunst. Dieselben vier Regeln, die hier den Shop übersetzen, tragen "
+        "auch die 26 Tabellen der Warenwirtschaft; sie unterscheiden sich nur in der Zahl "
+        "der Anwendungen.")
+B.zuordnung(s, Y0, [
+    ("Entitätstyp",
+     "wird eine Tabelle, sein Schlüsselattribut der Primärschlüssel: aus SITZUNG wird "
+     "die Tabelle sitzung mit session_id als Schlüssel."),
+    ("1:n-Beziehung",
+     "wird ein Fremdschlüssel auf der n-Seite: jede bestellposition der Warenwirtschaft "
+     "trägt ihre bestellung_id."),
+    ("n:m-Beziehung",
+     "wird eine eigene Tabelle mit beiden Schlüsseln: Sitzung–Artikel wird "
+     "warenkorbposition, das Beziehungsattribut menge zieht mit ein. Im "
+     "Warenwirtschaftsmodell entsteht artikel_allergen nach derselben Regel."),
+    ("Optionale Beziehung",
+     "wird ein Fremdschlüssel, der leer bleiben darf: kunde_id in sitzung ist NULL, "
+     "solange sich niemand anmeldet."),
+], rh=52.0)
+
+# Modellierungsweg 4: DDL
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "Modellierung · Schritt 4", "Am Ende stehen zwei CREATE TABLE — jede Regel ist wiederzufinden",
+       "Eigene Darstellung · Syntax geprüft in DuckDB und PostgreSQL")
+deck.einl(s, "Das Ergebnis der vier Regeln ist ausführbarer Code. In den zwei Anweisungen steckt "
+        "der ganze Weg: die Entität als Tabelle, der zusammengesetzte Schlüssel aus der "
+        "n:m-Beziehung, das Beziehungsattribut menge und der Fremdschlüssel, der leer "
+        "bleiben darf. Was im Diagramm der Krähenfuß war, heißt hier REFERENCES.")
+D.Deck.code(s, CL, Y0, 462, [
+    "CREATE TABLE sitzung (",
+    "  session_id   VARCHAR PRIMARY KEY,",
+    "  beginn       TIMESTAMP NOT NULL,",
+    "  device_type  VARCHAR,",
+    "  referrer     VARCHAR,",
+    "  kunde_id     INTEGER REFERENCES kunde",
+    "               -- NULL = nicht angemeldet",
+    ");",
+    "",
+    "CREATE TABLE warenkorbposition (",
+    "  session_id  VARCHAR  REFERENCES sitzung,",
+    "  artikel_id  INTEGER  REFERENCES artikel,",
+    "  menge       INTEGER  NOT NULL CHECK (menge > 0),",
+    "  PRIMARY KEY (session_id, artikel_id)",
+    ");",
+])
+B.kachel(s, CL + 462 + 24, Y0, CR - (CL + 462 + 24), 210, GOOD, "Woran die Regeln zu erkennen sind",
+         ["Regel 1: sitzung ist die Tabelle zur Entität, session_id ihr Primärschlüssel.",
+          "Regel 3: warenkorbposition trägt beide Schlüssel — zusammengesetzt als "
+          "Primärschlüssel — und das Beziehungsattribut menge.",
+          "Regel 4: kunde_id darf NULL sein — der Kreis aus dem Diagramm.",
+          "NOT NULL und CHECK sichern, was fachlich gilt: keine leere, keine negative Menge."])
+
+# Uebergabe an die Warenwirtschaft
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "Übergabe", "Der Kaufabschluss ist eine Übergabe: aus flüchtig wird dauerhaft", QUELLE)
+deck.einl(s, "Mit dem Kaufabschluss wechseln die Daten das System und den Charakter. Der Shop "
+        "reicht seinen Warenkorb an die Warenwirtschaft weiter, die daraus einen Beleg "
+        "macht — mit festen Bezügen auf Filiale, Zahlungsart und Aktion. Ein Detail trägt "
+        "weit: Der Warenkorb verweist auf Preise, der Beleg kopiert sie.")
+deck.bild(s, "19_checkout", y=Y0 + 6, max_h=200)
+B.band(s, Y0 + 226, 92, [
+    "Warum kopieren statt verweisen? Ein Beleg hält den Preis zum Kaufzeitpunkt fest, auch "
+    "wenn der Listenpreis morgen steigt. Deshalb trägt bestellposition ein eigenes Feld "
+    "einzelpreis — und deshalb lässt sich neun Jahre später noch korrekt auswerten, was 2017 "
+    "eine Cola kostete. Genau diese kopierten Preise stehen heute in den CSV-Dateien."])
 
 # ═══════════════════════════════════════════════════ Teil 2
 deck.kapitel("Das operative Modell: Konsistenz zuerst")
@@ -236,8 +327,9 @@ deck.bild(s, "07_galaxy", y=Y0, max_h=HOEHE)
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Zusammenschau", "Drei Modelle, weil drei verschiedene Fragen gestellt werden", QUELLE)
 deck.einl(s, "Es gibt nicht ein richtiges Datenmodell für BurgerMetrics, sondern drei — je eines "
-        "für die Aufgabe, die das System zu erfüllen hat. Wer das Auswertungsmodell in die "
-        "Kasse einbaut, bekommt Inkonsistenzen; wer die Kasse auswertet, bremst den Betrieb.")
+        "für die Aufgabe, die das System zu erfüllen hat. Eingebaut in die Kasse, erzeugte das "
+        "Auswertungsmodell Inkonsistenzen; ausgewertet im Kassensystem, bremste jede Jahresabfrage "
+        "den Betrieb. Die Trennung löst beide Probleme zugleich.")
 for i, (t, b, c) in enumerate([
     ("Shop · Website", ["Frage: Was liegt gerade im Warenkorb?",
                         "viele kleine Schreibvorgänge",
@@ -257,9 +349,10 @@ for i, (t, b, c) in enumerate([
 # Kette
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Umsetzung", "Vom Quellsystem zum Bericht in drei Schichten", Q_MESS)
-deck.einl(s, "Der Umbau geschieht nicht in einem Sprung, sondern in Schichten. Die Rohdaten bleiben "
-        "unangetastet, damit jederzeit nachvollziehbar ist, was das Quellsystem geliefert hat. "
-        "Erst die mittlere Schicht typisiert und benennt, erst die dritte modelliert um.")
+deck.einl(s, "Der Umbau geschieht nicht in einem Sprung, sondern in Schichten. Für BurgerMetrics sind "
+        "die CSV-Dateien die raw-Schicht: unangetastet, damit jederzeit nachvollziehbar bleibt, "
+        "was das Quellsystem geliefert hat. Erst die mittlere Schicht typisiert und benennt, "
+        "erst die dritte modelliert um.")
 deck.bild(s, "08_kette", y=Y0 + 10, max_h=110)
 w2 = (CW - 18) / 2
 B.kachel(s, CL, Y0 + 140, w2, 150, BLUE, "Warum drei Schichten und nicht eine",

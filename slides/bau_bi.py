@@ -49,7 +49,7 @@ deck.deckblatt("BurgerMetrics", "Von Kennzahlen zur Entscheidung")
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Leitfrage", "Eine Kennzahl zählt erst, wenn sie eine Entscheidung ändert", QUELLE)
 deck.einl(s, "Business Intelligence endet nicht bei der Zahl. Zwischen der Frage eines "
-             "Betriebsleiters und seiner Entscheidung liegen vier Stationen, und an jeder "
+             "Betriebsleiters und seiner Entscheidung liegen drei Stationen, und an jeder "
              "kann die Antwort kippen: bei der Definition der Kennzahl, beim Modell, aus "
              "dem sie gerechnet wird, und beim Werkzeug, das sie zeigt.")
 B.stufenband(s, Y0, 38, ["Frage", "Kennzahl", "Modell", "Werkzeug", "Entscheidung"])
@@ -106,8 +106,8 @@ s = deck.neu("Lisa_Slide")
 B.kopf(s, "Einordnung", "Vier Fragen, und nur die letzte ändert etwas", QUELLE)
 deck.einl(s, "Auswertungen unterscheiden sich nicht nach Werkzeug, sondern nach der Frage, "
              "die sie beantworten. Die vier Stufen bauen aufeinander auf: Ohne verlässliche "
-             "Beschreibung keine Diagnose, ohne Diagnose keine belastbare Prognose. Der "
-             "Nutzen entsteht erst auf der vierten Stufe.")
+             "Beschreibung keine Diagnose, ohne Diagnose keine belastbare Prognose. Handlungsleitend "
+             "wird eine Auswertung erst auf der vierten Stufe.")
 B.zuordnung(s, Y0, [
     ("deskriptiv",
      "Was ist passiert? Umsatz 2025: 2.994.771 EUR aus 136.557 Bestellungen. "
@@ -157,9 +157,9 @@ B.kachel(s, CL + bw5 + 20, Y0, CR - (CL + bw5 + 20), 196, GOOD, "Vom Klick zur K
 s = deck.neu("Tool_Slide")
 B.kopf(s, "System Kasse", "Jeder Klick an der Kasse schreibt eine Zeile", Q_FOTO)
 deck.einl(s, "Die Kasse des Projekts hat einen zuschaltbaren Modus, der zu jedem Bedienschritt "
-             "zeigt, welcher Datensatz dabei entsteht. Wer ein Produkt antippt, sieht die Zeile "
-             "in fact_order_items; wer kassiert, sieht den Kopfsatz in fact_orders. Genau diese "
-             "Zeilen wertet das Dashboard später aus.", "Tool_Slide")
+             "zeigt, welcher Datensatz dabei entsteht. Ein angetipptes Produkt blendet die spätere "
+             "Zielzeile in fact_order_items ein, das Kassieren den Kopfsatz für fact_orders — "
+             "geschrieben wird operativ, gezeigt wird, was in der Auswertung daraus wird.", "Tool_Slide")
 bw, _ = deck.foto(s, "03b_pos_daten", max_h=HOEHE)
 B.sprechblase(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 200, D.paras([
     [("Vom Klick zur Kennzahl", True, METHOD)],
@@ -184,7 +184,8 @@ B.kopf(s, "Abgrenzung", "Transaktionssysteme antworten je Vorgang, Analysesystem
 deck.einl(s, "Shop und Kasse sind Transaktionssysteme: Sie verarbeiten einen Vorgang nach dem "
              "anderen und müssen dabei jederzeit widerspruchsfrei sein. Die Auswertung stellt "
              "die umgekehrte Anforderung — eine Frage über Millionen vergangener Vorgänge. "
-             "Beide Anforderungen in einem System zu erfüllen, hieße, beide schlecht zu erfüllen.")
+             "Ein System, das beides zugleich versucht, macht bei einem von beiden Abstriche — "
+             "die Trennung erspart diesen Kompromiss.")
 B.gegenueber(s, Y0, 216,
              (BLUE, "Operativ · OLTP",
               ["Arbeitseinheit: ein Vorgang — eine Bestellung wird angelegt, geändert, bezahlt.",
@@ -283,8 +284,8 @@ B.band(s, Y0 + 206, 88, [
 
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Prüfhandwerk", "Nachgerechnet ist etwas anderes als nachgesehen", Q_MESS)
-deck.einl(s, "Ein Dashboard ist eine Behauptung über Daten. Wer es baut, muss sie unabhängig "
-             "prüfen können — mit einem zweiten Rechenweg, nicht mit einem zweiten Blick auf "
+deck.einl(s, "Ein Dashboard ist eine Behauptung über Daten. Prüfbar wird sie durch einen zweiten, "
+             "unabhängigen Rechenweg — nicht durch einen zweiten Blick auf "
              "dieselbe Abfrage. Für dieses Projekt sind alle Kennzahlen mit pandas und DuckDB "
              "getrennt nachgerechnet worden.")
 B.gegenueber(s, Y0, 190,
@@ -313,7 +314,7 @@ deck.bild(s, "07_galaxy", y=Y0, max_h=HOEHE)
 
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Rechenweg", "Der Weg einer einzigen Zahl, in vier Schritten", Q_MESS)
-deck.einl(s, "Hinter der größten Kachel des Dashboards steht keine Magie, sondern eine "
+deck.einl(s, "Hinter der größten Kachel des Dashboards steht eine einzige "
              "Abfrage mit vier Schritten. Wer sie kennt, kann jede Kachel selbst nachbauen — "
              "und erkennt, an welcher Stelle eine abweichende Entscheidung eine andere Zahl "
              "erzeugen würde.")

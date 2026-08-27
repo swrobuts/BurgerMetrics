@@ -1,13 +1,14 @@
 %%{init: {"er": {"nodeSpacing": 40, "rankSpacing": 56, "minEntityHeight": 42, "minEntityWidth": 90, "entityPadding": 12, "diagramPadding": 6}}}%%
 erDiagram
-    SESSION   ||--o{ WARENKORBPOS : "hält"
-    ARTIKEL   ||--o{ WARENKORBPOS : "liegt drin"
-    SESSION   }o--o| KUNDE        : "optional angemeldet"
-    SESSION {
+    SITZUNG   ||--o{ WARENKORBPOSITION : "hält"
+    ARTIKEL   ||--o{ WARENKORBPOSITION : "liegt drin"
+    SITZUNG   }o--o| KUNDE : "optional angemeldet"
+    SITZUNG {
         string session_id PK
-        timestamp letzte_aktivitaet
+        timestamp beginn
+        string device_type
     }
-    WARENKORBPOS {
+    WARENKORBPOSITION {
         int    artikel_id FK
         int    menge
     }

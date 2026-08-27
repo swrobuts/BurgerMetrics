@@ -1,9 +1,11 @@
 # Aufruf: python3 sprache_check.py deck.pptx --whitelist BurgerMetrics_Fachbegriffe.txt
 # Fachbegriffe des BurgerMetrics-Decks — Whitelist fuer sprache_check.py
+Abbildungsregeln
 Abschöpfung
 Abwanderungsgefährdet
 Abwanderungsgefährdete
 Anbieterwechsel
+Archivpflicht
 Armbrust
 AtScale
 Ausweichkäufe
@@ -14,6 +16,7 @@ Basiseffekt
 Beantwortbarkeit
 Beraterberichte
 Beraterberichten
+Bestellkanälen
 Bestellknopf
 Bestellknöpfe
 Betriebsaufwand
@@ -21,6 +24,7 @@ Betriebsbegriffe
 Betriebsdauer
 Betriebsmonate
 Beyond
+Beziehungsattribut
 Big
 BigQuery
 Bindungsstelle
@@ -30,6 +34,8 @@ BurgerMetrics
 Bündelaktion
 CASE
 CASE-Aggregation
+CHECK
+CREATE
 CSV
 Chocolate
 Coffee
@@ -63,10 +69,12 @@ ERP-Modell
 ETL
 Ebenenwechsel
 Engagement-Kennzahlen
+Entitätstyp
 Entscheidungsrelevant
 Ereignisstrom
 Europastern
 Evidence
+Fachlichkeit
 Fact
 Fast-Food-Kette
 Filialfrage
@@ -88,22 +96,29 @@ Granularität
 Granularitäten
 Grombuehl
 Grombühl
+Handlungsleitend
 Hauptbahnhof
 Heuchelhof
 Historisierung
 Holistics
+INTEGER
 Iceberg
 JOIN
 Joins
+KEY
 Kanalanteil
+Kann-Formulierung
+Kardinalitäten
 Kassenbeleg
 Kategoriename
 Kennzahlendefinitionen
+Kernentitäten
 Kiosk
 Klickraten
 Klickstrecke
 Konfidenz
 Konversions
+Krähenfuß
 Kundenkartenscan
 LIKE
 Lakehouse
@@ -113,6 +128,7 @@ Lengfeld
 Lernumgebung
 Lift
 Lightdash
+Listenpreis
 LookML
 Looker
 Mainfrankenpark
@@ -126,6 +142,7 @@ Metadatendatei
 Milchshake
 Milkshake
 Mio
+Modellgrenze
 MotherDuck
 Nachkommastellen
 Nachrechenbarkeit
@@ -138,6 +155,7 @@ OLTP
 Objektspeicher
 One
 Orphan
+PRIMARY
 Pages
 Pages-Deploy
 Parquet
@@ -149,6 +167,7 @@ PostgreSQL
 Preiselastizität
 Prueflauf
 Qlik
+REFERENCES
 RFM-Segmentierung
 Reaktivierungsversuch
 Rechenwerk
@@ -175,6 +194,7 @@ Supabase
 Superset
 Support
 Swamp
+TIMESTAMP
 Tabellensemantik
 Table
 Technologiestapel
@@ -186,6 +206,7 @@ Umsatzrisiko
 UniForm
 Unity
 Unsauberkeit
+VARCHAR
 VIEW
 Vault
 Verkaufsbereich
@@ -204,17 +225,21 @@ Zaharia
 Zahlart
 Zellerau
 Zieltabellen
+Zielzeile
 Zufriedenheitswert
 Zusicherungen
 Zuständigkeitsgrenze
 abwanderungsgefährdet
 adressierbare
+allergen
 amount
 artikel
 auseinandergehen
 ausgebremst
 bestelldauer
 bestellkanal
+bestellposition
+bestellung
 branch
 burgermetrics
 cta
@@ -230,13 +255,16 @@ diagramme
 dim
 discount
 duckdb
+einzelpreis
 employee
 ereignistyp
 fact
 generate
 gross
+handlungsleitend
 hour
 items
+kunde
 line
 load
 mart
@@ -266,6 +294,8 @@ rollierende
 schema-on-read
 schema-on-write
 screenshots
+session
+sitzung
 slides
 slot
 stg
@@ -279,6 +309,7 @@ versionierte
 versionierten
 verweildauer
 vorführbar
+warenkorbposition
 wawi
 weather
 zeilengleich

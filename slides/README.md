@@ -4,7 +4,7 @@ Drei Bauskripte, drei Decks — und ein gemeinsames Gerüst:
 
 | Skript | Deck | Zweck |
 |---|---|---|
-| `bau_datenmodell.py` | **Datenmodell und Aufbau** (26 Folien) | Wie Shop, Warenwirtschaft und Auswertung zusammenhängen, warum jede ein eigenes Datenmodell braucht, und wie sich der gewählte Weg zu Warehouse, Lake, Lakehouse und Mesh verhält. |
+| `bau_datenmodell.py` | **Datenmodell und Aufbau** (30 Folien) | Der Modellierungsweg vom Anforderungssatz über das ER-Diagramm und die Abbildungsregeln bis zum CREATE TABLE — am Shop vorgeführt —, dann das operative und das analytische Modell, die Zusammenführung als SQL und die Einordnung in Warehouse, Lake, Lakehouse und Mesh. |
 | `bau_bi.py` | **Von Kennzahlen zur Entscheidung** (39 Folien) | Der BI-Teil: die Fallstudie und ihre drei Systeme, operative gegen analytische Daten, Kennzahlen definieren und prüfen, der Weg zum Dashboard, Entscheidungen — und eine technologieoffene Bauanleitung für den Nachbau. |
 | `bau_deck.py` | **Von der Kasse bis zum Bericht** (20 Folien) | Die ältere Gesamtschau: vom operativen Modell über das Auswertungsmodell bis zur geprüften Kennzahl, mit Auswertungsfallen und Prüfhandwerk. |
 
@@ -22,13 +22,13 @@ Alle drei fassen zusammen, was in [`../docs/`](../docs/) ausführlich steht. Üb
 
 | | Datenmodell-Deck | BI-Deck |
 |---|---|---|
-| 1 | Ein Geschäftsvorfall, drei Systeme | Die Fallstudie: drei Systeme, eine Datenspur |
+| 1 | Vom Geschäftsvorfall zum ersten Schema | Die Fallstudie: drei Systeme, eine Datenspur |
 | 2 | Das operative Modell: Konsistenz zuerst | Kennzahlen definieren, rechnen und prüfen |
 | 3 | Das Auswertungsmodell: Lesetempo zuerst | Vom Auswertungsmodell zum Dashboard |
 | 4 | Ein Weg von vielen | Von der Zahl zur Entscheidung |
 | 5 | — | Architektur, Werkzeuge, Nachbau |
 
-Die operativen Datenmodelle beider Erfassungssysteme stehen jetzt attributiert auf eigenen Folien (`17_webshop_er`, `18_pos_er`); die Zusammenführung operativ → analytisch ist im Datenmodell-Deck als SQL-Folie ausgeführt und im Repo vorführbar (`../dataset/wawi_mini.sql` + `../dataset/wawi_zu_analytisch.sql` — acht von acht Zieltabellen zeilengleich mit `burgermetrics_mini.sql`). Kapitel 1 des BI-Decks stellt die Fallstudie vor und zeigt jedes System doppelt: die Kundensicht und die zuschaltbare Datensicht (Website an/aus, Kasse an/aus). Die Folie „Transaktionssysteme antworten je Vorgang, Analysesysteme je Frage" trennt die operative von der entscheidungsrelevanten Welt; Kapitel 5 endet mit einer Bauanleitung in vier Schritten, die den Technologiestapel offen lässt (DuckDB oder SQLite oder PostgreSQL; statische Seite oder Metabase oder Evidence oder Power BI).
+Kapitel 1 des Datenmodell-Decks führt den vollständigen Modellierungsweg am Shop vor: vier Anforderungssätze → ER-Diagramm → die vier Abbildungsregeln (Entitätstyp → Tabelle, 1:n → Fremdschlüssel, n:m → eigene Tabelle, optional → NULL) → zwei CREATE TABLE, in denen jede Regel wiederzufinden ist → die Übergabe an die Warenwirtschaft beim Kaufabschluss. Die operativen Datenmodelle beider Erfassungssysteme stehen attributiert auf eigenen Folien (`17_webshop_er`, `18_pos_er`); die Zusammenführung operativ → analytisch ist im Datenmodell-Deck als SQL-Folie ausgeführt und im Repo vorführbar (`../dataset/wawi_mini.sql` + `../dataset/wawi_zu_analytisch.sql` — acht von acht Zieltabellen zeilengleich mit `burgermetrics_mini.sql`). Kapitel 1 des BI-Decks stellt die Fallstudie vor und zeigt jedes System doppelt: die Kundensicht und die zuschaltbare Datensicht (Website an/aus, Kasse an/aus). Die Folie „Transaktionssysteme antworten je Vorgang, Analysesysteme je Frage" trennt die operative von der entscheidungsrelevanten Welt; Kapitel 5 endet mit einer Bauanleitung in vier Schritten, die den Technologiestapel offen lässt (DuckDB oder SQLite oder PostgreSQL; statische Seite oder Metabase oder Evidence oder Power BI).
 
 ---
 
@@ -51,7 +51,7 @@ Alle Diagramme sind **Mermaid-Quelltext** in [`diagramme/`](diagramme/) — vers
 | Datei | Zeigt | Deck |
 |---|---|---|
 | `01_systemkontext.mmd` | Kunde → Shop/Kasse → Warenwirtschaft ⇢ Auswertung → Bericht | Datenmodell |
-| `02_shop_modell.mmd` | Das schmale Sitzungsmodell des Shops (ER) | Datenmodell |
+| `02_shop_modell.mmd` | Das schmale Sitzungsmodell des Shops (ER), namensgleich mit der DDL-Folie | Datenmodell |
 | `03_wawi_verkaufspfad.mmd` | Der Verkaufspfad der Warenwirtschaft (ER) | Datenmodell |
 | `04_wawi_bereiche.mmd` | 26 Tabellen in sieben Bereichen — welche in die Auswertung fließen | Datenmodell |
 | `05_denormalisierung.mmd` | Drei normalisierte Artikel-Tabellen → eine breite Dimensionstabelle | Datenmodell |
@@ -68,6 +68,7 @@ Alle Diagramme sind **Mermaid-Quelltext** in [`diagramme/`](diagramme/) — vers
 | `16_datenspur.mmd` | Wo Daten entstehen, verbucht und befragt werden | BI |
 | `17_webshop_er.mmd` | Das Webshop-Modell mit Attributen: Sitzung, Ereignis, Warenkorb | BI |
 | `18_pos_er.mmd` | Der Kassenbeleg mit Attributen: kundenbestellung und bestellposition | BI |
+| `19_checkout.mmd` | Der Kaufabschluss als Übergabe: flüchtiger Warenkorb → dauerhafter Beleg | Datenmodell |
 
 ### Rendern
 

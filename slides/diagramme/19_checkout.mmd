@@ -1,0 +1,8 @@
+flowchart LR
+    W["sitzung + warenkorbposition<br/>Webshop · flüchtig, je Klick änderbar"]
+    B["kundenbestellung + bestellposition<br/>Warenwirtschaft · dauerhaft, unveränderlich"]
+    V["verworfen<br/>nach Ablauf der Sitzung"]
+    W == "Kaufabschluss:<br/>Preise werden kopiert, Bezüge gesetzt" ==> B
+    W -. "kein Kauf" .-> V
+    style B fill:#003E6E,color:#FFFFFF,stroke:#003E6E
+    style V fill:#F7F5EF,stroke:#C9C3B4,color:#8A8A8A
