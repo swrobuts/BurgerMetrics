@@ -128,6 +128,31 @@ Verhältnis zum kumulierten Umsatz aller Betriebsjahre und wies für die ältest
 Filiale 2,4 Prozent aus. Auf das Jahr bezogen sind es 15,2 Prozent, und die
 teuerste Lage ist nicht die, die die Tabelle nannte (`0010`).
 
+### Nachgebaut und gegengerechnet
+
+Die Kette ist nicht nur beschrieben, sondern geprüft. Aus dem Repository-Stand
+heraus — nicht aus der Arbeitskopie — wurde die gesamte Datenbank in ein
+zweites Schema neu aufgebaut: Tabellen anlegen, 3,7 Millionen Zeilen aus den
+CSV-Dateien laden, `obt_orders` erzeugen, Rechte setzen, alle elf
+SQL-Dateien fahren.
+
+Dann wurden beide Schemata Objekt für Objekt verglichen — nicht die
+Zeilenzahl, sondern eine Prüfsumme über den sortierten Inhalt jeder Tabelle
+und jeder Sicht:
+
+**49 von 49 Objekten wertgleich.** Kein Unterschied in einer einzigen Zeile.
+
+Das schließt die RFM-Segmentierung ein, die vor `0009` bei jeder Abfrage
+andere Größen lieferte. Sie ist jetzt über einen vollständigen Neuaufbau in
+einem anderen Schema hinweg reproduzierbar — das ist der eigentliche Beleg
+dafür, dass der Zweitschlüssel wirkt.
+
+Dabei fiel ein Fehler in `0004_sicherheit.sql` auf: Die Datei enthielt ein
+`ALTER ROLE authenticator SET pgrst.db_schemas`. Das verlangt Rechte, die
+niemand hat, der die Kette nicht als Superuser fährt — und es wirkt ohnehin
+nicht, weil PostgREST seine Schemaliste aus der Container-Umgebung liest. Der
+Schritt steht jetzt als Betriebsanweisung im Kommentar, nicht als SQL.
+
 ### Warum die Semantikschicht materialisiert ist
 
 Auf dem Entwicklungsrechner lief alles: 33 Sichten parallel, rund drei

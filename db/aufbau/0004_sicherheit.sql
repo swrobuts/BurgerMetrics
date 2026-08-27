@@ -22,22 +22,24 @@ BEGIN
   END LOOP;
 END $$;
 
--- PostgREST: Schema in die exponierte Liste aufnehmen (in-database config)
--- und die Konfiguration neu laden. Der bestehende Wert bleibt erhalten.
-DO $$
-DECLARE aktuelle text;
-BEGIN
-  SELECT split_part(unnest, '=', 2) INTO aktuelle
-  FROM unnest((SELECT setconfig FROM pg_db_role_setting s
-               JOIN pg_roles r ON r.oid = s.setrole
-               WHERE r.rolname = 'authenticator' AND s.setdatabase = 0))
-  WHERE unnest LIKE 'pgrst.db_schemas=%';
-  IF aktuelle IS NULL THEN
-    RAISE EXCEPTION 'pgrst.db_schemas nicht gefunden — Konfiguration pruefen';
-  END IF;
-  IF position('burgermetrics' IN aktuelle) = 0 THEN
-    EXECUTE format('ALTER ROLE authenticator SET pgrst.db_schemas = %L',
-                   aktuelle || ', burgermetrics');
-  END IF;
-END $$;
-NOTIFY pgrst, 'reload config';
+-- PostgREST: Das Schema muss in der exponierten Liste stehen. Hier stand
+-- frueher ein ALTER ROLE authenticator SET pgrst.db_schemas — das ist aus
+-- zwei Gruenden falsch und deshalb entfernt:
+--
+--   1. Es wirkt nicht. PostgREST liest die Schemaliste aus der Umgebung des
+--      Containers (PGRST_DB_SCHEMAS); die Einstellung an der Rolle wird davon
+--      ueberstimmt. Auch NOTIFY pgrst, 'reload config' bleibt folgenlos,
+--      solange PGRST_DB_CHANNEL_ENABLED=false gesetzt ist.
+--   2. Es scheitert ohnehin, wenn man die Kette nicht als Superuser faehrt —
+--      ALTER ROLE verlangt CREATEROLE und ADMIN OPTION auf authenticator.
+--
+-- Der Schritt gehoert damit nicht in die Datenbank, sondern in den Betrieb.
+-- Bei einem selbst gehosteten Supabase:
+--
+--   1. In /root/supabase/docker/.env die Zeile PGRST_DB_SCHEMAS um den
+--      Schemanamen ergaenzen (vorher sichern).
+--   2. docker compose restart rest
+--
+-- Ohne Docker startet man PostgREST mit db-schemas in seiner Konfiguration.
+-- Wer nur mit psql oder einem BI-Werkzeug direkt auf die Datenbank geht,
+-- braucht diesen Schritt gar nicht — die Grants oben genuegen.
