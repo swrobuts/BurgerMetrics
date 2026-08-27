@@ -20,6 +20,7 @@ bleiben die Quelle der Wahrheit; die Datenbank ist ihr Abbild.
 | `aufbau/0009_rfm_deterministisch.sql` | Zweitschlüssel für die Quintile, damit RFM reproduzierbar wird |
 | `aufbau/0010_filiale_tabellenspalten.sql` | Drive-Through, Sitzplätze, Mietquote |
 | `aufbau/0011_promotion_uplift.sql` | Warenkorb vor Rabatt statt des tautologischen ROI |
+| `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
@@ -126,6 +127,32 @@ Welcome (+8,0 Prozent Warenkorb, nach Rabatt −2,8 Prozent).
 Verhältnis zum kumulierten Umsatz aller Betriebsjahre und wies für die älteste
 Filiale 2,4 Prozent aus. Auf das Jahr bezogen sind es 15,2 Prozent, und die
 teuerste Lage ist nicht die, die die Tabelle nannte (`0010`).
+
+### Warum die Semantikschicht materialisiert ist
+
+Auf dem Entwicklungsrechner lief alles: 33 Sichten parallel, rund drei
+Sekunden, kein Fehler. Von GitHub Pages aus fiel dieselbe Seite mit einer
+Zeitgrenze aus (`57014 — canceling statement due to statement timeout`).
+
+Die Ursache ist keine langsame Abfrage. Einzeln braucht keine Sicht mehr als
+eine Sekunde; die teuerste, `v_produkt_jahr`, 0,9. Aber die Rolle `anon` hat
+ein `statement_timeout` von drei Sekunden, und wenn 33 Aggregationen über
+2,95 Millionen Positionen gleichzeitig starten, warten sie aufeinander: Jede
+einzelne braucht dann rund sechs Sekunden, und zwei fallen aus.
+
+`materialisieren.py` legt jede Sicht als Tabelle ab. Die Definition bleibt, wo
+sie war — in `aufbau/*.sql`; das Skript liest sie mit `pg_get_viewdef` aus,
+räumt in umgekehrter Abhängigkeitsreihenfolge ab und legt in richtiger neu an.
+Die Reihenfolge kommt aus `pg_depend`, nicht aus einer Liste im Kopf.
+
+Danach lädt die Seite in **281 Millisekunden** statt in drei Sekunden. Der
+Preis ist der übliche: Die Werte sind so alt wie der letzte Lauf. Für diesen
+Bestand ist das folgenlos, im Betrieb liefe das Skript nach dem nächtlichen
+Abzug — `python3 db/materialisieren.py --neu`.
+
+**Lehre daraus:** Ein Test auf dem Entwicklungsrechner prüft die Anwendung,
+nicht den Betrieb. Der Fehler trat erst auf, als die Seite dort lief, wo sie
+hingehört.
 
 ### Auch die Fließtexte rechnen
 
