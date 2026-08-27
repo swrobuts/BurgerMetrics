@@ -16,6 +16,7 @@ bleiben die Quelle der Wahrheit; die Datenbank ist ihr Abbild.
 | `aufbau/0005_semantik.sql` | die Sichten der Semantikschicht |
 | `aufbau/0006_semantik_ergaenzung.sql` | RFM, Kanal je Stunde, Niederschlag, Aktions-ROI |
 | `aufbau/0007_kennzahlen_einzeln.sql` | Produkte je Jahr und die Einzelwerte der Kacheln |
+| `aufbau/0008_summary_luecken.sql` | Umsatz je Altersgruppe, Anteil Heimatbezirk |
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
@@ -86,13 +87,13 @@ geblieben wären:
 
 Seit der Umstellung steht im Quelltext von `web/dashboard.html` **keine
 Nutzdatenzahl mehr**: keine der 88 Datenreihen, kein Kachelwert, kein Text der
-Management Summary. Die Seite lädt beim Aufruf 33 Sichten, baut daraus 89
-Reihen und füllt 72 Kacheln und 24 Summary-Karten — in rund drei Sekunden.
+Management Summary. Die Seite lädt beim Aufruf 35 Sichten, baut daraus 89
+Reihen und füllt 72 Kacheln und 30 Summary-Karten — in rund drei Sekunden.
 
 | Datei | Aufgabe |
 |---|---|
 | `web/js/konfiguration.js` | die einzige Stelle mit einer Adresse |
-| `web/js/datenquelle.js` | der Vertrag: 33 benannte Fragen; `PostgrestQuelle` als erste Umsetzung |
+| `web/js/datenquelle.js` | der Vertrag: 35 benannte Fragen; `PostgrestQuelle` als erste Umsetzung |
 | `web/js/reihen.js` | übersetzt die Antworten in die Reihen, die Chart.js erwartet |
 | `web/js/kacheln.js` | füllt Kennzahlkacheln und Management Summary |
 
@@ -116,6 +117,13 @@ Die Abweichungen sind gewollt und hier begründet:
 | Simulationsbasis Marge | 4,43 Mio. €, 70,4 % | 4,23 Mio. €, 67,3 % | Die alte Zahl beruht auf jahresweise interpolierten Kosten zwischen `cost_price_2017` und `cost_price`; die Sicht rechnet mit `cost_price`. |
 | Anteile mit Rundung | 23,3 %, 17,4 %, +21,6 % | 23,4 %, 17,5 %, +21,5 % | Kaufmännisch gerundet statt abgeschnitten (23,354 → 23,4). |
 | Regelbezeichnungen | „Fries + Cola" | „M.Fries + Cola 0.5" | Die Sicht benennt das tatsächlich gemessene Paar. |
+| Zweitstärkste Altersgruppe | „gefolgt von 35–44 J." | 18–24 J. | `v_alter_umsatz` misst nach: 25–34 J. führen mit 24,1 %, danach kommen 18–24 J. mit 20,4 % vor 35–44 J. mit 20,0 %. |
+| Umsatzanteil der beiden Spitzengruppen | „> 50 %" | 44,6 % | Summe der beiden gemessenen Anteile. |
+| Personalspreizung | „3× Spreizung" | 3,2× | Aus `v_personal_filiale` gerechnet statt gerundet angegeben. |
+
+Die letzten drei standen auf breiten Karten, die beim Ausräumen der Zahlen
+zunächst ohne `data-ms` blieben und deshalb leer aufliefen. Sie sind
+nachgezogen; die Prüfung „keine leere Kachel" deckt jetzt alle 30 Karten ab.
 
 Nachgerechnet wird das im Browser: `web/abgleich.html` stellt die
 Semantikschicht 29 Datenreihen des alten Dashboards gegenüber — **29 von 29

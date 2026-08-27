@@ -18,6 +18,7 @@ export async function ladeAlles(quelle) {
     kanaeleJahr: quelle.kanaeleJahr(), zahlartenJahr: quelle.zahlartenJahr(),
     wochentage: quelle.wochentage(), stunden: quelle.stunden(),
     heatmap: quelle.heatmap(), kundenAlter: quelle.kundenAlter(),
+    alterUmsatz: quelle.alterUmsatz(), heimatbezirk: quelle.heimatbezirk(),
     kundenLoyalty: quelle.kundenLoyalty(), kundenBezirke: quelle.kundenBezirke(),
     personalFilialen: quelle.personalFilialen(), personalRollen: quelle.personalRollen(),
     zufriedenheitKanal: quelle.zufriedenheitKanal(), zufriedenheitDauer: quelle.zufriedenheitDauer(),

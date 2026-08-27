@@ -40,7 +40,10 @@ export function fuelleKacheln(B, roh) {
   K.uebersicht3 = { wert: euro(B.yearAOV[i25]), ...delta(B.yearAOV[i25], B.yearAOV[i24]),
     kontext: `vs. ${euro(B.yearAOV[i24])} in 2024 · +${proz((B.yearAOV[i25] / B.yearAOV[i17] - 1) * 100, 0)} seit 2017` };
   K.uebersicht4 = { wert: mio(kum), ...delta(B.yearRevenue[i25], B.yearRevenue[i17], v => proz(v, 0)),
-    kontext: `${zahl(kumBest)} Bestellungen · ${zahl(roh.kundenAlter.reduce((a, x) => a + x.kunden, 0))} Kunden · ${B.branchLabels.length} Filialen` };
+    // Neben einer Bestellzahl meint "Kunden" die, die bestellt haben (24.992),
+    // nicht die 25.000 Saetze in dim_customer. v_alter_umsatz zaehlt ueber
+    // fact_orders und trifft damit dieselbe Menge wie die Summary-Kopfzeile.
+    kontext: `${zahl(kumBest)} Bestellungen · ${zahl(roh.alterUmsatz.reduce((a, x) => a + x.kunden, 0))} Kunden · ${B.branchLabels.length} Filialen` };
   K.uebersicht5 = { kontext: `App wächst ${pp(B.appData[i25] - B.appData[i24])} YoY · Counter ${pp(B.counterData[i25] - B.counterData[i24])}` };
 
   const topBurger = roh.produkteJahr.filter(p => p.category === 'Burger')
@@ -319,6 +322,22 @@ export function fuelleSummary(B, roh) {
   const items  = roh.produkteJahr.reduce((a, x) => a + x.menge, 0);
   const salat = roh.warenkorb.find(r => /Salad/.test(r.regel)) || {};
 
+  // Fuer die sechs breiten Karten.
+  const hb = roh.heimatbezirk[0] ?? {};
+  const aU = [...roh.alterUmsatz].sort((a, b) => b.umsatz - a.umsatz);
+  const typVon = (name) => (f.find(x => x.branch_name === name) || {}).branch_type ?? '—';
+  // Randklassen der Temperatur: die zwei hoechsten Tagesumsaetze. Beide ruhen
+  // auf wenigen Tagen — genau das ist die Aussage der Karte.
+  const tX = [...roh.wetterTemperatur].sort((a, b) => b.umsatz_je_tag - a.umsatz_je_tag).slice(0, 2);
+  // Zahlarten-Trend: erstes gegen letztes Jahr der Reihe. Anteile, keine
+  // absoluten Zahlen, damit ein angebrochenes letztes Jahr nicht stoert.
+  const zaJahre = [...new Set(roh.zahlartenJahr.map(x => x.jahr))].sort((a, b) => a - b);
+  const zaErst = zaJahre[0], zaLetzt = zaJahre[zaJahre.length - 1];
+  const zaAnteil = (art, jahr) => (roh.zahlartenJahr
+    .find(x => x.zahlart === art && x.jahr === jahr) || {}).anteil_pct ?? 0;
+  const zaOben = [...roh.zahlartenJahr].filter(x => x.jahr === zaLetzt)
+    .sort((a, b) => b.anteil_pct - a.anteil_pct)[0];
+
   const S = {
     1: [proz(cagr) + ' p.a.', `CAGR 2019–2025 (ab dem ersten Jahr mit vier Filialen). `
       + `Getrieben von Filialexpansion (1 → ${f.length} Standorte bis 2023) und organischem Wachstum.`],
@@ -376,6 +395,41 @@ export function fuelleSummary(B, roh) {
       + `Geringe Rabatthöhe bei hoher Frequenz.`],
     24: [zahl(roiFlop.roi, 1) + '× ROI', `${roiFlop.aktion} — niedrigster Wert. `
       + `Hoher Rabatt ohne nachweislichen Zusatzumsatz.`],
+
+    // 25–30: die sechs breiten Karten am Ende jedes Blocks.
+    25: [proz(hb.anteil_pct), `Anteil der Bestellungen, bei denen Wohnbezirk des Kunden und `
+      + `Bezirk der Filiale übereinstimmen — ${zahl(hb.aus_heimatbezirk)} von `
+      + `${zahl(hb.bestellungen)}. Die ${zahl(hb.filialbezirke)} Standorte bedienen `
+      + `${zahl(hb.wohnbezirke)} Wohnbezirke: das Einzugsgebiet ist überregional, `
+      + `nicht die Nachbarschaft.`],
+    26: [aU[0].altersgruppe + ' Jahre', `Umsatzstärkste Altersgruppe mit `
+      + `${proz(aU[0].umsatzanteil_pct)} des Gesamtumsatzes, gefolgt von `
+      + `${aU[1].altersgruppe} J. (${proz(aU[1].umsatzanteil_pct)}). Zusammen `
+      + `${proz(aU[0].umsatzanteil_pct + aU[1].umsatzanteil_pct)} — die Nachfrage `
+      + `verteilt sich breiter, als eine Zielgruppe nahelegt.`],
+    27: [`${zahl(regeln.length)} Regeln mit Lift > 2,0`,
+      regeln.map(r => `${r.produkt_a} ↔ ${r.produkt_b} (${zahl(r.lift, 2)})`).join(' · ')
+      + `. Die übrigen ${zahl(roh.warenkorb.length - regeln.length)} der `
+      + `${zahl(roh.warenkorb.length)} geprüften Regeln liegen nahe Lift 1 — `
+      + `dort kauft niemand das eine wegen des anderen.`],
+    28: [`${zaOben.zahlart === 'Cash' ? 'Bargeld' : 'Kartenzahlung'} ↑`,
+      `Anteil an allen Bestellungen von ${zaErst} auf ${zaLetzt}: Bargeld `
+      + `${proz(zaAnteil('Cash', zaErst))} → ${proz(zaAnteil('Cash', zaLetzt))}, `
+      + `Mobile Payment ${proz(zaAnteil('Mobile Payment', zaErst))} → `
+      + `${proz(zaAnteil('Mobile Payment', zaLetzt))}. Der Rückgang ist strukturell, `
+      + `nicht saisonal.`],
+    29: ['Extremwerte', `Höchste Tagesumsätze in den Randklassen: `
+      + `${zahl(tX[0].von, 1)} bis ${zahl(tX[0].bis, 1)} °C (${euro(tX[0].umsatz_je_tag, 0)}) `
+      + `und ${zahl(tX[1].von, 1)} bis ${zahl(tX[1].bis, 1)} °C `
+      + `(${euro(tX[1].umsatz_je_tag, 0)}). Beide stützen sich auf `
+      + `${zahl(tX[0].tage)} bzw. ${zahl(tX[1].tage)} Tage — zu wenig für eine `
+      + `Aussage über Temperatur, wahrscheinlich Sondereffekte.`],
+    30: [zahl(pf[0].umsatz_je_ma / pf[pf.length - 1].umsatz_je_ma, 1) + '× Spreizung',
+      `MA-Produktivität: ${euro(pf[0].umsatz_je_ma / 1000, 0)}k (${pf[0].branch_name}) `
+      + `gegen ${euro(pf[pf.length - 1].umsatz_je_ma / 1000, 0)}k `
+      + `(${pf[pf.length - 1].branch_name}). Erklärbar durch Standorttyp `
+      + `(${typVon(pf[0].branch_name)} gegen ${typVon(pf[pf.length - 1].branch_name)}) `
+      + `und Kundenfrequenz, nicht primär durch Personalleistung.`],
   };
 
   // Kopfzeile der Summary. "Unique Kunden" meint die Kunden MIT Bestellung

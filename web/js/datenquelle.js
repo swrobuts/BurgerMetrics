@@ -39,6 +39,10 @@ export class Datenquelle {
   heatmap() { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden */
   kundenAlter() { throw new Error('nicht umgesetzt'); }
+  /** je Altersgruppe: altersgruppe, kunden, bestellungen, umsatz, umsatzanteil_pct */
+  alterUmsatz() { throw new Error('nicht umgesetzt'); }
+  /** eine Zeile: bestellungen, aus_heimatbezirk, anteil_pct, filialbezirke, wohnbezirke */
+  heimatbezirk() { throw new Error('nicht umgesetzt'); }
   /** je Treuestufe: stufe, kunden */
   kundenLoyalty() { throw new Error('nicht umgesetzt'); }
   /** je Bezirk: bezirk, kunden */
@@ -130,6 +134,8 @@ export class PostgrestQuelle extends Datenquelle {
   stunden()            { return this.hole('v_stunde', 'order=stunde'); }
   heatmap()            { return this.hole('v_heatmap', ''); }
   kundenAlter()        { return this.hole('v_kunde_alter', 'order=altersgruppe'); }
+  alterUmsatz()        { return this.hole('v_alter_umsatz', 'order=umsatz.desc'); }
+  heimatbezirk()       { return this.hole('v_heimatbezirk', ''); }
   kundenLoyalty()      { return this.hole('v_kunde_loyalty', ''); }
   kundenBezirke()      { return this.hole('v_kunde_bezirk', 'order=kunden.desc'); }
   personalFilialen()   { return this.hole('v_personal_filiale', 'order=umsatz_je_ma'); }
