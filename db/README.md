@@ -20,6 +20,8 @@ bleiben die Quelle der Wahrheit; die Datenbank ist ihr Abbild.
 | `aufbau/0009_rfm_deterministisch.sql` | Zweitschlüssel für die Quintile, damit RFM reproduzierbar wird |
 | `aufbau/0010_filiale_tabellenspalten.sql` | Drive-Through, Sitzplätze, Mietquote |
 | `aufbau/0011_promotion_uplift.sql` | Warenkorb vor Rabatt statt des tautologischen ROI |
+| `aufbau/0012_diagrammwerte.sql` | Basislinie der Zufriedenheit — die letzte Zahl, die noch im Skript stand |
+| `aufbau/0013_operative_sichten.sql` | Speisekarte und Filialliste für Shop und Kasse |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 
 ```bash
@@ -152,6 +154,32 @@ Dabei fiel ein Fehler in `0004_sicherheit.sql` auf: Die Datei enthielt ein
 niemand hat, der die Kette nicht als Superuser fährt — und es wirkt ohnehin
 nicht, weil PostgREST seine Schemaliste aus der Container-Umgebung liest. Der
 Schritt steht jetzt als Betriebsanweisung im Kommentar, nicht als SQL.
+
+### Shop und Kasse lesen denselben Artikelstamm
+
+Bis August 2026 trugen beide Oberflächen ihren Katalog als Liste im
+Quelltext: 33 Artikel je Seite, mit Preisen. Der Abgleich gegen `dim_product`
+ergab, dass **kein einziger Preis stimmte** — weder mit dem Preis von 2017
+noch mit dem aktuellen. Der Classic Burger kostete an der Kasse 4,99 €, in
+der Datenbank 4,49 € (2017) beziehungsweise 5,90 € (heute). 13 Artikel der
+Kasse und 3 des Shops existierten im Datenmodell überhaupt nicht.
+
+Das war nicht nur unordentlich. Die Fallstudie behauptet, Shop und Kasse
+teilten sich denselben Artikelstamm — das ist die Aussage der Folie „Beide
+Anwendungen schreiben in denselben Kern". Solange die Kataloge auseinander
+liefen, war sie falsch.
+
+Beide Seiten sind jetzt ES-Module und laden `v_speisekarte` und
+`v_filialliste` über dieselbe `datenquelle.js` wie das Dashboard. Sie zeigen
+alle 57 Artikel statt 33, mit den Preisen aus `dim_product`, und melden
+denselben Fehlerschirm, wenn die Quelle fehlt.
+
+**Was bewusst in den Seiten bleibt** (`web/js/darstellung.js`): Produktbilder,
+Beschreibungstexte, Öffnungszeiten, Anfahrtsbeschreibungen und die
+Schnellwahl der Kasse. Nichts davon ist ein Messwert, nichts steht in einer
+CSV-Datei. Sie in die Datenbank zu schreiben, nur damit alles aus einer
+Quelle kommt, wäre der umgekehrte Fehler. Die Datei ist die Probe darauf:
+Man darf darin alles ändern, ohne dass eine Zahl im Dashboard anders wird.
 
 ### Warum die Semantikschicht materialisiert ist
 

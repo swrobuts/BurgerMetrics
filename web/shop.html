@@ -4164,52 +4164,11 @@ body.data-mode .phone-mockup { animation: none; }
 // =============================================================================
 // DATA
 // =============================================================================
-const PRODUCTS = [
-  {id:1,name:"Classic Burger",cat:"Burger",sub:"Beef",price:4.99,cal:540,img:"photo-1568901346375-23c9450c58cd",desc:"Saftiges Rindfleisch-Patty, frischer Salat, Tomate, Zwiebel, hauseigene Sauce.",tags:["popular"],allergens:"Gluten, Sesam"},
-  {id:2,name:"Cheeseburger",cat:"Burger",sub:"Beef",price:5.49,cal:620,img:"photo-1550547660-d9450f859349",desc:"Unser Classic mit geschmolzenem Cheddar. Der Liebling aller Gäste.",tags:["popular"],allergens:"Gluten, Sesam, Milch"},
-  {id:3,name:"Double Burger",cat:"Burger",sub:"Beef",price:7.99,cal:890,img:"photo-1594212699903-ec8a3eca50f5",desc:"Doppeltes Patty, doppelter Genuss. Für den großen Hunger.",tags:[],allergens:"Gluten, Sesam"},
-  {id:4,name:"Bacon King",cat:"Burger",sub:"Beef",price:8.99,cal:980,img:"photo-1553979459-d2229ba7433b",desc:"Smoky Bacon, karamellisierte Zwiebeln, BBQ-Sauce. Unser kräftigster Burger.",tags:["popular"],allergens:"Gluten, Sesam"},
-  {id:5,name:"Chicken Burger",cat:"Burger",sub:"Chicken",price:6.49,cal:510,img:"photo-1606755962773-d324e0a13086",desc:"Zartes Hähnchenbrustfilet, knusprig paniert, mit Coleslaw.",tags:[],allergens:"Gluten, Sesam"},
-  {id:6,name:"Crispy Chicken Deluxe",cat:"Burger",sub:"Chicken",price:7.49,cal:620,img:"photo-1513185158878-8d8c2a2a3da3",desc:"Crispy Chicken mit Jalapeños, Avocado-Creme und Rucola.",tags:["new"],allergens:"Gluten, Sesam, Ei"},
-  {id:7,name:"Veggie Burger",cat:"Burger",sub:"Vegetarian",price:5.99,cal:420,img:"photo-1525059696034-4967a8e1dca2",desc:"Hausgemachtes Gemüse-Patty mit Röstzwiebeln und Kräuterquark.",tags:["veg"],allergens:"Gluten, Sesam, Soja"},
-  {id:12,name:"Medium Fries",cat:"Side",sub:"Fries",price:2.99,cal:340,img:"photo-1573080496219-bb080dd4f877",desc:"Die perfekte Beilage in der beliebten Größe.",tags:["popular","veg"],allergens:"—"},
-  {id:13,name:"Large Fries",cat:"Side",sub:"Fries",price:3.49,cal:480,img:"photo-1598679253544-2c97992403ea",desc:"Für die, die nicht genug kriegen können.",tags:["veg","vegan"],allergens:"—"},
-  {id:14,name:"Chicken Nuggets 6pc",cat:"Side",sub:"Nuggets",price:3.99,cal:290,img:"photo-1562967916-eb82221dfb92",desc:"6 knusprige Nuggets mit Dip nach Wahl.",tags:["popular"],allergens:"Gluten, Ei"},
-  {id:15,name:"Chicken Nuggets 9pc",cat:"Side",sub:"Nuggets",price:5.49,cal:430,img:"photo-1562967916-eb82221dfb92",desc:"9 Nuggets — ideal zum Teilen oder ganz für dich.",tags:[],allergens:"Gluten, Ei"},
-  {id:16,name:"Onion Rings",cat:"Side",sub:"Fried",price:3.29,cal:350,img:"photo-1639024471283-03518883512d",desc:"Dicke Zwiebelringe in knuspriger Panade.",tags:["veg"],allergens:"Gluten, Milch"},
-  {id:17,name:"Side Salad",cat:"Side",sub:"Salad",price:3.49,cal:80,img:"photo-1512621776951-a57141f2eefd",desc:"Blattsalat mit Cherry-Tomaten und Vinaigrette.",tags:["veg","vegan"],allergens:"—"},
-  {id:18,name:"Mozzarella Sticks",cat:"Side",sub:"Fried",price:4.29,cal:420,img:"photo-1531749668029-2db88e4276c7",desc:"Panierte Mozzarella-Sticks mit Marinara-Dip.",tags:[],allergens:"Gluten, Milch"},
-    {id:21,name:"Cola 0.3l",cat:"Drink",sub:"Soft Drink",price:2.49,cal:130,img:"photo-1622483767028-3f66f32aef97",desc:"Coca-Cola Classic, eiskalt serviert.",tags:["veg"],allergens:"—"},
-  {id:22,name:"Cola 0.5l",cat:"Drink",sub:"Soft Drink",price:3.29,cal:210,img:"photo-1622483767028-3f66f32aef97",desc:"Mehr Cola, mehr Erfrischung.",tags:["popular"],allergens:"—"},
-  {id:25,name:"Wasser 0.5l",cat:"Drink",sub:"Water",price:1.99,cal:0,img:"photo-1548839140-29a749e1cf4d",desc:"Stilles oder mit Kohlensäure.",tags:["veg","vegan"],allergens:"—"},
-  {id:27,name:"Kaffee",cat:"Drink",sub:"Hot Drink",price:2.29,cal:5,img:"photo-1509042239860-f550ce710b93",desc:"Frisch gebrühter Filterkaffee.",tags:["veg"],allergens:"—"},
-  {id:28,name:"Cappuccino",cat:"Drink",sub:"Hot Drink",price:3.29,cal:80,img:"photo-1572442388796-11668a67e53d",desc:"Espresso mit cremigem Milchschaum.",tags:["veg"],allergens:"Milch"},
-  {id:30,name:"Milkshake Vanilla",cat:"Drink",sub:"Milkshake",price:4.49,cal:420,img:"photo-1572490122747-3968b75cc699",desc:"Handgerührter Vanille-Milkshake. Thick & creamy.",tags:["popular"],allergens:"Milch"},
-  {id:31,name:"Milkshake Chocolate",cat:"Drink",sub:"Milkshake",price:4.49,cal:450,img:"photo-1572490122747-3968b75cc699",desc:"Schokolade pur. Für Chocoholics.",tags:[],allergens:"Milch"},
-  {id:34,name:"Bier 0.3l",cat:"Drink",sub:"Alcohol",price:3.99,cal:130,img:"photo-1535958636474-b021ee887b13",desc:"Würzburger Hofbräu Pilsner vom Fass.",tags:[],allergens:"Gluten"},
-  {id:35,name:"Soft Ice Vanilla",cat:"Dessert",sub:"Ice Cream",price:1.99,cal:180,img:"photo-1570197571499-166b36435e9f",desc:"Klassisches Softeis im Waffelbecher.",tags:["veg"],allergens:"Milch"},
-  {id:37,name:"Sundae Caramel",cat:"Dessert",sub:"Sundae",price:3.49,cal:340,img:"photo-1563805042-7684c019e1cb",desc:"Vanilleeis mit warmem Karamell und gerösteten Nüssen.",tags:[],allergens:"Milch, Nuss"},
-  {id:39,name:"Apple Pie",cat:"Dessert",sub:"Pastry",price:2.29,cal:250,img:"photo-1568571780765-9276ac8b75a2",desc:"Warmer Apfelkuchen mit Zimtzucker.",tags:["veg"],allergens:"Gluten, Milch"},
-  {id:40,name:"Cookie Chocolate",cat:"Dessert",sub:"Pastry",price:1.49,cal:200,img:"photo-1499636136210-6f4ee915583e",desc:"Soft-baked Cookie mit belgischer Schokolade.",tags:["popular"],allergens:"Gluten, Milch, Ei"},
-  {id:42,name:"Breakfast Burger",cat:"Breakfast",sub:"Burger",price:4.99,cal:450,img:"photo-1525351484163-7529414344d8",desc:"Spiegelei, Bacon und Cheddar auf dem Frühstücksbun.",tags:[],allergens:"Gluten, Ei"},
-  {id:43,name:"Pancakes",cat:"Breakfast",sub:"Sweet",price:4.49,cal:380,img:"photo-1567620905732-2d1ec7ab7445",desc:"Drei fluffige Pancakes mit Ahornsirup und Butter.",tags:["popular","veg"],allergens:"Gluten, Milch, Ei"},
-  {id:44,name:"Scrambled Eggs & Toast",cat:"Breakfast",sub:"Savory",price:3.99,cal:320,img:"photo-1528735602780-2552fd46c7af",desc:"Cremiges Rührei auf Vollkorn-Toast.",tags:["veg"],allergens:"Gluten, Ei, Milch"},
-  {id:46,name:"Breakfast Wrap",cat:"Breakfast",sub:"Wrap",price:5.49,cal:410,img:"photo-1626700051175-6818013e1d4f",desc:"Tortilla mit Rührei, Bacon, Käse und Avocado.",tags:["new"],allergens:"Gluten, Ei, Milch"},
-  {id:47,name:"Ketchup Extra",cat:"Extra",sub:"Sauce",price:0.50,cal:20,img:"photo-1472476443507-c7a5948772fc",desc:"Hauseigener Ketchup — extra Portion.",tags:["veg","vegan"],allergens:"—"},
-  {id:49,name:"BBQ Sauce",cat:"Extra",sub:"Sauce",price:0.50,cal:30,img:"photo-1472476443507-c7a5948772fc",desc:"Smoky BBQ Sauce — der perfekte Dip.",tags:["veg","vegan"],allergens:"—"},
-  {id:50,name:"Cheese Dip",cat:"Extra",sub:"Sauce",price:0.80,cal:80,img:"photo-1472476443507-c7a5948772fc",desc:"Cremiger Cheddar-Dip zum Dippen.",tags:["veg"],allergens:"Milch"},
-];
+let PRODUCTS = [];   // wird aus v_speisekarte geladen
 
-const BRANCHES = [
-  {id:1,name:"BM Hauptbahnhof",address:"Bahnhofstraße 2, 97070 Würzburg",type:"City Center",lat:49.8019,lng:9.9358,dt:false,pg:false,park:0,hours:"Mo-Sa 6:00-23:00, So 8:00-22:00",directions:"Direkt am Hauptbahnhof, Ausgang Süd. 1 Min. Fußweg. Kein eigener Parkplatz — Tiefgarage Hauptbahnhof empfohlen."},
-  {id:2,name:"BM Sanderring",address:"Sanderring 8, 97070 Würzburg",type:"University",lat:49.7875,lng:9.931,dt:false,pg:false,park:10,hours:"Mo-Sa 7:00-23:00, So 9:00-22:00",directions:"Gegenüber der Uni am Sanderring, Straßenbahn-Haltestelle 'Sanderring'. 10 Parkplätze vor Ort."},
-  {id:3,name:"BM Europastern",address:"Nürnberger Str. 102, 97076 Würzburg",type:"Highway",lat:49.8103,lng:9.972,dt:true,pg:true,park:45,hours:"Mo-So 6:00-24:00",directions:"A3 Ausfahrt Würzburg-Heidingsfeld, Richtung Europastern. Großer Parkplatz, Drive-Through mit 2 Spuren."},
-  {id:4,name:"BM Mainfrankenpark",address:"Mainfrankenpark 14, 97078 Würzburg",type:"Shopping",lat:49.771,lng:9.895,dt:true,pg:true,park:40,hours:"Mo-Sa 9:00-22:00, So 10:00-21:00",directions:"Im Mainfrankenpark neben MediaMarkt. Direkte Zufahrt vom Parkplatz P3."},
-  {id:5,name:"BM Grombühl",address:"Grombühlstr. 30, 97080 Würzburg",type:"Hospital",lat:49.8095,lng:9.925,dt:false,pg:false,park:8,hours:"Mo-Fr 6:30-21:00, Sa 8:00-21:00, So 9:00-20:00",directions:"Nähe Uniklinikum Würzburg, 5 Min. zu Fuß von der Straßenbahn-Haltestelle 'Grombühlstraße'."},
-  {id:6,name:"BM Heuchelhof",address:"Heuchelhofstr. 45, 97084 Würzburg",type:"Residential",lat:49.762,lng:9.918,dt:true,pg:true,park:35,hours:"Mo-So 7:00-23:00",directions:"Im Heuchelhof-Center, Bus-Linie 14 Haltestelle 'Heuchelhof Mitte'. Großer Parkplatz, Spielplatz."},
-  {id:7,name:"BM Lengfeld",address:"Lengfelder Str. 12, 97076 Würzburg",type:"Commercial",lat:49.82,lng:9.96,dt:true,pg:false,park:25,hours:"Mo-Fr 6:00-22:00, Sa 7:00-22:00, So 8:00-21:00",directions:"Im Gewerbegebiet Lengfeld, neben dem Baumarkt. Gute Erreichbarkeit über B19."},
-  {id:8,name:"BM Zellerau",address:"Frankfurter Str. 55, 97082 Würzburg",type:"Mixed",lat:49.795,lng:9.908,dt:false,pg:false,park:12,hours:"Mo-Sa 8:00-22:00, So 9:00-21:00",directions:"In der Zellerau, 3 Min. von der Straßenbahn-Haltestelle 'Zellerau'. 12 Stellplätze direkt vor der Tür."},
-];
+
+let BRANCHES = [];   // wird aus v_filialliste geladen
+
 
 // =============================================================================
 // CART STATE
@@ -4269,7 +4228,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
-renderMenu('all');
+// Start erfolgt, sobald der Artikelstamm geladen ist (Modul am Dateiende).
 
 // =============================================================================
 // CART LOGIC
@@ -4445,8 +4404,10 @@ function initMap() {
   });
 }
 
-// Render location cards
+// Render location cards — erst wenn die Filialliste geladen ist
+function renderBranches() {
 const locGrid = document.getElementById('locationsGrid');
+locGrid.innerHTML = '';
 BRANCHES.forEach(b => {
   locGrid.innerHTML += `
     <div class="location-card fade-up" data-branch="${b.id}" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}','_blank')">
@@ -4468,6 +4429,7 @@ BRANCHES.forEach(b => {
     </div>
   `;
 });
+}
 
 // =============================================================================
 // NAVIGATION SCROLL (consolidated in unified scroll handler below)
@@ -5028,7 +4990,17 @@ renderMenu = function(filter) {
   // Init tilt after card entrance animation finishes (500ms)
   setTimeout(initTilt, 600);
 };
-renderMenu(activeFilter);
+// Der Shop startet, sobald Speisekarte und Filialliste da sind.
+window.shopStarten = function(artikel, filialen) {
+  PRODUCTS = artikel;
+  BRANCHES = filialen;
+  renderMenu(activeFilter);
+  renderBranches();
+  if (document.getElementById('map') && !window.__karteGebaut) {
+    window.__karteGebaut = true;
+    try { initMap(); } catch (e) { /* Karte ist Beiwerk */ }
+  }
+};
 
 // =============================================================================
 // VALUE CARD MOUSE GLOW
@@ -5102,7 +5074,7 @@ document.querySelectorAll('.location-card').forEach((card, i) => {
 // INIT
 // =============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-  initMap();
+  /* initMap() laeuft in shopStarten, sobald BRANCHES da ist */
   initTilt();
 });
 </script>
@@ -5569,6 +5541,56 @@ setTimeout(() => {
     document.getElementById('chatBadge').style.display = 'flex';
   }
 }, 5000);
+</script>
+<script type="module">
+/* Der Shop holt Speisekarte und Filialliste aus derselben Quelle wie Kasse
+   und Dashboard. Vorher standen beide als Listen im Quelltext — mit Preisen,
+   die mit dim_product nicht uebereinstimmten. Die Fallstudie behauptet einen
+   geteilten Artikelstamm; jetzt gibt es ihn auch. */
+import { QUELLE } from './js/konfiguration.js';
+import { waehleQuelle } from './js/datenquelle.js';
+import { bildVon, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js';
+
+const schirm = document.createElement('div');
+schirm.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;'
+  + 'justify-content:center;background:#faf9f7;z-index:99999;font:15px/1.6 '
+  + 'system-ui,sans-serif;color:#57534e;text-align:center;padding:24px';
+schirm.innerHTML = 'Speisekarte wird geladen \u2026';
+document.body.appendChild(schirm);
+
+try {
+  const quelle = waehleQuelle(QUELLE);
+  const [karte, filialen] = await Promise.all([quelle.speisekarte(), quelle.filialliste()]);
+
+  const artikel = karte.map(a => ({
+    id: a.artikel_id, name: a.name, cat: a.kategorie, sub: a.unterkategorie,
+    price: Number(a.preis), cal: a.kalorien,
+    img: bildVon(a.name, a.kategorie),
+    desc: BESCHREIBUNGEN[a.name] || '',
+    // Die Kennzeichnung kommt aus dem Datenmodell, nicht aus einer Liste
+    // im Quelltext: is_vegetarian und is_vegan stehen in dim_product.
+    tags: [a.vegan ? 'vegan' : null, a.vegetarisch ? 'veg' : null].filter(Boolean),
+    allergene: a.allergene,
+  }));
+
+  const standorte = filialen.map(f => ({
+    id: f.filiale_id, name: f.name, address: f.adresse, type: f.art,
+    lat: Number(f.breite), lng: Number(f.laenge),
+    dt: f.drive_through, pg: f.spielplatz, park: f.parkplaetze,
+    hours: OEFFNUNGSZEITEN[f.name] || '',
+    directions: ANFAHRT[f.name] || '',
+  }));
+
+  schirm.remove();
+  window.shopStarten(artikel, standorte);
+  console.info(`Shop: ${artikel.length} Artikel und ${standorte.length} Filialen `
+             + `aus ${QUELLE.art} geladen.`);
+} catch (fehler) {
+  schirm.innerHTML = '<div><b style="color:#b91c1c">Die Datenquelle antwortet nicht.</b>'
+    + '<br><br>' + String(fehler.message).replace(/</g, '&lt;')
+    + '<br><br><span style="font-size:12px">Quelle: ' + QUELLE.url
+    + ' \u00b7 Schema: ' + QUELLE.schema + '</span></div>';
+}
 </script>
 </body>
 </html>

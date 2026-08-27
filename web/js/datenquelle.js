@@ -39,6 +39,13 @@ export class Datenquelle {
   heatmap() { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden */
   kundenAlter() { throw new Error('nicht umgesetzt'); }
+  /** Artikelstamm fuer Shop und Kasse: artikel_id, name, kategorie,
+   *  unterkategorie, preis, preis_2017, kalorien, vegetarisch, vegan,
+   *  allergene, gelistet_seit */
+  speisekarte() { throw new Error('nicht umgesetzt'); }
+  /** Standorte: filiale_id, name, adresse, bezirk, plz, ort, breite, laenge,
+   *  art, drive_through, spielplatz, parkplaetze, sitzplaetze, eroeffnet */
+  filialliste() { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden, bestellungen, umsatz, umsatzanteil_pct */
   alterUmsatz() { throw new Error('nicht umgesetzt'); }
   /** eine Zeile: bestellungen, aus_heimatbezirk, anteil_pct, filialbezirke, wohnbezirke */
@@ -134,6 +141,8 @@ export class PostgrestQuelle extends Datenquelle {
   stunden()            { return this.hole('v_stunde', 'order=stunde'); }
   heatmap()            { return this.hole('v_heatmap', ''); }
   kundenAlter()        { return this.hole('v_kunde_alter', 'order=altersgruppe'); }
+  speisekarte()        { return this.hole('v_speisekarte', ''); }
+  filialliste()        { return this.hole('v_filialliste', ''); }
   alterUmsatz()        { return this.hole('v_alter_umsatz', 'order=umsatz.desc'); }
   heimatbezirk()       { return this.hole('v_heimatbezirk', ''); }
   kundenLoyalty()      { return this.hole('v_kunde_loyalty', ''); }
