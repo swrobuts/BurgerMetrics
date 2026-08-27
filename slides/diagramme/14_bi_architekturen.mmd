@@ -2,7 +2,7 @@ flowchart LR
     A0["direkt"] ~~~ A1["operative DB"] --> A3["BI-Werkzeug"] --> A4["Bericht"]
     B0["mit Abzug"] ~~~ B1["Abzug"] --> B2["Stern-Schema"] --> B3["BI-Werkzeug"] --> B4["Bericht"]
     C0["mit Semantik"] ~~~ C1["Lakehouse"] --> C2["Semantikschicht"] --> C3["BI-Werkzeug"] --> C4["Bericht"]
-    D0["dieses Projekt"] ~~~ D1["DuckDB"] --> D2["SQL vorab gerechnet"] --> D4["statische Seite"]
+    D0["dieses Projekt"] ~~~ D1["PostgreSQL<br/>Galaxy-Schema"] --> D2["Semantikschicht<br/>36 Sichten"] --> D3["REST"] --> D4["Dashboard"]
     style A0 fill:#FFFFFF,stroke:#FFFFFF,color:#8A8A8A
     style B0 fill:#FFFFFF,stroke:#FFFFFF,color:#8A8A8A
     style C0 fill:#FFFFFF,stroke:#FFFFFF,color:#8A8A8A

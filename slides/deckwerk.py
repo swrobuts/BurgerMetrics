@@ -3,7 +3,7 @@
 """
 deckwerk.py — gemeinsames Geruest der Bauskripte in diesem Ordner.
 
-Hier steht, was bau_datenmodell.py und bau_bi.py beide brauchen: den Skill
+Hier steht, was bau_fallstudie.py braucht: den Skill
 finden, den Platzhalterfehler des spec_loader umgehen, Absaetze richtig
 uebergeben, Diagramme und Bildschirmfotos massstabsgetreu setzen. Ohne diese
 Datei stuenden dieselben vierzig Zeilen zweimal da und wuerden auseinanderlaufen.
@@ -80,7 +80,7 @@ HOEHE = YMAX - Y0
 
 QUELLE = "Eigene Darstellung · Diagramme aus slides/diagramme/*.mmd"
 Q_FOTO = "Bildschirmfoto aus dem Projekt · aufgenommen mit slides/screenshots.mjs"
-Q_MESS = "Eigene Messung · DuckDB 1.5.5 auf dataset/, Median aus sieben Läufen"
+Q_MESS = "Eigene Messung · Schema burgermetrics in PostgreSQL 17.6"
 
 
 # --- Absatzformat -----------------------------------------------------------

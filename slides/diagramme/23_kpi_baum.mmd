@@ -1,0 +1,16 @@
+flowchart LR
+    U["Umsatz 2025<br/>2.994.771 EUR"]
+    B["Bestellungen<br/>136.557"]
+    A["Ø Bestellwert<br/>21,93 EUR"]
+    K["Kunden mit Kauf<br/>23.891"]
+    F["Käufe je Kunde<br/>5,72"]
+    G["Ø Betrag vor Rabatt<br/>22,21 EUR"]
+    R["Ø Rabatt<br/>0,28 EUR"]
+    U -- "×" --> B
+    U -- "×" --> A
+    B -- "×" --> K
+    B -- "×" --> F
+    A -- "+" --> G
+    A -- "−" --> R
+    style U fill:#003E6E,color:#FFFFFF,stroke:#003E6E
+    style R fill:#FDF3E8,stroke:#ED7004

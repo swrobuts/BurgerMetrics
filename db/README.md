@@ -90,13 +90,13 @@ geblieben wären:
 
 Seit der Umstellung steht im Quelltext von `web/dashboard.html` **keine
 Nutzdatenzahl mehr**: keine der 88 Datenreihen, kein Kachelwert, kein Text der
-Management Summary. Die Seite lädt beim Aufruf 35 Sichten, baut daraus 89
+Management Summary. Die Seite lädt beim Aufruf 33 Sichten, baut daraus 91
 Reihen und füllt 72 Kacheln und 30 Summary-Karten — in rund drei Sekunden.
 
 | Datei | Aufgabe |
 |---|---|
 | `web/js/konfiguration.js` | die einzige Stelle mit einer Adresse |
-| `web/js/datenquelle.js` | der Vertrag: 35 benannte Fragen; `PostgrestQuelle` als erste Umsetzung |
+| `web/js/datenquelle.js` | der Vertrag: 34 benannte Fragen; `PostgrestQuelle` als erste Umsetzung |
 | `web/js/reihen.js` | übersetzt die Antworten in die Reihen, die Chart.js erwartet |
 | `web/js/kacheln.js` | füllt Kennzahlkacheln und Management Summary |
 | `web/js/texte.js` | baut die Deutungs- und Empfehlungstexte unter den Diagrammen |
@@ -156,7 +156,7 @@ Altersgruppen unterscheiden sich in der Bestellhäufigkeit praktisch nicht
 (29,9 bis 30,4 je Kunde) — der Unterschied liegt allein im Bestellwert. Und
 das Streudiagramm „Temperatur gegen Tagesumsatz" zeichnete Bestellungen.
 
-**Eine zweite Datenquelle** braucht eine Klasse mit denselben 35 Methoden und
+**Eine zweite Datenquelle** braucht eine Klasse mit denselben 34 Methoden und
 einen Zweig in `waehleQuelle()`. Am Dashboard ändert sich dabei keine Zeile.
 Wer MySQL, Snowflake oder ein Lakehouse anschließt, baut dort die Sichten nach
 — die Feldnamen sind die Schnittstelle.

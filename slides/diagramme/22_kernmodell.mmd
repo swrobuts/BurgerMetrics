@@ -1,0 +1,17 @@
+flowchart TB
+    subgraph S ["nur Webshop"]
+      S1["sitzung"] --> S3["warenkorbposition"]
+    end
+    subgraph K ["gemeinsamer Kern · Warenwirtschaft"]
+      K1["kunde"] --> K4["kundenbestellung"]
+      K2["filiale"] --> K4
+      K3["artikel"] --> K5["bestellposition"]
+      K4 --> K5
+    end
+    subgraph P ["nur Kasse"]
+      P1["schicht"] --> P2["kassenbon"]
+    end
+    S3 == "Kaufabschluss" ==> K4
+    P2 == "Tagesabschluss" ==> K4
+    style K4 fill:#003E6E,color:#FFFFFF,stroke:#003E6E
+    style K5 fill:#003E6E,color:#FFFFFF,stroke:#003E6E

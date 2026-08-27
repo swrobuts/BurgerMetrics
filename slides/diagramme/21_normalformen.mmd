@@ -1,0 +1,10 @@
+flowchart LR
+    N0["bestellung<br/>ein Satz für alles"]
+    N1["bestellung<br/>+ position"]
+    N2["+ artikel"]
+    N3["+ filiale<br/>+ kunde"]
+    N0 -- "1. NF<br/>Wiederholgruppe" --> N1
+    N1 -- "2. NF<br/>Teilabhängigkeit" --> N2
+    N2 -- "3. NF<br/>transitive Abhängigkeit" --> N3
+    style N0 fill:#F7EEEC,stroke:#A32638
+    style N3 fill:#003E6E,color:#FFFFFF,stroke:#003E6E

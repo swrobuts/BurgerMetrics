@@ -4,6 +4,7 @@ Abbildungsregeln
 Abschöpfung
 Abwanderungsgefährdet
 Abwanderungsgefährdete
+Aggregatfunktion
 Anbieterwechsel
 Archivpflicht
 Armbrust
@@ -44,6 +45,7 @@ Constellation
 Counter
 Cube
 DBeaver
+DDL
 DWH
 Darreichungsform
 Dashboard
@@ -68,6 +70,7 @@ Durchrechnung
 ERP-Modell
 ETL
 Ebenenwechsel
+Einfügeanomalie
 Engagement-Kennzahlen
 Entitätstyp
 Entscheidungsrelevant
@@ -76,9 +79,13 @@ Europastern
 Evidence
 Fachlichkeit
 Fact
+Faktentabelle
+Faktentabellen
 Fast-Food-Kette
+Filialadresse
 Filialfrage
 Filialreiters
+Filialstamm
 Filialtabelle
 Filialumsätze
 Filialvergleich
@@ -108,17 +115,21 @@ Joins
 KEY
 Kanalanteil
 Kann-Formulierung
+Kardinalität
 Kardinalitäten
 Kassenbeleg
 Kategoriename
 Kennzahlendefinitionen
 Kernentitäten
 Kiosk
+Klickfolge
 Klickraten
 Klickstrecke
+Klickweg
 Konfidenz
 Konversions
 Krähenfuß
+Krähenfüße
 Kundenkartenscan
 LIKE
 Lakehouse
@@ -147,7 +158,10 @@ MotherDuck
 Nachkommastellen
 Nachrechenbarkeit
 Nessie
+Normalform
+Normalformen
 Nuggets
+Nullbarkeit
 Nulllinie
 OBT
 OLAP
@@ -169,9 +183,11 @@ Prueflauf
 Qlik
 REFERENCES
 RFM-Segmentierung
+ROI
 Reaktivierungsversuch
 Rechenwerk
 Repo
+Repository
 Rill
 Roll-up
 Rumpfjahr
@@ -202,6 +218,7 @@ Testvariante
 Themenreitern
 Tragfähigkeit
 Trap
+Typkorrektur
 Umsatzrisiko
 UniForm
 Unity
@@ -213,6 +230,7 @@ Verkaufsbereich
 Versionierbarkeit
 Verzerrungsfaktor
 WHERE
+Warenkorbposition
 Wartezeitanalyse
 Webshop-ER
 Wiederkaufrate
@@ -234,6 +252,7 @@ adressierbare
 allergen
 amount
 artikel
+aufbau
 auseinandergehen
 ausgebremst
 bestelldauer
@@ -244,6 +263,7 @@ branch
 burgermetrics
 cta
 customer
+dahintersteckt
 danebenlag
 dataset
 date
@@ -255,6 +275,7 @@ diagramme
 dim
 discount
 duckdb
+durchgerechnet
 einzelpreis
 employee
 ereignistyp
@@ -265,6 +286,7 @@ handlungsleitend
 hour
 items
 kunde
+kundenbestellung
 line
 load
 mart
@@ -298,6 +320,7 @@ session
 sitzung
 slides
 slot
+sperrarm
 stg
 supplier
 time
@@ -312,6 +335,7 @@ vorführbar
 warenkorbposition
 wawi
 weather
+wiederfindbar
 zeilengleich
 zubewegen
 zufriedenheit

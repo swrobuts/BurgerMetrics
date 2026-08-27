@@ -1,22 +1,23 @@
-# Foliendecks
+# Foliendeck
 
-Drei Bauskripte, drei Decks — und ein gemeinsames Gerüst:
+Ein Bauskript, ein Deck:
 
 | Skript | Deck | Zweck |
 |---|---|---|
-| `bau_datenmodell.py` | **Datenmodell und Aufbau** (30 Folien) | Der Modellierungsweg vom Anforderungssatz über das ER-Diagramm und die Abbildungsregeln bis zum CREATE TABLE — am Shop vorgeführt —, dann das operative und das analytische Modell, die Zusammenführung als SQL und die Einordnung in Warehouse, Lake, Lakehouse und Mesh. |
-| `bau_bi.py` | **Von Kennzahlen zur Entscheidung** (39 Folien) | Der BI-Teil: die Fallstudie und ihre drei Systeme, operative gegen analytische Daten, Kennzahlen definieren und prüfen, der Weg zum Dashboard, Entscheidungen — und eine technologieoffene Bauanleitung für den Nachbau. |
-| `bau_deck.py` | **Von der Kasse bis zum Bericht** (20 Folien) | Die ältere Gesamtschau: vom operativen Modell über das Auswertungsmodell bis zur geprüften Kennzahl, mit Auswertungsfallen und Prüfhandwerk. |
+| `bau_fallstudie.py` | **Von der Fachlichkeit zum Dashboard** (53 Folien) | Die Kette in einer Linie: sechs Sätze über das Geschäft, daraus ein ER-Diagramm, daraus normalisierte Tabellen, darauf Webshop und Kasse, von deren Belegen über den Datenfluss ins Galaxy-Schema — und von dort zu Kennzahlen, Dashboard und der Frage, welche Analytics-Infrastruktur ein solches Vorhaben trägt. |
 
-`deckwerk.py` trägt, was alle brauchen: den Skill finden, den Platzhalterfehler des `spec_loader` umgehen, Absätze richtig übergeben, Diagramme und Bildschirmfotos maßstabsgetreu setzen. Ohne diese Datei stünden dieselben vierzig Zeilen mehrfach da und liefen auseinander.
+`deckwerk.py` trägt, was das Bauskript braucht: den Skill finden, den Platzhalterfehler des `spec_loader` umgehen, Absätze richtig übergeben, Diagramme und Bildschirmfotos maßstabsgetreu setzen — und melden, wenn eine Diagrammbeschriftung unter 10,5 pt fiele.
 
-Alle drei fassen zusammen, was in [`../docs/`](../docs/) ausführlich steht. Überschneidungen zwischen den Decks sind gewollt: Das Galaxy-Schema steht in beiden, einmal als Ergebnis der Modellierung, einmal als Voraussetzung der Auswertung.
+Das Deck fasst zusammen, was in [`../docs/`](../docs/) ausführlich steht.
+
+**Vorgänger.** Bis August 2026 gab es drei Decks nebeneinander — `bau_datenmodell.py`, `bau_bi.py` und das ältere `bau_deck.py`. Sie sind in `bau_fallstudie.py` aufgegangen; die Aufteilung zerriss den Weg vom Modell zur Kennzahl genau an der Stelle, an der er zusammenhängt. Die alten Skripte stehen in der Git-Historie.
 
 ---
 
+
 ## Der rote Faden
 
-**Datenmodell-Deck:** Welche Frage stellt das System — und welches Modell beantwortet sie am günstigsten? Günstig heißt drei Konten: **Schreibkosten** (einen Sachverhalt widerspruchsfrei halten), **Lesekosten** (eine Auswertung über den ganzen Bestand), **Betriebskosten** (der Apparat, der beides trägt). Das operative Modell nimmt hohe Lesekosten in Kauf, um Schreibkosten zu sparen; das Auswertungsmodell dreht das um; die Architekturen in Kapitel 4 drehen an der dritten.
+**Der Bogen.** Welche Frage stellt das System — und welches Modell beantwortet sie am günstigsten? Günstig heißt drei Konten: **Schreibkosten** (einen Sachverhalt widerspruchsfrei halten), **Lesekosten** (eine Auswertung über den ganzen Bestand), **Betriebskosten** (der Apparat, der beides trägt). Das operative Modell nimmt hohe Lesekosten in Kauf, um Schreibkosten zu sparen; das Auswertungsmodell dreht das um; die Architekturen in Kapitel 4 drehen an der dritten.
 
 **BI-Deck:** Eine Kennzahl zählt erst, wenn sie eine Entscheidung ändert. Zwischen Frage und Entscheidung liegen fünf Stationen — **Frage · Kennzahl · Modell · Werkzeug · Entscheidung** —, und an jeder kann die Antwort kippen.
 
@@ -144,10 +145,8 @@ Ohne die Variable sucht `deckwerk.py` an den üblichen Stellen und bricht mit ei
 ## Bauen
 
 ```bash
-python3 bau_datenmodell.py               # -> ../../BurgerMetrics_Datenmodell.pptx
-python3 bau_bi.py                        # -> ../../BurgerMetrics_BI.pptx
-python3 bau_deck.py                      # -> ../../BurgerMetrics_Fallstudie.pptx
-python3 bau_bi.py -o /pfad/deck.pptx     # alternatives Ziel
+python3 bau_fallstudie.py                       # -> ../../BurgerMetrics_Fallstudie.pptx
+python3 bau_fallstudie.py -o /pfad/deck.pptx    # alternatives Ziel
 ```
 
 Die Skripte melden am Ende, ob ein Baustein mehr Platz braucht, als ihm zugewiesen wurde, und beenden sich in dem Fall mit Rückgabewert 1. Solche Warnungen sind vor der Auslieferung abzuarbeiten — sie bedeuten überlaufenden Text.

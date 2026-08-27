@@ -1,0 +1,9 @@
+%%{init: {"er": {"nodeSpacing": 34, "rankSpacing": 44, "minEntityHeight": 34, "minEntityWidth": 96, "entityPadding": 10, "diagramPadding": 6}}}%%
+erDiagram
+    direction LR
+    KUNDE     ||--o{ BESTELLUNG : "gibt auf"
+    FILIALE   ||--o{ BESTELLUNG : "nimmt entgegen"
+    BESTELLUNG ||--|{ POSITION  : "besteht aus"
+    ARTIKEL   ||--o{ POSITION   : "wird bestellt als"
+    ZAHLART   ||--o{ BESTELLUNG : "begleicht"
+    AKTION    |o--o{ BESTELLUNG : "vergünstigt"
