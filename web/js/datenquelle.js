@@ -84,6 +84,8 @@ export class Datenquelle {
   rfmSegmente() { throw new Error('nicht umgesetzt'); }
   /** je Stunde und Kanal: stunde, kanal, bestellungen, anteil_pct */
   kanaeleStunde() { throw new Error('nicht umgesetzt'); }
+  /** Die fuenf meistbestellten Artikel je Bestellkanal. */
+  kanalProdukte() { throw new Error('nicht umgesetzt'); }
   /** je Niederschlagsklasse: klasse, nr, tage, umsatz_je_tag, bestellungen_je_tag */
   wetterRegen() { throw new Error('nicht umgesetzt'); }
   /** je Aktion mit Wirtschaftlichkeit: aktion, …, baseline_aov, roi */
@@ -160,6 +162,7 @@ export class PostgrestQuelle extends Datenquelle {
   simulationBasis()    { return this.hole('v_simulation_basis', 'order=umsatz.desc'); }
   rfmSegmente()        { return this.hole('v_rfm_segment', 'order=umsatz_gesamt.desc'); }
   kanaeleStunde()      { return this.hole('v_kanal_stunde', 'order=stunde,kanal'); }
+  kanalProdukte()      { return this.hole('v_kanal_produkt', 'order=kanal,rang'); }
   wetterRegen()        { return this.hole('v_wetter_regen', 'order=nr'); }
   promotionenRoi()     { return this.hole('v_promotion_roi', 'order=roi.desc'); }
   produkteJahr()       { return this.hole('v_produkt_jahr', 'jahr=eq.2025&order=menge.desc'); }

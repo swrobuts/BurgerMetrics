@@ -27,6 +27,7 @@ export async function ladeAlles(quelle) {
     wetterRegen: quelle.wetterRegen(), kohorten: quelle.kohorten(),
     warenkorb: quelle.warenkorbRegeln(), simulation: quelle.simulationBasis(),
     rfm: quelle.rfmSegmente(), kanaeleStunde: quelle.kanaeleStunde(),
+    kanalProdukte: quelle.kanalProdukte(),
     produkteJahr: quelle.produkteJahr(), einzelwerte: quelle.einzelwerte(),
     einzelwerteZusatz: quelle.einzelwerteZusatz(),
   };
@@ -106,6 +107,22 @@ export function baueReihen(d) {
   R.channelTodDrive   = todAnteil('Drive-Through');
   R.channelTodApp     = todAnteil('App Order');
   R.channelTodKiosk   = todAnteil('Kiosk');
+  // Wie stark schwankt der Kanalmix ueber den Tag? Die Spanne je Kanal ist die
+  // Groesse, die entscheidet, ob von "Morgen-" und "Abendkanaelen" ueberhaupt
+  // die Rede sein kann. Sie wird gerechnet, nicht behauptet.
+  R.channelTodSpanne = ['Counter', 'Drive-Through', 'App Order', 'Kiosk'].map(k => {
+    const w = d.kanaeleStunde.filter(x => x.kanal === k).map(x => x.anteil_pct);
+    return { kanal: KANAL_KURZ[k] ?? k, min: Math.min(...w), max: Math.max(...w),
+             spanne: Math.max(...w) - Math.min(...w) };
+  }).sort((a, b) => b.spanne - a.spanne);
+
+  // ── Spitzenartikel je Kanal ─────────────────────────────────────────────
+  // Ersetzt die frueheren zwanzig fest eingetragenen Produktnamen.
+  R.kanalProdukte = ['Counter', 'Drive-Through', 'App Order', 'Kiosk'].map(k => ({
+    kanal: KANAL_KURZ[k] ?? k,
+    artikel: d.kanalProdukte.filter(x => x.kanal === k)
+                            .sort((a, b) => a.rang - b.rang),
+  }));
 
   // ── Zahlarten ───────────────────────────────────────────────────────────
   const zahlartJahr = (name) => R.paymentYears.map(j => {

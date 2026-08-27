@@ -2060,6 +2060,355 @@ export function baueTexte(B, roh) {
     + `bedienen Kunden aus ${zahl(pmHeimat.wohnbezirke)} Wohnbezirken.`;
   // ═══ Ende der Reiter-Fragmente ═══
 
+  // =========================================================================
+  // Diagrammtitel und Unterzeilen
+  //
+  // Bis hierher waren 66 Titel- und Unterzeilen als Text im HTML eingetragen.
+  // Sie sind der gefaehrlichste Ort fuer eine Zahl: Ein Titel wird gelesen wie
+  // ein Befund, steht aber ueber einem Diagramm, das ihn nicht mehr belegen
+  // muss. Beim Abgleich gegen die Datenbank fielen sechs falsche Aussagen auf,
+  // eine davon widersprach einem anderen Titel derselben Seite.
+  //
+  // Unterzeilen beschreiben Achse und Bezugsmenge. Auch dort stehen Zahlen —
+  // "109 Monate", "8 Standorte", "188 Mitarbeiter" —, und auch die altern.
+  // =========================================================================
+  const jVon = j[0], jBis = j[j.length - 1];
+  const spanne = `${jVon}–${jBis}`;
+  const monate = B.mLabels.length;
+  const nFil = f.length;
+  // Die Monatsschluessel kommen als "2017-03" aus der Sicht. In einer Unterzeile
+  // liest sich das wie eine Kennung, nicht wie ein Datum.
+  const MON = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli',
+               'August', 'September', 'Oktober', 'November', 'Dezember'];
+  const monLang = (s) => {
+    const m = /^(\d{4})-(\d{2})/.exec(String(s));
+    return m ? `${MON[Number(m[2]) - 1]} ${m[1]}` : String(s);
+  };
+
+  // ── Umsatz, Wachstum ─────────────────────────────────────────────────────
+  // Ab welchem Jahr wuchs der Umsatz ohne Unterbrechung? Rueckwaerts suchen,
+  // statt "seit 2021" zu behaupten.
+  let seit = j[j.length - 1];
+  for (let i = B.revYoY.length - 1; i >= 0; i--) {
+    if (B.revYoY[i] <= 0) break;
+    seit = j[i + 1];
+  }
+  T['revenueChart.titel'] =
+    `Umsatz wächst seit ${seit} ohne Rückschlag — der Zuwachs wird kleiner`;
+  T['revenueChart.sub'] =
+    `Monatlicher Umsatz in € · ${zahl(monate)} Monate · ${monLang(B.mLabels[0])} bis `
+    + `${monLang(B.mLabels[monate - 1])} · alle ${nFil} Filialen`;
+
+  T['aovChart.sub']    = `Ø Bestellwert in € · Jahresdurchschnitte · ${spanne}`;
+  T['ordersChart.sub'] = `Bestellungen pro Jahr · ${spanne}`;
+
+  // Verlangsamen sich wirklich alle drei Kennzahlen? Erste gegen letzte
+  // Wachstumsrate vergleichen, je Kennzahl einzeln.
+  const yoyEnde = [
+    ['Umsatz', B.revYoY], ['Bestellungen', B.ordYoY], ['Bestellwert', B.aovYoY],
+  ].map(([n, r]) => ({ n, erst: r[0], letzt: r[r.length - 1] }));
+  const langsamer = yoyEnde.filter(x => x.letzt < x.erst);
+  T['yoyChart.titel'] = langsamer.length === yoyEnde.length
+    ? `Alle ${zahl(yoyEnde.length)} Kennzahlen wachsen langsamer als in der Frühphase`
+    : `${zahl(langsamer.length)} von ${zahl(yoyEnde.length)} Kennzahlen wachsen `
+      + `langsamer — ${langsamer.map(x => x.n).join(' und ')}`;
+  T['yoyChart.sub'] =
+    `Wachstum gegenüber dem Vorjahr in % · Umsatz, Bestellungen, Bestellwert · `
+    + `${j[1]}–${letztesVoll}`;
+
+  T['yoyBranchChart.sub'] =
+    `Kumulierter Umsatz in € · alle ${nFil} Standorte · ${spanne}`;
+
+  // ── Filialen ─────────────────────────────────────────────────────────────
+  const fAov  = [...f].sort((a, b) => b.aov - a.aov);
+  const fEff  = [...f].map(x => ({ ...x, jeJahr: x.umsatz / x.betriebsjahre }))
+                      .sort((a, b) => b.jeJahr - a.jeJahr);
+  T['branchChart.titel'] =
+    `${fUmsatz[0].branch_name} führt im Umsatz, ${fAov[0].branch_name} im Bestellwert`;
+  T['branchChart.sub'] =
+    `Kumulierter Umsatz in € · ${nFil} Standorte in Würzburg · ${spanne}`;
+  T['tblBranch.titel'] = `Filial-Scorecard — alle ${nFil} Standorte im Vergleich`;
+  T['tblBranch.sub']   = `Alle Kennzahlen je Standort · sortiert nach Umsatz`;
+
+  // Steigt der Bestellwert wirklich mit dem Eroeffnungsjahr? Rangkorrelation
+  // nach Spearman — und die Ausreisser dazu, damit "systematisch" belegt ist
+  // oder eben nicht.
+  const nachAlter = [...f].sort((a, b) =>
+    String(a.opening_date).localeCompare(String(b.opening_date)));
+  const rangAov = [...nachAlter].sort((a, b) => a.aov - b.aov)
+                                .map(x => x.branch_id);
+  const dQuad = nachAlter.reduce((s, x, i) =>
+    s + (i - rangAov.indexOf(x.branch_id)) ** 2, 0);
+  const rho = 1 - (6 * dQuad) / (nFil * (nFil ** 2 - 1));
+  const bruch = nachAlter.filter((x, i) => i > 0 && x.aov < nachAlter[i - 1].aov);
+  T['branchAovChart.titel'] =
+    `Jüngere Filialen liegen im Bestellwert vorn — aber nicht ausnahmslos`;
+  T['branchAovChart.sub'] =
+    `Ø Bestellwert in € · nach Eröffnungsdatum · ${nFil} Standorte · `
+    + `Rangkorrelation ϱ = ${zahl(rho, 2)}, ${zahl(bruch.length)} Ausnahmen`;
+  const jungJahr = new Date(nachAlter[nFil - 1].opening_date).getFullYear();
+  T['branchAovChart.warnung'] =
+    `Der Zusammenhang ist kein Beleg für bessere Standorte: Die ${jungJahr} eröffnete `
+    + `${nachAlter[nFil - 1].branch_name} hat nur Umsätze aus Jahren, in denen die `
+    + `Preise ohnehin höher lagen. `
+    + `Der Bestellwert im Netz stieg von ${euro(B.yearAOV[0])} (${jVon}) auf `
+    + `${euro(B.yearAOV[iV])} (${letztesVoll}) — ein Basiseffekt, kein Standorteffekt.`;
+
+  T['branchEfficiencyChart.titel'] =
+    `${fEff[0].branch_name} erwirtschaftet je Betriebsjahr am meisten`;
+  T['branchEfficiencyChart.sub'] =
+    `Umsatz geteilt durch Betriebsjahre · ${euro(fEff[fEff.length - 1].jeJahr, 0)} `
+    + `bis ${euro(fEff[0].jeJahr, 0)} · ${nFil} Standorte`;
+
+  // ── Produkte ─────────────────────────────────────────────────────────────
+  T['topProductsChart.sub'] =
+    `Top ${zahl(B.topProducts.length)} Artikel nach kumuliertem Umsatz · ${spanne} · `
+    + `alle ${nFil} Filialen`;
+  T['categoryChart.sub'] =
+    `Umsatzanteil nach Hauptkategorie · ${zahl(B.categories.length)} Kategorien · `
+    + `${spanne}`;
+  T['veggieChart.sub'] =
+    `Anteil vegetarischer und veganer Bestellungen in % · ${spanne}`;
+
+  const wkTop = [...roh.warenkorb].sort((a, b) => b.konfidenz_pct - a.konfidenz_pct)[0];
+  T['tblBasket.titel'] =
+    `Höchste Konfidenz: ${wkTop.produkt_a} → ${wkTop.produkt_b} bei `
+    + `${proz(wkTop.konfidenz_pct)}`;
+  T['tblBasket.sub'] =
+    `${zahl(roh.warenkorb.length)} Warenkörbe · Support, Konfidenz und Lift · `
+    + `${zahl(kumBest)} Bestellungen`;
+
+  // ── Kunden ───────────────────────────────────────────────────────────────
+  const bz = [...roh.kundenBezirke].sort((a, b) => b.kunden - a.kunden);
+  const bzSpanne = (bz[0].kunden / bz[bz.length - 1].kunden - 1) * 100;
+  T['districtChart.titel'] =
+    `Kunden gleichmäßig über die Bezirke verteilt — ${bz[0].bezirk} knapp vorn`;
+  T['loyaltyBarChart.sub'] =
+    `Kunden je Treuestufe · ${zahl(B.loyaltyCount.reduce((a, b) => a + b, 0))} Kunden`;
+
+  // Die Frequenz je Kunde ist ueber die Altersgruppen nahezu gleich. Was sich
+  // unterscheidet, ist die Zahl der Kunden — das gehoert in den Titel, sonst
+  // liest man einen Kohorteneffekt in eine Groessenverteilung hinein.
+  const alt = roh.alterUmsatz;
+  const freq = alt.map(x => ({ g: x.altersgruppe, f: x.bestellungen / x.kunden }));
+  const frqMin = Math.min(...freq.map(x => x.f));
+  const frqMax = Math.max(...freq.map(x => x.f));
+  const altTop = [...alt].sort((a, b) => b.umsatzanteil_pct - a.umsatzanteil_pct)[0];
+  T['ageRevenueChart.titel'] =
+    `Umsatzanteil folgt der Kundenzahl — die Bestellfrequenz tut es nicht`;
+  T['ageRevenueChart.sub'] =
+    `Umsatzanteil je Altersgruppe in % · ${altTop.altersgruppe} führt mit `
+    + `${proz(altTop.umsatzanteil_pct)} · Frequenz ${zahl(frqMin, 1)} bis `
+    + `${zahl(frqMax, 1)} Bestellungen je Kunde in allen ${zahl(alt.length)} Gruppen`;
+
+  // ── Kanäle ───────────────────────────────────────────────────────────────
+  const k25 = B.channelLabels.map((n, i) => ({
+    n, aov: B.channelAOV2025[i], best: B.channelOrders2025[i],
+    ums: B.channelRevenue2025[i],
+  }));
+  const kAov  = [...k25].sort((a, b) => b.aov - a.aov);
+  const kBest = [...k25].sort((a, b) => b.best - a.best);
+  const kUms  = [...k25].sort((a, b) => b.ums - a.ums);
+  T['channelAOVChart.titel'] =
+    `${letztesVoll}: höchster Bestellwert im ${kAov[0].n}, höchstes Volumen am `
+    + `${kBest[0].n}`;
+  T['channelAOVChart.sub'] =
+    `Ø Bestellwert je Kanal in € · ${letztesVoll} · `
+    + `${euro(kAov[kAov.length - 1].aov)} bis ${euro(kAov[0].aov)} · `
+    + `alle ${nFil} Filialen`;
+
+  const appJetzt = B.appData[B.appData.length - 1];
+  const appJahr = j[B.appData.length - 1];
+  const appFrueh = B.appData.find(x => x > 0);
+  T['channelRevenueChart.titel'] =
+    `${kUms[0].n} trägt den größten Umsatzanteil, App Order wächst am schnellsten`;
+
+  // Der Kanalmix ueber den Tag: die groesste Spanne aller vier Kanaele
+  // entscheidet, ob es Tageszeitkanaele gibt. Sie liegt im niedrigen
+  // einstelligen Prozentpunktbereich — also gibt es sie nicht.
+  const tod = B.channelTodSpanne[0];
+  T['channelTodChart.titel'] =
+    `Der Kanalmix ist über den ganzen Tag praktisch konstant`;
+  T['channelTodChart.sub'] =
+    `Anteil der Bestellungen in % · ${zahl(B.channelLabels.length)} Kanäle · `
+    + `${zahl(B.channelTodHours[0])}–${zahl(B.channelTodHours[B.channelTodHours.length - 1])} Uhr · `
+    + `größte Tagesschwankung ${zahl(tod.spanne, 1)} Prozentpunkte (${tod.kanal})`;
+
+  // ── Spitzenartikel je Kanal ──────────────────────────────────────────────
+  const kp = B.kanalProdukte;
+  const gleich = kp.filter(x =>
+    x.artikel.map(a => a.produkt).join('|')
+      === kp[0].artikel.map(a => a.produkt).join('|')).length;
+  T['kanalProdukte.titel'] = gleich === kp.length
+    ? `Alle ${zahl(kp.length)} Kanäle haben dieselben fünf Spitzenartikel`
+    : `${zahl(gleich)} der ${zahl(kp.length)} Kanäle haben dieselben fünf Spitzenartikel`;
+  T['kanalProdukte.sub'] =
+    `Rang nach Stückzahl · Anteil an der Stückzahl des Kanals · ${spanne}`;
+  T['kanalProdukte.deutung'] =
+    `Interpretation: Die Kanalprofile unterscheiden sich kaum. Alle `
+    + `${zahl(kp.length)} Kanäle führen ${kp[0].artikel[0].produkt}, `
+    + `${kp[0].artikel[1].produkt} und ${kp[0].artikel[2].produkt} auf den ersten `
+    + `drei Rängen; die Anteile liegen zwischen `
+    + `${proz(Math.min(...kp.flatMap(x => x.artikel.map(a => a.anteil_pct))))} und `
+    + `${proz(Math.max(...kp.flatMap(x => x.artikel.map(a => a.anteil_pct))))} der `
+    + `Stückzahl des jeweiligen Kanals. Ein Kanal ist danach kein Geschmacksprofil, `
+    + `sondern nur ein Zugangsweg.`;
+
+  // ── Zeit ─────────────────────────────────────────────────────────────────
+  T['dowChart.sub'] = `Bestellungen je Wochentag · Mo–So · ${spanne}`;
+  T['hourChart.sub'] =
+    `Bestellungen je Stunde · ${zahl(B.hourLabels[0])}–`
+    + `${zahl(B.hourLabels[B.hourLabels.length - 1])} Uhr · ${spanne}`;
+  T['heatmapGrid.sub'] =
+    `Bestellungen nach Wochentag × Stunde · Farbintensität = Volumen · ${spanne}`;
+  T['dowRevenueChart.sub'] = `Umsatz je Wochentag in € · ${spanne}`;
+  T['paymentChart.sub'] =
+    `Anteil in % · ${zahl(B.paymentYears ? 4 : 4)} Zahlungsarten · ${spanne} · `
+    + `alle ${nFil} Filialen`;
+
+  T['channelChart.titel'] =
+    `App Order steigt auf ${proz(appJetzt)} (${appJahr}) — ${kUms[0].n} gibt `
+    + `langsam ab`;
+  T['channelChart.sub'] =
+    `Anteil der Bestellungen in % · ${zahl(B.channelLabels.length)} Kanäle · ${spanne}`;
+
+  // ── RFM und Assoziation ──────────────────────────────────────────────────
+  T['rfmValueChart.sub'] =
+    `Ø Kundenwert je Segment in € · ${zahl(B.rfmSegments.length)} Segmente`;
+  T['tblRFM.titel'] =
+    `RFM-Profil der ${zahl(B.rfmSegments.length)} Segmente`;
+  T['tblRFM.sub'] =
+    `${zahl(B.rfmSegments.length)} Segmente · Recency, Frequency, Monetary · `
+    + `${zahl(roh.rfm.reduce((s, x) => s + Number(x.kunden), 0))} Kunden`;
+
+  T['liftChart.titel'] =
+    `${zahl(dmStark.length)} der ${zahl(dmWk.length)} Paare erreichen einen Lift `
+    + `über ${zahl(dmLiftStark)}`;
+  T['tblAssoc.titel'] = `Alle ${zahl(dmWk.length)} Regeln mit Lift-Metrik`;
+  T['tblAssoc.sub'] =
+    `${zahl(dmWk.length)} Regeln · sortiert nach Häufigkeit · Lift über `
+    + `${zahl(dmLiftStark)} gilt als starke Assoziation`;
+
+  // ── Simulation und Prognose ──────────────────────────────────────────────
+  T['simChart.titel'] =
+    `Preissimulation — wie eine Preisänderung auf Umsatz und Marge wirkt`;
+  // Die Prognose setzt auf dem letzten vollstaendigen Jahr auf, nicht auf dem
+  // angebrochenen — sonst waere das erste Prognosejahr zur Haelfte gemessen.
+  const pJahre = B.szenarien[0].jahre.length;
+  const pVon = letztesVoll + 1, pBis = letztesVoll + pJahre;
+  T['forecastChart.titel'] =
+    `Umsatzprognose ${pVon}–${pBis} in ${zahl(B.szenarien.length)} Szenarien`;
+  T['tblForecast.titel'] = `Szenarienvergleich — Umsatz, Bestellungen, Investition`;
+  T['tblForecast.sub'] =
+    `${zahl(B.szenarien.length)} Szenarien für ${pVon}–${pBis} · fortgeschrieben aus `
+    + `${zahl(B.revYoY.length)} Jahren beobachtetem Wachstum`;
+
+  // ── Wetter ───────────────────────────────────────────────────────────────
+  // Die Randklassen der Temperatur bestehen aus sehr wenigen Tagen. Ohne diese
+  // Zahl liest man aus einem Ausschlag einen Effekt heraus, der auf einem
+  // einzigen Tag beruht.
+  const tb = roh.wetterTemperatur;
+  const tbMin = [...tb].sort((a, b) => a.tage - b.tage)[0];
+  const tbGross = tb.filter(x => x.tage >= 100);
+  const tbHoch = [...tbGross].sort((a, b) => b.umsatz_je_tag - a.umsatz_je_tag)[0];
+  const tbTief = [...tbGross].sort((a, b) => a.umsatz_je_tag - b.umsatz_je_tag)[0];
+  T['tempBinChart.titel'] =
+    `Wärmere Tage bringen mehr Umsatz — der Abstand ist klein`;
+  T['tempBinChart.sub'] =
+    `Ø Tagesumsatz je Temperaturklasse · ${euro(tbTief.umsatz_je_tag, 0)} bis `
+    + `${euro(tbHoch.umsatz_je_tag, 0)} über Klassen mit mindestens 100 Tagen · `
+    + `die kleinste Klasse umfasst ${zahl(tbMin.tage)} `
+    + `${Number(tbMin.tage) === 1 ? 'Tag' : 'Tage'}`;
+
+  const wl = [...roh.wetterLagen].sort((a, b) => b.umsatz_je_tag - a.umsatz_je_tag);
+  T['weatherCondChart.titel'] =
+    `Zwischen bester und schwächster Wetterlage liegen `
+    + `${proz((wl[0].umsatz_je_tag / wl[wl.length - 1].umsatz_je_tag - 1) * 100)} `
+    + `Tagesumsatz`;
+  T['weatherCondChart.sub'] =
+    `Ø Tagesumsatz nach Wetterlage · ${zahl(wl.length)} Kategorien · `
+    + `${zahl(wl[wl.length - 1].tage)} bis ${zahl(wl[0].tage)} Tage je Kategorie`;
+
+  T['weatherScatterChart.titel'] =
+    `Temperatur gegen Tagesumsatz — der Wachstumstrend überlagert den Wettereffekt`;
+
+  const rg = roh.wetterRegen;
+  const rgGross = rg.filter(x => x.tage >= 100);
+  const rgHoch = [...rgGross].sort((a, b) => b.umsatz_je_tag - a.umsatz_je_tag)[0];
+  const rgKlein = [...rg].sort((a, b) => a.tage - b.tage)[0];
+  T['rainChart.titel'] = `Niederschlag zeigt keinen erkennbaren negativen Effekt`;
+  T['rainChart.sub'] =
+    `Ø Tagesumsatz je Niederschlagsklasse · ${zahl(rg.length)} Klassen · `
+    + `der höchste Wert steht über ${zahl(rgKlein.tage)} `
+    + `${Number(rgKlein.tage) === 1 ? 'Tag' : 'Tagen'} und trägt deshalb nicht`;
+
+  // ── Personal ─────────────────────────────────────────────────────────────
+  const pf = [...roh.personalFilialen].sort((a, b) => b.umsatz_je_ma - a.umsatz_je_ma);
+  const maGes = roh.personalFilialen.reduce((s, x) => s + Number(x.mitarbeiter), 0);
+  T['empProdChart.titel'] =
+    `${pf[0].branch_name} erwirtschaftet je Mitarbeiter das `
+    + `${zahl(pf[0].umsatz_je_ma / pf[pf.length - 1].umsatz_je_ma, 1)}-fache von `
+    + `${pf[pf.length - 1].branch_name}`;
+  T['empProdChart.sub'] =
+    `Kumulierter Umsatz je Mitarbeiter · ${spanne} · ${nFil} Filialen · `
+    + `${zahl(maGes)} Mitarbeiter`;
+
+  const pr = [...roh.personalRollen].sort((a, b) => b.anzahl - a.anzahl);
+  const prGes = roh.personalRollen.reduce((s, x) => s + Number(x.anzahl), 0);
+  T['empRoleChart.titel'] =
+    `${pr[0].bezeichnung} und ${pr[1].bezeichnung} stellen `
+    + `${proz(100 * (Number(pr[0].anzahl) + Number(pr[1].anzahl)) / prGes)} der Belegschaft`;
+  T['empRoleChart.sub'] =
+    `${zahl(roh.personalRollen.length)} Rollen · Anzahl und Ø-Stundenlohn · `
+    + `${zahl(prGes)} Mitarbeiter`;
+
+  // ── Zufriedenheit ────────────────────────────────────────────────────────
+  const zk = [...roh.zufriedenheitKanal].sort((a, b) => b.zufriedenheit - a.zufriedenheit);
+  T['satChannelChart.titel'] =
+    `${zk[0].kanal} liegt mit ${zahl(zk[0].zufriedenheit, 2)} vorn, `
+    + `${zk[zk.length - 1].kanal} mit ${zahl(zk[zk.length - 1].zufriedenheit, 2)} hinten`;
+  T['satChannelChart.sub'] =
+    `Ø Zufriedenheit je Kanal · Skala 1 bis 5 · Spanne `
+    + `${zahl(zk[0].zufriedenheit - zk[zk.length - 1].zufriedenheit, 2)} Punkte über `
+    + `${zahl(roh.zufriedenheitKanal.reduce((s, x) => s + Number(x.bewertungen), 0))} `
+    + `Bewertungen`;
+
+  // Wo faellt die Zufriedenheit? Die erste Klasse, die deutlich unter der
+  // besten liegt — die Klassengrenzen kommen aus der Sicht, nicht aus dem Kopf.
+  const zd = roh.zufriedenheitDauer;
+  const zdBest = Math.max(...zd.map(x => x.zufriedenheit));
+  // Ab welcher Klasse faellt die Zufriedenheit spuerbar? Ein Zehntelpunkt auf
+  // einer Skala von 1 bis 5 — darunter ist es Rauschen, nicht Erfahrung.
+  const zdFall = zd.find(x => zdBest - x.zufriedenheit > 0.1);
+  T['satDurationChart.titel'] = zdFall
+    ? `Zufriedenheit bleibt stabil und fällt erst ab ${zdFall.dauer_klasse} Minuten`
+    : `Zufriedenheit bleibt über alle Bearbeitungsdauern stabil`;
+  T['satDurationChart.sub'] =
+    `Ø Zufriedenheit nach Bearbeitungsdauer · ${zahl(zd.length)} Klassen · `
+    + `${zahl(Math.min(...zd.map(x => x.zufriedenheit)), 2)} bis `
+    + `${zahl(zdBest, 2)} Punkte`;
+
+  const sh = B.satHourVal, shMin = Math.min(...sh), shMax = Math.max(...sh);
+  T['satHourChart.titel'] =
+    `Zufriedenheit über den Tag: ${zahl(shMax - shMin, 2)} Punkte zwischen bester `
+    + `und schwächster Stunde`;
+  T['satHourChart.sub'] =
+    `Ø Zufriedenheit je Stunde · ${zahl(B.satHours[0])}–`
+    + `${zahl(B.satHours[B.satHours.length - 1])} Uhr · Skala 1 bis 5`;
+
+  const psUnter = B.promoNames.filter((n, i) => B.promoAvgSat[i] < B.satBasis);
+  T['promoSatChart.titel'] = psUnter.length === 0
+    ? `Jede Aktion liegt über der Zufriedenheit ohne Aktion`
+    : `Alle Aktionen liegen über der Basislinie — außer ${psUnter.join(' und ')}`;
+
+  // ── Standortvergleich ────────────────────────────────────────────────────
+  T['tblGeo.titel'] =
+    `${fUmsatz[0].branch_name} mit dem höchsten Umsatz, ${fAov[0].branch_name} mit `
+    + `dem höchsten Bestellwert`;
+  T['tblGeo.sub'] =
+    `${nFil} Standorte · Umsatz, Flächenproduktivität, Mietquote · Würzburg`;
+
+
   return T;
 }
 

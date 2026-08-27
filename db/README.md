@@ -22,6 +22,7 @@ bleiben die Quelle der Wahrheit; die Datenbank ist ihr Abbild.
 | `aufbau/0011_promotion_uplift.sql` | Warenkorb vor Rabatt statt des tautologischen ROI |
 | `aufbau/0012_diagrammwerte.sql` | Basislinie der Zufriedenheit — die letzte Zahl, die noch im Skript stand |
 | `aufbau/0013_operative_sichten.sql` | Speisekarte und Filialliste für Shop und Kasse |
+| `aufbau/0014_kanal_produkte.sql` | Die fünf meistbestellten Artikel je Kanal — ersetzt die letzte Musterdatenliste |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 
 ```bash

@@ -165,5 +165,42 @@ export function fuelleTabellen(B, roh) {
     f.has_drive_through ? 'Ja' : 'Nein',
   ])));
 
+  n += fuelleKanalProdukte(B);
   return n;
+}
+
+
+// ---------------------------------------------------------------------------
+// Spitzenartikel je Kanal. Frueher zwanzig Produktnamen im HTML, deklariert
+// als "Musterdaten". Sie waren sogar richtig — falsch war die Ueberschrift
+// darueber: Drei der vier Kanaele haben dieselben fuenf Artikel in derselben
+// Reihenfolge. Der Rang bekommt hier den Mengenanteil an die Seite, damit
+// sichtbar wird, wie klein die Unterschiede sind.
+// ---------------------------------------------------------------------------
+const RAND = { 'Counter': 'var(--bar)', 'Drive-Through': 'var(--bar-light)',
+               'App': 'var(--green)', 'Kiosk': 'var(--orange)' };
+
+function fuelleKanalProdukte(B) {
+  const wurzel = document.getElementById('kanalProdukte');
+  if (!wurzel || !B.kanalProdukte) return 0;
+  wurzel.textContent = '';
+  B.kanalProdukte.forEach(k => {
+    const sp = document.createElement('div');
+    const kopf = document.createElement('div');
+    kopf.style.cssText = 'font-size:10px;font-weight:700;color:var(--muted);'
+      + 'text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;'
+      + 'padding-bottom:6px;border-bottom:2px solid ' + (RAND[k.kanal] ?? 'var(--bar)');
+    kopf.textContent = k.kanal;
+    sp.appendChild(kopf);
+    const liste = document.createElement('div');
+    liste.style.cssText = 'font-size:11px;line-height:2;color:var(--ink-light)';
+    k.artikel.forEach(a => {
+      const z = document.createElement('div');
+      z.textContent = `${a.rang}. ${a.produkt} · ${proz(a.anteil_pct)}`;
+      liste.appendChild(z);
+    });
+    sp.appendChild(liste);
+    wurzel.appendChild(sp);
+  });
+  return B.kanalProdukte.reduce((s, k) => s + k.artikel.length, 0);
 }

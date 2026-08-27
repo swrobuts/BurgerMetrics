@@ -136,6 +136,12 @@
     .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
     .chart-title { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.35; }
     .chart-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    /* Methodenhinweis unter einem Diagramm: warum die naheliegende Deutung
+       nicht traegt. Bewusst anders gefaerbt als die Unterzeile — es ist eine
+       Einschraenkung, keine Achsenbeschriftung. */
+    .chart-warn { font-size: 10px; color: var(--orange); margin-top: 6px;
+                  line-height: 1.5; border-left: 2px solid var(--orange);
+                  padding-left: 8px; }
 
     /* ── Toggle Switches ── */
     .toggle-group {
@@ -845,7 +851,7 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Umsatz wächst seit 2021 kontinuierlich — Wachstum verlangsamt sich aber</div><div class="chart-sub">Monatlicher Umsatz in € · 109 Monate · März 2017 – März 2026 · Alle Filialen</div></div>
+<div><div class="chart-title" data-txt="revenueChart.titel"></div><div class="chart-sub" data-txt="revenueChart.sub"></div></div>
 <div class="toggle-group" id="toggleRevenue">
 <button class="toggle-btn active" data-mode="monat" onclick="switchRevenue('monat')">Monat</button>
 <button class="toggle-btn" data-mode="quartal" onclick="switchRevenue('quartal')">Quartal</button>
@@ -858,7 +864,7 @@
 <div class="grid-2">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="aovChart.titel"></div><div class="chart-sub">AOV in € · Jahresdurchschnitte · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="aovChart.titel"></div><div class="chart-sub" data-txt="aovChart.sub"></div></div>
 <div class="toggle-group" id="toggleAOV">
 <button class="toggle-btn active" data-mode="jahr" onclick="switchAOV('jahr')">Jahr</button>
 </div>
@@ -868,7 +874,7 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="ordersChart.titel"></div><div class="chart-sub">Bestellungen pro Jahr · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="ordersChart.titel"></div><div class="chart-sub" data-txt="ordersChart.sub"></div></div>
 <div class="toggle-group" id="toggleOrders">
 <button class="toggle-btn active" data-mode="jahr" onclick="switchOrders('jahr')">Jahr</button>
 </div>
@@ -882,7 +888,7 @@
 <div class="sub-content" id="sub_uebersicht_yoy">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Wachstum verlangsamt sich auf allen drei KPIs synchron</div><div class="chart-sub">Year-over-Year-Wachstum in % · Umsatz, Bestellungen, AOV · 2018–2025</div></div>
+<div><div class="chart-title" data-txt="yoyChart.titel"></div><div class="chart-sub" data-txt="yoyChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="yoyChart"></canvas></div>
 <div class="legend-row">
@@ -894,7 +900,7 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="yoyBranchChart.titel"></div><div class="chart-sub">Kumulierter Umsatz in € · Alle 8 Standorte · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="yoyBranchChart.titel"></div><div class="chart-sub" data-txt="yoyBranchChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="yoyBranchChart"></canvas></div>
 <div class="interpretation" data-txt="yoyBranchChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="yoyBranchChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
@@ -932,14 +938,14 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Europastern führt im Umsatz, Mainfrankenpark im Bestellwert</div><div class="chart-sub">Kumulierter Umsatz in € · 8 Standorte in Würzburg · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="branchChart.titel"></div><div class="chart-sub" data-txt="branchChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="branchChart"></canvas></div>
 <div class="interpretation" data-txt="branchChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="branchChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card table-card" style="overflow-x:auto">
-<div class="chart-title" style="margin-bottom:4px">Filial-Scorecard</div>
-<div class="chart-sub" style="margin-bottom:10px">Alle KPIs je Standort · sortiert nach Umsatz</div>
+<div class="chart-title" style="margin-bottom:4px" data-txt="tblBranch.titel"></div>
+<div class="chart-sub" style="margin-bottom:10px" data-txt="tblBranch.sub"></div>
 <div class="table-toolbar">
 <input class="table-search" oninput="filterTable('tblBranch',this.value)" placeholder="Suchen…" type="text"/>
 <span class="group-label">Gruppieren:</span>
@@ -959,14 +965,15 @@
 <div class="sub-content" id="sub_filialen_aov">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Neuere Filialen erzielen systematisch höhere Bestellwerte</div><div class="chart-sub">AOV in € · Sortiert nach Eröffnungsdatum · 8 Standorte</div></div>
+<div><div class="chart-title" data-txt="branchAovChart.titel"></div><div class="chart-sub" data-txt="branchAovChart.sub"></div>
+<div class="chart-warn" data-txt="branchAovChart.warnung"></div></div>
 </div>
 <div class="chart-area"><canvas id="branchAovChart"></canvas></div>
 <div class="interpretation" data-txt="branchAovChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="branchAovChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Umsatz pro Betriebsjahr — Mainfrankenpark ist der produktivste Standort</div><div class="chart-sub">Umsatz geteilt durch Anzahl aktiver Jahre · normalisierter Vergleich</div></div>
+<div><div class="chart-title" data-txt="branchEfficiencyChart.titel"></div><div class="chart-sub" data-txt="branchEfficiencyChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="branchEfficiencyChart"></canvas></div>
 <div class="interpretation" data-txt="branchEfficiencyChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="branchEfficiencyChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
@@ -1004,7 +1011,7 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="topProductsChart.titel"></div><div class="chart-sub">Top 15 Produkte nach kumuliertem Umsatz · 2017–2026 · Alle Filialen</div></div>
+<div><div class="chart-title" data-txt="topProductsChart.titel"></div><div class="chart-sub" data-txt="topProductsChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="topProductsChart"></canvas></div>
 <div class="interpretation" data-txt="topProductsChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="topProductsChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
@@ -1014,22 +1021,22 @@
 <div class="grid-2">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="categoryChart.titel"></div><div class="chart-sub">Umsatzanteil nach Hauptkategorie · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="categoryChart.titel"></div><div class="chart-sub" data-txt="categoryChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="categoryChart"></canvas></div>
 <div class="interpretation" data-txt="categoryChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="categoryChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="veggieChart.titel"></div><div class="chart-sub">Anteil vegetarisch/veganer Bestellungen in % · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="veggieChart.titel"></div><div class="chart-sub" data-txt="veggieChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="veggieChart"></canvas></div>
 <div class="interpretation" data-txt="veggieChart.deutung"><strong>Interpretation:</strong><div class="recommendation"><strong>Handlungsempfehlung:</strong> Die Menü-Architektur sollte den Veggie-Trend reflektieren: Pflanzliche Optionen als Default-Position auf der Karte (nicht als Alternative). Lieferantenverträge für pflanzliche Patties auf 18 Monate verlängern, um Preisstabilität zu sichern.</div></div>
 </div>
 </div>
 <div class="chart-card table-card" style="overflow-x:auto">
-<div class="chart-title" style="margin-bottom:4px">Produktkombinationen mit der höchsten Konfidenz — Grundlage für Bundle-Pricing</div>
-<div class="chart-sub" style="margin-bottom:10px">Top 10 Warenkörbe · Market-Basket-Analyse · Support &amp; Confidence</div>
+<div class="chart-title" style="margin-bottom:4px" data-txt="tblBasket.titel"></div>
+<div class="chart-sub" style="margin-bottom:10px" data-txt="tblBasket.sub"></div>
 <div class="table-toolbar">
 <input class="table-search" oninput="filterTable('tblBasket',this.value)" placeholder="Suchen…" type="text"/>
 <span class="table-count" id="tblBasket_count">10 Zeilen</span>
@@ -1113,7 +1120,7 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Kunden gleichmäßig über Bezirke verteilt — Rottenbauer knapp vorne</div><div class="chart-sub" data-txt="districtChart.sub"></div></div>
+<div><div class="chart-title" data-txt="districtChart.titel"></div><div class="chart-sub" data-txt="districtChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="districtChart"></canvas></div>
 <div class="interpretation" data-txt="districtChart.deutung"><strong>Interpretation:</strong><div class="recommendation"><strong>Handlungsempfehlung:</strong> Die gleichmäßige Verteilung zeigt, dass BurgerMetrics keine einzelne Kern-Region hat, sondern stadtweit penetriert. Marketing-Budgets sollten entsprechend breit gestreut werden. Bezirke mit Filiale haben keinen erkennbaren Kundenvorteil — die Marke wirkt überregional.</div></div>
@@ -1122,14 +1129,14 @@
 <div class="sub-content" id="sub_kunden_segmente">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="loyaltyBarChart.titel"></div><div class="chart-sub">Loyalty-Tier-Verteilung · Absolute Kundenzahlen</div></div>
+<div><div class="chart-title" data-txt="loyaltyBarChart.titel"></div><div class="chart-sub" data-txt="loyaltyBarChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="loyaltyBarChart"></canvas></div>
 <div class="interpretation" data-txt="loyaltyBarChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="loyaltyBarChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Bestellfrequenz nach Altersgruppe — 25–34 an erster Stelle</div><div class="chart-sub">Geschätzter Umsatzanteil pro Kohorte · basierend auf Kundenzahl und Ø-Frequenz</div></div>
+<div><div class="chart-title" data-txt="ageRevenueChart.titel"></div><div class="chart-sub" data-txt="ageRevenueChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="ageRevenueChart"></canvas></div>
 <div class="interpretation" data-txt="ageRevenueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="ageRevenueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
@@ -1168,14 +1175,14 @@
 <div class="grid-2">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Kanäle 2025 — höchster Bestellwert im Drive-Through, höchstes Volumen am Counter</div><div class="chart-sub">Ø Bestellwert pro Kanal in € · 2025 · Alle Filialen</div></div>
+<div><div class="chart-title" data-txt="channelAOVChart.titel"></div><div class="chart-sub" data-txt="channelAOVChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="channelAOVChart"></canvas></div>
 <div class="interpretation" data-txt="channelAOVChart.deutung"><strong>Interpretation:</strong><div class="recommendation"><strong>Handlungsempfehlung:</strong> Die geringe AOV-Spreizung zwischen Kanälen deutet auf einheitliches Bestellverhalten hin. Potenzial liegt eher in Volumensteigerung als in AOV-Optimierung einzelner Kanäle. Upselling-Maßnahmen in App und Kiosk könnten den AOV über das Netzwerk-Mittel heben.</div></div>
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Umsatzanteil je Kanal — Counter mit dem größten Anteil, App Order mit steigendem Anteil</div><div class="chart-sub" data-txt="channelRevenueChart.sub"></div></div>
+<div><div class="chart-title" data-txt="channelRevenueChart.titel"></div><div class="chart-sub" data-txt="channelRevenueChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="channelRevenueChart"></canvas></div>
 <div class="interpretation" data-txt="channelRevenueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="channelRevenueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
@@ -1185,7 +1192,7 @@
 <div class="sub-content" id="sub_kanaele_detail">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Tageszeiten-Verteilung nach Kanal — Drive-Through mit höherem Morgenanteil, App Order mit höherem Abendanteil</div><div class="chart-sub">Anteil der Bestellungen in % · 4 Kanäle · 06:00–22:00 Uhr</div></div>
+<div><div class="chart-title" data-txt="channelTodChart.titel"></div><div class="chart-sub" data-txt="channelTodChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="channelTodChart"></canvas></div>
 <div class="legend-row">
@@ -1197,52 +1204,10 @@
 <div class="interpretation" data-txt="channelTodChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="channelTodChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card table-card" style="overflow-x:auto">
-<div class="chart-title" style="margin-bottom:4px">Top-5 Produkte je Kanal — Bestellpräferenzen unterscheiden sich deutlich</div>
-<div class="chart-sub" style="margin-bottom:14px">Ranking nach Bestellhäufigkeit · Musterdaten kompatibel mit fact_orders.csv × dim_product.csv</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
-<div>
-<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar)">Counter</div>
-<div style="font-size:11px;line-height:2;color:var(--ink-light)">
-<div>1. Cola 0,5l</div>
-<div>2. Medium Fries</div>
-<div>3. Cola 0,3l</div>
-<div>4. Coffee</div>
-<div>5. Beyond Burger</div>
-</div>
-</div>
-<div>
-<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bar-light)">Drive-Through</div>
-<div style="font-size:11px;line-height:2;color:var(--ink-light)">
-<div>1. Cola 0,5l</div>
-<div>2. Medium Fries</div>
-<div>3. Cola 0,3l</div>
-<div>4. Coffee</div>
-<div>5. Small Fries</div>
-</div>
-</div>
-<div>
-<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--green)">App</div>
-<div style="font-size:11px;line-height:2;color:var(--ink-light)">
-<div>1. Cola 0,5l</div>
-<div>2. Medium Fries</div>
-<div>3. Cola 0,3l</div>
-<div>4. Coffee</div>
-<div>5. Beyond Burger</div>
-</div>
-</div>
-<div>
-<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--orange)">Kiosk</div>
-<div style="font-size:11px;line-height:2;color:var(--ink-light)">
-<div>1. Cola 0,5l</div>
-<div>2. Medium Fries</div>
-<div>3. Cola 0,3l</div>
-<div>4. Coffee</div>
-<div>5. Beyond Burger</div>
-</div>
-</div>
-</div>
-<div class="interpretation" style="margin-top:16px">
-<strong>Interpretation:</strong> Die Kanalprofile zeigen überraschend geringe Unterschiede: Alle vier Kanäle haben dieselben Top-3 (Cola 0,5l, Medium Fries, Cola 0,3l). Die Bestellpräferenzen variieren kaum nach Kanal — die Kunden bestellen kanalübergreifend ähnlich.
+<div class="chart-title" data-txt="kanalProdukte.titel"></div>
+<div class="chart-sub" data-txt="kanalProdukte.sub" style="margin-bottom:14px"></div>
+<div id="kanalProdukte" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px"></div>
+<div class="interpretation" style="margin-top:16px" data-txt="kanalProdukte.deutung"><strong>Interpretation:</strong>
         <div class="recommendation" data-txt="kanaele_tabelle3.empfehlung"><strong>Handlungsempfehlung:</strong></div>
 </div>
 </div>
@@ -1279,14 +1244,14 @@
 <div class="grid-2">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="dowChart.titel"></div><div class="chart-sub">Bestellungen pro Wochentag · Mo–So · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="dowChart.titel"></div><div class="chart-sub" data-txt="dowChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="dowChart"></canvas></div>
 <div class="interpretation" data-txt="dowChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="dowChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="hourChart.titel"></div><div class="chart-sub">Bestellungen pro Stunde · 06:00–23:00 · Gesamtzeitraum</div></div>
+<div><div class="chart-title" data-txt="hourChart.titel"></div><div class="chart-sub" data-txt="hourChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="hourChart"></canvas></div>
 <div class="interpretation" data-txt="hourChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="hourChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
@@ -1296,13 +1261,13 @@
 <div class="sub-content" id="sub_zeit_heatmap">
 <div class="chart-card">
 <div class="chart-title" data-txt="zeitanalyse_tabelle2.titel" style="margin-bottom:4px"></div>
-<div class="chart-sub" style="margin-bottom:16px">Bestellungen nach Wochentag × Stunde · Farbintensität = Volumen · 2017–2026</div>
+<div class="chart-sub" style="margin-bottom:16px" data-txt="heatmapGrid.sub"></div>
 <div class="heatmap-grid" id="heatmapGrid"></div>
 <div class="interpretation" data-txt="zeitanalyse_tabelle2.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="zeitanalyse_tabelle2.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="dowRevenueChart.titel"></div><div class="chart-sub">Umsatz pro Wochentag in € · Gesamtzeitraum · 2017–2026</div></div>
+<div><div class="chart-title" data-txt="dowRevenueChart.titel"></div><div class="chart-sub" data-txt="dowRevenueChart.sub"></div></div>
 </div>
 <div class="chart-area"><canvas id="dowRevenueChart"></canvas></div>
 <div class="interpretation" data-txt="dowRevenueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="dowRevenueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
@@ -1339,7 +1304,7 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="paymentChart.titel"></div><div class="chart-sub">Anteil in % · 4 Zahlungsarten · 2017–2026 · Alle Filialen</div></div>
+<div><div class="chart-title" data-txt="paymentChart.titel"></div><div class="chart-sub" data-txt="paymentChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="paymentChart"></canvas></div>
 <div class="legend-row">
@@ -1379,7 +1344,7 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">App-Bestellungen verdoppeln sich alle 2 Jahre — Counter verliert stetig</div><div class="chart-sub">Anteil in % · 4 Kanäle · 2017–2026 · Omnichannel-Transformation</div></div>
+<div><div class="chart-title" data-txt="channelChart.titel"></div><div class="chart-sub" data-txt="channelChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="channelChart"></canvas></div>
 <div class="legend-row">
@@ -1430,15 +1395,15 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title" data-txt="rfmValueChart.titel"></div><div class="chart-sub">Ø Customer Lifetime Value pro Segment in €</div></div>
+<div><div class="chart-title" data-txt="rfmValueChart.titel"></div><div class="chart-sub" data-txt="rfmValueChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="rfmValueChart"></canvas></div>
 <div class="interpretation" data-txt="rfmValueChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="rfmValueChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 </div>
 <div class="chart-card table-card" style="overflow-x:auto">
-<div class="chart-title" style="margin-bottom:4px">RFM-Segment-Profiling — Basis für CRM-Maßnahmen</div>
-<div class="chart-sub" style="margin-bottom:10px">7 Segmente · Recency, Frequency, Monetary · Handlungscluster</div>
+<div class="chart-title" style="margin-bottom:4px" data-txt="tblRFM.titel"></div>
+<div class="chart-sub" style="margin-bottom:10px" data-txt="tblRFM.sub"></div>
 <div class="table-toolbar">
 <input class="table-search" oninput="filterTable('tblRFM',this.value)" placeholder="Suchen…" type="text"/>
 <span class="table-count" id="tblRFM_count">7 Zeilen</span>
@@ -1477,14 +1442,14 @@
 </div>
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Lift-Analyse — drei Produktpaare mit Lift über 1, übrige ohne nachweisbaren Zusammenhang</div><div class="chart-sub" data-txt="liftChart.sub"></div></div>
+<div><div class="chart-title" data-txt="liftChart.titel"></div><div class="chart-sub" data-txt="liftChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="liftChart"></canvas></div>
 <div class="interpretation" data-txt="liftChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="liftChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card table-card" style="overflow-x:auto">
-<div class="chart-title" style="margin-bottom:4px">Assoziationsregeln mit Lift-Metrik — vollständige Übersicht</div>
-<div class="chart-sub" style="margin-bottom:10px">15 Regeln · sortiert nach Häufigkeit · Lift &gt; 2 = starke Assoziation</div>
+<div class="chart-title" style="margin-bottom:4px" data-txt="tblAssoc.titel"></div>
+<div class="chart-sub" style="margin-bottom:10px" data-txt="tblAssoc.sub"></div>
 <div class="table-toolbar">
 <input class="table-search" oninput="filterTable('tblAssoc',this.value)" placeholder="Suchen…" type="text"/>
 <span class="table-count" id="tblAssoc_count">15 Zeilen</span>
@@ -1502,7 +1467,7 @@
 <div class="sub-content active" id="sub_sim_preis">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Preissimulation — Wie wirken Preisänderungen auf Umsatz und Marge?</div><div class="chart-sub" data-txt="simChart.sub"></div></div>
+<div><div class="chart-title" data-txt="simChart.titel"></div><div class="chart-sub" data-txt="simChart.sub"></div></div>
 </div>
 <div style="margin-bottom:16px">
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
@@ -1548,7 +1513,7 @@
 <div class="sub-content" id="sub_sim_prognose">
 <div class="chart-card">
 <div class="chart-header">
-<div><div class="chart-title">Umsatzprognose 2026–2028 — drei Wachstumsszenarien</div><div class="chart-sub" data-txt="forecastChart.sub"></div></div>
+<div><div class="chart-title" data-txt="forecastChart.titel"></div><div class="chart-sub" data-txt="forecastChart.sub"></div></div>
 </div>
 <div class="chart-area tall"><canvas id="forecastChart"></canvas></div>
 <div class="legend-row">
@@ -1560,8 +1525,8 @@
 <div class="interpretation" data-txt="forecastChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="forecastChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card table-card" style="overflow-x:auto">
-<div class="chart-title" style="margin-bottom:4px">Szenario-Vergleich — Umsatz, Bestellungen, Investitionsbedarf</div>
-<div class="chart-sub" style="margin-bottom:10px">Drei Szenarien für 2026–2028 · basierend auf historischen Wachstumsmustern</div>
+<div class="chart-title" style="margin-bottom:4px" data-txt="tblForecast.titel"></div>
+<div class="chart-sub" style="margin-bottom:10px" data-txt="tblForecast.sub"></div>
 <table class="data-table" id="tblForecast">
 <thead><tr><th>Szenario</th><th>Wachstum</th><th>Umsatz 2026</th><th>Umsatz 2027</th><th>Umsatz 2028</th><th>Investition</th><th>ROI (3J)</th></tr></thead>
 <tbody></tbody>
@@ -1574,7 +1539,7 @@
 <!-- Sub: Temperatur-Impact -->
 <div class="sub-content active" id="sub_wetter_temp">
 <div class="chart-card">
-<div><div class="chart-title">Temperatur bestimmt den Tagesumsatz — Sommer-Boost ab 15 °C</div>
+<div><div class="chart-title" data-txt="tempBinChart.titel"></div>
 <div class="chart-sub" data-txt="tempBinChart.sub"></div></div>
 <div class="kpi-row">
 <div class="kpi-card" data-kpi="wetter1"><div class="kpi-label">WÄRMSTE TAGE (25–30°C)</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-delta pos"></div><div class="kpi-context"></div></div>
@@ -1586,22 +1551,22 @@
 <div class="interpretation" data-txt="tempBinChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="tempBinChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
-<div><div class="chart-title">Wetterlage beeinflusst Besuchsfrequenz stärker als Zufriedenheit</div>
-<div class="chart-sub">Ø Tagesumsatz nach Wetterkondition · 5 Kategorien</div></div>
+<div><div class="chart-title" data-txt="weatherCondChart.titel"></div>
+<div class="chart-sub" data-txt="weatherCondChart.sub"></div></div>
 <div class="chart-area"><canvas id="weatherCondChart"></canvas></div>
 </div>
 </div>
 <!-- Sub: Scatter & Niederschlag -->
 <div class="sub-content" id="sub_wetter_scatter">
 <div class="chart-card">
-<div><div class="chart-title">Temperatur vs. Tagesumsatz — der Wachstumstrend überlagert den Wettereffekt</div>
+<div><div class="chart-title" data-txt="weatherScatterChart.titel"></div>
 <div class="chart-sub" data-txt="weatherScatterChart.sub"></div></div>
 <div class="chart-area xtall"><canvas id="weatherScatterChart"></canvas></div>
 <div class="interpretation"><strong>Interpretation:</strong> Der Scatter-Plot zeigt den Grund für die niedrige Korrelation: Die vertikale Streuung zeigt, dass identische Temperaturen 2017 vs. 2025 völlig unterschiedliche Umsätze erzeugen — der Wachstumstrend dominiert. Innerhalb eines Jahres wäre die Temperatur-Korrelation deutlich stärker.</div>
 </div>
 <div class="chart-card">
-<div><div class="chart-title">Niederschlag zeigt keinen klaren negativen Effekt</div>
-<div class="chart-sub">Ø Tagesumsatz nach Niederschlagsmenge · 5 Klassen</div></div>
+<div><div class="chart-title" data-txt="rainChart.titel"></div>
+<div class="chart-sub" data-txt="rainChart.sub"></div></div>
 <div class="chart-area"><canvas id="rainChart"></canvas></div>
 <div class="interpretation"><strong>Interpretation:</strong> Überraschenderweise sinkt der Umsatz nicht mit steigendem Regen. Die Kategorie &gt;10mm zeigt sogar den höchsten Wert — allerdings basierend auf nur 7 Tagen. Regen treibt vermutlich Drive-Through-Nutzung, was den Counter-Verlust kompensiert.</div>
 </div>
@@ -1612,8 +1577,8 @@
 <!-- Sub: Produktivität -->
 <div class="sub-content active" id="sub_personal_prod">
 <div class="chart-card">
-<div><div class="chart-title">Europastern und Hauptbahnhof liefern doppelte Produktivität pro Mitarbeiter</div>
-<div class="chart-sub">Umsatz pro Mitarbeiter (kum. 2017–2026) · 8 Filialen · 188 Mitarbeiter</div></div>
+<div><div class="chart-title" data-txt="empProdChart.titel"></div>
+<div class="chart-sub" data-txt="empProdChart.sub"></div></div>
 <div class="kpi-row">
 <div class="kpi-card" data-kpi="personal1"><div class="kpi-label">TOP: EUROPASTERN</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
 <div class="kpi-card" data-kpi="personal2"><div class="kpi-label">BOTTOM: ZELLERAU</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
@@ -1624,15 +1589,15 @@
 <div class="interpretation" data-txt="empProdChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="empProdChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
-<div><div class="chart-title">Rollenverteilung &amp; Vergütung — Kassierer und Köche bilden das Rückgrat</div>
-<div class="chart-sub">5 Rollen · Ø-Stundenlohn · Vollzeitquote</div></div>
+<div><div class="chart-title" data-txt="empRoleChart.titel"></div>
+<div class="chart-sub" data-txt="empRoleChart.sub"></div></div>
 <div class="chart-area"><canvas id="empRoleChart"></canvas></div>
 </div>
 </div>
 <!-- Sub: Zufriedenheit -->
 <div class="sub-content" id="sub_personal_sat">
 <div class="chart-card">
-<div><div class="chart-title">App-Bestellungen generieren signifikant höhere Zufriedenheit</div>
+<div><div class="chart-title" data-txt="satChannelChart.titel"></div>
 <div class="chart-sub" data-txt="satChannelChart.sub"></div></div>
 <div class="kpi-row">
 <div class="kpi-card" data-kpi="personal5"><div class="kpi-label">GESAMT Ø ZUFRIEDENHEIT</div><div class="kpi-value" style="font-size:22px"></div><div class="kpi-context"></div></div>
@@ -1643,14 +1608,14 @@
 <div class="chart-area"><canvas id="satChannelChart"></canvas></div>
 </div>
 <div class="chart-card">
-<div><div class="chart-title">Zufriedenheit bleibt bis 12 Min. stabil und fällt ab 13 Min. deutlich</div>
-<div class="chart-sub">Ø Satisfaction Score nach Bearbeitungsdauer · 6 Klassen</div></div>
+<div><div class="chart-title" data-txt="satDurationChart.titel"></div>
+<div class="chart-sub" data-txt="satDurationChart.sub"></div></div>
 <div class="chart-area"><canvas id="satDurationChart"></canvas></div>
 <div class="interpretation" data-txt="satDurationChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="satDurationChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
-<div><div class="chart-title">Zufriedenheit nach Tageszeit — Mittagstief bei 12–13 Uhr</div>
-<div class="chart-sub">Ø Satisfaction Score pro Stunde · 06:00–23:00</div></div>
+<div><div class="chart-title" data-txt="satHourChart.titel"></div>
+<div class="chart-sub" data-txt="satHourChart.sub"></div></div>
 <div class="chart-area tall"><canvas id="satHourChart"></canvas></div>
 </div>
 </div>
@@ -1672,7 +1637,7 @@
 <div class="interpretation" data-txt="promoROIChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="promoROIChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
-<div><div class="chart-title">Promo-Zufriedenheit liegt überall über Baseline — außer COVID Delivery</div>
+<div><div class="chart-title" data-txt="promoSatChart.titel"></div>
 <div class="chart-sub" data-txt="promoSatChart.sub"></div></div>
 <div class="chart-area xtall"><canvas id="promoSatChart"></canvas></div>
 </div>
@@ -1692,8 +1657,8 @@
 <div class="interpretation" data-txt="cohortChart.deutung"><strong>Interpretation:</strong><div class="recommendation" data-txt="cohortChart.empfehlung"><strong>Handlungsempfehlung:</strong></div></div>
 </div>
 <div class="chart-card">
-<div><div class="chart-title">Filial-Scorecard — Europastern mit dem höchsten Umsatz, Zellerau mit dem höchsten Bestellwert</div>
-<div class="chart-sub">8 Standorte · Umsatz, Effizienz, Miete · Lat/Lon Würzburg</div></div>
+<div><div class="chart-title" data-txt="tblGeo.titel"></div>
+<div class="chart-sub" data-txt="tblGeo.sub"></div></div>
 <div class="chart-card table-card">
 <table class="data-table" id="tblGeo">
 <thead><tr><th>Filiale</th><th>Typ</th><th>Umsatz</th><th>€/m²</th><th>Mietquote</th><th>AOV</th><th>Sat.</th><th>Sitze</th><th>Drive-Thr.</th></tr></thead>
