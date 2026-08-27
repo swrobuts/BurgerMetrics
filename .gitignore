@@ -18,3 +18,6 @@ BurgerMetrics_Fallstudie.pdf
 # Python-Zwischenstand
 __pycache__/
 *.pyc
+
+# Zugangsdaten (VPS-Supabase)
+.env

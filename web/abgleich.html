@@ -1,0 +1,102 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<title>Abgleich: Datenbank gegen einkodierte Werte</title>
+<style>body{font:13px/1.5 -apple-system,system-ui,sans-serif;margin:24px;max-width:1100px}
+h1{font-size:18px}td,th{padding:3px 10px;border-bottom:1px solid #eee;text-align:left;font-variant-numeric:tabular-nums}
+.ok{color:#166534}.abw{color:#b91c1c;font-weight:600}#stand{font-size:15px;margin:12px 0;padding:8px 12px;background:#f4f7fa}</style>
+</head><body>
+<h1>Abgleich: Semantikschicht gegen die bisher einkodierten Werte</h1>
+<div id="stand">läuft …</div><table id="t"><thead><tr><th>Reihe</th><th>n</th><th>Ergebnis</th><th>erste Abweichung</th></tr></thead><tbody></tbody></table>
+<script type="module">
+import { QUELLE } from './js/konfiguration.js';
+import { waehleQuelle } from './js/datenquelle.js';
+const q = waehleQuelle(QUELLE);
+const alt = {
+  yearRevenue:[189699,407631,831495,728623,1232130,2017208,2581072,2841075,2994771,698674],
+  yearOrders:[13086,27402,53307,46209,73415,113128,127022,133307,136557,31080],
+  yearAOV:[14.5,14.88,15.6,15.77,16.78,17.83,20.32,21.31,21.93,22.48],
+  branchRevenue:[3391529,2205646,2158128,2029699,1683541,1359198,942419,752219],
+  branchAOV:[18.62,17.8,21.03,20.14,18.84,18.82,19.74,21.05],
+  categoryRevenue:[6290052,5128856,2465661,495384,243865,54968],
+  topProductRevenue:[1301008,1018671,829880,597158],
+  channelOrders2025:[69939,28798,14441,23379],
+  channelRevenue2025:[1528567,644371,310031,511803],
+  channelAOV2025:[21.86,22.38,21.47,21.89],
+  dowRevenue:[1790393,1774042,1875684,1998150],
+  dowOrders:[93117,92168,97848,104023],
+  hourOrders:[12235,30576,37909,24757],
+  ageCount:[2034,5392,6320,4516,2948,2254,1536],
+  loyaltyCount:[15339,4212,3541,1908],
+  districtCounts:[2185,2156,2132,2087],
+  empRoleCount:[13,58,57,32,28],
+  empRevPerEmp:[35820,55436,61782,67342],
+  satChannelVal:[4.001,3.792,3.783,3.768],
+  satChannelN:[44454,190599,123098,396362],
+  promoOrders:[454,1643,2632,6511],
+  veggiePercent:[8.9,9.8,21.0,24.3],
+  cashData:[48.9,48.6,43.7,34.3],
+  counterData:[44.7,61.6,56.5,49.0],
+  assocLift:[2.73,3.29,1.20,1.22,1.45,1.22,1.50,1.25,2.28,1.13,1.14,1.46,1.15,1.34,1.16],
+  mRevenue:[5898,12479,17304,23110],
+  weatherRev:[4624,4449,4317,4240],
+  tempRevAvg:[8899,3854,4355,4177],
+  cohortSizes:[1502,1999,3033,2538],
+};
+const rnd=(v,d)=>Math.round(v*10**d)/10**d;
+async function neu(){
+  const [kj,f,kat,p,k25,wt,st,ka,kl,kb,pf,pr,zk,pm,wl,wtemp,koh,wr,vg,zj,um]=await Promise.all([
+    q.kennzahlenJahr(),q.filialen(),q.kategorien(),q.produkte(),q.kanaeleJahr(),q.wochentage(),
+    q.stunden(),q.kundenAlter(),q.kundenLoyalty(),q.kundenBezirke(),q.personalFilialen(),
+    q.personalRollen(),q.zufriedenheitKanal(),q.promotionen(),q.wetterLagen(),q.wetterTemperatur(),
+    q.kohorten(),q.warenkorbRegeln(),q.veggieAnteil(),q.zahlartenJahr(),q.umsatzMonat()]);
+  const k=(j,n)=>k25.filter(x=>x.jahr===j&&x.kanal===n)[0];
+  const kn=['Counter','Drive-Through','App Order','Kiosk'];
+  const altersreihe=['<18','18-24','25-34','35-44','45-54','55-64','65+'];
+  const jahrAnteil=(reihe,f)=>[2017,2018,2019,2020].map(j=>{const r=reihe.filter(x=>x.jahr===j&&f(x))[0];return r?rnd(r.anteil_pct,1):null});
+  return {
+    yearRevenue:kj.map(r=>Math.round(r.umsatz)),
+    yearOrders:kj.map(r=>r.bestellungen),
+    yearAOV:kj.map(r=>rnd(r.aov,2)),
+    branchRevenue:f.map(r=>Math.round(r.umsatz)),
+    branchAOV:f.map(r=>rnd(r.aov,2)),
+    categoryRevenue:kat.map(r=>Math.round(r.positionsumsatz)),
+    topProductRevenue:p.slice(0,4).map(r=>Math.round(r.positionsumsatz)),
+    channelOrders2025:kn.map(n=>k(2025,n).bestellungen),
+    channelRevenue2025:kn.map(n=>Math.round(k(2025,n).umsatz)),
+    channelAOV2025:kn.map(n=>rnd(k(2025,n).aov,2)),
+    dowRevenue:wt.slice(0,4).map(r=>Math.round(r.umsatz)),
+    dowOrders:wt.slice(0,4).map(r=>r.bestellungen),
+    hourOrders:st.slice(0,4).map(r=>r.bestellungen),
+    ageCount:altersreihe.map(a=>(ka.filter(x=>x.altersgruppe===a)[0]||{}).kunden),
+    loyaltyCount:['None','Bronze','Silver','Gold'].map(s=>kl.filter(x=>x.stufe===s)[0].kunden),
+    districtCounts:kb.slice(0,4).map(r=>r.kunden),
+    empRoleCount:['Branch Manager','Cashier','Cook','Shift Manager','Trainee'].map(r=>pr.filter(x=>x.rolle===r)[0].anzahl),
+    empRevPerEmp:pf.slice(0,4).map(r=>Math.round(r.umsatz_je_ma)),
+    satChannelVal:['App Order','Drive-Through','Kiosk','Counter'].map(n=>rnd(zk.filter(x=>x.kanal===n)[0].zufriedenheit,3)),
+    satChannelN:['App Order','Drive-Through','Kiosk','Counter'].map(n=>zk.filter(x=>x.kanal===n)[0].bestellungen),
+    promoOrders:['Birthday Offer 25%','Student Discount 8%','Grand Opening 15%','Happy Hour 15%'].map(a=>pm.filter(x=>x.aktion===a)[0].bestellungen),
+    veggiePercent:vg.slice(0,4).map(r=>rnd(r.anteil_pct,1)),
+    cashData:jahrAnteil(zj,x=>x.zahlart==='Cash'),
+    counterData:jahrAnteil(k25,x=>x.kanal==='Counter'),
+    assocLift:wr.map(r=>rnd(r.lift,2)),
+    mRevenue:um.slice(0,4).map(r=>Math.round(r.umsatz)),
+    weatherRev:wl.slice(0,4).map(r=>Math.round(r.umsatz_je_tag)),
+    tempRevAvg:wtemp.filter(r=>r.tage>0).slice(0,4).map(r=>Math.round(r.umsatz_je_tag)),
+    cohortSizes:[2017,2018,2019,2020].map(j=>koh.filter(x=>x.kohorte===j)[0].kohortengroesse),
+  };
+}
+try{
+  const db=await neu(); const tb=document.querySelector('#t tbody'); let ok=0,ab=0;
+  for(const [name,werte] of Object.entries(alt)){
+    const ist=db[name]||[]; const n=Math.min(werte.length,ist.length);
+    let erste=null;
+    for(let i=0;i<n;i++){ const d=Math.abs(Number(ist[i])-Number(werte[i]));
+      const tol=Math.abs(werte[i])>1000?1.5:0.011;
+      if(!(d<=tol)){ erste=`[${i}] DB ${ist[i]} ≠ alt ${werte[i]}`; break; } }
+    const gut=!erste && n===werte.length; gut?ok++:ab++;
+    tb.insertAdjacentHTML('beforeend',
+      `<tr><td>${name}</td><td>${n}/${werte.length}</td><td class="${gut?'ok':'abw'}">${gut?'identisch':'ABWEICHUNG'}</td><td>${erste||''}</td></tr>`);
+  }
+  document.getElementById('stand').innerHTML=
+    `<b>${ok} Reihen identisch, ${ab} abweichend</b> — alle Werte live aus der Datenbank über die Semantikschicht.`;
+}catch(e){ document.getElementById('stand').innerHTML='<b style="color:#b91c1c">Fehler:</b> '+e.message; }
+</script></body></html>
