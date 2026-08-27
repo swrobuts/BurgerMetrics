@@ -1,0 +1,34 @@
+%%{init: {"er": {"nodeSpacing": 28, "rankSpacing": 36, "minEntityHeight": 36, "minEntityWidth": 80, "entityPadding": 8, "diagramPadding": 4}}}%%
+erDiagram
+    direction LR
+    SITZUNG ||--o{ EREIGNIS : "erzeugt"
+    SITZUNG ||--o{ WARENKORBPOS : "hält"
+    ARTIKEL ||--o{ WARENKORBPOS : "liegt drin"
+    ARTIKEL |o--o{ EREIGNIS : "betrifft"
+    SITZUNG }o--o| KUNDE : "optional angemeldet"
+    SITZUNG {
+        string session_id PK
+        timestamp beginn
+        string referrer
+        string device_type
+        string geo_location
+        string cta_variant "A/B-Test"
+    }
+    EREIGNIS {
+        int ereignis_id PK
+        string ereignistyp "view, add_to_cart, filter, section"
+        int verweildauer_ms
+        int scroll_tiefe_pct
+    }
+    WARENKORBPOS {
+        int artikel_id FK
+        int menge
+    }
+    ARTIKEL {
+        int artikel_id PK
+        string name
+        money preis
+    }
+    KUNDE {
+        int kunde_id PK
+    }

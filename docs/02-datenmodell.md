@@ -70,6 +70,8 @@ Konkret werden die drei Artikel-Tabellen zu einer breiten Dimension zusammengezo
 | `kunde` + `loyalty_stufe` | `dim_customer` | Loyalty-Stufe wandert als Attribut in die Kundenzeile |
 | `promotion` + `promotionstyp` | `dim_promotion` | analog |
 | `zahlungsart` | `dim_payment_method` | unverändert übernommen |
+
+Diese Zuordnung ist keine Behauptung, sondern lauffähig: [`../dataset/wawi_mini.sql`](../dataset/wawi_mini.sql) stellt den operativen Ausschnitt bereit, [`../dataset/wawi_zu_analytisch.sql`](../dataset/wawi_zu_analytisch.sql) baut daraus per JOIN die analytischen Tabellen — zeilengleich mit `burgermetrics_mini.sql`, für alle acht Ziele.
 | `mitarbeiter` + `mitarbeiterrolle` | `dim_employee` | analog |
 | `wetterdaten` | `dim_weather` | unverändert übernommen |
 | (nicht im Quellsystem) | `dim_date` | Kalenderdimension, künstlich erzeugt |

@@ -4,8 +4,8 @@ Drei Bauskripte, drei Decks — und ein gemeinsames Gerüst:
 
 | Skript | Deck | Zweck |
 |---|---|---|
-| `bau_datenmodell.py` | **Datenmodell und Aufbau** (25 Folien) | Wie Shop, Warenwirtschaft und Auswertung zusammenhängen, warum jede ein eigenes Datenmodell braucht, und wie sich der gewählte Weg zu Warehouse, Lake, Lakehouse und Mesh verhält. |
-| `bau_bi.py` | **Von Kennzahlen zur Entscheidung** (37 Folien) | Der BI-Teil: die Fallstudie und ihre drei Systeme, operative gegen analytische Daten, Kennzahlen definieren und prüfen, der Weg zum Dashboard, Entscheidungen — und eine technologieoffene Bauanleitung für den Nachbau. |
+| `bau_datenmodell.py` | **Datenmodell und Aufbau** (26 Folien) | Wie Shop, Warenwirtschaft und Auswertung zusammenhängen, warum jede ein eigenes Datenmodell braucht, und wie sich der gewählte Weg zu Warehouse, Lake, Lakehouse und Mesh verhält. |
+| `bau_bi.py` | **Von Kennzahlen zur Entscheidung** (39 Folien) | Der BI-Teil: die Fallstudie und ihre drei Systeme, operative gegen analytische Daten, Kennzahlen definieren und prüfen, der Weg zum Dashboard, Entscheidungen — und eine technologieoffene Bauanleitung für den Nachbau. |
 | `bau_deck.py` | **Von der Kasse bis zum Bericht** (20 Folien) | Die ältere Gesamtschau: vom operativen Modell über das Auswertungsmodell bis zur geprüften Kennzahl, mit Auswertungsfallen und Prüfhandwerk. |
 
 `deckwerk.py` trägt, was alle brauchen: den Skill finden, den Platzhalterfehler des `spec_loader` umgehen, Absätze richtig übergeben, Diagramme und Bildschirmfotos maßstabsgetreu setzen. Ohne diese Datei stünden dieselben vierzig Zeilen mehrfach da und liefen auseinander.
@@ -28,7 +28,7 @@ Alle drei fassen zusammen, was in [`../docs/`](../docs/) ausführlich steht. Üb
 | 4 | Ein Weg von vielen | Von der Zahl zur Entscheidung |
 | 5 | — | Architektur, Werkzeuge, Nachbau |
 
-Kapitel 1 des BI-Decks stellt die Fallstudie vor und zeigt jedes System doppelt: die Kundensicht und die zuschaltbare Datensicht (Website an/aus, Kasse an/aus). Die Folie „Transaktionssysteme antworten je Vorgang, Analysesysteme je Frage" trennt die operative von der entscheidungsrelevanten Welt; Kapitel 5 endet mit einer Bauanleitung in vier Schritten, die den Technologiestapel offen lässt (DuckDB oder SQLite oder PostgreSQL; statische Seite oder Metabase oder Evidence oder Power BI).
+Die operativen Datenmodelle beider Erfassungssysteme stehen jetzt attributiert auf eigenen Folien (`17_webshop_er`, `18_pos_er`); die Zusammenführung operativ → analytisch ist im Datenmodell-Deck als SQL-Folie ausgeführt und im Repo vorführbar (`../dataset/wawi_mini.sql` + `../dataset/wawi_zu_analytisch.sql` — acht von acht Zieltabellen zeilengleich mit `burgermetrics_mini.sql`). Kapitel 1 des BI-Decks stellt die Fallstudie vor und zeigt jedes System doppelt: die Kundensicht und die zuschaltbare Datensicht (Website an/aus, Kasse an/aus). Die Folie „Transaktionssysteme antworten je Vorgang, Analysesysteme je Frage" trennt die operative von der entscheidungsrelevanten Welt; Kapitel 5 endet mit einer Bauanleitung in vier Schritten, die den Technologiestapel offen lässt (DuckDB oder SQLite oder PostgreSQL; statische Seite oder Metabase oder Evidence oder Power BI).
 
 ---
 
@@ -66,6 +66,8 @@ Alle Diagramme sind **Mermaid-Quelltext** in [`diagramme/`](diagramme/) — vers
 | `14_bi_architekturen.mmd` | Vier Wege von der Datenbank zum Bericht | BI |
 | `15_bi_semantik.mmd` | Mit und ohne semantische Schicht | BI |
 | `16_datenspur.mmd` | Wo Daten entstehen, verbucht und befragt werden | BI |
+| `17_webshop_er.mmd` | Das Webshop-Modell mit Attributen: Sitzung, Ereignis, Warenkorb | BI |
+| `18_pos_er.mmd` | Der Kassenbeleg mit Attributen: kundenbestellung und bestellposition | BI |
 
 ### Rendern
 

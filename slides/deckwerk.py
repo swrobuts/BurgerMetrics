@@ -223,6 +223,28 @@ class Deck:
 
     # --- eigene Motive --------------------------------------------------
     @staticmethod
+    def code(slide, x, y, w, zeilen, size=11.0, zeilenabstand=1.12):
+        """SQL- oder Codeblock: weisser Kasten, Haarlinie, nichtproportionale Schrift.
+
+        Kein Baustein des Skills — dort gibt es kein Code-Motiv. Courier New ist
+        auf jedem Zielsystem vorhanden; die Hoehe waechst mit den Zeilen.
+        """
+        h = len(zeilen) * size * zeilenabstand + 28
+        B.shape(slide, B.MSO_SHAPE.RECTANGLE, x, y, w, h, WEISS, HAAR)
+        tb = slide.shapes.add_textbox(B.E(x + 12), B.E(y + 9), B.E(w - 24), B.E(h - 16))
+        tf = tb.text_frame
+        tf.word_wrap = False
+        from pptx.util import Pt as _Pt
+        for i, z in enumerate(zeilen):
+            para = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+            lauf = para.add_run()
+            lauf.text = z if z else " "
+            lauf.font.name = "Courier New"
+            lauf.font.size = _Pt(size)
+            lauf.font.color.rgb = B.rgb(B.BODY)
+        return h
+
+    @staticmethod
     def bewertung(slide, y, spalten, zeilen, rh=44.0, bw=250.0):
         """Bewertungsmatrix: Bezeichner links, Balken je Spalte.
 

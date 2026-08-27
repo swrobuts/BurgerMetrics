@@ -344,3 +344,18 @@ Bei der Prüfung fielen zusätzlich drei Aussagen durch, die sich in den Daten *
 Mehrere quantitative Angaben waren der Größenordnung nach zu korrigieren, darunter der Anteil bewerteter Bestellungen (30 % → 18,9 %), der Mobile-Payment-Verlauf (17 → 25 % statt tatsächlich 0,9 → 12,2 %) und der Weihnachtsmarkt-Effekt (+15 % → +5 %).
 
 Weitere Prüfberichte liegen unter [`../docs/`](../docs/).
+
+
+## Der Rückweg: vom operativen Modell zum Galaxy-Schema
+
+Zwei Skripte führen die Zusammenführung vor, die sonst nur als Diagramm existiert:
+
+| Datei | Inhalt |
+|---|---|
+| [`wawi_mini.sql`](wawi_mini.sql) | Ausschnitt des operativen 3NF-Modells (14 Tabellen, deutsche Namen), befüllt mit denselben 19 Bestellungen wie `burgermetrics_mini.sql`. „Keine Aktion" ist hier `NULL` am Beleg, nicht eine Zeile. |
+| [`wawi_zu_analytisch.sql`](wawi_zu_analytisch.sql) | Die Sichten, die per JOIN und Umbenennung daraus das analytische Schema bauen — inklusive generierter `dim_date` und der `No Promotion`-Zeile aus operativem `NULL`. |
+
+Nach dem Laden beider Skripte (plus `burgermetrics_mini.sql` zum Vergleich) ist jede der acht
+Zieltabellen **zeilengleich** mit ihrem Original — die Prüfabfrage steht am Ende von
+`wawi_zu_analytisch.sql`. Läuft in DuckDB; PostgreSQL braucht statt `monthname()`/`dayname()`
+die `to_char`-Entsprechungen.

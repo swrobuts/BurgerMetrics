@@ -179,6 +179,36 @@ B.kachel(s, CL, Y0 + 148, CW, 112, METHOD, "Warum die Redundanz vertretbar ist",
 B.band(s, Y0 + 274, 48, [
     "Faustregel: Konsistenz hat Vorrang im operativen System, Lesegeschwindigkeit im Auswertungssystem."])
 
+# Die Zusammenführung als SQL
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "System 3 · Auswertung", "Die Zusammenführung ist eine Abfrage — zwei Joins, eine Dimension",
+       "Eigene Darstellung · vorführbar mit dataset/wawi_mini.sql und wawi_zu_analytisch.sql")
+deck.einl(s, "Was die vorige Folie als Pfeil zeichnet, ist im Werkzeug eine einzige Abfrage: "
+             "zwei Joins lösen die Normalisierung auf, die AS-Klauseln übersetzen die deutschen "
+             "Betriebsbegriffe ins Auswertungsvokabular der CSV-Dateien. Mehr passiert bei "
+             "einer Dimension nicht — und dasselbe Muster trägt alle sieben Zieltabellen.")
+D.Deck.code(s, CL, Y0, 470, [
+    "CREATE VIEW dim_product AS",
+    "SELECT a.artikel_id   AS product_id,",
+    "       a.name         AS product_name,",
+    "       k.name         AS category,",
+    "       u.name         AS subcategory,",
+    "       a.vegetarisch  AS is_vegetarian,",
+    "       a.listenpreis  AS unit_price",
+    "FROM artikel a",
+    "JOIN artikelunterkategorie u",
+    "     USING (unterkategorie_id)",
+    "JOIN artikelkategorie k",
+    "     USING (kategorie_id);",
+])
+B.kachel(s, CL + 470 + 24, Y0, CR - (CL + 470 + 24), 168, METHOD, "Zwei Handgriffe, sieben Mal",
+         ["Zusammenführen: Verknüpfungen auflösen, die sonst jede Abfrage neu bezahlt.",
+          "Benennen: aus artikel wird dim_product, aus netto_gesamt wird net_total — das ist die stg-Schicht.",
+          "Aus operativem NULL (keine Aktion) wird die Dimensionszeile 0, No Promotion."])
+B.kachel(s, CL + 470 + 24, Y0 + 184, CR - (CL + 470 + 24), 116, GOOD, "Der Beweis läuft im Repo",
+         ["wawi_mini.sql: der operative Ausschnitt, 14 Tabellen, deutsch.",
+          "wawi_zu_analytisch.sql: die Sichten — acht von acht Zieltabellen zeilengleich mit burgermetrics_mini.sql."])
+
 # Granularität
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "System 3 · Auswertung", "Die erste Frage an jede Faktentabelle: Welches Ereignis ist eine Zeile?", QUELLE)

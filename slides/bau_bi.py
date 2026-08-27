@@ -140,6 +140,19 @@ B.band(s, YS + 24 + bh2 + 16, 76, [
     "einen Ereignisstrom je sichtbarer Sektion, die Klickraten der Bestellknöpfe. Dazu steht "
     "dort, welche Rechtsgrundlage dieses Beobachten überhaupt erlaubt."])
 
+# Webshop-ER
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "System Website", "Bestellen braucht drei Tabellen — Beobachten braucht zwei mehr", QUELLE)
+deck.einl(s, "Das Bestellen selbst kommt mit Sitzung, Warenkorbposition und Artikelstamm aus. "
+             "Was die Datensicht eben gezeigt hat, braucht zwei Tabellen mehr: die Sitzung "
+             "trägt Herkunft, Gerät und Testvariante, und jede Interaktion wird ein Ereignis. "
+             "Ein Kunde ist optional — beobachtet wird auch, wer sich nie anmeldet.")
+bw5, _ = deck.bild(s, "17_webshop_er", y=Y0, max_h=HOEHE)
+B.kachel(s, CL + bw5 + 20, Y0, CR - (CL + bw5 + 20), 196, GOOD, "Vom Klick zur Kachel",
+         ["ereignistyp und verweildauer_ms speisen später Konversions- und Engagement-Kennzahlen.",
+          "cta_variant macht den A/B-Test auswertbar.",
+          "Der Laden kann das alles nicht messen — nur der Webshop sieht, was vor dem Kauf passiert."])
+
 # Kasse: Datensicht
 s = deck.neu("Tool_Slide")
 B.kopf(s, "System Kasse", "Jeder Klick an der Kasse schreibt eine Zeile", Q_FOTO)
@@ -155,6 +168,15 @@ B.sprechblase(s, CL + bw + 24, Y0, CR - (CL + bw + 24), 200, D.paras([
     ["Der Kundenkartenscan verbindet die Bestellung mit dim_customer — erst dadurch "
      "werden Segmentierung und Wiederkaufsraten überhaupt rechenbar."],
 ]), farbe=METHOD)
+
+# POS-ER
+s = deck.neu("Lisa_Slide")
+B.kopf(s, "System Kasse", "Der Kassenbeleg: zehn Felder, fünf Bezüge — drei Kennzahlen von morgen", QUELLE)
+deck.einl(s, "Die Kasse schreibt in den Verkaufsbereich der Warenwirtschaft: einen Kopf je "
+             "Bestellung, eine Position je Artikel. Drei Felder sind operativ nur Beiwerk des "
+             "Belegs — bestellkanal, bestelldauer_min und zufriedenheit. Analytisch werden "
+             "genau sie zu Kanalanteil, Wartezeitanalyse und Zufriedenheitswert des Dashboards.")
+deck.bild(s, "18_pos_er", y=Y0, max_h=HOEHE)
 
 # Abgrenzung operativ / analytisch
 s = deck.neu("Lisa_Slide")
@@ -581,6 +603,10 @@ B.zuordnung(s, Y0, [
      "gerechneten Zahlen. Alternativen: Metabase oder Superset zum Klicken, Evidence "
      "für Berichte als Code, Power BI oder Tableau im Unternehmensumfeld."),
 ], rh=58.0)
+B.band(s, Y0 + 258, 62, [
+    "Schritt 3 ist im Repo vorgeführt: dataset/wawi_mini.sql (operativer Ausschnitt, 14 Tabellen, "
+    "deutsch) und dataset/wawi_zu_analytisch.sql (die Joins) erzeugen nachweislich dieselben "
+    "Tabellen wie burgermetrics_mini.sql — acht von acht zeilengleich."])
 
 s = deck.neu("Lisa_Slide")
 B.kopf(s, "Nachbau", "Was davon an einem Nachmittag nachzubauen ist", Q_EIG)
