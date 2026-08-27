@@ -7,7 +7,7 @@
  * schreibt eine neue Klasse mit denselben Methoden und traegt sie unten in
  * `waehleQuelle` ein. Am Dashboard aendert sich dabei keine Zeile.
  *
- * Der Vertrag ist absichtlich schmal: 25 benannte Fragen, jede liefert ein
+ * Der Vertrag ist absichtlich schmal: 33 benannte Fragen, jede liefert ein
  * Array von Objekten mit stabilen Feldnamen. Diese Namen sind die eigentliche
  * Schnittstelle — sie stehen serverseitig in db/aufbau/0005_semantik.sql.
  */
@@ -68,6 +68,21 @@ export class Datenquelle {
   warenkorbRegeln() { throw new Error('nicht umgesetzt'); }
   /** je Burger: produkt, preis, kosten, menge, umsatz */
   simulationBasis() { throw new Error('nicht umgesetzt'); }
+  /** je RFM-Segment: segment, kunden, anteil_pct, recency_tage, frequenz,
+   *  lebenswert, umsatz_gesamt */
+  rfmSegmente() { throw new Error('nicht umgesetzt'); }
+  /** je Stunde und Kanal: stunde, kanal, bestellungen, anteil_pct */
+  kanaeleStunde() { throw new Error('nicht umgesetzt'); }
+  /** je Niederschlagsklasse: klasse, nr, tage, umsatz_je_tag, bestellungen_je_tag */
+  wetterRegen() { throw new Error('nicht umgesetzt'); }
+  /** je Aktion mit Wirtschaftlichkeit: aktion, …, baseline_aov, roi */
+  promotionenRoi() { throw new Error('nicht umgesetzt'); }
+  /** je Jahr und Produkt: jahr, product_name, category, menge, positionsumsatz, anteil_pct */
+  produkteJahr() { throw new Error('nicht umgesetzt'); }
+  /** Einzelwerte: kennung, wert, vergleich, anzahl */
+  einzelwerte() { throw new Error('nicht umgesetzt'); }
+  /** weitere Einzelwerte mit Textfeld: kennung, wert, vergleich, anzahl, text */
+  einzelwerteZusatz() { throw new Error('nicht umgesetzt'); }
 }
 
 /**
@@ -118,7 +133,7 @@ export class PostgrestQuelle extends Datenquelle {
   kundenLoyalty()      { return this.hole('v_kunde_loyalty', ''); }
   kundenBezirke()      { return this.hole('v_kunde_bezirk', 'order=kunden.desc'); }
   personalFilialen()   { return this.hole('v_personal_filiale', 'order=umsatz_je_ma'); }
-  personalRollen()     { return this.hole('v_personal_rolle', 'order=anzahl.desc'); }
+  personalRollen()     { return this.hole('v_personal_rolle', 'order=nr'); }
   zufriedenheitKanal() { return this.hole('v_zufriedenheit_kanal', 'order=zufriedenheit.desc'); }
   zufriedenheitDauer() { return this.hole('v_zufriedenheit_dauer', 'order=nr'); }
   promotionen()        { return this.hole('v_promotion', 'order=bestellungen.desc'); }
@@ -128,6 +143,13 @@ export class PostgrestQuelle extends Datenquelle {
   kohorten()           { return this.hole('v_kohorte', 'order=kohorte,jahr'); }
   warenkorbRegeln()    { return this.hole('v_warenkorb_auswahl', 'order=nr'); }
   simulationBasis()    { return this.hole('v_simulation_basis', 'order=umsatz.desc'); }
+  rfmSegmente()        { return this.hole('v_rfm_segment', 'order=umsatz_gesamt.desc'); }
+  kanaeleStunde()      { return this.hole('v_kanal_stunde', 'order=stunde,kanal'); }
+  wetterRegen()        { return this.hole('v_wetter_regen', 'order=nr'); }
+  promotionenRoi()     { return this.hole('v_promotion_roi', 'order=roi.desc'); }
+  produkteJahr()       { return this.hole('v_produkt_jahr', 'jahr=eq.2025&order=menge.desc'); }
+  einzelwerte()        { return this.hole('v_kennzahl_einzeln', ''); }
+  einzelwerteZusatz()  { return this.hole('v_kennzahl_zusatz', ''); }
 }
 
 /** Wandelt Zahlen-Zeichenketten (PostgREST numeric) in echte Zahlen. */
