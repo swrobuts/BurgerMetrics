@@ -50,7 +50,7 @@ export const BILDER = {
   "Cola 0.3l":             "photo-1622483767028-3f66f32aef97",
   "Cola 0.5l":             "photo-1622483767028-3f66f32aef97",
   "Craft Lemonade":        "photo-1507281549113-040fcfef650e",
-  "Fanta 0.3l":            "photo-1685156328670-bad82b790a56",
+  "Fanta 0.3l":            "photo-1624517452488-04869289c4ca",
   "Fresh OJ":              "photo-1600271886742-f049cd451bba",
   "Hot Chocolate":         "photo-1637572815755-c4b80092dce1",
   "Ice Tea 0.3l":          "photo-1601390395693-364c0e22031a",
@@ -65,7 +65,7 @@ export const BILDER = {
   "Cookie Chocolate":    "photo-1499636136210-6f4ee915583e",
   "Donut":               "photo-1624277904878-120554c46c2d",
   "Soft Ice Chocolate":  "photo-1614014077943-840960ce6694",
-  "Soft Ice Vanilla":    "photo-1477505982272-ead89926a577",
+  "Soft Ice Vanilla":    "photo-1705103654884-cbd03d95761a",
   "Sundae Caramel":      "photo-1563805042-7684c019e1cb",
   "Sundae Hot Fudge":    "photo-1633881613747-e98695066141",
   "Vegan Brownie":       "photo-1515037893149-de7f840978e2",
@@ -156,4 +156,21 @@ export const SCHNELLWAHL = ["Classic Burger", "Cheeseburger", "Medium Fries", "C
 /** Bild eines Artikels, mit Rueckfall auf die Kategorie. */
 export function bildVon(name, kategorie) {
   return BILDER[name] || RUECKFALLBILD[kategorie] || RUECKFALLBILD.Burger;
+}
+
+/**
+ * Bild-URL in genau der Groesse, in der die Kachel es zeigt.
+ *
+ * Ohne Hoehe liefert Unsplash das Bild in seinem Originalverhaeltnis, und der
+ * Browser schneidet es per object-fit mittig zu. Bei hochformatigen Aufnahmen
+ * faellt dabei genau die Mitte weg — vom Burger blieb das obere Broetchen, vom
+ * Eis die obere Haelfte.
+ *
+ * Mit fit=crop schneidet Unsplash serverseitig zu, und crop=entropy waehlt
+ * dabei den Bereich mit dem hoechsten Informationsgehalt statt der Bildmitte.
+ * Bei Produktfotos ist das das Produkt.
+ */
+export function bildUrl(kennung, breite, hoehe, q = 75) {
+  return `https://images.unsplash.com/${kennung}`
+       + `?w=${breite}&h=${hoehe}&fit=crop&crop=entropy&q=${q}`;
 }

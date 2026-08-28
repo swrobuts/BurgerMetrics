@@ -849,7 +849,7 @@ function getItems(){
 function renderCard(p){
   const inCart=state.order.find(o=>o.id===p.id);
   const qty=inCart?inCart.qty:0;
-  const imgUrl=p.img?`https://images.unsplash.com/${p.img}?w=400&q=70`:'';
+  const imgUrl=p.img?bildUrl(p.img, 400, 400, 70):'';
   const bgStyle=imgUrl?`background-image:url('${imgUrl}')`:`background:${CAT_COLORS[p.cat]}22`;
   return `<div class="product-card${qty?' in-cart':''}" onclick="addToOrder(${p.id})" style="${bgStyle}">
     <span class="cart-badge ${qty?'show':''}">${qty}</span>
@@ -861,7 +861,7 @@ const CAT_LABEL_SHORT={burger:'Burger',sides:'Beilagen',drinks:'Getränke',desse
 function renderRow(p){
   const inCart=state.order.find(o=>o.id===p.id);
   const qty=inCart?inCart.qty:0;
-  const imgUrl=p.img?`https://images.unsplash.com/${p.img}?w=100&q=60`:'';
+  const imgUrl=p.img?bildUrl(p.img, 100, 100, 60):'';
   return `<div class="product-row${qty?' in-cart':''}" onclick="addToOrder(${p.id})">
     <div class="pr-img" style="background-image:url('${imgUrl}')"></div>
     <div class="pr-name">${p.name}</div>
@@ -1705,7 +1705,10 @@ window.kasseStarten = function(artikel){
    gibt. Genau das soll die Fallstudie nicht vorfuehren. */
 import { QUELLE } from './js/konfiguration.js';
 import { waehleQuelle } from './js/datenquelle.js';
-import { bildVon, SCHNELLWAHL } from './js/darstellung.js';
+import { bildVon, bildUrl, SCHNELLWAHL } from './js/darstellung.js';
+// renderCard und renderRow liegen im klassischen Skriptblock —
+// dort ist ein Modul-Import nicht sichtbar.
+window.bildUrl = bildUrl;
 
 // Die Kasse gruppiert nach eigenen Reitern. Die Datenbank kennt ihre eigenen
 // Kategorienamen — hier die Abbildung, an einer Stelle statt in jeder Abfrage.

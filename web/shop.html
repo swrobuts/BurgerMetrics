@@ -4188,7 +4188,7 @@ function renderMenu(filter) {
   menuGrid.innerHTML = items.map((p, i) => `
     <div class="menu-card visible" style="animation-delay:${i * 40}ms">
       <div class="menu-card-img">
-        <img src="https://images.unsplash.com/${p.img}?w=600&q=75" alt="${p.name}" loading="lazy">
+        <img src="${bildUrl(p.img, 600, 400)}" alt="${p.name}" loading="lazy">
         <div class="menu-card-badges">
           ${p.tags.includes('popular') ? '<span class="menu-badge badge-popular">Beliebt</span>' : ''}
           ${p.tags.includes('new') ? '<span class="menu-badge badge-new">Neu</span>' : ''}
@@ -5549,7 +5549,10 @@ setTimeout(() => {
    geteilten Artikelstamm; jetzt gibt es ihn auch. */
 import { QUELLE } from './js/konfiguration.js';
 import { waehleQuelle } from './js/datenquelle.js';
-import { bildVon, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js';
+import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js';
+// renderCard und renderRow liegen im klassischen Skriptblock —
+// dort ist ein Modul-Import nicht sichtbar.
+window.bildUrl = bildUrl;
 
 const schirm = document.createElement('div');
 schirm.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;'
