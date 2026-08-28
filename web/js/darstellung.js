@@ -14,36 +14,75 @@
 // ist besser als eine Luecke und ehrlicher als ein erfundenes Bild.
 
 export const BILDER = {
-  "Classic Burger": "photo-1568901346375-23c9450c58cd",
-  "Cheeseburger": "photo-1550547660-d9450f859349",
-  "Double Burger": "photo-1594212699903-ec8a3eca50f5",
-  "Bacon King": "photo-1553979459-d2229ba7433b",
-  "Chicken Burger": "photo-1606755962773-d324e0a13086",
-  "Crispy Chicken Deluxe": "photo-1513185158878-8d8c2a2a3da3",
-  "Veggie Burger": "photo-1525059696034-4967a8e1dca2",
-  "Medium Fries": "photo-1573080496219-bb080dd4f877",
-  "Large Fries": "photo-1598679253544-2c97992403ea",
-  "Chicken Nuggets 6pc": "photo-1562967916-eb82221dfb92",
-  "Chicken Nuggets 9pc": "photo-1562967916-eb82221dfb92",
-  "Onion Rings": "photo-1639024471283-03518883512d",
-  "Side Salad": "photo-1512621776951-a57141f2eefd",
-  "Mozzarella Sticks": "photo-1531749668029-2db88e4276c7",
-  "Cola 0.3l": "photo-1622483767028-3f66f32aef97",
-  "Cola 0.5l": "photo-1622483767028-3f66f32aef97",
-  "Cappuccino": "photo-1572442388796-11668a67e53d",
-  "Milkshake Vanilla": "photo-1572490122747-3968b75cc699",
-  "Milkshake Chocolate": "photo-1572490122747-3968b75cc699",
-  "Soft Ice Vanilla": "photo-1570197571499-166b36435e9f",
-  "Sundae Caramel": "photo-1563805042-7684c019e1cb",
-  "Apple Pie": "photo-1568571780765-9276ac8b75a2",
-  "Cookie Chocolate": "photo-1499636136210-6f4ee915583e",
-  "Breakfast Burger": "photo-1525351484163-7529414344d8",
-  "Pancakes": "photo-1567620905732-2d1ec7ab7445",
-  "Scrambled Eggs & Toast": "photo-1528735602780-2552fd46c7af",
-  "Breakfast Wrap": "photo-1626700051175-6818013e1d4f",
-  "Ketchup Extra": "photo-1472476443507-c7a5948772fc",
-  "BBQ Sauce": "photo-1472476443507-c7a5948772fc",
-  "Cheese Dip": "photo-1472476443507-c7a5948772fc"
+  // Burger
+  "Bacon King":             "photo-1553979459-d2229ba7433b",
+  "BBQ Smokehouse":         "photo-1623945359666-8f855090ee81",
+  "Beyond Burger":          "photo-1610970878459-a0e464d7592b",
+  "Cheeseburger":           "photo-1550547660-d9450f859349",
+  "Chicken Burger":         "photo-1606755962773-d324e0a13086",
+  "Classic Burger":         "photo-1568901346375-23c9450c58cd",
+  "Crispy Chicken Deluxe":  "photo-1513185158878-8d8c2a2a3da3",
+  "Double Burger":          "photo-1594212699903-ec8a3eca50f5",
+  "Fish Burger":            "photo-1671106571674-a89083d27e60",
+  "Green Goddess Bowl":     "photo-1607532941433-304659e8198a",
+  "Kids Burger":            "photo-1586190848861-99aa4a171e90",
+  "Smashed Burger":         "photo-1607013251379-e6eecfffe234",
+  "Truffle Deluxe":         "photo-1625683257212-116d74981941",
+  "Veggie Burger":          "photo-1525059696034-4967a8e1dca2",
+
+  // Side
+  "Chicken Nuggets 6pc":  "photo-1562967916-eb82221dfb92",
+  "Chicken Nuggets 9pc":  "photo-1562967916-eb82221dfb92",
+  "Coleslaw":             "photo-1781019450243-ba76b4a1b789",
+  "Large Fries":          "photo-1598679253544-2c97992403ea",
+  "Loaded Fries":         "photo-1771818708792-d671ae9b4b46",
+  "Medium Fries":         "photo-1573080496219-bb080dd4f877",
+  "Mozzarella Sticks":    "photo-1531749668029-2db88e4276c7",
+  "Onion Rings":          "photo-1639024471283-03518883512d",
+  "Side Salad":           "photo-1512621776951-a57141f2eefd",
+  "Small Fries":          "photo-1664337873087-ac64b3f1e454",
+  "Sweet Potato Fries":   "photo-1745792714512-77cffdb16020",
+
+  // Drink
+  "Beer 0.3l":             "photo-1600788886242-5c96aabe3757",
+  "Cappuccino":            "photo-1572442388796-11668a67e53d",
+  "Coffee":                "photo-1613158556069-e7d8eae76214",
+  "Cola 0.3l":             "photo-1622483767028-3f66f32aef97",
+  "Cola 0.5l":             "photo-1622483767028-3f66f32aef97",
+  "Craft Lemonade":        "photo-1507281549113-040fcfef650e",
+  "Fanta 0.3l":            "photo-1685156328670-bad82b790a56",
+  "Fresh OJ":              "photo-1600271886742-f049cd451bba",
+  "Hot Chocolate":         "photo-1637572815755-c4b80092dce1",
+  "Ice Tea 0.3l":          "photo-1601390395693-364c0e22031a",
+  "Milkshake Chocolate":   "photo-1577805947697-89e18249d767",
+  "Milkshake Strawberry":  "photo-1579954115545-a95591f28bfc",
+  "Milkshake Vanilla":     "photo-1572490122747-3968b75cc699",
+  "Sprite 0.3l":           "photo-1680404005217-a441afdefe83",
+  "Water 0.5l":            "photo-1662926912257-514bbe9d4ba3",
+
+  // Dessert
+  "Apple Pie":           "photo-1568571780765-9276ac8b75a2",
+  "Cookie Chocolate":    "photo-1499636136210-6f4ee915583e",
+  "Donut":               "photo-1624277904878-120554c46c2d",
+  "Soft Ice Chocolate":  "photo-1614014077943-840960ce6694",
+  "Soft Ice Vanilla":    "photo-1477505982272-ead89926a577",
+  "Sundae Caramel":      "photo-1563805042-7684c019e1cb",
+  "Sundae Hot Fudge":    "photo-1633881613747-e98695066141",
+  "Vegan Brownie":       "photo-1515037893149-de7f840978e2",
+
+  // Breakfast
+  "Breakfast Burger":        "photo-1525351484163-7529414344d8",
+  "Breakfast Wrap":          "photo-1626700051175-6818013e1d4f",
+  "Hash Browns":             "photo-1783684522943-7ab49ce47d43",
+  "Pancakes":                "photo-1567620905732-2d1ec7ab7445",
+  "Scrambled Eggs & Toast":  "photo-1528735602780-2552fd46c7af",
+
+  // Extra
+  "BBQ Sauce":      "photo-1630938248609-b9188b210bb1",
+  "Cheese Dip":     "photo-1734772257288-d53770c7707f",
+  "Ketchup Extra":  "photo-1472476443507-c7a5948772fc",
+  "Mayo Extra":     "photo-1669994537466-433652ab10fa"
+
 };
 
 export const RUECKFALLBILD = {
