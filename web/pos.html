@@ -19,10 +19,17 @@
   --radius:8px;--radius-lg:12px;
 }
 html,body{height:100%;overflow:hidden}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.4}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.4;
+  /* Der Koerper ist eine Spalte: Kopf, Hinweis und Funktionsleiste
+     nehmen ihre eigene Hoehe, der Hauptteil bekommt den Rest.
+     Vorher stand dort eine calc-Rechnung mit drei fest
+     eingetragenen Hoehen — sie ging falsch aus, sobald der
+     Hinweis zweizeilig wurde (gemessen: 64 statt 46 px).
+     svh statt vh, damit die Leisten mobiler Browser zaehlen. */
+  display:flex;flex-direction:column;height:100svh;overflow:hidden}
 
 /* === HEADER === */
-.header{height:62px;background:var(--header-bg);display:flex;align-items:center;padding:0 24px;gap:20px;color:#fff;z-index:100}
+.header{height:62px;flex-shrink:0;background:var(--header-bg);display:flex;align-items:center;padding:0 24px;gap:20px;color:#fff;z-index:100}
 .header-logo{font-size:20px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
 .header-logo span{color:var(--green);font-weight:400}
 .header-spacer{flex:1}
@@ -37,10 +44,10 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .header-link:hover{background:var(--green-hover)}
 
 /* === MAIN LAYOUT === */
-.main{display:flex;height:calc(100vh - 62px - 56px);overflow:hidden}
+.main{display:flex;flex:1;min-height:0;overflow:hidden}
 
 /* === CATEGORY SIDEBAR === */
-.sidebar{width:136px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:6px 0;overflow-y:auto;flex-shrink:0;gap:2px}
+.sidebar{width:var(--rail-w);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:6px 0;overflow-y:auto;flex-shrink:0;gap:2px}
 .cat-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;cursor:pointer;border:none;background:none;font-size:12px;font-weight:700;color:var(--text-light);transition:all .15s;border-left:4px solid transparent;position:relative;min-height:70px;letter-spacing:.3px;margin:0 6px;border-radius:10px}
 .cat-btn:hover{background:#f1f3f5;color:var(--text)}
 .cat-btn.active{background:#f1f3f5;color:var(--text);font-weight:800;border-left-color:transparent;box-shadow:inset 0 0 0 2px #dee2e6}
@@ -102,7 +109,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .product-card .p-price{font-size:22px;font-weight:800;color:#fff;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.5);padding-bottom:12px}
 
 /* === ORDER PANEL === */
-.order-panel{width:440px;background:var(--white);border-left:2px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.order-panel{width:var(--panel-w);background:var(--white);border-left:2px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .order-header{padding:14px 20px;border-bottom:2px solid var(--border);display:flex;align-items:center;justify-content:between;gap:10px}
 .order-title{font-size:19px;font-weight:800;color:var(--dark);flex:1}
 .order-count{background:var(--bg);color:var(--text-light);font-size:12px;font-weight:600;padding:2px 8px;border-radius:10px}
@@ -164,7 +171,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .pay-btn:disabled{background:#d1d5db;cursor:not-allowed}
 
 /* === FUNCTION BAR === */
-.funcbar{height:56px;background:var(--white);border-top:2px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:6px}
+.funcbar{height:56px;flex-shrink:0;background:var(--white);border-top:2px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:6px}
 .func-btn{flex:1;height:44px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:#495057;transition:all .15s;white-space:nowrap;padding:0 10px}
 .func-btn:hover{background:var(--bg);border-color:#adb5bd;color:var(--dark)}
 .func-btn .fkey{font-size:11px;font-weight:700;color:#868e96;background:#f1f3f5;padding:2px 6px;border-radius:4px}
@@ -381,6 +388,243 @@ body.data-mode .pos-data-annotation{display:block}
 /* === EMPTY STATES === */
 .empty-state{text-align:center;padding:40px;color:var(--text-light);font-size:15px}
 .empty-state .empty-icon{font-size:36px;margin-bottom:10px;opacity:.4}
+
+/* ============================================================
+   BILDSCHIRMGROESSEN
+   ------------------------------------------------------------
+   Gemessen vor dem Umbau: Die Bestellleiste stand bei jeder
+   Breite auf 440 px (flex-shrink:0), die Kategorieleiste auf
+   136 px. Fuer das Produktraster blieb dadurch:
+       1180 px Fenster -> 564 px Raster (Kachel 128 px)
+        900 px Fenster -> 284 px Raster (Kachel  58 px)
+        768 px Fenster -> 152 px Raster (Kachel  25 px)
+        430 px Fenster ->   8 px Raster (nichts mehr)
+   Untergrenze fuer vier Kacheln zu 100 px: 136 + 450 + 440
+   = 1026 px. Darunter bricht das dreispaltige Layout.
+
+   Eine Quelle je Aufteilung: --panel-w traegt die Breite der
+   Bestellleiste, --rail-w die der Kategorieleiste. Das Raster
+   nimmt mit flex:1 den Rest — zwei Zahlen, die sich zu 100 %
+   ergaenzen muessten, gibt es hier nicht.
+   ============================================================ */
+:root { --panel-w: 440px; --rail-w: 136px; }
+
+/* --- bis 1180 px: Polster und Breiten zuruecknehmen ---------
+   Erst die Masse, noch kein Umbau. */
+@media (max-width: 1180px) {
+  :root { --panel-w: 340px; --rail-w: 112px; }
+  .product-grid { gap: 10px; }
+}
+
+/* --- bis 1023 px: das Raster gibt eine Spalte ab ------------ */
+@media (max-width: 1023px) {
+  :root { --panel-w: 300px; --rail-w: 96px; }
+  .cat-btn { font-size: 11px; min-height: 62px; padding: 9px 4px; }
+  .cat-btn .cat-icon { width: 38px; height: 38px; font-size: 17px; }
+}
+
+/* --- der Kopf ----------------------------------------------
+   Gemessen bei 768 px: Der Kopf ist 62 px hoch, sein Inhalt
+   brauchte 70 px — .header-info stand mit 78 px Hoehe und
+   499 px Breite darin und brach um. Zurueckgenommen wird in
+   der Reihenfolge, in der ein Kassierer die Angaben am
+   wenigsten braucht: erst die Versalien-Beschriftung, dann die
+   Schichtdauer, dann der Name (das Kuerzel im Kreis bleibt).
+   Uhrzeit und Dashboard-Weg bleiben bis zuletzt. */
+.header      { flex-wrap: nowrap; overflow: hidden; }
+.header-info { white-space: nowrap; }
+
+@media (max-width: 1023px) {
+  .header       { padding: 0 14px; gap: 12px; }
+  .header-info  { gap: 12px; font-size: 13px; }
+  .header-info .revenue .label { display: none; }
+  #shiftInfo    { display: none; }
+}
+@media (max-width: 767px) {
+  .header-logo  { font-size: 17px; }
+  .header-info  { gap: 10px; }
+  .header-info .staff > span { display: none; }
+  .header-info .clock { font-size: 14px; }
+}
+@media (max-width: 599px) {
+  .header-info .revenue { display: none; }
+  .header-logo span { display: none; }
+}
+
+/* --- bis 899 px: stapeln --------------------------------------
+   Kategorien waagerecht ueber das Raster, Bestellung als Blatt
+   darunter. Die Reihenfolge im Fluss bleibt, nur die Richtung
+   dreht sich — kein Umsortieren im DOM, keine Zustaende in JS.
+   Das Blatt behaelt 38svh: genug fuer drei Positionen und die
+   Summe, ohne dem Raster den Platz zu nehmen. */
+@media (max-width: 899px) {
+  .main { flex-direction: column; }
+  .sidebar {
+    width: 100%; flex-direction: row; height: auto;
+    overflow-x: auto; overflow-y: hidden;
+    border-right: 0; border-bottom: 1px solid var(--border);
+    padding: 5px 6px; gap: 4px;
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .cat-btn {
+    flex-direction: row; gap: 7px; flex-shrink: 0;
+    min-height: 44px; min-width: 0; padding: 8px 13px; margin: 0;
+    border-left: 0; white-space: nowrap;
+  }
+  .cat-btn .cat-icon { width: 26px; height: 26px; font-size: 14px; }
+  .order-items { flex: none; overflow-y: visible; }
+  .cat-btn.active { box-shadow: inset 0 0 0 2px #dee2e6; }
+  .grid-area   { flex: 1; min-height: 0; }
+  /* Gestapelt scrollt das Panel als Ganzes. Im Seitenlayout
+     scrollt nur die Positionsliste, waehrend die Fusszeile mit
+     Summe und Zahlarten stehenbleibt — das geht hier nicht auf:
+     Die Fusszeile ist allein 494 px hoch, das Panel bei 768 px
+     nur 389. Der Knopf "Bar" ragte 64 px hinaus und war, weil
+     .main abschneidet, nicht erreichbar — kassieren war auf dem
+     Tablet unmoeglich. Deshalb faellt hier die innere Rollung
+     weg und das Panel bekommt eine eigene. */
+  .order-panel {
+    width: 100%; max-height: 46svh; overflow-y: auto;
+    border-left: 0; border-top: 2px solid var(--border);
+  }
+}
+
+/* --- unter 600 px: zugeklapptes Foldable ---------------------
+   Zielgeraete der Kasse sind Desktop, Tablet und das aufgeklappte
+   Foldable. Zugeklappt (rund 430 px) ist sie nicht der
+   vorgesehene Arbeitsplatz — aber ein Foldable ist zwei Geraete,
+   und zuklappen laeuft ohne Neuladen. Das Layout muss deshalb
+   auch hier stehen, statt zu zerfallen: zwei Spalten, flacher
+   Kopf, und ein Hinweis, der sagt, woran man ist. */
+/* Der Grundzustand steht vor der Abfrage. Stuende er dahinter,
+   gewaenne er bei gleicher Spezifitaet ueber die Reihenfolge —
+   der Hinweis bliebe verborgen, waehrend seine Hoehe im Layout
+   schon abgezogen waere. */
+.schmal-hinweis {
+  display: none; flex-shrink: 0; align-items: center; gap: 8px;
+  padding: 7px 12px; font-size: 12px; line-height: 1.35;
+  background: #FFF6E6; color: #8A5A18;
+  border-bottom: 1px solid #E8D4AE;
+}
+
+@media (max-width: 399px) {
+  .header-dash .dash-text { display: none; }
+  .header-dash { padding: 10px 14px; }
+}
+
+@media (max-width: 599px) {
+  .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+  .order-panel  { max-height: 42svh; }
+  .header       { padding: 0 12px; gap: 10px; }
+  .schmal-hinweis { display: flex; }
+}
+
+/* --- flach: Hoehe ist die knappe Groesse ---------------------
+   Ein aufgeklapptes Foldable ist breit genug fuer jede
+   max-width-Abfrage und trotzdem zu flach fuer eine senkrechte
+   Kategorieleiste: Bei 900x430 waren von sieben Kategorien vier
+   sichtbar, die uebrigen nur durch Scrollen erreichbar.
+
+   Gemessen bei 900x430: Kopf 62 + Fussleiste 56 lassen 312 px
+   fuer den Arbeitsbereich. Eine waagerechte Leiste kostet davon
+   55 px und gibt dafuer alle sieben Kategorien frei.
+
+   Ab 900 px Breite bleibt die Bestellung rechts stehen — dort
+   ist Breite reichlich, Hoehe nicht. Dafuer wird .main zum
+   Raster: Leiste oben links, Artikel darunter, Bestellung ueber
+   beide Zeilen rechts. Darunter greift die Stapelregel oben. */
+@media (max-height: 500px) and (min-width: 900px) {
+  .main {
+    display: grid;
+    grid-template-columns: 1fr var(--panel-w);
+    grid-template-rows: auto 1fr;
+  }
+  .sidebar {
+    grid-column: 1; grid-row: 1;
+    width: 100%; height: auto; flex-direction: row;
+    overflow-x: auto; overflow-y: hidden;
+    border-right: 0; border-bottom: 1px solid var(--border);
+    padding: 4px 6px; gap: 4px; scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .cat-btn {
+    flex-direction: row; gap: 6px; flex-shrink: 0;
+    min-height: 40px; padding: 6px 12px; margin: 0;
+    border-left: 0; white-space: nowrap; font-size: 12px;
+  }
+  .cat-btn .cat-icon { width: 24px; height: 24px; font-size: 13px; }
+  .grid-area   { grid-column: 1; grid-row: 2; min-height: 0; }
+  .order-panel {
+    grid-column: 2; grid-row: 1 / 3;
+    width: auto; max-height: none; overflow-y: auto;
+    border-left: 2px solid var(--border); border-top: 0;
+  }
+  /* Auch hier scrollt das Panel als Ganzes: Bei 900x430 bleiben
+     ihm 322 px, die Fusszeile allein braucht 494. */
+  .order-items { flex: none; overflow-y: visible; }
+  .header { height: 52px; }
+}
+
+/* --- Trefferflaechen ------------------------------------------
+   Gemessen bei 768 px (Tablet). Zu niedrig waren, jeweils Hoehe:
+   Ansichtsumschalter 32, Modal-Schliesser 32, Leeren 24,
+   Abbrechen/Bestaetigen 40, Dashboard-Weg 43, Eingabefelder 38.
+   WCAG 2.5.5 will 44 px, 2.5.8 mindestens 24.
+
+   Bewusst NICHT an (hover: none) gebunden. Die Abfrage liess sich
+   in der Vorschau bei 768 px nicht ausloesen — dort meldet sie
+   hover: hover, die Regel waere auf genau der Geraeteklasse tot
+   gewesen, fuer die sie gedacht ist. Eine unsichtbare Flaeche
+   stoert mit Maus ohnehin nicht.
+
+   Nur senkrecht (inset: -10px 0): Der Ansichtsumschalter steht mit
+   2 px Abstand neben seinem Nachbarn, die Stornoknoepfe mit 8 px.
+   Seitliches Wachstum wuerde dem Nachbarn Klicks wegnehmen.
+   Die Breiten sind mit 59 bis 217 px ohnehin ausreichend.
+
+   Nicht in der Liste, weil schon gross genug:
+   .qty-btn misst 44x44; der Datenschalter (48x26) liegt in einer
+   Pille, die den Klick selbst annimmt. */
+.order-clear, .view-toggle button, .order-item-btn,
+.cancel-btn, .confirm-btn, .header-dash { position: relative; }
+.order-clear::after, .view-toggle button::after, .order-item-btn::after,
+.cancel-btn::after, .confirm-btn::after, .header-dash::after {
+  content: ''; position: absolute; inset: -10px 0;
+}
+
+/* Der Modal-Schliesser steht allein in der Ecke, er darf auch
+   seitlich wachsen: 32 wird zu 52 in beide Richtungen. */
+.modal-close { position: relative; }
+.modal-close::after { content: ''; position: absolute; inset: -10px; }
+
+/* Eingabefelder: ::after wird auf <input> nicht gezeichnet,
+   deshalb hier das Element selbst. 38 auf 44 aendert die Zeile
+   um 6 px, das traegt das Formular. */
+.discount-custom input, .extras-input-row input { min-height: 44px; }
+
+/* Knoepfe in den Modalen, ebenfalls nur senkrecht: die Abstaende
+   betragen 6 px (Schnellbetraege) und 8 px (Rabattstufen,
+   Kopfwerkzeuge). 34 bis 42 px werden so zu 54 bis 62. */
+.quick-amounts button, .discount-presets button,
+.discount-custom button,
+.modal-tools button:not(.modal-close) { position: relative; }
+.quick-amounts button::after, .discount-presets button::after,
+.discount-custom button::after,
+.modal-tools button:not(.modal-close)::after {
+  content: ''; position: absolute; inset: -10px 0;
+}
+
+/* <select> zeichnet kein ::after — hier waechst das Element. */
+.discount-custom select { min-height: 44px; }
+
+@media (hover: none) {
+  /* Kein :hover-Zustand auf Touch — er bleibt nach dem Tippen
+     haengen und sieht aus wie eine Auswahl. */
+  .cat-btn:hover, .product-card:hover, .product-row:hover { background: none; }
+  .product-card:hover { box-shadow: none; border-color: var(--border); }
+}
+
 </style>
 </head>
 <body>
@@ -400,11 +644,16 @@ body.data-mode .pos-data-annotation{display:block}
       <span style="font-size:11px;color:#94a3b8;margin-left:4px" id="shiftInfo"></span>
     </div>
     <span class="clock" id="hdrClock">00:00:00</span>
-    <a href="dashboard.html" class="header-dash">📊 Dashboard</a>
+    <a href="dashboard.html" class="header-dash" aria-label="Dashboard"><span aria-hidden="true">📊</span><span class="dash-text">Dashboard</span></a>
   </div>
 </div>
 
 <!-- MAIN -->
+<div class="schmal-hinweis">
+  <i class="fa-solid fa-circle-info"></i>
+  <span>Die Kasse ist für Tablet und größer gebaut. Auf dieser Breite bleibt sie
+  bedienbar, zeigt aber weniger Artikel je Bildschirm.</span>
+</div>
 <div class="main">
   <!-- Sidebar -->
   <div class="sidebar" id="catSidebar">
@@ -717,7 +966,7 @@ body.data-mode .pos-data-annotation{display:block}
   <div class="modal" style="width:640px;max-width:95vw">
     <div class="modal-header">
       <h3>Tagesabschluss — Kassenbericht</h3>
-      <div style="display:flex;gap:8px;align-items:center">
+      <div class="modal-tools" style="display:flex;gap:8px;align-items:center">
         <button onclick="printDayClose()" style="padding:8px 14px;border:1.5px solid #dee2e6;border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:#495057;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-print"></i> Drucken</button>
         <button onclick="exportDayCloseCSV()" style="padding:8px 14px;border:1.5px solid #198754;border-radius:8px;background:#f0fdf4;font-size:13px;font-weight:600;color:#198754;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="fa-solid fa-file-csv"></i> CSV Export</button>
         <button class="modal-close" onclick="closeAllModals()">✕</button>
