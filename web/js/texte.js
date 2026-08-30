@@ -70,9 +70,14 @@ export function baueTexte(B, roh) {
 
   T['aovChart.titel'] =
     `Ø Bestellwert stieg um ${zahl((aovVoll / aovErst - 1) * 100, 0)} % seit Gründung`;
+  // Dasselbe Bezugsjahr wie in der Ueberschrift. Vorher stand hier das
+  // angebrochene Jahr: 14,50 auf 22,48 sind +55 %, waehrend die Ueberschrift
+  // mit dem letzten vollen Jahr +51 % auswies — zwei Zahlen zu einem Diagramm,
+  // die sich widersprachen.
   T['aovChart.deutung'] =
-    `Der Bestellwert stieg von ${euro(aovErst)} (${j[0]}) auf ${euro(aovLetzt)} `
-    + `(${j[j.length - 1]}). Den größten Sprung brachte ${j[aovMaxJahr + 1]} mit `
+    `Der Bestellwert stieg von ${euro(aovErst)} (${j[0]}) auf ${euro(aovVoll)} `
+    + `(${letztesVoll}); im angebrochenen Jahr ${j[j.length - 1]} liegt er bei `
+    + `${euro(aovLetzt)}. Den größten Sprung brachte ${j[aovMaxJahr + 1]} mit `
     + `${vz(B.aovYoY[aovMaxJahr])}. Seither flacht die Kurve ab `
     + `(${letztesVoll}: ${vz(B.aovYoY[B.aovYoY.length - 1])}) — ein Hinweis darauf, `
     + `dass die Zahlungsbereitschaft in dieser Preislage begrenzt ist.`;
@@ -557,9 +562,11 @@ export function baueTexte(B, roh) {
     + `Unabhängigkeitswert ${zahl(prLiftNeutral)} liegen.`;
 
   T['produkte_tabelle3.empfehlung'] =
-    `Handlungsempfehlung: Als Bündel eignen sich die ${zahl(prWkStark.length)} Regeln `
-    + `mit einem Lift über ${zahl(prLiftSchwelle)}, weil nur sie deutlich über den `
-    + `Zufall hinausgehen: `
+    `Handlungsempfehlung: Als Bündel eignen sich die ${zahl(prWkStark.length)} der `
+    + `${zahl(roh.warenkorb.length)} gezeigten Warenkörbe mit einem Lift über `
+    + `${zahl(prLiftSchwelle)}, weil nur sie deutlich über den Zufall hinausgehen — `
+    + `die Tabelle listet die häufigsten Kombinationen, nicht die mit dem stärksten `
+    + `Lift: `
     + `${prUnd(prWkStark.map(r => `${r.produkt_a} mit ${r.produkt_b} (Lift `
         + `${zahl(r.lift, 2)}, Konfidenz ${proz(r.konfidenz_pct)})`))}. `
     + `${prWkHaeufig.produkt_a} und ${prWkHaeufig.produkt_b} sind mit `
@@ -1682,10 +1689,9 @@ export function baueTexte(B, roh) {
   const wtHeissTage = wtHeiss.reduce((s, x) => s + (x.tage ?? 0), 0);
   const wtHeissAnt  = wtTageZahl ? wtHeissTage / wtTageZahl * 100 : 0;
 
-  T['tempBinChart.sub'] =
-    `Ø Tagesumsatz und Bestellungen je Temperaturklasse · `
-    + `${zahl(wtKlassen.length)} Klassen · ${zahl(wtTageZahl)} Betriebstage · `
-    + `${wtVon}–${wtBis}`;
+  // tempBinChart.sub wird weiter unten gesetzt, wo die Klassen mit mindestens
+  // 100 Tagen bereits ausgewertet sind. Die fruehere Zuweisung stand hier
+  // doppelt und wurde stillschweigend ueberschrieben.
 
   T['tempBinChart.deutung'] =
     `Interpretation: Über alle ${zahl(wtTageZahl)} Betriebstage erklärt die Temperatur den `
@@ -1797,9 +1803,8 @@ export function baueTexte(B, roh) {
     const psKBew = psK.reduce((a, x) => a + x.bewertungen, 0);
     const psKHoch = [...psK].sort((a, b) => b.zufriedenheit - a.zufriedenheit)[0];
 
-    T['satChannelChart.sub'] =
-      `Ø Satisfaction Score (1–5) nach Bestellkanal · ${zahl(psKBest)} Bestellungen, `
-      + `davon ${zahl(psKBew)} mit Bewertung`;
+    // satChannelChart.sub wird weiter unten gesetzt und hat diese Zuweisung
+    // ueberschrieben; die dortige Fassung nennt zusaetzlich die Spanne.
 
     const psD = roh.zufriedenheitDauer;
     const psDSort = [...psD].sort((a, b) => a.nr - b.nr);
@@ -2329,6 +2334,18 @@ export function baueTexte(B, roh) {
     `Ø Tagesumsatz nach Wetterlage · ${zahl(wl.length)} Kategorien · `
     + `${zahl(wl[wl.length - 1].tage)} bis ${zahl(wl[0].tage)} Tage je Kategorie`;
 
+  // Die Klassengrenzen standen als Text in den Kacheln ("25-30 Grad"),
+  // waehrend der waermste erfasste Tag 27,7 Grad hat. Jetzt kommen sie
+  // aus derselben Quelle wie die Werte darunter.
+  const tKl   = roh.wetterTemperatur.filter(x => x.tage > 0);
+  const tWarm = tKl[tKl.length - 1], tKalt = tKl[1];
+  // "bis" statt Gedankenstrich: Bei negativen Graden entstuende sonst
+  // "−8,7–−5,1", was niemand liest.
+  T['wetter1.titel'] =
+    `WÄRMSTE TAGE (${zahl(tWarm.von, 1)} bis ${zahl(tWarm.bis, 1)} °C)`;
+  T['wetter2.titel'] =
+    `KÄLTESTE TAGE (${zahl(tKalt.von, 1)} bis ${zahl(tKalt.bis, 1)} °C)`;
+
   T['weatherScatterChart.titel'] =
     `Temperatur gegen Tagesumsatz — der Wachstumstrend überlagert den Wettereffekt`;
 
@@ -2341,6 +2358,33 @@ export function baueTexte(B, roh) {
     `Ø Tagesumsatz je Niederschlagsklasse · ${zahl(rg.length)} Klassen · `
     + `der höchste Wert steht über ${zahl(rgKlein.tage)} `
     + `${Number(rgKlein.tage) === 1 ? 'Tag' : 'Tagen'} und trägt deshalb nicht`;
+
+  // Die Deutung stand bis zuletzt als fester Text im HTML und nannte 7 Tage,
+  // waehrend die Daten 8 zeigen — die Untertitelzeile darueber war laengst
+  // mitgewandert, weil sie erzeugt wird. Jetzt wird auch die Deutung gebaut.
+  const rgSpitze  = [...rg].sort((a, b) => b.umsatz_je_tag - a.umsatz_je_tag)[0];
+  const rgTage    = rg.reduce((s, x) => s + Number(x.tage), 0);
+  const rgMittel  = rg.reduce((s, x) => s + x.umsatz_je_tag * x.tage, 0) / rgTage;
+  const rgNiedrig = [...rgGross].sort((a, b) => a.umsatz_je_tag - b.umsatz_je_tag)[0];
+  const rgSpanne  = (rgHoch.umsatz_je_tag / rgNiedrig.umsatz_je_tag - 1) * 100;
+  const rgListe   = rgGross
+    .map(x => `${x.klasse} ${euro(x.umsatz_je_tag, 0)} an ${zahl(x.tage)} Tagen`)
+    .join(', ');
+  T['rainChart.deutung'] =
+    `Der Umsatz sinkt nicht mit steigendem Niederschlag: Die stärkste Klasse ist `
+    + `${rgSpitze.klasse} mit ${euro(rgSpitze.umsatz_je_tag, 0)} je Tag, gegenüber `
+    + `${euro(rgMittel, 0)} im Mittel aller ${zahl(rgTage)} Betriebstage. Belastbar `
+    + `ist dieser Spitzenwert nicht: Hinter ihm stehen nur ${zahl(rgSpitze.tage)} `
+    + `${Number(rgSpitze.tage) === 1 ? 'Tag' : 'Tage'}. Aussagekräftig sind allein `
+    + `die Klassen mit mindestens 100 Tagen — ${rgListe} —, zwischen denen `
+    + `${proz(rgSpanne)} liegen. Ein Zusammenhang zwischen Regenmenge und Umsatz `
+    + `ist darin nicht zu erkennen.`;
+  T['rainChart.empfehlung'] =
+    `Auf Regen ausgerichtete Aktionen sind durch diese Daten nicht gedeckt. Die `
+    + `naheliegende Vermutung, Regen verlagere Bestellungen vom Counter in den `
+    + `Drive-Through, lässt sich hier weder belegen noch widerlegen: Dafür wären `
+    + `die Kanalanteile je Tag nötig, die diese Sicht nicht führt. Erfolgsmaß einer `
+    + `Prüfung wäre der Counter-Anteil an Regentagen gegenüber trockenen Tagen.`;
 
   // ── Personal ─────────────────────────────────────────────────────────────
   const pf = [...roh.personalFilialen].sort((a, b) => b.umsatz_je_ma - a.umsatz_je_ma);
