@@ -1208,18 +1208,48 @@ function setView(mode){
   document.getElementById('productList').style.display=mode==='list'?'flex':'none';
   renderProducts();
 }
+// Wie viele Spalten? Frueher richtete sich das allein nach der
+// Anzahl der Artikel: vier Artikel ergaben vier Spalten. Auf einem
+// Tablet im Querformat standen dann vier 126-px-Kacheln in einer
+// Flaeche von 584x503, darunter blieb alles leer.
+//
+// Jetzt entscheidet die verfuegbare Breite — und nur sie. Damit
+// ist die Kachel in jeder Warengruppe gleich gross und liegt an
+// derselben Stelle; wer oft kassiert, greift blind. Haenge die
+// Spaltenzahl dagegen an der Artikelzahl, springt die Kachel beim
+// Umschalten der Gruppe (gemessen: 183 px bei Burger gegen 134 bei
+// Beilagen) — das kostet mehr, als der gewonnene Platz bringt.
+//
+// Gruppen mit vielen Artikeln rollen dafuer senkrecht. Das ist der
+// bewusste Tausch: gleichbleibende, gut treffbare Kacheln gegen
+// gelegentliches Rollen.
+const ZIEL_KACHEL = 200;   // px, angestrebte Kantenlaenge
+const MIN_KACHEL  = 110;   // darunter wird das Tippen unsicher
+function spaltenzahl(grid){
+  const cs = getComputedStyle(grid);
+  const luecke = parseFloat(cs.gap) || 14;
+  const breite = grid.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  // Vor dem ersten Layout hat das Raster noch keine Breite.
+  if(!(breite > 0)) return 4;
+  // Die Spaltenzahl waehlen, deren Kachel am dichtesten an ZIEL
+  // liegt. Ueber das Verhaeltnis zu runden trifft daneben: Bei
+  // 728 px Breite ergab das 3 Spalten mit 233 px, obwohl 4 Spalten
+  // mit 171 px naeher am Ziel liegen.
+  let beste = 1, abstand = Infinity;
+  for(let c = 1; c <= 10; c++){
+    const kachel = (breite - luecke*(c-1)) / c;
+    if(kachel < MIN_KACHEL) break;
+    const d = Math.abs(kachel - ZIEL_KACHEL);
+    if(d < abstand){ abstand = d; beste = c; }
+  }
+  return beste;
+}
+
 function renderProducts(){
   if(state.viewMode==='list'){renderListView();return;}
   const grid=document.getElementById('productGrid');
   const items=getItems();
-  const n=items.length;
-  // Aim for roughly square cells: more cols for fewer items
-  let cols;
-  if(n<=4)cols=n;
-  else if(n<=6)cols=3;
-  else if(n<=8)cols=4;
-  else cols=Math.min(5,Math.ceil(Math.sqrt(n*1.5)));
-  grid.style.gridTemplateColumns='repeat('+cols+',1fr)';
+  grid.style.gridTemplateColumns='repeat('+spaltenzahl(grid)+',1fr)';
   // Die Zeilenhoehe wird bewusst NICHT gesetzt. Frueher stand hier
   // gridTemplateRows='repeat(n,1fr)', damit alle Artikel ohne Rollen
   // auf die Flaeche passen. Das geht auf, solange die Flaeche hoch
@@ -1234,6 +1264,19 @@ function renderProducts(){
   // es zu hoch wird.
   grid.innerHTML=items.map(p=>renderCard(p)).join('');
 }
+
+// Beim Drehen des Geraets aendert sich die verfuegbare Flaeche und
+// damit die richtige Spaltenzahl. Vorher wurde nie neu gerechnet:
+// Wer das Tablet drehte, behielt die Anordnung des alten Formats.
+// Gebremst, damit waehrend des Ziehens am Fensterrand nicht bei
+// jedem Pixel neu gezeichnet wird.
+let umbruchTimer;
+function neuUmbrechen(){
+  clearTimeout(umbruchTimer);
+  umbruchTimer = setTimeout(() => { if(state.viewMode==='grid') renderProducts(); }, 150);
+}
+window.addEventListener('resize', neuUmbrechen);
+window.addEventListener('orientationchange', neuUmbrechen);
 
 // ===== ORDER MANAGEMENT =====
 function addToOrder(id){
