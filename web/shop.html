@@ -1405,7 +1405,10 @@ ul { list-style: none; }
 /* ============================================
    NOTIFICATION TOAST
    ============================================ */
+/* z-index 5000 ueber allem, enthaelt keinen Knopf — darf also
+   waehrend ihrer Anzeigedauer keine Klicks abfangen. */
 .toast {
+  pointer-events: none;
   position: fixed;
   bottom: 24px;
   left: 50%;
@@ -1480,7 +1483,10 @@ ul { list-style: none; }
 /* ============================================
    SCROLL PROGRESS BAR
    ============================================ */
+/* Reine Anzeige. Mit z-index 1001 liegt der Balken ueber der
+   Navigation (1000) und nahm im obersten 3-px-Streifen Klicks an. */
 .scroll-progress {
+  pointer-events: none;
   position: fixed;
   top: 0; left: 0;
   height: 3px;
@@ -1614,9 +1620,19 @@ ul { list-style: none; }
 /* ============================================
    BACK TO TOP
    ============================================ */
+/* Bis zum Erscheinen unsichtbar (opacity 0), nahm aber Klicks an:
+   ein unsichtbarer Knopf, der die Seite nach oben springen laesst.
+   Erst .visible macht ihn bedienbar.
+
+   bottom:104px statt 32: Beide Knoepfe sassen unten rechts mit
+   32 px Abstand, der Chat-Knopf (60x60, z-index 2000) genau ueber
+   diesem (48x48, z-index 900). Gemessen waren 60 Prozent verdeckt
+   und die Mitte traf den Chat-Knopf — "nach oben" war also auch
+   im sichtbaren Zustand nicht bedienbar. 32 + 60 + 12 = 104. */
 .back-to-top {
+  pointer-events: none;
   position: fixed;
-  bottom: 32px;
+  bottom: 104px;   /* ueber dem Chat-Knopf, siehe unten */
   right: 32px;
   width: 48px;
   height: 48px;
@@ -1636,6 +1652,7 @@ ul { list-style: none; }
   border: none;
 }
 .back-to-top.visible {
+  pointer-events: auto;
   opacity: 1;
   transform: translateY(0) scale(1);
 }

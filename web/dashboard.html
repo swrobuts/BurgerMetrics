@@ -686,6 +686,35 @@
         min-width: 44px;
       }
     }
+
+    /* Dieselben Ziele noch einmal, aber ohne Bindung an den
+       Zeigertyp. Gemessen bei 1205x655 meldet der Browser
+       hover: hover — die Abfrage oben ist dort tot, und 23 von
+       24 Bedienelementen lagen unter 44 px, die Umschalter mit
+       43x23 sogar unter dem Mindestmass von 24.
+
+       Hier waechst nur die Flaeche ueber ::after, das Element
+       behaelt sein Mass: min-height wuerde die Navigationsleiste
+       auf dem Rechner sichtbar hoeher machen.
+
+       Nur senkrecht — .main-nav und .sub-nav-inner haben gap: 0,
+       die Umschalter 1 px. Seitliches Wachstum naehme dem
+       Nachbarn Klicks weg. Die Breiten reichen mit 42 bis 174 px
+       ohnehin fast ueberall; nur der schmalste Umschalter bekommt
+       zwei Pixel dazu. */
+    .filter-btn, .toggle-btn { position: relative; }
+    .filter-btn::after { content: ''; position: absolute; inset: -7px 0; }
+    .toggle-btn::after { content: ''; position: absolute; inset: -11px 0; }
+    .toggle-btn { min-width: 44px; }
+
+    /* Die beiden Navigationsleisten brauchen echte Hoehe statt
+       einer gewachsenen Flaeche: Sie tragen overflow-x: auto zum
+       waagerechten Schieben, und overflow schneidet in BEIDEN
+       Achsen. Ein ::after, das nach oben ragt, wird vom Elternteil
+       weggeschnitten — per elementFromPoint geprueft, es wirkte
+       nicht. Deshalb hier min-height; das kostet 3 px in der
+       Hauptleiste und 10 in der Unterleiste. */
+    .main-nav button, .sub-nav button { min-height: 44px; }
   </style>
 </head>
 <body>
