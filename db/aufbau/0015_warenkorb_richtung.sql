@@ -50,6 +50,9 @@ CREATE OR REPLACE FUNCTION kurzname(name text) RETURNS text AS $$
     WHEN 'Beyond Burger'      THEN 'Beyond'
     WHEN 'Green Goddess Bowl' THEN 'G.Goddess'
     WHEN 'Side Salad'         THEN 'Salad'
+    WHEN 'Chicken Nuggets 6pc' THEN 'Nuggets 6'
+    WHEN 'Chicken Nuggets 9pc' THEN 'Nuggets 9'
+    WHEN 'BBQ Sauce'          THEN 'BBQ'
     ELSE name
   END;
 $$ LANGUAGE sql IMMUTABLE;
@@ -77,7 +80,14 @@ WITH paare(nr, a, b) AS (VALUES
   (12,'Green Goddess Bowl','Cola 0.5l'),
   (13,'Large Fries','Medium Fries'),
   (14,'Beyond Burger','Cola 0.3l'),
-  (15,'Side Salad','Medium Fries'))
+  (15,'Side Salad','Medium Fries'),
+  -- Die staerksten Regeln des Bestands: Lift 8,97 und 8,90, also rund
+  -- neunmal haeufiger als bei Unabhaengigkeit. Sie stehen am Ende, weil
+  -- die Reihenfolge dem Support folgt und der hier bei 1,4 % liegt.
+  -- Beide Groessen sind aufgenommen: Ihre Werte liegen so dicht
+  -- beieinander, dass eine Auswahl willkuerlich waere.
+  (16,'Chicken Nuggets 6pc','BBQ Sauce'),
+  (17,'Chicken Nuggets 9pc','BBQ Sauce'))
 SELECT p.nr,
        kurzname(r.produkt_a) || '→' || kurzname(r.produkt_b) AS regel,
        r.produkt_a, r.produkt_b,

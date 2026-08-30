@@ -565,8 +565,7 @@ export function baueTexte(B, roh) {
     `Handlungsempfehlung: Als Bündel eignen sich die ${zahl(prWkStark.length)} der `
     + `${zahl(roh.warenkorb.length)} gezeigten Warenkörbe mit einem Lift über `
     + `${zahl(prLiftSchwelle)}, weil nur sie deutlich über den Zufall hinausgehen — `
-    + `die Tabelle zeigt eine Auswahl aus Burgern, Beilagen und Getränken, nicht `
-    + `die Paare mit dem stärksten Lift: `
+    + `die Tabelle zeigt eine kuratierte Auswahl, nicht alle Paare des Bestands: `
     + `${prUnd(prWkStark.map(r => `${r.produkt_a} mit ${r.produkt_b} (Lift `
         + `${zahl(r.lift, 2)}, Konfidenz ${proz(r.konfidenz_pct)})`))}. `
     + `${prWkHaeufig.produkt_a} und ${prWkHaeufig.produkt_b} sind mit `
@@ -2180,8 +2179,8 @@ export function baueTexte(B, roh) {
     `Höchste Konfidenz: ${wkTop.produkt_a} → ${wkTop.produkt_b} bei `
     + `${proz(wkTop.konfidenz_pct)}`;
   T['tblBasket.sub'] =
-    `${zahl(roh.warenkorb.length)} ausgewählte Warenkörbe aus Burgern, Beilagen `
-    + `und Getränken · Support, Konfidenz und Lift · ${zahl(kumBest)} Bestellungen`;
+    `${zahl(roh.warenkorb.length)} ausgewählte Warenkörbe · Support, Konfidenz `
+    + `und Lift · ${zahl(kumBest)} Bestellungen`;
 
   // ── Kunden ───────────────────────────────────────────────────────────────
   const bz = [...roh.kundenBezirke].sort((a, b) => b.kunden - a.kunden);
@@ -2290,7 +2289,7 @@ export function baueTexte(B, roh) {
     `${zahl(dmStark.length)} der ${zahl(dmWk.length)} Paare erreichen einen Lift `
     + `über ${zahl(dmLiftStark)}`;
   // Nicht "Alle": v_warenkorb_regeln fuehrt weit mehr Paare, die Tabelle
-  // zeigt eine kuratierte Auswahl aus Burgern, Beilagen und Getraenken.
+  // zeigt eine kuratierte Auswahl.
   T['tblAssoc.titel'] = `${zahl(dmWk.length)} ausgewählte Regeln mit Lift-Metrik`;
   T['tblAssoc.sub'] =
     `${zahl(dmWk.length)} ausgewählte Regeln · nach Häufigkeit geordnet · Lift `
