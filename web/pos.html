@@ -1255,21 +1255,25 @@ const MANAGER_PIN = '1234';
 // ===== STATE =====
 // Mehrwertsteuer. Die Kasse rechnete bisher pauschal 19 Prozent — auch bei
 // "Mitnehmen", obwohl sie die Verzehrart direkt darueber abfragt und sie auf
-// den Bon druckt. Fuer Speisen ausser Haus gilt der ermaessigte Satz; das ist
-// unabhaengig vom Jahr richtig.
+// den Bon druckt.
 //
-// Der Satz fuer den Verzehr im Haus hat sich mehrfach geaendert: 19 Prozent,
-// waehrend der Pandemie und bis Ende 2023 ermaessigt, danach wieder 19, und
-// zum 1. Januar 2026 erneut ermaessigt. Welcher Satz fuer die Fallstudie
-// gelten soll, ist eine fachliche Entscheidung — sie steht deshalb hier und
-// nicht verstreut im Code.
+// Seit dem 1. Januar 2026 gilt der ermaessigte Satz von 7 Prozent auch fuer
+// den Verzehr im Haus; ausser Haus galt er ohnehin. Beide Saetze stehen
+// derzeit also gleich.
+//
+// Die Unterscheidung bleibt trotzdem im Code, statt einen einzigen Satz
+// festzuschreiben: Sie hat sich schon mehrfach geaendert — 19 Prozent, in der
+// Pandemie und bis Ende 2023 ermaessigt, danach wieder 19, seit 2026
+// ermaessigt. Wer den naechsten Wechsel nachziehen muss, aendert hier zwei
+// Zahlen und sonst nichts. Der Bon und der Tagesabschluss lesen den Satz aus
+// der Transaktion, nicht aus einer festen Zahl im Text.
 //
 // Das Faktenmodell fuehrt kein Steuerfeld: fact_orders kennt gross_total,
 // discount_amount und net_total, aber keinen Steuerbetrag. Die Angabe auf dem
 // Bon ist eine Rechnung der Kasse, keine Groesse aus dem Bestand.
 const MWST = {
   counter: 0.07,   // Mitnehmen — ermaessigter Satz fuer Speisen ausser Haus
-  dine:    0.19,   // Im Haus — zu pruefen: seit 2026 ebenfalls ermaessigt
+  dine:    0.07,   // Im Haus — seit 1. Januar 2026 ebenfalls ermaessigt
 };
 
 const state = {
