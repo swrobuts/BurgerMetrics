@@ -171,7 +171,15 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .pay-btn:disabled{background:#d1d5db;cursor:not-allowed}
 
 /* === FUNCTION BAR === */
-.funcbar{height:56px;flex-shrink:0;background:var(--white);border-top:2px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:6px}
+.funcbar{height:56px;flex-shrink:0;background:var(--white);border-top:2px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:6px;
+  /* Die Knoepfe tragen white-space:nowrap, koennen also nicht
+     schmaler werden als ihre Beschriftung: zusammen 792 px.
+     Ohne overflow-x wurden sie am Rand abgeschnitten und waren
+     nicht erreichbar — bei 768 px F8, bei 430 px F5 bis F8.
+     Auf einem echten Foldable war genau das zu sehen. */
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.funcbar::-webkit-scrollbar{height:4px}
+.funcbar::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px}
 .func-btn{flex:1;height:44px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:#495057;transition:all .15s;white-space:nowrap;padding:0 10px}
 .func-btn:hover{background:var(--bg);border-color:#adb5bd;color:var(--dark)}
 .func-btn .fkey{font-size:11px;font-weight:700;color:#868e96;background:#f1f3f5;padding:2px 6px;border-radius:4px}
@@ -484,6 +492,14 @@ body.data-mode .pos-data-annotation{display:block}
      .main abschneidet, nicht erreichbar — kassieren war auf dem
      Tablet unmoeglich. Deshalb faellt hier die innere Rollung
      weg und das Panel bekommt eine eigene. */
+  /* Der Datenschalter schwebt fest ueber dem unteren Rand. Im
+     Seitenlayout liegt dort die Kategorienleiste, gestapelt aber
+     das Bestellpanel — auf einem echten Foldable verdeckte er die
+     Zwischensumme, bei 430 px sogar "GESAMT". Ein Streifen am Ende
+     des Panels haelt die Stelle frei; der Schalter schwebt dann
+     ueber Leerraum statt ueber Betraegen. */
+  .order-panel { padding-bottom: 64px; }
+
   .order-panel {
     width: 100%; max-height: 46svh; overflow-y: auto;
     border-left: 0; border-top: 2px solid var(--border);
