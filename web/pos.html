@@ -47,6 +47,13 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .main{display:flex;flex:1;min-height:0;overflow:hidden}
 
 /* === CATEGORY SIDEBAR === */
+/* padding-bottom haelt die Stelle frei, an der der Datenschalter
+   schwebt. Auf einem Tablet im Querformat (1200x700) lag er genau
+   auf "Extras" — die Warengruppe war nicht anklickbar. Bei hohen
+   Fenstern fiel das nicht auf, weil die Leiste dort laenger ist
+   als ihre Knoepfe; der Fehler haengt an der Fensterhoehe, nicht
+   an der Breite. overflow-y:auto war schon gesetzt, die Leiste
+   rollt also, wenn der Streifen sie zu lang macht. */
 .sidebar{width:var(--rail-w);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:6px 0;overflow-y:auto;flex-shrink:0;gap:2px}
 .cat-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;cursor:pointer;border:none;background:none;font-size:12px;font-weight:700;color:var(--text-light);transition:all .15s;border-left:4px solid transparent;position:relative;min-height:70px;letter-spacing:.3px;margin:0 6px;border-radius:10px}
 .cat-btn:hover{background:#f1f3f5;color:var(--text)}
@@ -108,15 +115,27 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
      ueberlappende Paare. Am Desktop fiel es nicht auf, weil
      die Raster dort hoch genug sind. */
   align-content:start;grid-auto-rows:max-content}
-.product-card{border:2px solid var(--border);border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;position:relative;transition:box-shadow .15s,border-color .15s;user-select:none;min-width:0;min-height:0;overflow:hidden;background-size:cover;background-position:center;aspect-ratio:1}
+.product-card{border:2px solid var(--border);border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;position:relative;transition:box-shadow .15s,border-color .15s;user-select:none;min-width:0;min-height:0;overflow:hidden;background-size:cover;background-position:center;aspect-ratio:1;container-type:inline-size}
 .product-card::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.35) 40%,rgba(0,0,0,.1) 100%);border-radius:12px;pointer-events:none}
 .product-card.in-cart{border-color:var(--green);box-shadow:0 0 0 2px var(--green)}
 .product-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.2);border-color:#adb5bd}
 .product-card:active{filter:brightness(.9)}
 .product-card .cart-badge{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.5);transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:2}
 .product-card .cart-badge.show{opacity:1;transform:scale(1)}
-.product-card .p-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.25;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.5)}
-.product-card .p-price{font-size:22px;font-weight:800;color:#fff;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.5);padding-bottom:12px}
+/* Die Kachelgroesse haengt an der Spaltenzahl, und die richtet
+   sich nach der Anzahl der Artikel — nicht nach der Fenster-
+   breite. Media Queries waeren hier das falsche Werkzeug,
+   deshalb eine Containerabfrage: cqi bezieht sich auf die
+   Breite der Kachel selbst.
+   Vorher stand die Schrift fest auf 16 px. Auf dem Tablet
+   (Kachel 104 px) ragten dreizeilige Namen wie "Crispy Chicken
+   Deluxe" 5 px oben aus der Kachel, und "Cheeseburger" — ein
+   Wort, das nicht umbrechen kann — wurde rechts abgeschnitten.
+   overflow-wrap:anywhere laesst solche Woerter brechen, die
+   Begrenzung auf drei Zeilen haelt den Rest im Rahmen. */
+.product-card .p-name{font-size:clamp(11px,13cqi,17px);font-weight:700;color:#fff;margin-bottom:4px;line-height:1.25;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.5);
+  overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.product-card .p-price{font-size:clamp(14px,17cqi,22px);font-weight:800;color:#fff;position:relative;z-index:1;text-shadow:0 1px 4px rgba(0,0,0,.5);padding-bottom:clamp(6px,6cqi,12px);white-space:nowrap}
 
 /* === ORDER PANEL === */
 .order-panel{width:var(--panel-w);background:var(--white);border-left:2px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
@@ -196,9 +215,16 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .func-btn .ficon{font-size:16px}
 
 /* === DATA VIEW TOGGLE === */
-.pos-data-toggle{position:fixed;bottom:62px;left:24px;z-index:1500;display:flex;align-items:center;gap:12px;background:#1e293b;padding:10px 20px;border-radius:50px;box-shadow:0 8px 32px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);transition:all .4s;cursor:pointer}
-.pos-data-toggle:hover{border-color:rgba(0,255,136,.3);box-shadow:0 8px 40px rgba(0,255,136,.15)}
-.pos-data-toggle-label{font-family:'Courier New',monospace;font-size:13px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.85);text-transform:uppercase;transition:color .3s}
+/* Frueher position:fixed ueber dem Inhalt. Das ging dreimal
+   schief: Er lag auf der Zwischensumme, auf "GESAMT" und
+   schliesslich auf der Warengruppe "Extras", die dadurch nicht
+   mehr anklickbar war. Ein Streifen Freiraum half nicht, weil
+   die darunterliegenden Flaechen rollen. Jetzt steht er als
+   normales Bedienelement in der Funktionsleiste und verdeckt
+   nichts mehr. */
+.pos-data-toggle{display:flex;align-items:center;gap:10px;flex-shrink:0;height:44px;padding:0 14px;background:#1e293b;border-radius:8px;border:1.5px solid rgba(255,255,255,.08);transition:border-color .3s;cursor:pointer}
+.pos-data-toggle:hover{border-color:rgba(0,255,136,.4)}
+.pos-data-toggle-label{font-family:'Courier New',monospace;font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.85);text-transform:uppercase;transition:color .3s;white-space:nowrap}
 body.data-mode .pos-data-toggle-label{color:#00FF88}
 .pos-data-toggle-track{width:48px;height:26px;background:#475569;border-radius:13px;position:relative;transition:background .3s;border:none;cursor:pointer}
 body.data-mode .pos-data-toggle-track{background:#00FF88}
@@ -492,6 +518,12 @@ body.data-mode .pos-data-annotation{display:block}
   }
   .cat-btn .cat-icon { width: 26px; height: 26px; font-size: 14px; }
   .order-items { flex: none; overflow-y: visible; }
+
+  /* Schmal faellt der Datenschalter weg. Er ist ein Lehrmittel,
+     kein Kassenwerkzeug, und die Funktionsleiste rollt hier
+     ohnehin schon — 163 px weniger heisst spuerbar weniger
+     Schieben bis F8. */
+  .pos-data-toggle { display: none; }
   .cat-btn.active { box-shadow: inset 0 0 0 2px #dee2e6; }
   .grid-area   { flex: 1; min-height: 0; }
   /* Gestapelt scrollt das Panel als Ganzes. Im Seitenlayout
@@ -502,14 +534,6 @@ body.data-mode .pos-data-annotation{display:block}
      .main abschneidet, nicht erreichbar — kassieren war auf dem
      Tablet unmoeglich. Deshalb faellt hier die innere Rollung
      weg und das Panel bekommt eine eigene. */
-  /* Der Datenschalter schwebt fest ueber dem unteren Rand. Im
-     Seitenlayout liegt dort die Kategorienleiste, gestapelt aber
-     das Bestellpanel — auf einem echten Foldable verdeckte er die
-     Zwischensumme, bei 430 px sogar "GESAMT". Ein Streifen am Ende
-     des Panels haelt die Stelle frei; der Schalter schwebt dann
-     ueber Leerraum statt ueber Betraegen. */
-  .order-panel { padding-bottom: 64px; }
-
   .order-panel {
     width: 100%; max-height: 46svh; overflow-y: auto;
     border-left: 0; border-top: 2px solid var(--border);
@@ -758,6 +782,16 @@ body.data-mode .pos-data-annotation{display:block}
   <button class="func-btn" onclick="handleDayClose()"><span class="fkey">F6</span><span class="ficon">📋</span>Abschluss</button>
   <button class="func-btn" onclick="openModal('historyModal')"><span class="fkey">F7</span><span class="ficon">📜</span>Historie</button>
   <button class="func-btn" onclick="openModal('topSellerModal');renderTopSellers()"><span class="fkey">F8</span><span class="ficon">🏆</span>Top-Seller</button>
+  <!-- Der Datenschalter steht in der Leiste, nicht darueber: als
+       schwebendes Element verdeckte er je nach Fensterhoehe
+       Bedienelemente — auf einem Tablet im Querformat die
+       Warengruppe "Extras", die dadurch nicht anklickbar war. -->
+  <div class="pos-data-toggle" onclick="togglePosDataMode()">
+    <span class="pos-data-toggle-label" id="posDataLabel">DATA VIEW</span>
+    <button class="pos-data-toggle-track" id="posDataTrack">
+      <div class="pos-data-toggle-thumb"></div>
+    </button>
+  </div>
 </div>
 
 <!-- MANAGER BADGE -->
@@ -766,13 +800,6 @@ body.data-mode .pos-data-annotation{display:block}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- DATA VIEW TOGGLE (like on website) -->
-<div class="pos-data-toggle" onclick="togglePosDataMode()">
-  <span class="pos-data-toggle-label" id="posDataLabel">DATA VIEW</span>
-  <button class="pos-data-toggle-track" id="posDataTrack">
-    <div class="pos-data-toggle-thumb"></div>
-  </button>
-</div>
 
 <!-- DATA ANNOTATIONS (visible only in data-mode) -->
 <div class="pos-data-annotation" style="position:fixed;top:80px;left:130px;animation-delay:.1s;z-index:1200">
