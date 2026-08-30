@@ -196,15 +196,14 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .order-total .total-value{font-size:36px;font-weight:900;color:var(--dark)}
 
 /* Extras button */
-.extras-trigger{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;margin-bottom:12px;border:2px dashed var(--border);border-radius:12px;cursor:pointer;font-size:15px;font-weight:700;color:var(--text-light);transition:all .15s;background:transparent;min-height:52px}
+.extras-trigger{display:flex;align-items:center;justify-content:center;padding:11px;margin-bottom:12px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;color:var(--text-light);transition:all .12s;background:transparent;min-height:46px}
 .extras-trigger:hover{border-color:var(--green);color:var(--green);background:#f0fdf4}
 .extras-trigger.has-extras{border-color:var(--green);color:var(--green);background:#f0fdf4;border-style:solid;font-weight:700}
 .extras-status{font-size:11px;color:var(--green);padding:0 0 6px;text-align:center}
 
 /* Payment methods */
 .pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.pay-method-btn{padding:16px 8px;border:2px solid var(--border);border-radius:12px;background:var(--white);cursor:pointer;font-size:15px;font-weight:700;text-align:center;color:var(--text);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:70px;justify-content:center}
-.pay-method-btn .pm-icon{font-size:24px}
+.pay-method-btn{padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;background:var(--white);cursor:pointer;font-size:15px;font-weight:700;text-align:center;color:var(--text);transition:all .12s;display:flex;align-items:center;justify-content:center;min-height:48px}
 .pay-method-btn:hover{border-color:var(--green);background:#f0fdf4}
 .pay-method-btn.active{border-color:var(--green);background:#f0fdf4;color:var(--green);border-width:3px}
 
@@ -223,10 +222,9 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
   overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
 .funcbar::-webkit-scrollbar{height:4px}
 .funcbar::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px}
-.func-btn{flex:1;height:44px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:#495057;transition:all .15s;white-space:nowrap;padding:0 10px}
+.func-btn{flex:1;height:44px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:700;color:#495057;transition:all .12s;white-space:nowrap;padding:0 12px}
 .func-btn:hover{background:var(--bg);border-color:#adb5bd;color:var(--dark)}
 .func-btn .fkey{font-size:11px;font-weight:700;color:#868e96;background:#f1f3f5;padding:2px 6px;border-radius:4px}
-.func-btn .ficon{font-size:16px}
 
 /* === DATA VIEW TOGGLE === */
 /* Frueher position:fixed ueber dem Inhalt. Das ging dreimal
@@ -282,7 +280,7 @@ body.data-mode .pos-data-annotation{display:block}
 .pos-da-sql{display:block;background:rgba(0,0,0,.3);padding:8px 12px;border-radius:6px;margin-top:8px;font-size:11px;color:#8be9fd;border-left:3px solid rgba(0,255,136,.3)}
 
 /* Dashboard link in header */
-.header-dash{color:#e2e8f0;text-decoration:none;font-size:14px;font-weight:700;padding:10px 18px;border:1.5px solid #64748b;border-radius:10px;transition:all .15s;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06)}
+.header-dash{color:#e2e8f0;text-decoration:none;font-size:14px;font-weight:700;padding:10px 16px;border:1.5px solid #64748b;border-radius:9px;transition:all .12s;display:flex;align-items:center;background:rgba(255,255,255,.06)}
 .header-dash:hover{color:#fff;border-color:#94a3b8;background:rgba(255,255,255,.12)}
 
 /* === MODALS === */
@@ -675,7 +673,6 @@ body.data-mode .pos-data-annotation{display:block}
   .extras-trigger  { padding: 9px; margin-bottom: 8px; }
   .pay-methods     { margin-bottom: 8px; }
   .pay-method-btn  { padding: 9px 8px; min-height: 44px; }
-  .pay-method-btn .pm-icon { font-size: 19px; }
   .pay-btn         { height: 54px; font-size: 19px; }
 }
 
@@ -699,6 +696,75 @@ body.data-mode .pos-data-annotation{display:block}
   .order-total    { padding: 6px 0; margin-bottom: 6px; }
   .order-total .total-value { font-size: 25px; }
   .pay-btn        { height: 48px; font-size: 18px; }
+}
+
+/* --- Relief: Knoepfe wie Tasten -------------------------------
+   Eine Kasse ist ein Geraet mit Tasten, kein Formular. Die
+   Knoepfe bekommen deshalb Koerper:
+
+   - ein sehr flacher Verlauf von oben hell nach unten leicht
+     abgedunkelt (das Licht kommt von oben, wie im Raum),
+   - eine helle Kante innen oben und eine dunkle innen unten —
+     das ist die eigentliche Woelbung,
+   - ein kurzer Schatten darunter, der die Taste vom Untergrund
+     abhebt.
+
+   Beim Druecken kehrt sich die Woelbung um: Die Taste sieht
+   eingedrueckt aus, statt sich zu verschieben. Bewusst ohne
+   transform — was man unter dem Finger haelt, soll nicht
+   wegrutschen; sonst verliert man beim Tippen das Ziel.
+
+   Die Werte sind absichtlich klein. Ein starker Verlauf sieht
+   aus wie eine Schaltflaeche aus dem Netz, eine flache Woelbung
+   wie ein Geraet. */
+.func-btn, .pay-method-btn, .svc-btn, .qty-btn, .extras-trigger,
+.view-toggle button, .header-dash, .cat-btn, .order-clear {
+  background-image: linear-gradient(180deg,
+                    rgba(255,255,255,.9) 0%,
+                    rgba(255,255,255,0) 45%,
+                    rgba(0,0,0,.035) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85),
+              inset 0 -1px 0 rgba(0,0,0,.07),
+              0 1px 1px rgba(15,23,42,.06),
+              0 2px 5px rgba(15,23,42,.05);
+}
+
+.func-btn:active, .pay-method-btn:active, .svc-btn:active,
+.qty-btn:active, .extras-trigger:active, .view-toggle button:active,
+.header-dash:active, .cat-btn:active, .order-clear:active {
+  background-image: linear-gradient(180deg,
+                    rgba(0,0,0,.05) 0%,
+                    rgba(255,255,255,0) 55%,
+                    rgba(255,255,255,.5) 100%);
+  box-shadow: inset 0 2px 3px rgba(15,23,42,.14),
+              inset 0 -1px 0 rgba(255,255,255,.6);
+}
+
+/* Die dunklen Knoepfe brauchen ihr eigenes Licht: Auf gruenem
+   oder schwarzem Grund waere ein weisser Verlauf zu grell. */
+.pay-btn, .svc-btn.active, .header-dash {
+  background-image: linear-gradient(180deg,
+                    rgba(255,255,255,.16) 0%,
+                    rgba(255,255,255,0) 50%,
+                    rgba(0,0,0,.12) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28),
+              inset 0 -1px 0 rgba(0,0,0,.18),
+              0 2px 4px rgba(15,23,42,.18);
+}
+.pay-btn:active, .svc-btn.active:active, .header-dash:active {
+  background-image: linear-gradient(180deg,
+                    rgba(0,0,0,.16) 0%,
+                    rgba(255,255,255,0) 55%,
+                    rgba(255,255,255,.12) 100%);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.28);
+}
+
+/* Die gewaehlte Zahlart und die aktive Warengruppe bleiben
+   erkennbar eingerastet — sie sind gedrueckt und nicht nur
+   markiert. */
+.pay-method-btn.active, .cat-btn.active, .view-toggle button.active {
+  box-shadow: inset 0 2px 3px rgba(15,23,42,.10),
+              inset 0 -1px 0 rgba(255,255,255,.7);
 }
 
 /* --- Trefferflaechen ------------------------------------------
@@ -787,7 +853,7 @@ body.data-mode .pos-data-annotation{display:block}
       <span style="font-size:11px;color:#94a3b8;margin-left:4px" id="shiftInfo"></span>
     </div>
     <span class="clock" id="hdrClock">00:00:00</span>
-    <a href="dashboard.html" class="header-dash" aria-label="Dashboard"><span aria-hidden="true">📊</span><span class="dash-text">Dashboard</span></a>
+    <a href="dashboard.html" class="header-dash" aria-label="Dashboard"><span class="dash-text">Dashboard</span></a>
   </div>
 </div>
 
@@ -849,7 +915,7 @@ body.data-mode .pos-data-annotation{display:block}
       </div>
       <div style="display:flex;gap:8px;margin-bottom:8px">
         <div class="extras-trigger" id="extrasTrigger" onclick="openModal('extrasModal')" style="flex:1;margin-bottom:0">
-          🏷️ Kundenkarte / Gutschein
+          Kundenkarte / Gutschein
         </div>
         <div class="extras-trigger" onclick="handleDiscount()" style="flex:0 0 auto;margin-bottom:0;min-width:100px">
           % Rabatt
@@ -857,10 +923,10 @@ body.data-mode .pos-data-annotation{display:block}
       </div>
       <div class="extras-status" id="extrasStatus"></div>
       <div class="pay-methods" id="payMethods">
-        <button class="pay-method-btn active" data-method="cash" onclick="selectPayMethod(this,'cash')"><span class="pm-icon"><i class="fa-solid fa-money-bill-wave"></i></span>Bar</button>
-        <button class="pay-method-btn" data-method="ec" onclick="selectPayMethod(this,'ec')"><span class="pm-icon"><i class="fa-solid fa-credit-card"></i></span>EC / Mobile</button>
-        <button class="pay-method-btn" data-method="credit" onclick="selectPayMethod(this,'credit')"><span class="pm-icon"><i class="fa-brands fa-cc-visa"></i></span>Kreditkarte</button>
-        <button class="pay-method-btn" data-method="split" onclick="selectPayMethod(this,'split')"><span class="pm-icon"><i class="fa-solid fa-scissors"></i></span>Split</button>
+        <button class="pay-method-btn active" data-method="cash" onclick="selectPayMethod(this,'cash')">Bar</button>
+        <button class="pay-method-btn" data-method="ec" onclick="selectPayMethod(this,'ec')">EC / Mobile</button>
+        <button class="pay-method-btn" data-method="credit" onclick="selectPayMethod(this,'credit')">Kreditkarte</button>
+        <button class="pay-method-btn" data-method="split" onclick="selectPayMethod(this,'split')">Split</button>
       </div>
       <button class="pay-btn" id="payBtn" onclick="startPayment()" disabled>BEZAHLEN</button>
     </div>
@@ -869,12 +935,12 @@ body.data-mode .pos-data-annotation{display:block}
 
 <!-- FUNCTION BAR -->
 <div class="funcbar">
-  <button class="func-btn" onclick="handleStorno()"><span class="fkey">F1</span><span class="ficon">🚫</span>Storno</button>
-  <button class="func-btn" onclick="handleManager()"><span class="fkey">F3</span><span class="ficon">👤</span>Manager</button>
-  <button class="func-btn" onclick="reprintReceipt()"><span class="fkey">F5</span><span class="ficon">🧾</span>Bon</button>
-  <button class="func-btn" onclick="handleDayClose()"><span class="fkey">F6</span><span class="ficon">📋</span>Abschluss</button>
-  <button class="func-btn" onclick="openModal('historyModal')"><span class="fkey">F7</span><span class="ficon">📜</span>Historie</button>
-  <button class="func-btn" onclick="openModal('topSellerModal');renderTopSellers()"><span class="fkey">F8</span><span class="ficon">🏆</span>Top-Seller</button>
+  <button class="func-btn" onclick="handleStorno()"><span class="fkey">F1</span>Storno</button>
+  <button class="func-btn" onclick="handleManager()"><span class="fkey">F3</span>Manager</button>
+  <button class="func-btn" onclick="reprintReceipt()"><span class="fkey">F5</span>Bon</button>
+  <button class="func-btn" onclick="handleDayClose()"><span class="fkey">F6</span>Abschluss</button>
+  <button class="func-btn" onclick="openModal('historyModal')"><span class="fkey">F7</span>Historie</button>
+  <button class="func-btn" onclick="openModal('topSellerModal');renderTopSellers()"><span class="fkey">F8</span>Top-Seller</button>
   <!-- Der Datenschalter steht in der Leiste, nicht darueber: als
        schwebendes Element verdeckte er je nach Fensterhoehe
        Bedienelemente — auf einem Tablet im Querformat die
@@ -888,7 +954,7 @@ body.data-mode .pos-data-annotation{display:block}
 </div>
 
 <!-- MANAGER BADGE -->
-<div class="manager-badge" id="managerBadge">🔑 Manager-Modus</div>
+<div class="manager-badge" id="managerBadge">Manager-Modus</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -1152,7 +1218,7 @@ body.data-mode .pos-data-annotation{display:block}
         <div class="extras-result" id="cardResult"></div>
       </div>
       <div class="extras-section">
-        <h4>🎟️ Gutschein-Code</h4>
+        <h4>Gutschein-Code</h4>
         <div class="extras-input-row">
           <input type="text" id="couponInput" placeholder="Code eingeben">
           <button onclick="applyCoupon()">Einlösen</button>
