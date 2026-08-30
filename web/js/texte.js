@@ -2438,9 +2438,15 @@ export function baueTexte(B, roh) {
   T['satHourChart.titel'] =
     `Zufriedenheit über den Tag: ${zahl(shMax - shMin, 2)} Punkte zwischen bester `
     + `und schwächster Stunde`;
+  // Die Achse ist beschnitten — bei 0,06 Punkten Unterschied auf einer Skala
+  // von 1 bis 5 waere eine Nullachse eine gerade Linie. Zulaessig ist das,
+  // weil eine Linie Position kodiert und nicht Laenge; ausgewiesen gehoert es
+  // trotzdem, sonst liest man Gebirge in eine Schwankung von anderthalb
+  // Prozent.
   T['satHourChart.sub'] =
     `Ø Zufriedenheit je Stunde · ${zahl(B.satHours[0])}–`
-    + `${zahl(B.satHours[B.satHours.length - 1])} Uhr · Skala 1 bis 5`;
+    + `${zahl(B.satHours[B.satHours.length - 1])} Uhr · Skala 1 bis 5, `
+    + `Achse beschnitten auf ${zahl(shMin, 2)} bis ${zahl(shMax, 2)}`;
 
   const psUnter = B.promoNames.filter((n, i) => B.promoAvgSat[i] < B.satBasis);
   T['promoSatChart.titel'] = psUnter.length === 0

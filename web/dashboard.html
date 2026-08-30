@@ -2800,7 +2800,20 @@ function createEmpRoleChart(){
   new Chart(document.getElementById('empRoleChart'),{type:'bar',
     data:{labels:sortedLabels,datasets:[
       {label:'Anzahl',data:sortedCount,backgroundColor:barBlue,borderRadius:3,maxBarThickness:32,yAxisID:'y'},
-      {label:'Ø Stundenlohn (€)',data:sortedWage,backgroundColor:'#d97706',borderRadius:3,maxBarThickness:32,yAxisID:'y1'}
+      // Der Stundenlohn stand hier als zweite Balkenreihe auf einer zweiten
+      // Achse. Zwei Balkenreihen auf zwei Achsen laden zum Laengenvergleich
+      // ein, der nicht traegt: Die Anzahl lief gegen 0 bis 100, der Lohn gegen
+      // 0 bis 20. Der Manager stand damit mit 13 Kraeften auf 13 Prozent der
+      // einen Achse und mit 20 Euro auf 100 Prozent der anderen — nebeneinander
+      // gezeichnet und doch unvergleichbar, weil das Verhaeltnis der beiden
+      // Achsen frei gewaehlt ist.
+      //
+      // Als Punkte kodiert der Lohn Position statt Laenge. Die andere
+      // Zeichenform sagt dem Auge, dass hier zwei Groessen stehen und keine
+      // zwei Saeulen zu vergleichen sind.
+      {label:'Ø Stundenlohn (€)',data:sortedWage,type:'line',showLine:false,
+       pointStyle:'rectRot',pointRadius:7,pointHoverRadius:9,
+       backgroundColor:'#d97706',borderColor:'#d97706',yAxisID:'y1'}
     ]},
     options:mkOpts({legend:{display:true,position:'bottom',labels:{padding:10,usePointStyle:true,pointStyle:'circle',font:{size:10}}},
       datalabels:{color:'#1e293b',font:{size:9,weight:'600',family:'"IBM Plex Mono"'},anchor:'end',align:'top',offset:2,formatter:function(v,ctx){return ctx.datasetIndex===0?v:'€'+v.toFixed(0)}}},
