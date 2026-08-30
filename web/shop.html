@@ -3512,19 +3512,21 @@ body.data-mode .phone-mockup { animation: none; }
   <div class="hero-stats">
     <div class="hero-stats-inner">
       <div>
-        <div class="hero-stat-num" data-count="8">0</div>
+        <!-- Werte kommen aus der Datenquelle, siehe unten. Hier steht bewusst
+     keine Zahl: Eine falsche Zahl ist schlimmer als ein Strich. -->
+        <div class="hero-stat-num">–</div>
         <div class="hero-stat-label">Filialen in Würzburg</div>
       </div>
       <div>
-        <div class="hero-stat-num" data-count="50">0</div>
+        <div class="hero-stat-num">–</div>
         <div class="hero-stat-label">Produkte im Sortiment</div>
       </div>
       <div>
-        <div class="hero-stat-num" data-count="100">0</div>
-        <div class="hero-stat-label">Tausend Kunden / Jahr</div>
+        <div class="hero-stat-num">–</div>
+        <div class="hero-stat-label">Tausend Stammkunden / Jahr</div>
       </div>
       <div>
-        <div class="hero-stat-num" data-count="4" data-suffix=".8">0</div>
+        <div class="hero-stat-num">–</div>
         <div class="hero-stat-label">Durchschnittsbewertung</div>
       </div>
     </div>
@@ -3607,8 +3609,10 @@ body.data-mode .phone-mockup { animation: none; }
         <div class="data-annotation-title">MARKET BASKET ANALYSIS</div>
       </div>
       <div class="data-schema-mini" style="display:block;background:transparent;border:none;padding:0;margin:8px 0;text-align:left;">
-        <span class="schema-box">Burger</span><span class="schema-arrow">+</span><span class="schema-box">Fries</span><span class="schema-arrow">+</span><span class="schema-box">Cola</span><br>
-        <span style="color:#7DE0FF;font-size:.88rem;">Support: 35% · Confidence: 72% · Lift: 2.1</span>
+        <!-- Die Kaesten nannten Burger + Fries + Cola, waehrend die Regel
+             darunter aus den Daten kommt. Beides muss dasselbe Paar zeigen. -->
+        <span data-dv="regel1-paar">…</span><br>
+        <span style="color:#7DE0FF;font-size:.88rem;" data-dv="regel1">wird geladen …</span>
       </div>
       Die Reihenfolge der Clicks und Add-to-Cart-Events ermöglicht Assoziationsregeln, die im Laden nur über POS-Bondaten (ohne Browsing-Kontext) möglich wären.
       <span class="da-ethical"><strong>🔍 Ethik:</strong> Empfehlungsalgorithmen können zum „Upselling" manipulativ eingesetzt werden. Transparenz gegenüber Kunden nötig (Dark Patterns vermeiden).</span>
@@ -3979,7 +3983,9 @@ body.data-mode .phone-mockup { animation: none; }
         <span class="schema-box">dim_employee</span>
       </div>
       <div style="margin-top:12px;font-size:.88rem;color:rgba(255,255,255,.8);">
-        106.720 Bestellungen · 411.982 Positionen · 12.000 Kunden · 50 Produkte · 8 Filialen · 366 Tage
+        <!-- Stand bis zuletzt fest im Quelltext und war in fuenf von sechs
+             Angaben falsch. Wird jetzt aus der Semantikschicht gefuellt. -->
+        <span data-dv="bestand">wird geladen …</span>
       </div>
     </div>
 
@@ -4149,9 +4155,10 @@ body.data-mode .phone-mockup { animation: none; }
         <p>Apriori-Algorithmus auf <code>fact_order_items</code>: Welche Produkte werden zusammen gekauft?</p>
         <div class="am-formula">Support(A→B) = P(A∩B)<br>Confidence(A→B) = P(B|A)<br>Lift(A→B) = P(B|A) / P(B)</div>
         <div class="am-kpi-row">
-          <div class="am-kpi"><strong>Burger→Fries</strong>Conf: 65%</div>
-          <div class="am-kpi"><strong>Burger→Cola</strong>Conf: 55%</div>
-          <div class="am-kpi"><strong>Nuggets→BBQ</strong>Conf: 40%</div>
+          <!-- Die drei staerksten Regeln nach Lift, aus v_warenkorb_auswahl. -->
+          <div class="am-kpi" data-dv="regel-a">…</div>
+          <div class="am-kpi" data-dv="regel-b">…</div>
+          <div class="am-kpi" data-dv="regel-c">…</div>
         </div>
       </div>
       <div class="analytics-method">
@@ -4190,9 +4197,14 @@ body.data-mode .phone-mockup { animation: none; }
         </div>
         <p>Saisonalität in <code>net_total</code> über <code>dim_date</code>: Wochentags-Muster, Monatszyklen, Feiertagseffekte, COVID-Einbruch 2020, Erholung 2021.</p>
         <div class="am-kpi-row">
-          <div class="am-kpi"><strong>Fr/Sa</strong>+25% Umsatz</div>
-          <div class="am-kpi"><strong>Sommer</strong>+15% Peak</div>
-          <div class="am-kpi"><strong>Kiliani</strong>+25% Event</div>
+          <!-- Fr/Sa ist aus v_wochentag berechnet. Die frueheren Angaben
+               "Sommer +15%" und "Kiliani +25%" standen fest im Quelltext und
+               sind aus diesem Bestand nicht belegbar: Ein Kennzeichen fuer
+               Volksfeste fuehrt dim_date nicht. Statt erfundener Zahlen der
+               staerkste und der schwaechste Wochentag, beide gerechnet. -->
+          <div class="am-kpi" data-dv="tag-stark">…</div>
+          <div class="am-kpi" data-dv="tag-schwach">…</div>
+          <div class="am-kpi" data-dv="tag-spanne">…</div>
         </div>
       </div>
       <div class="analytics-method">
@@ -4593,7 +4605,11 @@ const counterObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       const el = entry.target;
+      // Ohne gesetzten Zielwert nicht hochzaehlen: Frueher stand er fest im
+      // Markup, jetzt kommt er aus den Daten. Fehlt er, bleibt der Strich
+      // stehen — sonst liefe der Zaehler gegen NaN.
       const target = parseInt(el.dataset.count);
+      if (!isFinite(target)) return;
       const suffix = el.dataset.suffix || '';
       let current = 0;
       const step = Math.max(1, Math.floor(target / 40));
@@ -4636,6 +4652,9 @@ function toggleDataMode() {
 
   if (dataMode) {
     showToast('🔬 Datenperspektive aktiviert — Willkommen, Data Expert!');
+    // Die Zahlen der Datenperspektive erst hier holen: Sie sind nur in diesem
+    // Modus sichtbar, und die Kundenseite soll dafuer nicht warten muessen.
+    if (typeof window.datenperspektiveFuellen === 'function') window.datenperspektiveFuellen();
     startEventCounter();
     // Start section visibility tracking
     document.querySelectorAll('section[id]').forEach(sec => sectionObserver.observe(sec));
@@ -5695,7 +5714,14 @@ document.body.appendChild(schirm);
 
 try {
   const quelle = waehleQuelle(QUELLE);
-  const [karte, filialen] = await Promise.all([quelle.speisekarte(), quelle.filialliste()]);
+  // Die vier Kennzahlen im Kopfbereich standen als data-count fest im HTML:
+  // 8 Filialen, 50 Produkte, 100 Tausend Kunden, 4,8 Sterne. Drei davon
+  // widersprachen den eigenen Daten — es sind 57 Produkte, rund 24 Tausend
+  // Kunden im Jahr und 3,8 Sterne. Auf der Kundenseite eine Bewertung zu
+  // behaupten, die der eigene Bestand nicht hergibt, ist der schlimmste Fall
+  // davon. Deshalb kommen sie jetzt aus derselben Quelle wie alles andere.
+  const [karte, filialen, einzel] = await Promise.all([
+    quelle.speisekarte(), quelle.filialliste(), quelle.einzelwerte()]);
 
   const artikel = karte.map(a => ({
     id: a.artikel_id, name: a.name, cat: a.kategorie, sub: a.unterkategorie,
@@ -5715,6 +5741,108 @@ try {
     hours: OEFFNUNGSZEITEN[f.name] || '',
     directions: ANFAHRT[f.name] || '',
   }));
+
+  // Kennzahlen im Kopfbereich aus den Daten setzen. data-count traegt den
+  // Zielwert, den der Zaehler anlaeuft; data-suffix die Nachkommastelle.
+  const E = (kennung) => einzel.find(x => x.kennung === kennung) || {};
+  const stamm = E('wiederkehrend_2025');
+  const note  = E('zufriedenheit_2025');
+  const zahlen = document.querySelectorAll('.hero-stat-num');
+  const setze = (i, wert, nachkomma) => {
+    if (!zahlen[i] || wert === undefined || wert === null) return;
+    zahlen[i].dataset.count = String(Math.trunc(wert));
+    if (nachkomma) zahlen[i].dataset.suffix = ',' + String(Math.round((wert % 1) * 10));
+    else delete zahlen[i].dataset.suffix;
+  };
+  setze(0, standorte.length);
+  setze(1, artikel.length);
+  // Stammkunden: 2025 aktiv und schon vorher Kunde. In Tausend, wie das
+  // Etikett es sagt.
+  if (stamm.anzahl) setze(2, Math.round(Number(stamm.anzahl) / 1000));
+  if (note.wert)    setze(3, Number(note.wert), true);
+
+  // ── Zahlen der Datenperspektive ──────────────────────────────────────
+  // Die Anmerkungen im Datenmodus nannten Zahlen, die fest im Quelltext
+  // standen und nicht zum Bestand passten: 106.720 Bestellungen statt
+  // 754.513, 12.000 Kunden statt 25.000, 50 Produkte statt 57, dazu
+  // erfundene Support- und Konfidenzwerte. Sie stehen unter Tabellennamen
+  // wie fact_order_items und lesen sich damit als Messwerte.
+  //
+  // Geholt wird erst beim Einschalten des Modus — die Kundenseite soll auf
+  // diese Sichten nicht warten.
+  let dvGeholt = false;
+  window.datenperspektiveFuellen = async function () {
+    if (dvGeholt) return;
+    dvGeholt = true;
+    const setz = (name, html) => {
+      const el = document.querySelector(`[data-dv="${name}"]`);
+      if (el) el.innerHTML = html;
+    };
+    try {
+      const [jahre, kategorien, alter, wochentage, regeln] = await Promise.all([
+        quelle.kennzahlenJahr(), quelle.kategorien(), quelle.kundenAlter(),
+        quelle.wochentage(), quelle.warenkorbRegeln()]);
+
+      const zahl = (v) => Number(v).toLocaleString('de-DE');
+      const bestellungen = jahre.reduce((s, r) => s + Number(r.bestellungen), 0);
+      const positionen   = kategorien.reduce((s, r) => s + Number(r.menge), 0);
+      const kunden       = alter.reduce((s, r) => s + Number(r.kunden), 0);
+      setz('bestand',
+        `${zahl(bestellungen)} Bestellungen · ${zahl(positionen)} Positionen · `
+        + `${zahl(kunden)} Kunden · ${zahl(artikel.length)} Produkte · `
+        + `${zahl(standorte.length)} Filialen · ${jahre[0].jahr}–${jahre[jahre.length-1].jahr}`);
+
+      // Die drei staerksten Regeln nach Lift, aus derselben Sicht wie im
+      // Dashboard. Kurzform des Namens, damit die Kachel nicht bricht.
+      const kurz = (n) => n.replace('Chicken Nuggets ', 'Nuggets ')
+                           .replace('Medium Fries', 'M.Fries')
+                           .replace('Small Fries', 'S.Fries')
+                           .replace('Large Fries', 'L.Fries')
+                           .replace('Beyond Burger', 'Beyond')
+                           .replace('Green Goddess Bowl', 'G.Goddess')
+                           .replace('Side Salad', 'Salad');
+      const stark = [...regeln].sort((a, b) => b.lift - a.lift);
+      const proz = (v, n = 1) => Number(v).toLocaleString('de-DE',
+        { minimumFractionDigits: n, maximumFractionDigits: n }) + ' %';
+      if (stark[0]) setz('regel1-paar',
+        `<span class="schema-box">${kurz(stark[0].produkt_a)}</span>`
+        + `<span class="schema-arrow">→</span>`
+        + `<span class="schema-box">${kurz(stark[0].produkt_b)}</span>`);
+      if (stark[0]) setz('regel1',
+        `${kurz(stark[0].produkt_a)} → ${kurz(stark[0].produkt_b)} · `
+        + `Support: ${proz(stark[0].support_pct)} · Konfidenz: ${proz(stark[0].konfidenz_pct)} · `
+        + `Lift: ${Number(stark[0].lift).toLocaleString('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2})}`);
+      ['regel-a', 'regel-b', 'regel-c'].forEach((n, i) => {
+        const r = stark[i]; if (!r) return;
+        setz(n, `<strong>${kurz(r.produkt_a)}→${kurz(r.produkt_b)}</strong>`
+              + `Konf: ${proz(r.konfidenz_pct, 0)}`);
+      });
+
+      // Wochentage: gerechnet gegen den Wochenschnitt, nicht geschaetzt.
+      const wGes = wochentage.reduce((s, r) => s + Number(r.umsatz), 0);
+      const schnitt = wGes / wochentage.length;
+      const sortiert = [...wochentage].sort((a, b) => b.umsatz - a.umsatz);
+      const NAME = { Monday:'Montag', Tuesday:'Dienstag', Wednesday:'Mittwoch',
+                     Thursday:'Donnerstag', Friday:'Freitag', Saturday:'Samstag',
+                     Sunday:'Sonntag' };
+      const hoch = sortiert[0], tief = sortiert[sortiert.length - 1];
+      const vz = (v) => (v >= 0 ? '+' : '−') + proz(Math.abs(v), 0);
+      setz('tag-stark',
+        `<strong>${NAME[hoch.wochentag] || hoch.wochentag}</strong>`
+        + `${vz((hoch.umsatz / schnitt - 1) * 100)} Umsatz`);
+      setz('tag-schwach',
+        `<strong>${NAME[tief.wochentag] || tief.wochentag}</strong>`
+        + `${vz((tief.umsatz / schnitt - 1) * 100)} Umsatz`);
+      setz('tag-spanne',
+        `<strong>Spanne</strong>${proz((hoch.umsatz / tief.umsatz - 1) * 100, 0)}`);
+    } catch (e) {
+      // Sichtbar scheitern statt falsche Zahlen zeigen.
+      document.querySelectorAll('[data-dv]').forEach(el => {
+        el.textContent = 'Datenquelle antwortet nicht';
+      });
+      console.warn('Datenperspektive:', e);
+    }
+  };
 
   schirm.remove();
   window.shopStarten(artikel, standorte);
