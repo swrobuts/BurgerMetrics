@@ -1429,7 +1429,8 @@ export function baueTexte(B, roh) {
 
   T['liftChart.sub'] =
     `${zahl(dmWk.length)} ausgewählte Assoziationsregeln · Support, Konfidenz und `
-    + `Lift · ${zahl(dmBest)} Bestellungen`;
+    + `Lift · ${zahl(dmBest)} Bestellungen · Punktdiagramm mit logarithmischer `
+    + `Achse; die Linie bei 1 markiert Unabhängigkeit`;
 
   T['liftChart.deutung'] =
     `Interpretation: Nur ${zahl(dmStark.length)} der ${zahl(dmWk.length)} Regeln erreichen `

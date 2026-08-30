@@ -2271,6 +2271,33 @@ function mkHBar(id, labels, data, colors, fmtFn, extra) {
   });
 }
 
+// Waagerechtes Punktdiagramm. Gebraucht, wo die Achse logarithmisch sein
+// muss: Ein Balken kodiert Laenge, und Laenge liest man als Verhaeltnis —
+// doppelt so lang heisst doppelt so viel. Auf einer logarithmischen Achse
+// stimmt das nicht mehr, dort bedeutet doppelte Laenge den quadrierten Wert.
+// Ein Punkt kodiert dagegen Position, und Position darf logarithmisch
+// geteilt sein. Deshalb Punkte statt Balken, sobald die Spanne eine lineare
+// Achse unbrauchbar macht.
+function mkHDot(id, labels, data, colors, fmtFn, extra) {
+  // Punktdaten sind {x, y}-Objekte, keine Zahlen: Der Etikettformatierer
+  // bekommt das Objekt und muss den Wert selbst herausziehen.
+  var wert = function(v){ return (v && typeof v === 'object') ? v.x : v; };
+  var plugins = {legend:{display:false},
+    datalabels:dlBarRight(function(v){ return fmtFn(wert(v)); })};
+  if (extra && extra.annotation) plugins.annotation = extra.annotation;
+  var scalesX = Object.assign({}, (extra && extra.xOpts) || {beginAtZero:true});
+  scalesX = Object.assign(scalesX, {grid:gridStyle,
+    ticks:Object.assign({},monoTicks,{callback:(extra&&extra.xFmt)||function(v){return fmtShort(v)}}),
+    border:{display:false}});
+  new Chart(document.getElementById(id), {
+    type:'scatter',
+    data:{datasets:[{label:'', data:data.map(function(v,i){return {x:v, y:labels[i]}}),
+      backgroundColor:colors, borderColor:colors, pointRadius:6, pointHoverRadius:8}]},
+    options: mkOpts(plugins, {x:scalesX, y:xScale({type:'category', labels:labels,
+      offset:true, ticks:{font:{size:11}}})}, {indexAxis:'y'})
+  });
+}
+
 function createYoyBranchChart(){
   mkHBar('yoyBranchChart', branchLabels, branchRevenue, barBlue, function(v){return fmt(v)});
 }
@@ -2595,9 +2622,21 @@ function createLiftChart(){
   var assocLabels = BM.assocLabels;
   var assocLift = BM.assocLift;
   var assocColors=assocLift.map(function(l){return l>=2?'#16a34a':l>=1.3?'#d97706':barLight});
-  mkHBar('liftChart', assocLabels, assocLift, assocColors,
-    function(v){return v.toFixed(2)+'×'},
-    {xOpts:{beginAtZero:true,max:3.8,suggestedMin:0},xFmt:function(v){return v.toFixed(1)+'×'},barW:20,
+  // Punkte statt Balken. Die Spanne reicht von Lift 1,13 bis 8,97; auf einer
+  // linearen Achse von 0 bis 9 waeren die zwoelf schwachen Regeln nicht mehr
+  // auseinanderzuhalten (1,13 und 1,50 lagen vier Prozent der Breite
+  // auseinander). Eine logarithmische Achse loest das — sie darf aber keine
+  // Balken tragen: Balken kodieren Laenge, und auf einer Log-Achse bedeutet
+  // doppelte Laenge nicht den doppelten, sondern den quadrierten Wert.
+  // Ein Punkt kodiert Position; die ist logarithmisch teilbar.
+  //
+  // Der frueher fest eingetragene Achsenmaximalwert von 3,8 schnitt die
+  // beiden staerksten Regeln ab: Ihre Balken wurden 2.508 Pixel breit
+  // gezeichnet, die Zeichenflaeche ist rund 1.070 Pixel breit.
+  mkHDot('liftChart', assocLabels, assocLift, assocColors,
+    function(v){return v.toFixed(2).replace('.',',')+'×'},
+    {xOpts:{type:'logarithmic',min:1,max:10},
+     xFmt:function(v){return [1,1.5,2,3,5,10].indexOf(v)>=0 ? String(v).replace('.',',')+'×' : ''},barW:20,
      annotation:{annotations:{threshold:{type:'line',xMin:2,xMax:2,borderColor:'#16a34a',borderWidth:1.5,borderDash:[5,3],
        label:{display:true,content:'Lift = 2 (stark)',position:'start',font:{size:9},backgroundColor:'rgba(22,163,74,.85)',color:'#fff',padding:3}},
        weak:{type:'line',xMin:1,xMax:1,borderColor:'#94a3b8',borderWidth:1,borderDash:[3,3],
