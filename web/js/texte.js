@@ -565,8 +565,8 @@ export function baueTexte(B, roh) {
     `Handlungsempfehlung: Als Bündel eignen sich die ${zahl(prWkStark.length)} der `
     + `${zahl(roh.warenkorb.length)} gezeigten Warenkörbe mit einem Lift über `
     + `${zahl(prLiftSchwelle)}, weil nur sie deutlich über den Zufall hinausgehen — `
-    + `die Tabelle listet die häufigsten Kombinationen, nicht die mit dem stärksten `
-    + `Lift: `
+    + `die Tabelle zeigt eine Auswahl aus Burgern, Beilagen und Getränken, nicht `
+    + `die Paare mit dem stärksten Lift: `
     + `${prUnd(prWkStark.map(r => `${r.produkt_a} mit ${r.produkt_b} (Lift `
         + `${zahl(r.lift, 2)}, Konfidenz ${proz(r.konfidenz_pct)})`))}. `
     + `${prWkHaeufig.produkt_a} und ${prWkHaeufig.produkt_b} sind mit `
@@ -1429,8 +1429,8 @@ export function baueTexte(B, roh) {
   const dmBest = (B.yearOrders ?? []).reduce((s, x) => s + x, 0);
 
   T['liftChart.sub'] =
-    `Top ${zahl(dmWk.length)} Assoziationsregeln · Support, Confidence & Lift · `
-    + `${zahl(dmBest)} Bestellungen`;
+    `${zahl(dmWk.length)} ausgewählte Assoziationsregeln · Support, Konfidenz und `
+    + `Lift · ${zahl(dmBest)} Bestellungen`;
 
   T['liftChart.deutung'] =
     `Interpretation: Nur ${zahl(dmStark.length)} der ${zahl(dmWk.length)} Regeln erreichen `
@@ -2180,8 +2180,8 @@ export function baueTexte(B, roh) {
     `Höchste Konfidenz: ${wkTop.produkt_a} → ${wkTop.produkt_b} bei `
     + `${proz(wkTop.konfidenz_pct)}`;
   T['tblBasket.sub'] =
-    `${zahl(roh.warenkorb.length)} Warenkörbe · Support, Konfidenz und Lift · `
-    + `${zahl(kumBest)} Bestellungen`;
+    `${zahl(roh.warenkorb.length)} ausgewählte Warenkörbe aus Burgern, Beilagen `
+    + `und Getränken · Support, Konfidenz und Lift · ${zahl(kumBest)} Bestellungen`;
 
   // ── Kunden ───────────────────────────────────────────────────────────────
   const bz = [...roh.kundenBezirke].sort((a, b) => b.kunden - a.kunden);
@@ -2289,10 +2289,12 @@ export function baueTexte(B, roh) {
   T['liftChart.titel'] =
     `${zahl(dmStark.length)} der ${zahl(dmWk.length)} Paare erreichen einen Lift `
     + `über ${zahl(dmLiftStark)}`;
-  T['tblAssoc.titel'] = `Alle ${zahl(dmWk.length)} Regeln mit Lift-Metrik`;
+  // Nicht "Alle": v_warenkorb_regeln fuehrt weit mehr Paare, die Tabelle
+  // zeigt eine kuratierte Auswahl aus Burgern, Beilagen und Getraenken.
+  T['tblAssoc.titel'] = `${zahl(dmWk.length)} ausgewählte Regeln mit Lift-Metrik`;
   T['tblAssoc.sub'] =
-    `${zahl(dmWk.length)} Regeln · sortiert nach Häufigkeit · Lift über `
-    + `${zahl(dmLiftStark)} gilt als starke Assoziation`;
+    `${zahl(dmWk.length)} ausgewählte Regeln · nach Häufigkeit geordnet · Lift `
+    + `über ${zahl(dmLiftStark)} gilt als starke Assoziation`;
 
   // ── Simulation und Prognose ──────────────────────────────────────────────
   T['simChart.titel'] =

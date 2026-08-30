@@ -240,28 +240,63 @@ GROUP BY 1,2,3 ORDER BY umsatz DESC;
 GRANT SELECT ON ALL TABLES IN SCHEMA burgermetrics TO anon, authenticated;
 NOTIFY pgrst, 'reload config';
 
+-- Kurznamen fuer die Achsenbeschriftung. Frueher standen sie als vierte
+-- Spalte in der Handliste und mussten zur dort gewaehlten Reihenfolge passen.
+-- Als Funktion koennen Etikett und Richtung nicht mehr auseinanderlaufen.
+CREATE OR REPLACE FUNCTION kurzname(name text) RETURNS text AS $$
+  SELECT CASE name
+    WHEN 'Medium Fries'       THEN 'M.Fries'
+    WHEN 'Small Fries'        THEN 'S.Fries'
+    WHEN 'Large Fries'        THEN 'L.Fries'
+    WHEN 'Cola 0.5l'          THEN 'Cola 0.5'
+    WHEN 'Cola 0.3l'          THEN 'Cola 0.3'
+    WHEN 'Beyond Burger'      THEN 'Beyond'
+    WHEN 'Green Goddess Bowl' THEN 'G.Goddess'
+    WHEN 'Side Salad'         THEN 'Salad'
+    ELSE name
+  END;
+$$ LANGUAGE sql IMMUTABLE;
+
+GRANT EXECUTE ON FUNCTION kurzname(text) TO anon, authenticated;
+
 -- Die 15 Paare, die das Dashboard zeigt — eine kuratierte Auswahl aus
 -- v_warenkorb_regeln. Die Auswahl ist eine fachliche Entscheidung (Burger,
 -- Beilagen, Getraenke) und gehoert deshalb in die Semantikschicht, nicht ins
--- Frontend. Die Kurzbezeichnung entspricht der Achsenbeschriftung.
+-- Frontend. Die Reihenfolge der Liste folgt dem Support; sie wurde von Hand
+-- gesetzt und ist deshalb gegen Datenaenderungen nicht abgesichert.
 CREATE OR REPLACE VIEW v_warenkorb_auswahl AS
-WITH paare(nr, a, b, kurz) AS (VALUES
-  ( 1,'Medium Fries','Cola 0.5l','M.Fries→Cola 0.5'),
-  ( 2,'Small Fries','Cola 0.3l','S.Fries→Cola 0.3'),
-  ( 3,'Cola 0.3l','Cola 0.5l','Cola 0.3→Cola 0.5'),
-  ( 4,'Cola 0.3l','Medium Fries','Cola 0.3→M.Fries'),
-  ( 5,'Beyond Burger','Cola 0.5l','Beyond→Cola 0.5'),
-  ( 6,'Small Fries','Cola 0.5l','S.Fries→Cola 0.5'),
-  ( 7,'Beyond Burger','Medium Fries','Beyond→M.Fries'),
-  ( 8,'Small Fries','Medium Fries','S.Fries→M.Fries'),
-  ( 9,'Beyond Burger','Side Salad','Beyond→Salad'),
-  (10,'Large Fries','Cola 0.5l','L.Fries→Cola 0.5'),
-  (11,'Side Salad','Cola 0.5l','Salad→Cola 0.5'),
-  (12,'Green Goddess Bowl','Cola 0.5l','G.Goddess→Cola 0.5'),
-  (13,'Large Fries','Medium Fries','L.Fries→M.Fries'),
-  (14,'Beyond Burger','Cola 0.3l','Beyond→Cola 0.3'),
-  (15,'Side Salad','Medium Fries','Salad→M.Fries'))
-SELECT p.nr, p.kurz AS regel, p.a AS produkt_a, p.b AS produkt_b,
+WITH paare(nr, a, b) AS (VALUES
+  ( 1,'Medium Fries','Cola 0.5l'),
+  ( 2,'Small Fries','Cola 0.3l'),
+  ( 3,'Cola 0.3l','Cola 0.5l'),
+  ( 4,'Cola 0.3l','Medium Fries'),
+  ( 5,'Beyond Burger','Cola 0.5l'),
+  ( 6,'Small Fries','Cola 0.5l'),
+  ( 7,'Beyond Burger','Medium Fries'),
+  ( 8,'Small Fries','Medium Fries'),
+  ( 9,'Beyond Burger','Side Salad'),
+  (10,'Large Fries','Cola 0.5l'),
+  (11,'Side Salad','Cola 0.5l'),
+  (12,'Green Goddess Bowl','Cola 0.5l'),
+  (13,'Large Fries','Medium Fries'),
+  (14,'Beyond Burger','Cola 0.3l'),
+  (15,'Side Salad','Medium Fries'))
+-- Die Auswahl nennt ein Paar, nicht eine Richtung: Der JOIN trifft die Regel
+-- in beiden Reihenfolgen. Angezeigt werden muss aber die Richtung, zu der die
+-- Konfidenz gehoert — sie ist nicht symmetrisch. Vorher standen hier p.a und
+-- p.b, also die Reihenfolge der Handliste. Bei drei der fuenfzehn Paare war
+-- die Regel andersherum gespeichert, und die Tabelle zeigte die Konfidenz der
+-- Gegenrichtung: "Large Fries -> Medium Fries 15,6 %" war in Wahrheit
+-- P(Large Fries | Medium Fries); richtig sind 30,6 %. Ebenso bei
+-- "Side Salad -> Medium Fries" (15,4 statt 30,9 %) und
+-- "Cola 0.3l -> Medium Fries" (24,5 statt 32,4 %).
+-- Support, Lift und die gemeinsame Zahl sind symmetrisch und waren richtig.
+--
+-- Die Kurzbezeichnung wird aus derselben Richtung gebaut, damit Etikett und
+-- Zahl nicht auseinanderlaufen koennen.
+SELECT p.nr,
+       kurzname(r.produkt_a) || '→' || kurzname(r.produkt_b) AS regel,
+       r.produkt_a, r.produkt_b,
        r.gemeinsam, r.support_pct, r.konfidenz_pct, r.lift
 FROM paare p
 JOIN v_warenkorb_regeln r
