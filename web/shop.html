@@ -276,7 +276,11 @@ ul { list-style: none; }
     position: fixed;
     top: 0; right: -100%;
     width: 280px;
-    height: 100vh;
+    /* svh: die kleine Ansichtshoehe, also die mit ausgeklappten
+       Browserleisten. 100vh waere hoeher als der Bildschirm und
+       der letzte Verweis der Schublade laege darunter. */
+    height: 100vh;   /* Rueckfall fuer aeltere Browser */
+    height: 100svh;
     background: var(--charcoal);
     flex-direction: column;
     padding: 100px 40px 40px;
@@ -293,7 +297,8 @@ ul { list-style: none; }
    ============================================ */
 .hero {
   position: relative;
-  min-height: 100vh;
+  min-height: 100vh;   /* Rueckfall */
+  min-height: 100svh;
   overflow: hidden;
   background: var(--charcoal);
 }
@@ -1097,7 +1102,8 @@ ul { list-style: none; }
   top: 0; right: -420px;
   width: 400px;
   max-width: 90vw;
-  height: 100vh;
+  height: 100vh;   /* Rueckfall */
+  height: 100svh;
   background: var(--white);
   z-index: 2001;
   transition: right .4s ease;
@@ -3140,6 +3146,115 @@ body.data-mode .phone-mockup { animation: none; }
     padding: 12px 16px;
     font-size: .9rem;
   }
+}
+
+/* ==============================================================
+   TREFFERFLAECHEN
+
+   Gemessen bei 375, 430 und 768 px, nicht geschaetzt: 157 der
+   176 anklickbaren Elemente lagen unter 44 px, 75 sogar unter
+   24. WCAG 2.5.5 verlangt 44 px, 2.5.8 mindestens 24.
+
+   Der Umbruch selbst war in Ordnung — bei keiner der sieben
+   Breiten lief etwas ueber. Die Arbeit lag ganz hier.
+
+   Zwei Wege, bewusst getrennt:
+   - Wo Platz ist, waechst das Element selbst (min-height).
+   - Wo das Layout sich verschoebe, waechst nur die Flaeche
+     ueber ::after; das Element behaelt sein Mass.
+
+   Nicht an (hover: none) gebunden. Die Abfrage meldet bei
+   768 px "hover: hover" — ein Tablet fiele durch das Raster,
+   waehrend es genau die Geraeteklasse ist, um die es geht.
+   Eine unsichtbare Flaeche stoert mit Maus nicht.
+   ============================================================== */
+
+/* Allergen-Umschalter: 57 Stueck, 104x14. Ueber ::after, sonst
+   waeren alle 57 Karten um 30 px hoeher geworden. Die Nachbarn
+   im Kartenkoerper sind Beschreibungstext und das eingeklappte
+   Allergenfeld — beides nicht anklickbar, die Ueberlappung
+   nimmt also niemandem einen Klick weg. */
+.allergen-toggle { position: relative; }
+.allergen-toggle::after { content: ''; position: absolute; inset: -15px 0; }
+
+/* Der Bestellknopf der Karte war 42 hoch, es fehlten zwei. */
+.menu-card-footer .btn,
+.menu-card-footer button { min-height: 44px; }
+
+/* Punkte des Bildwechslers: 12x12 bei 12 px Abstand. Ein
+   ::after von -16px wuerde 20 px in den Nachbarn ragen, also
+   waechst zuerst der Abstand. 32 + 12 = 44, die Flaechen
+   stossen genau aneinander, ohne sich zu ueberlappen. */
+.hero-dots { gap: 32px; }
+.hero-dot  { position: relative; }
+.hero-dot::after { content: ''; position: absolute; inset: -16px; }
+
+/* Datenschalter: 48x26. Waagerecht reichen 48, senkrecht
+   fehlen 18 — und waagerecht stuende nach 12 px das Etikett. */
+.data-toggle-track { position: relative; }
+.data-toggle-track::after { content: ''; position: absolute; inset: -9px 0; }
+
+/* Hier ist Platz, deshalb waechst das Element selbst. */
+.menu-filters .filter-btn { min-height: 44px; }
+.nav-links a   { min-height: 44px; display: flex; align-items: center; }
+.nav-logo      { min-height: 44px; }
+.modal-box .btn { min-height: 44px; }
+.chatbot-input { min-height: 44px; }
+
+/* Verweise der Fusszeile standen mit 17 px Hoehe untereinander.
+   Hier waere ::after falsch: Die Flaechen wuerden sich
+   ueberlappen und man traefe den falschen Verweis. Also echter
+   Abstand — die Fusszeile wird dadurch hoeher, und das ist
+   richtig so. */
+.footer-grid ul a {
+  display: inline-flex; align-items: center;
+  min-height: 44px;
+  /* min-width, weil kurze Verweise wie "AGB" sonst nur 29 px
+     breit werden — die Hoehe allein genuegt nicht. */
+  min-width: 44px;
+}
+
+/* Mengenknoepfe im Warenkorb: 28x28. Sie erscheinen erst,
+   wenn Ware im Korb liegt — im leeren Zustand faellt das nicht
+   auf. Zwischen ihnen steht die Mengenzahl mit je 10 px
+   Abstand, 8 px Wachstum ringsum ergibt 44 und reicht nicht
+   bis zum anderen Knopf. Sichtbar bleiben sie klein, sonst
+   wuerde die Zeile im Korb deutlich hoeher. */
+.qty-btn { position: relative; }
+.qty-btn::after { content: ''; position: absolute; inset: -8px; }
+
+/* Runde Symbolknoepfe auf 44. */
+.footer-social a { width: 44px; height: 44px; }
+.cart-close      { width: 44px; height: 44px; }
+.chatbot-send    { width: 44px; height: 44px; }
+.chatbot-close   { min-width: 44px; min-height: 44px; }
+
+/* Menuegriff: 24x16 Inhalt, vorher 8 px Innenabstand ringsum
+   (40x32). 14 senkrecht und 10 waagerecht ergeben genau 44x44.
+
+   position/z-index, weil die geoeffnete Schublade sonst ueber
+   dem Griff liegt: Sie ist fixiert, der Griff war statisch, und
+   positionierte Elemente malen ueber statische. Da es weder
+   einen Schliessknopf noch eine Hintergrundflaeche gibt, liess
+   sich das Menue nicht wieder schliessen — nur ueber einen der
+   Verweise oder neu laden. */
+.nav-toggle { padding: 14px 10px; position: relative; z-index: 1; }
+
+/* Zoomknoepfe der Karte gehoeren zu Leaflet und kamen mit
+   30x30. Die Quellenzeile der Karte bleibt klein — sie ist
+   Pflichtangabe, kein Bedienelement. */
+.leaflet-control-zoom a {
+  width: 44px !important; height: 44px !important;
+  line-height: 44px !important;
+}
+
+/* Kein :hover-Zustand auf Touch — er bleibt nach dem Tippen
+   stehen und sieht aus wie eine Auswahl. */
+@media (hover: none) {
+  .menu-card:hover     { transform: none; }
+  .filter-btn:hover:not(.active) { background: none; }
+  .back-to-top:hover   { transform: translateY(0) scale(1); }
+  .footer-social a:hover { transform: none; }
 }
 </style>
 </head>
