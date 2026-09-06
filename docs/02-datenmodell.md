@@ -72,6 +72,8 @@ Konkret werden die drei Artikel-Tabellen zu einer breiten Dimension zusammengezo
 | `zahlungsart` | `dim_payment_method` | unverändert übernommen |
 
 Diese Zuordnung ist keine Behauptung, sondern lauffähig: [`../dataset/wawi_mini.sql`](../dataset/wawi_mini.sql) stellt den operativen Ausschnitt bereit, [`../dataset/wawi_zu_analytisch.sql`](../dataset/wawi_zu_analytisch.sql) baut daraus per JOIN die analytischen Tabellen — zeilengleich mit `burgermetrics_mini.sql`, für alle acht Ziele.
+
+Im Betrieb existiert dieselbe Abbildung über dem ganzen Bestand: Das Schema `wawi` trägt das operative Modell mit allen 754.513 Belegen, Kasse und Shop schreiben dorthin, und `db/aufbau/0019_wawi_zu_burgermetrics.sql` führt die stg-Sichten und die Ladefunktion, mit der neue Belege ins Galaxy-Schema wandern. `wawi.etl_probe()` ist der Gleichheitsbeweis von oben, nur über den vollen Bestand.
 | `mitarbeiter` + `mitarbeiterrolle` | `dim_employee` | analog |
 | `wetterdaten` | `dim_weather` | unverändert übernommen |
 | (nicht im Quellsystem) | `dim_date` | Kalenderdimension, künstlich erzeugt |

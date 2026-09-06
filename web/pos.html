@@ -367,6 +367,9 @@ body.data-mode .pos-data-annotation{display:block}
 .receipt .r-line{border-bottom:1px dashed #999;margin:8px 0}
 .receipt .r-row{display:flex;justify-content:space-between}
 .receipt .r-big{font-size:16px;font-weight:bold}
+.receipt-db{margin-top:10px;font:12px/1.5 'Courier New','Lucida Console',monospace;color:#64748b;text-align:center;word-break:break-word}
+.receipt-db.ok{color:#15803d}
+.receipt-db.err{color:#dc2626}
 .receipt .r-barcode{font-family:'Libre Barcode 39',cursive;font-size:40px;text-align:center;margin-top:12px;letter-spacing:2px}
 
 /* === HISTORY MODAL === */
@@ -964,15 +967,15 @@ body.data-mode .pos-data-annotation{display:block}
 <div class="pos-data-annotation" style="position:fixed;top:80px;left:130px;animation-delay:.1s;z-index:1200">
   <div class="pos-da-header">
     <div class="pos-da-icon collect"><i class="fa-solid fa-database"></i></div>
-    <div class="pos-da-title">PRODUKT-AUSWAHL → fact_order_items</div>
+    <div class="pos-da-title">PRODUKT-AUSWAHL → wawi.bestellposition</div>
   </div>
-  Jeder Klick auf ein Produkt erzeugt einen Datensatz:<br>
-  <span class="pos-da-metric">order_item_id</span>
-  <span class="pos-da-metric">product_id</span>
-  <span class="pos-da-metric">quantity</span>
-  <span class="pos-da-metric">unit_price</span>
-  <span class="pos-da-metric">line_total</span>
-  <div class="pos-da-sql">INSERT INTO fact_order_items (order_id, product_id, quantity, unit_price, line_total) VALUES (...)</div>
+  Jede Zeile der Bestellung wird eine Position im operativen System:<br>
+  <span class="pos-da-metric">position_id</span>
+  <span class="pos-da-metric">artikel_id</span>
+  <span class="pos-da-metric">menge</span>
+  <span class="pos-da-metric">einzelpreis</span>
+  <span class="pos-da-metric">positionsbetrag</span>
+  <div class="pos-da-sql">INSERT INTO wawi.bestellposition (bestellung_id, artikel_id, menge, einzelpreis, positionsbetrag) … → ETL → fact_order_items</div>
 </div>
 
 <div class="pos-data-annotation" style="position:fixed;top:80px;right:20px;animation-delay:.2s;z-index:1200;max-width:300px">
@@ -992,24 +995,23 @@ body.data-mode .pos-data-annotation{display:block}
 <div class="pos-data-annotation" style="position:fixed;bottom:80px;left:130px;animation-delay:.3s;z-index:1200">
   <div class="pos-da-header">
     <div class="pos-da-icon storage"><i class="fa-solid fa-receipt"></i></div>
-    <div class="pos-da-title">TRANSAKTION → fact_orders</div>
+    <div class="pos-da-title">TRANSAKTION → wawi.kundenbestellung</div>
   </div>
-  Bei Bezahlung entsteht ein kompletter Datensatz:<br>
-  <span class="pos-da-metric">order_id</span>
-  <span class="pos-da-metric">date</span>
-  <span class="pos-da-metric">time</span>
-  <span class="pos-da-metric">branch_id</span>
-  <span class="pos-da-metric">customer_id</span>
-  <span class="pos-da-metric">payment_id</span>
-  <span class="pos-da-metric">order_channel</span>
-  <span class="pos-da-metric">satisfaction_score</span>
-  <div class="pos-da-sql">INSERT INTO fact_orders (...) → Füllt obt_orders über JOIN mit allen Dimensionstabellen</div>
+  Bei Bezahlung schreibt die Kasse den Beleg ins operative System — Bestellung, Positionen und Rechnung in einer Transaktion:<br>
+  <span class="pos-da-metric">bestellung_id</span>
+  <span class="pos-da-metric">bestelldatum</span>
+  <span class="pos-da-metric">bestellzeit</span>
+  <span class="pos-da-metric">filiale_id</span>
+  <span class="pos-da-metric">zahlungsart_id</span>
+  <span class="pos-da-metric">bestellkanal</span>
+  <span class="pos-da-metric">quelle</span>
+  <div class="pos-da-sql">SELECT wawi.bestellung_anlegen(filiale_id, zahlungsart_id, bestellkanal, positionen, …) → ETL (db/aufbau/0019) → fact_orders</div>
 </div>
 
 <div class="pos-data-annotation" style="position:fixed;bottom:80px;right:20px;animation-delay:.4s;z-index:1200;max-width:300px">
   <div class="pos-da-header">
     <div class="pos-da-icon collect"><i class="fa-solid fa-users"></i></div>
-    <div class="pos-da-title">KUNDENDATEN → dim_customer</div>
+    <div class="pos-da-title">KUNDENDATEN → wawi.kunde → dim_customer</div>
   </div>
   Bei Kundenkarten-Scan:<br>
   <span class="pos-da-metric">customer_id</span>
@@ -1156,6 +1158,7 @@ body.data-mode .pos-data-annotation{display:block}
     </div>
     <div class="modal-body">
       <div class="receipt" id="receiptContent"></div>
+      <div class="receipt-db" id="receiptDb"></div>
     </div>
   </div>
 </div>
@@ -1800,6 +1803,29 @@ function processPayment(method,paid,change,splitCash,splitCard){
   state.dayRevenue+=total;
   updateHeaderRevenue();
 
+  // Der Beleg geht ins operative System (wawi.kundenbestellung), nicht nur
+  // auf den Bon. Der Bon erscheint sofort; die Antwort der Datenbank traegt
+  // die Belegnummer nach. Scheitert das Schreiben, sagt der Bon das — die
+  // Kasse tut dann nicht so, als waere nichts passiert.
+  const dbInfo=document.getElementById('receiptDb');
+  dbInfo.className='receipt-db';
+  dbInfo.textContent='Wird in wawi.kundenbestellung gespeichert \u2026';
+  if(window.bestellungSpeichern){
+    window.bestellungSpeichern(tx).then(antwort=>{
+      tx.bestellungId=antwort.bestellung_id;
+      dbInfo.className='receipt-db ok';
+      dbInfo.textContent=`Gespeichert: wawi.kundenbestellung #${antwort.bestellung_id}`
+        +` \u00b7 ${antwort.positionen} Positionen \u00b7 ${fmt(Number(antwort.netto_gesamt))}`;
+    }).catch(fehler=>{
+      dbInfo.className='receipt-db err';
+      dbInfo.textContent='Nicht gespeichert: '+fehler.message;
+      showToast('Bestellung nicht gespeichert: '+fehler.message,'error');
+    });
+  } else {
+    dbInfo.className='receipt-db err';
+    dbInfo.textContent='Keine Verbindung zum operativen System.';
+  }
+
   // Loyalty points
   if(state.customerCard&&CUSTOMERS[state.customerCard]){
     const c=CUSTOMERS[state.customerCard];
@@ -2260,16 +2286,29 @@ window.kasseStarten = function(artikel){
 };
 </script>
 <script type="module">
-/* Die Kasse holt ihren Artikelstamm aus derselben Quelle wie das Dashboard.
-   Vorher stand er als Liste im Quelltext — mit Preisen, die mit dim_product
-   nicht uebereinstimmten, und 13 Artikeln, die es im Datenmodell gar nicht
-   gibt. Genau das soll die Fallstudie nicht vorfuehren. */
+/* Die Kasse holt ihren Artikelstamm aus dem operativen System (Schema wawi)
+   und schreibt ihre Belege dorthin zurueck. Vorher stand der Stamm als Liste
+   im Quelltext — mit Preisen, die mit dim_product nicht uebereinstimmten, und
+   13 Artikeln, die es im Datenmodell gar nicht gibt — und der Beleg landete
+   nirgends. Genau das soll die Fallstudie nicht vorfuehren. */
 import { QUELLE } from './js/konfiguration.js';
 import { waehleQuelle } from './js/datenquelle.js';
 import { bildVon, bildUrl, SCHNELLWAHL } from './js/darstellung.js';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;
+
+// Wo diese Kasse steht. Das Modell kennt keine Kasse, nur die Filiale — und
+// ein Beleg ohne Filiale ist keiner. Kasse 1 steht am Hauptbahnhof
+// (wawi.filiale, filiale_id 2).
+const FILIALE_ID = 2;
+// Sitzungskennung, damit eine Uebungsgruppe ihre Belege in
+// wawi.v_bestellung_letzte wiederfindet. Lebt nur in diesem Tab.
+const SITZUNG = 'kasse-' + Math.random().toString(36).slice(2, 8);
+// Zahlarten der Kasse -> wawi.zahlungsart: 1 Cash, 2 EC Card, 3 Credit Card,
+// 4 Mobile Payment. Split wird als Kartenzahlung verbucht — das Modell kennt
+// eine Zahlungsart je Beleg (dieselbe Vereinfachung wie in fact_orders).
+const ZAHLUNGSART = { cash: 1, card: 2, credit: 3, mobile: 4, split: 2 };
 
 // Die Kasse gruppiert nach eigenen Reitern. Die Datenbank kennt ihre eigenen
 // Kategorienamen — hier die Abbildung, an einer Stelle statt in jeder Abfrage.
@@ -2285,6 +2324,22 @@ document.body.appendChild(schirm);
 
 try {
   const quelle = waehleQuelle(QUELLE);
+
+  // Der Schreibweg. processPayment (klassischer Block) ruft ihn nach jedem
+  // Bon. Preise gehen NICHT mit — die Datenbank nimmt sie aus wawi.artikel;
+  // die Kasse liefert nur Artikel, Mengen, Zahlart und den Rabatt.
+  // Mitnehmen wie Im Haus sind beides der Tresen: bestellkanal 'Counter'.
+  window.bestellungSpeichern = (tx) => quelle.bestellungAnlegen({
+    filiale_id:     FILIALE_ID,
+    zahlungsart_id: ZAHLUNGSART[tx.method] || 1,
+    bestellkanal:   'Counter',
+    positionen:     tx.items.map(i => ({ artikel_id: i.id, menge: i.qty })),
+    quelle:         'kasse',
+    sitzung:        SITZUNG,
+    rabatt_betrag:  Math.round(((tx.discount || 0) + (tx.bonus || 0)) * 100) / 100,
+    mwst_satz:      tx.taxRate,
+  });
+
   const karte = await quelle.speisekarte();
   const artikel = karte.map(a => ({
     id:    a.artikel_id,
@@ -2298,12 +2353,12 @@ try {
   }));
   schirm.remove();
   window.kasseStarten(artikel);
-  console.info(`Kasse: ${artikel.length} Artikel aus ${QUELLE.art} geladen.`);
+  console.info(`Kasse: ${artikel.length} Artikel aus ${QUELLE.art} (Schema ${QUELLE.schemaWawi}) geladen.`);
 } catch (fehler) {
   schirm.innerHTML = '<div><b style="color:#dc2626">Die Datenquelle antwortet nicht.</b>'
     + '<br><br>' + String(fehler.message).replace(/</g, '&lt;')
     + '<br><br><span style="font-size:12px">Quelle: ' + QUELLE.url
-    + ' \u00b7 Schema: ' + QUELLE.schema + '</span></div>';
+    + ' \u00b7 Schema: ' + QUELLE.schemaWawi + '</span></div>';
 }
 </script>
 </body></html>

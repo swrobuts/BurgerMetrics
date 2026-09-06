@@ -84,9 +84,9 @@ nachvollziehbar:
 
 1. **Fachlichkeit** — sechs Sätze über das Geschäft
 2. **ER-Modell** — Entitäten, Beziehungen, Kardinalitäten
-3. **Normalisierung** — bis zur dritten Normalform, `dataset/wawi_mini.sql`
-4. **Anwendungen** — Shop und Kasse auf demselben Kern, `web/`
-5. **Auswertungsmodell** — Galaxy-Schema mit zwei Faktentabellen, `db/aufbau/`
+3. **Normalisierung** — bis zur dritten Normalform, `dataset/wawi_mini.sql`; im Betrieb das Schema `wawi`, `db/aufbau/0016`
+4. **Anwendungen** — Shop und Kasse lesen und schreiben in denselben operativen Kern, `web/`
+5. **Auswertungsmodell** — Galaxy-Schema mit zwei Faktentabellen, `db/aufbau/`; der ETL-Schritt von `wawi` dorthin ist `db/aufbau/0019`
 6. **Kennzahlen** — die Semantikschicht als SQL-Sichten
 7. **Dashboard** — `web/dashboard.html`
 

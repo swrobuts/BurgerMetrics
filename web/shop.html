@@ -1305,6 +1305,9 @@ ul { list-style: none; }
   line-height: 1.6;
   margin-bottom: 8px;
 }
+.modal-order-db { font-size: .78rem; color: var(--stone-500, #78716c); margin: -12px 0 20px; font-family: 'Courier New', monospace; word-break: break-word; }
+.modal-order-db.ok { color: #15803d; }
+.modal-order-db.err { color: #b91c1c; }
 .modal-order-nr {
   font-family: var(--font-display);
   font-size: 1.3rem;
@@ -4294,7 +4297,8 @@ body.data-mode .phone-mockup { animation: none; }
     <h3>BESTELLUNG AUFGEGEBEN!</h3>
     <p>Deine Bestellung wird jetzt zubereitet.</p>
     <p style="font-size:.85rem;">Geschätzte Wartezeit: <strong>8-12 Minuten</strong></p>
-    <div class="modal-order-nr" id="orderNr">BM-2024-000000</div>
+    <div class="modal-order-nr" id="orderNr">Bestellung Nr. …</div>
+    <div class="modal-order-db" id="orderDb"></div>
     <button class="btn btn-primary" onclick="closeModal()">Alles klar!</button>
   </div>
 </div>
@@ -4498,14 +4502,53 @@ function closeCart() {
   document.body.style.overflow = '';
 }
 
+// Zahlarten des Shops -> wawi.zahlungsart: 1 Cash, 2 EC Card, 3 Credit Card,
+// 4 Mobile Payment (siehe die Anmerkungen im Datenmodus).
+const ZAHLUNGSART = { cash: 1, ec: 2, credit: 3, mobile: 4 };
+
 function placeOrder() {
   if (cart.length === 0) return;
-  const orderNr = `BM-2024-${String(Math.floor(Math.random() * 999999)).padStart(6, '0')}`;
-  document.getElementById('orderNr').textContent = orderNr;
+  // Die Bestellnummer vergibt die Datenbank, nicht der Browser. Vorher stand
+  // hier eine Zufallszahl im Format BM-2024-######, und die Bestellung
+  // landete nirgends.
+  const nrEl = document.getElementById('orderNr');
+  const dbEl = document.getElementById('orderDb');
+  nrEl.textContent = 'Wird gespeichert \u2026';
+  dbEl.className = 'modal-order-db';
+  dbEl.textContent = '';
   document.getElementById('orderModal').classList.add('open');
+
+  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const bestellung = {
+    filiale_id:     Number(document.getElementById('cartBranch').value),
+    zahlungsart_id: ZAHLUNGSART[selectedPayment] || 2,
+    bestellkanal:   'App Order',
+    positionen:     cart.map(c => ({ artikel_id: c.id, menge: c.qty })),
+    quelle:         'shop',
+    rabatt_betrag:  appDiscount ? Math.round(subtotal * 10) / 100 : 0,
+  };
   closeCart();
   cart = [];
+  appDiscount = false;
   updateCartUI();
+
+  if (!window.bestellungSpeichern) {
+    nrEl.textContent = 'Nicht gespeichert';
+    dbEl.className = 'modal-order-db err';
+    dbEl.textContent = 'Keine Verbindung zum operativen System.';
+    return;
+  }
+  window.bestellungSpeichern(bestellung).then(antwort => {
+    nrEl.textContent = `Bestellung Nr. ${antwort.bestellung_id}`;
+    dbEl.className = 'modal-order-db ok';
+    dbEl.textContent = `wawi.kundenbestellung #${antwort.bestellung_id} \u00b7 `
+      + `${antwort.positionen} Positionen \u00b7 `
+      + `\u20ac${Number(antwort.netto_gesamt).toFixed(2).replace('.', ',')}`;
+  }).catch(fehler => {
+    nrEl.textContent = 'Nicht gespeichert';
+    dbEl.className = 'modal-order-db err';
+    dbEl.textContent = fehler.message;
+  });
 }
 
 function closeModal() {
@@ -5694,16 +5737,22 @@ setTimeout(() => {
 }, 5000);
 </script>
 <script type="module">
-/* Der Shop holt Speisekarte und Filialliste aus derselben Quelle wie Kasse
-   und Dashboard. Vorher standen beide als Listen im Quelltext — mit Preisen,
-   die mit dim_product nicht uebereinstimmten. Die Fallstudie behauptet einen
-   geteilten Artikelstamm; jetzt gibt es ihn auch. */
+/* Der Shop holt Speisekarte und Filialliste aus dem operativen System
+   (Schema wawi) — derselben Quelle wie die Kasse — und schreibt seine
+   Bestellungen dorthin zurueck. Vorher standen beide Listen im Quelltext,
+   mit Preisen, die mit dim_product nicht uebereinstimmten, und die
+   Bestellung endete in einer Zufallsnummer. Die Fallstudie behauptet einen
+   geteilten Kern, in den beide Anwendungen schreiben; jetzt gibt es ihn. */
 import { QUELLE } from './js/konfiguration.js';
 import { waehleQuelle } from './js/datenquelle.js';
 import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;
+
+// Sitzungskennung, damit eine Uebungsgruppe ihre Bestellungen in
+// wawi.v_bestellung_letzte wiederfindet. Lebt nur in diesem Tab.
+const SITZUNG = 'shop-' + Math.random().toString(36).slice(2, 8);
 
 const schirm = document.createElement('div');
 schirm.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;'
@@ -5714,6 +5763,13 @@ document.body.appendChild(schirm);
 
 try {
   const quelle = waehleQuelle(QUELLE);
+
+  // Der Schreibweg; placeOrder (klassischer Block) ruft ihn. Der Browser
+  // schickt Artikel und Mengen, keine Preise — die nimmt die Datenbank aus
+  // wawi.artikel.
+  window.bestellungSpeichern = (bestellung) =>
+    quelle.bestellungAnlegen({ ...bestellung, sitzung: SITZUNG });
+
   // Die vier Kennzahlen im Kopfbereich standen als data-count fest im HTML:
   // 8 Filialen, 50 Produkte, 100 Tausend Kunden, 4,8 Sterne. Drei davon
   // widersprachen den eigenen Daten — es sind 57 Produkte, rund 24 Tausend
@@ -5741,6 +5797,21 @@ try {
     hours: OEFFNUNGSZEITEN[f.name] || '',
     directions: ANFAHRT[f.name] || '',
   }));
+
+  // Die Filialauswahl im Warenkorb kommt aus derselben Liste. Vorher stand
+  // sie fest im HTML — mit eigenen Nummern: Dort war 1 der Hauptbahnhof, in
+  // der Datenbank ist 1 der Europastern. Eine Bestellung waere in der
+  // falschen Filiale gelandet.
+  const auswahl = document.getElementById('cartBranch');
+  if (auswahl) {
+    auswahl.textContent = '';
+    for (const f of standorte) {
+      const o = document.createElement('option');
+      o.value = f.id;
+      o.textContent = f.address ? `${f.name} \u2014 ${f.address}` : f.name;
+      auswahl.appendChild(o);
+    }
+  }
 
   // Kennzahlen im Kopfbereich aus den Daten setzen. data-count traegt den
   // Zielwert, den der Zaehler anlaeuft; data-suffix die Nachkommastelle.
@@ -5852,7 +5923,7 @@ try {
   schirm.innerHTML = '<div><b style="color:#b91c1c">Die Datenquelle antwortet nicht.</b>'
     + '<br><br>' + String(fehler.message).replace(/</g, '&lt;')
     + '<br><br><span style="font-size:12px">Quelle: ' + QUELLE.url
-    + ' \u00b7 Schema: ' + QUELLE.schema + '</span></div>';
+    + ' \u00b7 Schema: ' + QUELLE.schemaWawi + '</span></div>';
 }
 </script>
 </body>

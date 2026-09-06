@@ -10,6 +10,12 @@
  * Der Vertrag ist absichtlich schmal: 33 benannte Fragen, jede liefert ein
  * Array von Objekten mit stabilen Feldnamen. Diese Namen sind die eigentliche
  * Schnittstelle — sie stehen serverseitig in db/aufbau/0005_semantik.sql.
+ *
+ * Kasse und Shop benutzen dasselbe Modul, aber einen anderen Teil davon: den
+ * Artikelstamm und das Anlegen einer Bestellung. Beides geht gegen das
+ * operative Schema wawi (db/aufbau/0016 bis 0019), nicht gegen das
+ * Auswertungsmodell — das Warehouse wird aus dem operativen System beladen,
+ * nicht umgekehrt.
  */
 
 /** Basisklasse: beschreibt den Vertrag und dokumentiert jede Frage. */
@@ -39,13 +45,31 @@ export class Datenquelle {
   heatmap() { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden */
   kundenAlter() { throw new Error('nicht umgesetzt'); }
-  /** Artikelstamm fuer Shop und Kasse: artikel_id, name, kategorie,
-   *  unterkategorie, preis, preis_2017, kalorien, vegetarisch, vegan,
-   *  allergene, gelistet_seit */
+  /** Artikelstamm fuer Shop und Kasse (operatives Schema): artikel_id, name,
+   *  kategorie, unterkategorie, preis, preis_2017, kalorien, vegetarisch,
+   *  vegan, allergene, gelistet_seit */
   speisekarte() { throw new Error('nicht umgesetzt'); }
-  /** Standorte: filiale_id, name, adresse, bezirk, plz, ort, breite, laenge,
-   *  art, drive_through, spielplatz, parkplaetze, sitzplaetze, eroeffnet */
+  /** Standorte (operatives Schema): filiale_id, name, adresse, bezirk, plz,
+   *  ort, breite, laenge, art, drive_through, spielplatz, parkplaetze,
+   *  sitzplaetze, eroeffnet */
   filialliste() { throw new Error('nicht umgesetzt'); }
+  /**
+   * Eine Bestellung im operativen System anlegen — der einzige Schreibweg.
+   * @param {object} bestellung  filiale_id, zahlungsart_id, bestellkanal
+   *   ('Counter' | 'Drive-Through' | 'Kiosk' | 'App Order'), positionen
+   *   [{artikel_id, menge}], quelle ('kasse' | 'shop'); optional sitzung,
+   *   kunde_id, promotion_id, rabatt_betrag, mwst_satz.
+   *   Preise schickt der Browser NICHT — sie kommen aus dem Stamm.
+   * @returns {Promise<object>} bestellung_id, rechnung_id, bestelldatum,
+   *   bestellzeit, positionen, artikel_anzahl, brutto_gesamt, rabatt_betrag,
+   *   netto_gesamt, mwst_satz, mwst_betrag, quelle
+   */
+  bestellungAnlegen(bestellung) { throw new Error('nicht umgesetzt'); }
+  /** Die juengsten Uebungsbestellungen: bestellung_id, quelle, sitzung,
+   *  bestelldatum, bestellzeit, filiale, kanal, zahlungsart, artikel_anzahl,
+   *  positionen, brutto_gesamt, rabatt_betrag, netto_gesamt, erfasst_am,
+   *  im_warehouse */
+  letzteBestellungen() { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden, bestellungen, umsatz, umsatzanteil_pct */
   alterUmsatz() { throw new Error('nicht umgesetzt'); }
   /** eine Zeile: bestellungen, aus_heimatbezirk, anteil_pct, filialbezirke, wohnbezirke */
@@ -100,25 +124,29 @@ export class Datenquelle {
 
 /**
  * PostgREST-Adapter (Supabase, selbstgehostet).
- * Uebersetzt jede Frage in genau einen GET auf eine Sicht der Semantikschicht.
+ * Uebersetzt jede Frage in genau einen GET auf eine Sicht — der
+ * Semantikschicht (Schema burgermetrics) oder des operativen Modells
+ * (Schema wawi). Das Schema waehlt der Header Accept-Profile; PostgREST
+ * muss beide kennen (PGRST_DB_SCHEMAS, siehe db/README.md).
  */
 export class PostgrestQuelle extends Datenquelle {
-  constructor({ url, schluessel, schema = 'burgermetrics' }) {
+  constructor({ url, schluessel, schema = 'burgermetrics', schemaWawi = 'wawi' }) {
     super();
     this.url = url.replace(/\/$/, '');
     this.schluessel = schluessel;
     this.schema = schema;
+    this.schemaWawi = schemaWawi;
     this.zwischenspeicher = new Map();
   }
 
-  async hole(sicht, abfrage = '') {
-    const schluessel = sicht + '?' + abfrage;
-    if (this.zwischenspeicher.has(schluessel)) return this.zwischenspeicher.get(schluessel);
+  async hole(sicht, abfrage = '', { schema = this.schema, frisch = false } = {}) {
+    const schluessel = schema + '.' + sicht + '?' + abfrage;
+    if (!frisch && this.zwischenspeicher.has(schluessel)) return this.zwischenspeicher.get(schluessel);
     const antwort = await fetch(`${this.url}/rest/v1/${sicht}?${abfrage}`, {
       headers: {
         apikey: this.schluessel,
         Authorization: `Bearer ${this.schluessel}`,
-        'Accept-Profile': this.schema,
+        'Accept-Profile': schema,
       },
     });
     if (!antwort.ok) {
@@ -129,6 +157,32 @@ export class PostgrestQuelle extends Datenquelle {
     const daten = (await antwort.json()).map(zahlenWandeln);
     this.zwischenspeicher.set(schluessel, daten);
     return daten;
+  }
+
+  /**
+   * Ruft eine Datenbankfunktion auf (PostgREST: POST /rpc/<name>). Der
+   * Header Content-Profile waehlt das Schema; die Argumente gehen als JSON
+   * mit den Parameternamen der Funktion.
+   */
+  async rufe(funktion, argumente, { schema = this.schemaWawi } = {}) {
+    const antwort = await fetch(`${this.url}/rest/v1/rpc/${funktion}`, {
+      method: 'POST',
+      headers: {
+        apikey: this.schluessel,
+        Authorization: `Bearer ${this.schluessel}`,
+        'Content-Profile': schema,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(argumente),
+    });
+    if (!antwort.ok) {
+      // PostgREST verpackt RAISE EXCEPTION als {message, details, hint, code}.
+      let meldung = await antwort.text();
+      try { meldung = JSON.parse(meldung).message || meldung; } catch (_) { /* Text bleibt */ }
+      throw new Error(`${funktion}: HTTP ${antwort.status} — ${meldung}`);
+    }
+    const daten = await antwort.json();
+    return Array.isArray(daten) ? daten.map(zahlenWandeln) : zahlenWandeln(daten);
   }
 
   kennzahlenJahr()     { return this.hole('v_kennzahlen_jahr', 'order=jahr'); }
@@ -143,8 +197,10 @@ export class PostgrestQuelle extends Datenquelle {
   stunden()            { return this.hole('v_stunde', 'order=stunde'); }
   heatmap()            { return this.hole('v_heatmap', ''); }
   kundenAlter()        { return this.hole('v_kunde_alter', 'order=altersgruppe'); }
-  speisekarte()        { return this.hole('v_speisekarte', ''); }
-  filialliste()        { return this.hole('v_filialliste', ''); }
+  speisekarte()        { return this.hole('v_speisekarte', '', { schema: this.schemaWawi }); }
+  filialliste()        { return this.hole('v_filialliste', '', { schema: this.schemaWawi }); }
+  bestellungAnlegen(b) { return this.rufe('bestellung_anlegen', b); }
+  letzteBestellungen() { return this.hole('v_bestellung_letzte', '', { schema: this.schemaWawi, frisch: true }); }
   alterUmsatz()        { return this.hole('v_alter_umsatz', 'order=umsatz.desc'); }
   heimatbezirk()       { return this.hole('v_heimatbezirk', ''); }
   kundenLoyalty()      { return this.hole('v_kunde_loyalty', ''); }
