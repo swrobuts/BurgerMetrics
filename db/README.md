@@ -85,7 +85,9 @@ Zwei Eigenheiten der Instanz, beide hart erarbeitet:
   zählte in der Fehlermeldung die alte Liste auf, ohne `storage` und
   `graphql_public`. Die Rollen-Einstellung ist entfernt
   (`ALTER ROLE authenticator RESET pgrst.db_schemas`); seither ist die
-  `.env` die einzige Quelle. Prüfen, falls es wieder hakt:
+  `.env` die einzige Quelle. Das `RESET` braucht den Superuser des
+  Supabase-Images, `supabase_admin` — die Rolle `postgres` darf
+  `authenticator` nicht ändern. Prüfen, falls es wieder hakt:
 
   ```sql
   SELECT unnest(rolconfig) FROM pg_roles WHERE rolname = 'authenticator';
