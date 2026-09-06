@@ -19,7 +19,7 @@ WITH je AS (
   JOIN dim_product  p USING (product_id)
   GROUP BY 1,2,3,4,5)
 SELECT jahr, product_id, product_name, category, subcategory, menge, positionsumsatz,
-       100.0 * positionsumsatz / sum(positionsumsatz) OVER (PARTITION BY jahr) AS anteil_pct
+       100.0 * positionsumsatz / NULLIF(sum(positionsumsatz) OVER (PARTITION BY jahr), 0) AS anteil_pct
 FROM je;
 
 -- Einzelwerte. Jede Zeile ist eine Kachel; kennung ist der Schluessel, den
@@ -61,9 +61,12 @@ kohorte AS (
   FROM (SELECT DISTINCT kohorte, kohortengroesse FROM v_kohorte) k
   JOIN LATERAL (SELECT aktive FROM v_kohorte v
                 WHERE v.kohorte = k.kohorte AND v.jahr = k.kohorte + 1) f ON true),
+-- NULLIF im Nenner: Auf einer leeren Datenbank (Sichten vor dem Laden
+-- angelegt) ist die Kundenzahl 0, und die Division bricht das Skript ab.
+-- Mit NULLIF wird der Wert NULL, und die Kachel bleibt leer statt falsch.
 aktiv26 AS (
   SELECT round(100.0 * count(DISTINCT customer_id)
-             / (SELECT count(DISTINCT customer_id) FROM fact_orders), 0) AS pct
+             / NULLIF((SELECT count(DISTINCT customer_id) FROM fact_orders), 0), 0) AS pct
   FROM fact_orders WHERE extract(year FROM date) = 2026)
 SELECT * FROM (VALUES
   ('wiederkehrend_2025',
