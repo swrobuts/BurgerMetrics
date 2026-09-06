@@ -80,6 +80,8 @@ Diese Umdeutung ist ehrlich zu benennen: Aus einem Nebenprodukt wurde nachträgl
 
 **Rückblickende Bewertung:** Die Entscheidung war unter der Anforderung „ohne Server lauffähig" richtig. Wäre ein Server zulässig, wäre eine berechnende Variante vorzuziehen — sie würde die Prüfstrecke für die Berichtswerte überflüssig machen.
 
+**Zurückgenommen (August 2026):** Seit der Bestand in der selbstgehosteten Supabase-Instanz liegt, gilt die Anforderung nicht mehr, und der Bericht liest die Semantikschicht zur Laufzeit ([Kapitel 5.3](05-anwendungen.md#53-der-bericht)). Die Prüfstrecke aus Kapitel 4 bleibt als Dokument der Migration erhalten; ihre laufende Aufgabe hat `web/abgleich.html` übernommen, das die Sichten gegen die alten Berichtswerte stellt.
+
 ---
 
 ## E6 — Eine Datei je Anwendung {#e6}
