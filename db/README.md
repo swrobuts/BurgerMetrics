@@ -75,18 +75,45 @@ REFRESH MATERIALIZED VIEW burgermetrics.v_warenkorb_regeln;
 
 Zwei Eigenheiten der Instanz, beide hart erarbeitet:
 
-* **Die Schema-Liste kommt aus der Container-Umgebung**, nicht aus der
-  Datenbank. `ALTER ROLE authenticator SET pgrst.db_schemas = …` bleibt
-  wirkungslos, weil Umgebungsvariablen in PostgREST Vorrang haben. Das Schema
-  wird in `/root/supabase/docker/.env` bei `PGRST_DB_SCHEMAS` eingetragen.
-  Seit `0016` müssen dort **beide** Schemata stehen:
-  `PGRST_DB_SCHEMAS=burgermetrics,wawi`. Der Browser wählt das Schema je
-  Anfrage über `Accept-Profile` (lesen) und `Content-Profile` (Funktionsaufruf).
+* **Die Schema-Liste hat zwei mögliche Quellen, und die Datenbank gewinnt.**
+  PostgREST liest `PGRST_DB_SCHEMAS` aus der Container-Umgebung, also aus
+  `/root/supabase/docker/.env`. Steht aber an der Rolle `authenticator` eine
+  Einstellung `pgrst.db_schemas` (`ALTER ROLE … SET`), hat **die** Vorrang —
+  nicht die Umgebung, wie hier lange behauptet. Genau so lag es auf der
+  Instanz: Eine alte Rollen-Einstellung überstimmte die `.env`, und nach dem
+  Eintrag von `wawi` meldete PostgREST weiter `Invalid schema: wawi` und
+  zählte in der Fehlermeldung die alte Liste auf, ohne `storage` und
+  `graphql_public`. Die Rollen-Einstellung ist entfernt
+  (`ALTER ROLE authenticator RESET pgrst.db_schemas`); seither ist die
+  `.env` die einzige Quelle. Das `RESET` braucht den Superuser des
+  Supabase-Images, `supabase_admin` — die Rolle `postgres` darf
+  `authenticator` nicht ändern. Prüfen, falls es wieder hakt:
+
+  ```sql
+  SELECT unnest(rolconfig) FROM pg_roles WHERE rolname = 'authenticator';
+  ```
+
+  Die Liste in der `.env` **ergänzen, nicht ersetzen**: Auf der Instanz
+  laufen weitere Projekte, deren Schemata dort ebenfalls stehen. Seit `0016`
+  gehören `burgermetrics` und `wawi` beide hinein. Der Browser wählt das
+  Schema je Anfrage über `Accept-Profile` (lesen) und `Content-Profile`
+  (Funktionsaufruf).
+* **Eine geänderte `.env` braucht `up -d`, nicht `restart`.**
+  `docker compose restart` startet den Container mit seiner alten Umgebung
+  neu; die Datei wird erst beim Neuerzeugen gelesen. Das fiel beim Eintrag
+  von `wawi` auf: Nach `restart` meldete PostgREST weiter `Invalid schema:
+  wawi` und zählte in der Fehlermeldung die alte Liste auf.
 * **`PGRST_DB_CHANNEL_ENABLED=false`** — `NOTIFY pgrst, 'reload schema'`
-  bewirkt daher nichts. Nach jeder Schemaänderung:
+  bewirkt daher nichts. Nach jeder Änderung an Sichten oder Funktionen
+  genügt ein Neustart, nach einer Änderung an `.env` muss der Container neu
+  erzeugt werden:
 
 ```bash
-ssh vps "cd /root/supabase/docker && docker compose restart rest"
+cd /root/supabase/docker
+cp .env .env.bak
+sed -i 's/^\(PGRST_DB_SCHEMAS=.*\)$/\1,wawi/' .env     # anhängen, nicht ersetzen
+grep ^PGRST_DB_SCHEMAS .env
+docker compose up -d rest                                # liest .env neu
 ```
 
 ## Prüfung

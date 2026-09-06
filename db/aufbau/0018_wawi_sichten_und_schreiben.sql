@@ -13,9 +13,10 @@
 --                   und Rechnung in einer Transaktion.
 --
 -- Betrieb: Das Schema muss PostgREST bekannt sein — in
---          /root/supabase/docker/.env bei PGRST_DB_SCHEMAS ergaenzen
---          (burgermetrics,wawi), dann `docker compose restart rest`.
---          Dieselbe Eigenheit wie in 0004 beschrieben.
+--          /root/supabase/docker/.env die Liste PGRST_DB_SCHEMAS um ,wawi
+--          ERGAENZEN (nicht ersetzen: dort stehen auch andere Projekte),
+--          dann `docker compose up -d rest`. Ein `restart` genuegt nicht,
+--          er liest die .env nicht neu. Details in 0004 und db/README.md.
 --
 -- Objekte: wawi.v_speisekarte, wawi.v_filialliste, wawi.v_bestellung_letzte,
 --          wawi.bestellung_anlegen(); Grants und RLS auf wawi.
