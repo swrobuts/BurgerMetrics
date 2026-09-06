@@ -87,15 +87,19 @@ Beim Laden entstehen 25 Diagramme, nach dem Durchlaufen der Hauptnavigation 34, 
 
 `pos.html` bildet die Erfassung an der Kasse nach: Artikel wählen, Warenkorb füllen, Zahlungsart wählen, Bon erzeugen, Tagesabschluss als CSV exportieren.
 
-Der didaktische Kern ist ein zuschaltbares Feld, das zu jedem Bedienschritt zeigt, **welche Daten dabei entstehen** — im Markup als `.pos-data-annotation` angelegt und standardmäßig ausgeblendet. Wer einen Artikel bucht, sieht die entstehende Zeile in `fact_order_items`; wer die Bestellung abschließt, sieht die Zeile in `fact_orders`.
+Der didaktische Kern ist ein zuschaltbares Feld, das zu jedem Bedienschritt zeigt, **welche Daten dabei entstehen** — im Markup als `.pos-data-annotation` angelegt und standardmäßig ausgeblendet. Wer einen Artikel bucht, sieht die entstehende Zeile in `wawi.bestellposition`; wer die Bestellung abschließt, sieht den Beleg in `wawi.kundenbestellung`.
 
-Damit schließt sich der Kreis zum Datenmodell: Die Granularität aus [Kapitel 2](02-datenmodell.md#24-granularität-die-wichtigste-entscheidung) wird an der Kasse sichtbar, wo sie entsteht.
+Die Daten entstehen nicht nur auf dem Bildschirm. Bei jeder Zahlung schreibt die Kasse den Beleg in das operative Schema `wawi` — Bestellung, Positionen und Rechnung in einer Transaktion, über die Datenbankfunktion `bestellung_anlegen()`. Der Browser schickt Artikelnummern, Mengen, Zahlart und Rabatt; die Preise nimmt die Funktion aus dem Artikelstamm. Die Belegnummer, die zurückkommt, steht unter dem Bon. Der Artikelstamm selbst kommt aus demselben Schema (`v_speisekarte`).
+
+Damit schließt sich der Kreis zum Datenmodell: Die Granularität aus [Kapitel 2](02-datenmodell.md#24-granularität-die-wichtigste-entscheidung) wird an der Kasse sichtbar, wo sie entsteht — und der Weg von dort ins Auswertungsmodell ist der ETL-Schritt aus `db/aufbau/0019`, nicht mehr eine Behauptung.
 
 ---
 
 ## 5.5 Online-Shop
 
 `shop.html` bildet die Kundensicht ab: Speisekarte, Warenkorb, Filialkarte, Bestellabschluss. Auch hier gibt es die zuschaltbare Datenansicht.
+
+Speisekarte und Filialliste kommen aus dem Schema `wawi`, dieselbe Quelle wie an der Kasse. Auch die Filialauswahl im Warenkorb wird daraus gebaut; vorher stand sie mit eigenen Nummern im HTML, und Filiale 1 war dort der Hauptbahnhof, in der Datenbank aber der Europastern. Der Bestellabschluss schreibt die Bestellung über dieselbe Funktion wie die Kasse (`bestellkanal = 'App Order'`) und zeigt die Nummer, die die Datenbank vergibt — an die Stelle der früheren Zufallsnummer `BM-2024-######`.
 
 Die Filialkarte nutzt **Leaflet 1.9.4** mit den acht Geokoordinaten aus `dim_branch.csv`. Sie ist die einzige Stelle im Projekt, an der Kartenmaterial von einem externen Dienst geladen wird.
 

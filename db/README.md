@@ -1,8 +1,18 @@
-# Datenbank: Schema `burgermetrics`
+# Datenbank: Schemata `burgermetrics` und `wawi`
 
 Der Bestand liegt seit August 2026 in einer selbstgehosteten **Supabase**-Instanz
 (PostgreSQL 17.6) auf dem VPS. Die CSV-Dateien in [`../dataset/`](../dataset/)
 bleiben die Quelle der Wahrheit; die Datenbank ist ihr Abbild.
+
+Eine Instanz, zwei Schemata:
+
+| Schema | Modell | Wer liest | Wer schreibt |
+|---|---|---|---|
+| `wawi` | operatives Warenwirtschaftsmodell, 3NF, deutsche Namen (wie `dataset/wawi_mini.sql`) | Kasse und Shop: Artikelstamm, Filialliste | Kasse und Shop: Bestellungen, über `wawi.bestellung_anlegen()` |
+| `burgermetrics` | Galaxy-Schema mit Semantikschicht | Dashboard | der Ladelauf: CSV-Import und `burgermetrics.uebernahme_aus_wawi()` |
+
+Der Weg zwischen beiden ist der ETL-Schritt aus Kapitel 2 der Dokumentation —
+hier nicht als Behauptung, sondern als Funktion (`0019`).
 
 ## Aufbau in fünf Schritten
 
@@ -24,6 +34,10 @@ bleiben die Quelle der Wahrheit; die Datenbank ist ihr Abbild.
 | `aufbau/0013_operative_sichten.sql` | Speisekarte und Filialliste für Shop und Kasse |
 | `aufbau/0014_kanal_produkte.sql` | Die fünf meistbestellten Artikel je Kanal — ersetzt die letzte Musterdatenliste |
 | `aufbau/0015_warenkorb_richtung.sql` | Richtung der Assoziationsregeln — die Konfidenz gehörte bei drei Paaren zur Gegenrichtung |
+| `aufbau/0016_wawi_schema.sql` | Schema `wawi`: 15 Tabellen in 3NF, Stammdaten aus den Dimensionen übernommen |
+| `aufbau/0017_wawi_bestand.sql` | die historischen Bestellungen einmalig ins operative Schema — Bestellung, Position, Rechnung |
+| `aufbau/0018_wawi_sichten_und_schreiben.sql` | `v_speisekarte`, `v_filialliste`, `v_bestellung_letzte` und die Schreibfunktion `bestellung_anlegen()`; Rechte |
+| `aufbau/0019_wawi_zu_burgermetrics.sql` | ETL `wawi` → `burgermetrics`: stg-Sichten, `uebernahme_aus_wawi()`, `etl_probe()`, `uebungsbestellungen_loeschen()` |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 
 ```bash
@@ -65,6 +79,9 @@ Zwei Eigenheiten der Instanz, beide hart erarbeitet:
   Datenbank. `ALTER ROLE authenticator SET pgrst.db_schemas = …` bleibt
   wirkungslos, weil Umgebungsvariablen in PostgREST Vorrang haben. Das Schema
   wird in `/root/supabase/docker/.env` bei `PGRST_DB_SCHEMAS` eingetragen.
+  Seit `0016` müssen dort **beide** Schemata stehen:
+  `PGRST_DB_SCHEMAS=burgermetrics,wawi`. Der Browser wählt das Schema je
+  Anfrage über `Accept-Profile` (lesen) und `Content-Profile` (Funktionsaufruf).
 * **`PGRST_DB_CHANNEL_ENABLED=false`** — `NOTIFY pgrst, 'reload schema'`
   bewirkt daher nichts. Nach jeder Schemaänderung:
 
@@ -157,7 +174,7 @@ niemand hat, der die Kette nicht als Superuser fährt — und es wirkt ohnehin
 nicht, weil PostgREST seine Schemaliste aus der Container-Umgebung liest. Der
 Schritt steht jetzt als Betriebsanweisung im Kommentar, nicht als SQL.
 
-### Shop und Kasse lesen denselben Artikelstamm
+### Shop und Kasse lesen und schreiben im operativen Schema
 
 Bis August 2026 trugen beide Oberflächen ihren Katalog als Liste im
 Quelltext: 33 Artikel je Seite, mit Preisen. Der Abgleich gegen `dim_product`
@@ -167,14 +184,59 @@ der Datenbank 4,49 € (2017) beziehungsweise 5,90 € (heute). 13 Artikel der
 Kasse und 3 des Shops existierten im Datenmodell überhaupt nicht.
 
 Das war nicht nur unordentlich. Die Fallstudie behauptet, Shop und Kasse
-teilten sich denselben Artikelstamm — das ist die Aussage der Folie „Beide
+teilten sich denselben Kern — das ist die Aussage der Folie „Beide
 Anwendungen schreiben in denselben Kern". Solange die Kataloge auseinander
 liefen, war sie falsch.
 
-Beide Seiten sind jetzt ES-Module und laden `v_speisekarte` und
-`v_filialliste` über dieselbe `datenquelle.js` wie das Dashboard. Sie zeigen
-alle 57 Artikel statt 33, mit den Preisen aus `dim_product`, und melden
-denselben Fehlerschirm, wenn die Quelle fehlt.
+Der erste Umbau ließ beide Seiten `v_speisekarte` und `v_filialliste` aus
+`burgermetrics` lesen. Das behob die Preise, drehte aber die Richtung um:
+Die operativen Anwendungen lasen aus dem Auswertungsmodell — aus
+`dim_product`, einer denormalisierten Dimension —, und geschrieben wurde
+nirgends. Die Kasse zeigte im Datenmodus die Zeile, die in `fact_orders`
+entstehen würde, und warf sie dann weg.
+
+Seit `0016` gibt es das operative Schema `wawi` mit dem 3NF-Modell aus
+`dataset/wawi_mini.sql`, befüllt mit denselben Stammdaten und dem ganzen
+Bestand. Beide Seiten lesen Speisekarte und Filialliste jetzt von dort, und
+**jeder Bon und jede Shop-Bestellung wird gespeichert**: Bestellung,
+Positionen und Rechnung in einer Transaktion, über die Funktion
+`wawi.bestellung_anlegen()`. Der Browser schickt Artikel, Mengen, Zahlart und
+Rabatt — keine Preise; die nimmt die Funktion aus `wawi.artikel`. Die Antwort
+trägt die Belegnummer, die Kasse druckt sie unter den Bon, der Shop zeigt sie
+statt der bisherigen Zufallsnummer `BM-2024-######`.
+
+Was Kasse und Shop schreiben, trägt `quelle = 'kasse'` beziehungsweise
+`'shop'` und eine Sitzungskennung; der kuratierte Bestand trägt
+`quelle = 'bestand'`. `wawi.v_bestellung_letzte` zeigt die jüngsten fünfzig
+Übungsbestellungen und ob der ETL-Schritt sie schon übernommen hat.
+
+**Der ETL-Schritt läuft nicht von allein.** Das Dashboard zeigt den
+kuratierten Bestand mit seinen 754.513 Belegen; jede Übungsstunde würde seine
+Zahlen verändern. Die Übernahme ist deshalb ein bewusster Aufruf durch
+`postgres`, wie ein nächtlicher Ladelauf im Betrieb:
+
+```sql
+SELECT * FROM burgermetrics.uebernahme_aus_wawi();   -- neue Belege ins Galaxy-Schema
+SELECT * FROM wawi.etl_probe();                      -- muss 0 und 0 je Tabelle liefern
+SELECT * FROM wawi.uebungsbestellungen_loeschen();   -- Übung zurücksetzen, Bestand bleibt
+```
+
+Danach `python3 db/materialisieren.py --neu`, sonst zeigt das Dashboard den
+alten Stand. `etl_probe()` ist der Gleichheitsbeweis aus
+`dataset/wawi_zu_analytisch.sql`, nur über den ganzen Bestand statt über 19
+Belege: die symmetrische Differenz von `stg_fact_orders` gegen `fact_orders`
+und von `stg_fact_order_items` gegen `fact_order_items`.
+
+**Was `anon` darf:** beide Schemata lesen und genau diese eine Funktion
+aufrufen. Kein `INSERT` auf eine Tabelle, kein Aufruf der drei
+Betriebsfunktionen. Die Funktion prüft Filiale, Zahlart, Kanal, Artikel und
+Mengen, fasst doppelte Artikel zusammen und lehnt mehr als sechzig Belege je
+Sitzung und zehn Minuten ab. Ein öffentlich beschreibbarer Bestand ohne diese
+Bremse wäre eine Einladung.
+
+Beide Seiten sind ES-Module und benutzen dieselbe `datenquelle.js` wie das
+Dashboard. Sie zeigen alle 57 Artikel statt 33 und melden denselben
+Fehlerschirm, wenn die Quelle fehlt.
 
 **Was bewusst in den Seiten bleibt** (`web/js/darstellung.js`): Produktbilder,
 Beschreibungstexte, Öffnungszeiten, Anfahrtsbeschreibungen und die

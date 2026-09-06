@@ -126,6 +126,26 @@ Der gemeinsame Nenner: In allen vier Fällen lief etwas **erfolgreich durch** un
 
 ---
 
+## E9 — Ein zweites Schema statt einer zweiten Datenbank (September 2026) {#e9}
+
+**Frage:** Kasse und Shop lasen ihren Artikelstamm aus `dim_product`, also aus dem Auswertungsmodell, und schrieben nichts. Wo gehört das operative System hin?
+
+**Erwogen:**
+
+| Option | Einschätzung |
+|---|---|
+| Alles bleibt in `burgermetrics` | Einfach, aber die Richtung ist falsch: Das operative System liest aus dem Warehouse, und die Kette aus Kapitel 2 bleibt Behauptung |
+| Eigene Datenbank oder eigenes DBMS für den Betrieb | Fachlich sauber, aber ein zweiter Server, ein zweiter Zugang, ein zweiter Betrieb — für ein Lehrprojekt ohne Gegenwert |
+| Zweites Schema `wawi` in derselben Instanz | Trennung der Modelle ohne zweiten Betrieb; PostgREST bedient beide über die Profil-Header |
+
+**Gewählt:** das zweite Schema. `wawi` trägt das 3NF-Modell aus `dataset/wawi_mini.sql` mit dem ganzen Bestand; Kasse und Shop lesen und schreiben dort, `burgermetrics` wird daraus beladen (`db/aufbau/0016` bis `0019`).
+
+**Preis:** Der Bestand liegt zweimal in der Instanz, einmal normalisiert und einmal als Galaxy-Schema — rund 3,7 Millionen Zeilen mehr. Das ist die Redundanz, die Kapitel 2.3 für den Auswertungsbestand ausdrücklich in Kauf nimmt, jetzt auch physisch. Und der Bestand ist öffentlich beschreibbar; die Funktion `bestellung_anlegen()` ist deshalb der einzige Schreibweg, prüft ihre Eingaben und bremst.
+
+**Was bewusst nicht automatisch läuft:** die Übernahme neuer Belege ins Galaxy-Schema. Das Dashboard zeigt den kuratierten Bestand, und jede Übung würde seine Zahlen verändern. `uebernahme_aus_wawi()` ist ein bewusster Aufruf, `uebungsbestellungen_loeschen()` der Weg zurück.
+
+---
+
 ## Offene Punkte {#offene-punkte}
 
 Bekannt, nicht behoben, mit Bewertung:
