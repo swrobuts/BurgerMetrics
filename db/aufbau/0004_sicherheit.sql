@@ -37,8 +37,10 @@ END $$;
 -- Bei einem selbst gehosteten Supabase:
 --
 --   1. In /root/supabase/docker/.env die Zeile PGRST_DB_SCHEMAS um den
---      Schemanamen ergaenzen (vorher sichern).
---   2. docker compose restart rest
+--      Schemanamen ERGAENZEN, nicht ersetzen — dort stehen auch die Schemata
+--      der anderen Projekte auf der Instanz (vorher sichern).
+--   2. docker compose up -d rest — nicht restart: restart behaelt die alte
+--      Umgebung des Containers, die .env wird erst beim Neuerzeugen gelesen.
 --
 -- Ohne Docker startet man PostgREST mit db-schemas in seiner Konfiguration.
 -- Wer nur mit psql oder einem BI-Werkzeug direkt auf die Datenbank geht,

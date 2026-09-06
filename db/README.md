@@ -79,14 +79,26 @@ Zwei Eigenheiten der Instanz, beide hart erarbeitet:
   Datenbank. `ALTER ROLE authenticator SET pgrst.db_schemas = …` bleibt
   wirkungslos, weil Umgebungsvariablen in PostgREST Vorrang haben. Das Schema
   wird in `/root/supabase/docker/.env` bei `PGRST_DB_SCHEMAS` eingetragen.
-  Seit `0016` müssen dort **beide** Schemata stehen:
-  `PGRST_DB_SCHEMAS=burgermetrics,wawi`. Der Browser wählt das Schema je
+  Die Liste **ergänzen, nicht ersetzen**: Auf der Instanz laufen weitere
+  Projekte, deren Schemata dort ebenfalls stehen. Seit `0016` gehören
+  `burgermetrics` und `wawi` beide hinein. Der Browser wählt das Schema je
   Anfrage über `Accept-Profile` (lesen) und `Content-Profile` (Funktionsaufruf).
+* **Eine geänderte `.env` braucht `up -d`, nicht `restart`.**
+  `docker compose restart` startet den Container mit seiner alten Umgebung
+  neu; die Datei wird erst beim Neuerzeugen gelesen. Das fiel beim Eintrag
+  von `wawi` auf: Nach `restart` meldete PostgREST weiter `Invalid schema:
+  wawi` und zählte in der Fehlermeldung die alte Liste auf.
 * **`PGRST_DB_CHANNEL_ENABLED=false`** — `NOTIFY pgrst, 'reload schema'`
-  bewirkt daher nichts. Nach jeder Schemaänderung:
+  bewirkt daher nichts. Nach jeder Änderung an Sichten oder Funktionen
+  genügt ein Neustart, nach einer Änderung an `.env` muss der Container neu
+  erzeugt werden:
 
 ```bash
-ssh vps "cd /root/supabase/docker && docker compose restart rest"
+cd /root/supabase/docker
+cp .env .env.bak
+sed -i 's/^\(PGRST_DB_SCHEMAS=.*\)$/\1,wawi/' .env     # anhängen, nicht ersetzen
+grep ^PGRST_DB_SCHEMAS .env
+docker compose up -d rest                                # liest .env neu
 ```
 
 ## Prüfung
