@@ -60,9 +60,21 @@ $$ LANGUAGE sql IMMUTABLE;
 GRANT EXECUTE ON FUNCTION kurzname(text) TO anon, authenticated;
 
 -- Beide Formen abraeumen: Auf dem Server liegt eine materialisierte Sicht,
--- lokal nach einem frischen 0005 eine gewoehnliche.
-DROP MATERIALIZED VIEW IF EXISTS v_warenkorb_auswahl;
-DROP VIEW IF EXISTS v_warenkorb_auswahl;
+-- lokal nach einem frischen 0005 eine gewoehnliche. IF EXISTS hilft dabei
+-- nicht — DROP MATERIALIZED VIEW scheitert an einer gewoehnlichen Sicht
+-- gleichen Namens ("is not a materialized view") und umgekehrt. Deshalb
+-- erst die Relationsart nachsehen und dann das passende DROP ausfuehren.
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN SELECT c.relkind
+           FROM   pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+           WHERE  n.nspname = 'burgermetrics' AND c.relname = 'v_warenkorb_auswahl'
+             AND  c.relkind IN ('v', 'm') LOOP
+    EXECUTE format('DROP %s burgermetrics.v_warenkorb_auswahl',
+                   CASE WHEN r.relkind = 'm' THEN 'MATERIALIZED VIEW' ELSE 'VIEW' END);
+  END LOOP;
+END $$;
 
 CREATE VIEW v_warenkorb_auswahl AS
 WITH paare(nr, a, b) AS (VALUES

@@ -52,13 +52,15 @@ Die Abwägung fällt hier zugunsten der Lesbarkeit aus, weil die Anwendungen Leh
 
 `dashboard.html` ist die umfangreichste der drei Anwendungen: 13 Registerkarten der ersten Ebene, darunter eine zweite Navigationsebene, insgesamt **41 Diagramme**.
 
-### Daten im Code statt zur Laufzeit geladen
+### Daten zur Laufzeit aus der Semantikschicht
 
-Alle Werte stehen als JavaScript-Konstanten in der Datei. Der Bericht liest die CSV-Dateien **nicht**.
+Im Quelltext des Berichts steht **keine Nutzdatenzahl**: keine Datenreihe, kein Kachelwert, kein Text der Management Summary. Beim Aufruf lädt die Seite 33 Sichten der Semantikschicht (`db/aufbau/0005` bis `0015`) über PostgREST und baut daraus 91 Datenreihen, 72 Kacheln und 30 Summary-Karten — in rund drei Sekunden. Die CSV-Dateien liest der Bericht nach wie vor nicht; er liest deren Abbild in der Datenbank.
 
-Das hat einen praktischen Grund: Ein Browser kann 176 MB CSV nicht sinnvoll verarbeiten, und ohne Server scheitert das Laden ohnehin an den Sicherheitsregeln für lokale Dateien. Es hat aber eine unangenehme Folge — die Werte können von den Daten abweichen, ohne dass es auffällt. Genau deshalb existiert die Prüfstrecke aus [Kapitel 4](04-validierung.md).
+Die Arbeit ist auf vier Module in `web/js/` verteilt: `konfiguration.js` kennt als einzige Datei eine Adresse, `datenquelle.js` ist der Vertrag aus benannten Fragen, `reihen.js` übersetzt die Antworten in die Form, die Chart.js erwartet, `kacheln.js` und `texte.js` füllen Kennzahlen und Deutungstexte. Der Bericht kennt keine Tabelle, keine Spalte und keinen Join — nur die Namen der Sichten.
 
-Die ehrliche Beschreibung lautet: Der Bericht ist eine **Momentaufnahme der Daten, kein Fenster auf sie.**
+Bis August 2026 war das anders: Alle Werte standen als JavaScript-Konstanten in der Datei, weil ein Browser 176 MB CSV nicht verarbeiten kann und ohne Server das Laden lokaler Dateien an den Sicherheitsregeln scheitert. Der Preis war, dass die Werte von den Daten abweichen konnten, ohne dass es auffiel — die Prüfstrecke aus [Kapitel 4](04-validierung.md) existierte genau deshalb, und beim Umbau fielen zwei falsche Werte auf, die sie nicht erwischt hatte (`categoryRevenue` etwa zur Hälfte zu niedrig). Die Entscheidung und ihre Rücknahme stehen im [Entscheidungsjournal](08-entscheidungen.md#e5).
+
+Die ehrliche Beschreibung lautet jetzt: Der Bericht ist ein **Fenster auf die Semantikschicht**, und die ist so aktuell wie der letzte Lauf von `db/materialisieren.py`. Die Sichten sind auf dem Server materialisiert, weil 33 gleichzeitige Aggregationen über 2,95 Millionen Positionen die Zeitgrenze der Rolle `anon` rissen; die Begründung steht in [`db/README.md`](../db/README.md). Was der Bericht damit nicht mehr kann: per Doppelklick ohne Netz laufen. Ohne Verbindung zur Datenbank zeigt er den Fehlerschirm, keine alten Zahlen.
 
 ### Diagramme werden verzögert erzeugt
 
