@@ -24,13 +24,18 @@
 
 SET search_path TO wawi, burgermetrics;
 
+-- Alle Objekte sind mit Schema qualifiziert. Ohne Qualifikation traefe ein
+-- DROP VIEW IF EXISTS ueber den Suchpfad die gleichnamige Sicht in
+-- burgermetrics — und die ist nach materialisieren.py eine materialisierte
+-- Sicht, an der DROP VIEW scheitert.
+
 -- ---------------------------------------------------------------------------
 -- Speisekarte: der Artikelstamm, wie ihn eine Verkaufsoberflaeche braucht.
 -- preis ist der heutige Listenpreis, preis_2017 der aelteste Stand aus der
 -- Preishistorie — damit die Preisentwicklung im Unterricht sichtbar bleibt.
 -- ---------------------------------------------------------------------------
-DROP VIEW IF EXISTS v_speisekarte CASCADE;
-CREATE VIEW v_speisekarte AS
+DROP VIEW IF EXISTS wawi.v_speisekarte CASCADE;
+CREATE VIEW wawi.v_speisekarte AS
 SELECT a.artikel_id,
        a.name,
        k.name                             AS kategorie,
@@ -49,15 +54,15 @@ JOIN   artikelunterkategorie u USING (unterkategorie_id)
 JOIN   artikelkategorie      k USING (kategorie_id)
 ORDER  BY k.name, a.name;
 
-COMMENT ON VIEW v_speisekarte IS
+COMMENT ON VIEW wawi.v_speisekarte IS
   'Artikelstamm fuer Shop und Kasse, aus dem operativen Modell. Bilder und '
   'Beschreibungen sind nicht Teil des Datenmodells und stehen in den Seiten.';
 
 -- ---------------------------------------------------------------------------
 -- Filialliste: die Standorte, wie sie eine Kundenoberflaeche zeigt.
 -- ---------------------------------------------------------------------------
-DROP VIEW IF EXISTS v_filialliste CASCADE;
-CREATE VIEW v_filialliste AS
+DROP VIEW IF EXISTS wawi.v_filialliste CASCADE;
+CREATE VIEW wawi.v_filialliste AS
 SELECT f.filiale_id,
        f.name,
        f.adresse,
@@ -76,7 +81,7 @@ FROM   filiale f
 LEFT JOIN filialtyp t USING (filialtyp_id)
 ORDER  BY f.filiale_id;
 
-COMMENT ON VIEW v_filialliste IS
+COMMENT ON VIEW wawi.v_filialliste IS
   'Standortliste fuer den Online-Shop, aus dem operativen Modell. '
   'Oeffnungszeiten stehen in der Seite.';
 
@@ -84,8 +89,8 @@ COMMENT ON VIEW v_filialliste IS
 -- Die letzten Uebungsbestellungen: damit Kasse und Shop im Datenmodus zeigen
 -- koennen, wo der Beleg gelandet ist — und Studierende ihn wiederfinden.
 -- ---------------------------------------------------------------------------
-DROP VIEW IF EXISTS v_bestellung_letzte CASCADE;
-CREATE VIEW v_bestellung_letzte AS
+DROP VIEW IF EXISTS wawi.v_bestellung_letzte CASCADE;
+CREATE VIEW wawi.v_bestellung_letzte AS
 SELECT b.bestellung_id,
        b.quelle,
        b.sitzung,
@@ -110,7 +115,7 @@ WHERE  b.quelle <> 'bestand'
 ORDER  BY b.erfasst_am DESC
 LIMIT  50;
 
-COMMENT ON VIEW v_bestellung_letzte IS
+COMMENT ON VIEW wawi.v_bestellung_letzte IS
   'Die 50 juengsten Uebungsbestellungen aus Kasse und Shop. im_warehouse sagt, '
   'ob der ETL-Schritt (0019) sie schon nach burgermetrics uebernommen hat.';
 
