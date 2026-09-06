@@ -26,10 +26,14 @@ END $$;
 -- frueher ein ALTER ROLE authenticator SET pgrst.db_schemas — das ist aus
 -- zwei Gruenden falsch und deshalb entfernt:
 --
---   1. Es wirkt nicht. PostgREST liest die Schemaliste aus der Umgebung des
---      Containers (PGRST_DB_SCHEMAS); die Einstellung an der Rolle wird davon
---      ueberstimmt. Auch NOTIFY pgrst, 'reload config' bleibt folgenlos,
---      solange PGRST_DB_CHANNEL_ENABLED=false gesetzt ist.
+--   1. Es ist die falsche Stelle. Die Einstellung an der Rolle hat in
+--      PostgREST VORRANG vor der Umgebung des Containers (PGRST_DB_SCHEMAS).
+--      Wer sie setzt, schaltet die .env fuer diese Einstellung ab — und beim
+--      naechsten Schema wundert man sich, warum die .env nichts bewirkt.
+--      Genau das ist beim Schema wawi passiert; eine alte Rollen-Einstellung
+--      wurde per ALTER ROLE authenticator RESET pgrst.db_schemas entfernt.
+--      NOTIFY pgrst, 'reload config' bleibt ausserdem folgenlos, solange
+--      PGRST_DB_CHANNEL_ENABLED=false gesetzt ist.
 --   2. Es scheitert ohnehin, wenn man die Kette nicht als Superuser faehrt —
 --      ALTER ROLE verlangt CREATEROLE und ADMIN OPTION auf authenticator.
 --
