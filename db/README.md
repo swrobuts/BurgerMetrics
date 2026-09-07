@@ -38,6 +38,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `aufbau/0017_wawi_bestand.sql` | die historischen Bestellungen einmalig ins operative Schema — Bestellung, Position, Rechnung |
 | `aufbau/0018_wawi_sichten_und_schreiben.sql` | `v_speisekarte`, `v_filialliste`, `v_bestellung_letzte` und die Schreibfunktion `bestellung_anlegen()`; Rechte |
 | `aufbau/0019_wawi_zu_burgermetrics.sql` | ETL `wawi` → `burgermetrics`: stg-Sichten, `uebernahme_aus_wawi()`, `etl_probe()`, `uebungsbestellungen_loeschen()` |
+| `aufbau/0020_demo_rolle.sql` | Rolle `studi` (Kennwort `thws`): nur lesen, beide Schemata, eine Minute je Abfrage — als `supabase_admin` ausführen |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 
 ```bash
@@ -46,6 +47,30 @@ python3 db/lade_csv.py    # 3.704.595 Zeilen, rund 110 Sekunden
 ```
 
 Die SQL-Dateien sind idempotent: Sie laufen zweimal hintereinander fehlerfrei.
+
+## Direkt auf die Datenbank: die Rolle `studi`
+
+Wer nicht über die Seiten, sondern mit `psql`, DBeaver oder einem
+BI-Werkzeug auf den Bestand will, meldet sich als `studi` an:
+
+| | |
+|---|---|
+| Host | `supabase.butscher.cloud` |
+| Port | `5433` |
+| Datenbank | `postgres` |
+| Benutzer | `studi` |
+| Kennwort | `thws` |
+
+```bash
+psql "host=supabase.butscher.cloud port=5433 dbname=postgres user=studi password=thws"
+```
+
+Der Suchpfad steht auf `wawi, burgermetrics`, also treffen `SELECT * FROM
+artikel` und `SELECT * FROM fact_orders` ohne Präfix. Die Rolle darf nur
+lesen — kein `INSERT`, kein Aufruf von `bestellung_anlegen()`, keine anderen
+Schemata der Instanz — und jede Abfrage wird nach einer Minute abgebrochen.
+Das Kennwort steht bewusst im Skript (`0020`): Der Bestand ist synthetisch und
+über den anon-Schlüssel ohnehin öffentlich lesbar.
 
 ## Warum eine Semantikschicht
 
