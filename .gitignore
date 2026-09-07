@@ -27,3 +27,6 @@ node_modules/
 
 # Foliensammlung — bleibt lokal, nicht auf GitHub
 slides/
+
+# Umgebung des MCP-Servers — reproduzierbar aus mcp/requirements.txt
+mcp/.venv/

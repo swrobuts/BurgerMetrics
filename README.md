@@ -44,6 +44,7 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 | `db/` | der Aufbau der Datenbank: Schema, Fakten, Semantikschicht, Sicherheit — als nummerierte SQL-Dateien in der Reihenfolge, in der sie laufen |
 | `web/` | Online-Shop, Kassensystem und BI-Dashboard |
 | `docs/` | die ausführliche Dokumentation zu Modell, Kennzahlen und Betrieb |
+| `mcp/` | ein MCP-Server über beide Schemata für den Betreiber — Claude Desktop oder Claude Code als Fenster auf die Datenbank |
 
 ---
 
