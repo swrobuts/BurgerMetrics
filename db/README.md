@@ -38,7 +38,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `aufbau/0017_wawi_bestand.sql` | die historischen Bestellungen einmalig ins operative Schema — Bestellung, Position, Rechnung |
 | `aufbau/0018_wawi_sichten_und_schreiben.sql` | `v_speisekarte`, `v_filialliste`, `v_bestellung_letzte` und die Schreibfunktion `bestellung_anlegen()`; Rechte |
 | `aufbau/0019_wawi_zu_burgermetrics.sql` | ETL `wawi` → `burgermetrics`: stg-Sichten, `uebernahme_aus_wawi()`, `etl_probe()`, `uebungsbestellungen_loeschen()` |
-| `aufbau/0020_demo_rolle.sql` | Rolle `studi_daba` (Kennwort `thws`): nur lesen, beide Schemata, eine Minute je Abfrage — als `supabase_admin` ausführen |
+| `aufbau/0020_demo_rolle.sql` | Rolle `studi_daba` (Kennwort `thws`): nur lesen, beide Schemata, zehn Minuten je Abfrage — als `supabase_admin` ausführen |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 
 ```bash
@@ -69,7 +69,7 @@ Der Suchpfad steht auf `wawi, burgermetrics`, also treffen `SELECT * FROM
 artikel` und `SELECT * FROM fact_orders` ohne Präfix. Die Rolle darf nur
 lesen — kein `INSERT`, kein Aufruf von `bestellung_anlegen()`, keine anderen
 Schemata der Instanz —, jede Transaktion ist nur lesend, und jede Abfrage
-wird nach einer Minute abgebrochen. Legt ein Aufbauskript oder
+wird nach zehn Minuten abgebrochen; das reicht für einen Vollabzug der Positionstabelle in einen eigenen ETL-Prozess. Legt ein Aufbauskript oder
 `materialisieren.py` neue Sichten an, sind sie durch die Default-Privileges
 automatisch lesbar. Das Kennwort steht bewusst im Skript (`0020`): Der
 Bestand ist synthetisch und über den anon-Schlüssel ohnehin öffentlich lesbar.

@@ -21,7 +21,7 @@
 --        Was studi_daba NICHT darf: schreiben (kein INSERT, UPDATE, DELETE),
 --        Bestellungen anlegen (kein EXECUTE auf wawi.bestellung_anlegen),
 --        andere Schemata der Instanz lesen, Rollen anlegen, eine Abfrage
---        laenger als eine Minute laufen lassen, mehr als zwanzig Sitzungen
+--        laenger als zehn Minuten laufen lassen, mehr als zwanzig Sitzungen
 --        gleichzeitig halten.
 --
 -- Voraussetzung: als Superuser ausfuehren (supabase_admin). Die Rolle
@@ -43,10 +43,11 @@ BEGIN
   END IF;
 END $$;
 
--- Eine Uebungsabfrage darf nicht die Instanz belegen. Eine Minute reicht
--- fuer jede Aufgabe des Uebungsblatts; die Selbstverknuepfung ueber 2,95
--- Millionen Positionen braucht 4,4 Sekunden.
-ALTER ROLE studi_daba SET statement_timeout = '60s';
+-- Eine Uebungsabfrage darf nicht die Instanz belegen, ein Vollabzug fuer
+-- einen ETL-Prozess muss aber durchlaufen: 2,95 Millionen Positionen sind
+-- rund 135 MB, das dauert ueber Hochschul-WLAN mehrere Minuten. Zehn
+-- Minuten decken das ab; die Uebungsabfragen selbst brauchen Sekunden.
+ALTER ROLE studi_daba SET statement_timeout = '10min';
 ALTER ROLE studi_daba SET idle_in_transaction_session_timeout = '5min';
 -- Jede Transaktion nur lesend — zweiter Riegel neben den fehlenden Grants.
 ALTER ROLE studi_daba SET default_transaction_read_only = on;
