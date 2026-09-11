@@ -40,6 +40,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `aufbau/0019_wawi_zu_burgermetrics.sql` | ETL `wawi` → `burgermetrics`: stg-Sichten, `uebernahme_aus_wawi()`, `etl_probe()`, `uebungsbestellungen_loeschen()` |
 | `aufbau/0020_demo_rolle.sql` | Rolle `studi_daba` (Kennwort `thws`): nur lesen, beide Schemata, zehn Minuten je Abfrage — als `supabase_admin` ausführen |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
+| `betrieb/studi_daba_verwaltung.sql` | einmalig als `supabase_admin`: `postgres` darf die Einstellungen von `studi_daba` ändern, danach geht `ALTER ROLE studi_daba SET ...` über den MCP-Server |
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
@@ -73,6 +74,17 @@ wird nach zehn Minuten abgebrochen; das reicht für einen Vollabzug der Position
 `materialisieren.py` neue Sichten an, sind sie durch die Default-Privileges
 automatisch lesbar. Das Kennwort steht bewusst im Skript (`0020`): Der
 Bestand ist synthetisch und über den anon-Schlüssel ohnehin öffentlich lesbar.
+
+**Einstellungen später ändern:** `ALTER ROLE studi_daba SET ...` darf
+zunächst nur `supabase_admin`, also `docker exec -i supabase-db psql -U
+supabase_admin -d postgres` auf dem Server. Wer das nicht jedes Mal will,
+spielt einmalig `betrieb/studi_daba_verwaltung.sql` als `supabase_admin`
+ein; danach darf auch `postgres` die Rolle verwalten, etwa über den
+MCP-Server. Kontrolle nach jeder Änderung:
+
+```sql
+SELECT unnest(rolconfig) FROM pg_roles WHERE rolname = 'studi_daba';
+```
 
 **Warum nicht `studi`:** Diese Rolle gibt es auf der Instanz schon, sie
 gehört der VeloCity-Fallstudie (Schema `velocity`) und hat deren Suchpfad.
