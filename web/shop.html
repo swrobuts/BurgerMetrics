@@ -2007,6 +2007,12 @@ body.data-mode .data-annotation { display: block; }
 }
 .data-annotation .da-advantage strong { color: #FFC060; }
 
+/* Der zuletzt gespeicherte Datensatz in der Datenperspektive: Feld → Wert, ohne inhalt */
+.da-datensatz { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 6px 0 10px; font-family: 'Courier New', monospace; font-size: .78rem; }
+.da-datensatz dt { color: #7DE0FF; }
+.da-datensatz dd { margin: 0; color: #fff; word-break: break-word; }
+.da-datensatz dd.leer { grid-column: 1 / -1; color: rgba(255,255,255,.55); }
+
 /* Live event flash on interacted elements */
 body.data-mode .menu-card { position: relative; }
 body.data-mode .menu-card::after {
@@ -3673,6 +3679,26 @@ body.data-mode .phone-mockup { animation: none; }
       Die Reihenfolge der Clicks und Add-to-Cart-Events ermöglicht Assoziationsregeln, die im Laden nur über POS-Bondaten (ohne Browsing-Kontext) möglich wären.
       <span class="da-ethical"><strong>🔍 Ethik:</strong> Empfehlungsalgorithmen können zum „Upselling" manipulativ eingesetzt werden. Transparenz gegenüber Kunden nötig (Dark Patterns vermeiden).</span>
     </div>
+
+    <div class="data-annotation" style="bottom:40px;right:20px;animation-delay:.3s;">
+      <div class="data-annotation-header">
+        <div class="data-annotation-icon da-icon-collect"><i class="fa-solid fa-star"></i></div>
+        <div class="data-annotation-title">REZENSIONEN</div>
+      </div>
+      Jede Bewertung im Shop ist ein Datensatz im operativen System; der ETL-Lauf übernimmt ihn ins Warehouse:
+      <div class="data-schema-mini" style="display:block;background:transparent;border:none;padding:0;margin:8px 0;text-align:left;">
+        <span class="schema-box">Rezension</span><span class="schema-arrow">→</span>
+        <span class="schema-box">wawi.rezension</span><span class="schema-arrow">→</span>
+        <span class="schema-box">ETL</span><span class="schema-arrow">→</span>
+        <span class="schema-box schema-box-fact">fact_reviews</span>
+      </div>
+      Zuletzt in dieser Sitzung gespeichert:
+      <dl class="da-datensatz" id="daRezension"><dd class="leer">noch keine Rezension</dd></dl>
+      <span class="da-metric">stars</span>
+      <span class="da-metric">review_text</span>
+      <span class="da-metric">source = shop</span><br><br>
+      → 10.000 simulierte Rezensionen liegen bereits in <code>fact_reviews</code> (Sentiment-Analyse). Besuchertexte zeigt der Shop nicht an; die Kundenstimmen kommen aus der Simulation.
+    </div>
   </div>
 </section>
 
@@ -4788,6 +4814,9 @@ function submitReview(event) {
     document.getElementById('reviewForm').reset();
     sterneAnzeigen(0);
     reviewZaehler();
+    logEvent('REVIEW', 'Rezension gespeichert',
+      `INSERT INTO wawi.rezension · #${antwort.rezension_id} · ${'★'.repeat(antwort.sterne)} ${antwort.artikel}`);
+    datensatzAnzeigen(antwort.rezension_id);
     // Der neue Stand ist Beiwerk: Scheitert das Nachladen, bleibt die
     // Bestätigung stehen — die Rezension ist gespeichert.
     bewertungenAktualisieren().catch(fehler => console.warn('Bewertungsstand nicht neu geladen:', fehler));
@@ -4809,6 +4838,30 @@ async function bewertungenAktualisieren() {
     el.classList.toggle('leer', bewertungKlasse(artikelId) === 'leer');
   });
   if (reviewProduktId !== null) reviewStandAnzeigen();
+}
+
+// Zeigt den gespeicherten Datensatz in der Datenperspektive — aus der Sicht
+// wawi.v_rezension_letzte, nicht aus dem Formular, damit zu sehen ist, was
+// wirklich in der Datenbank steht. Ohne inhalt: Besuchertext wird nicht gerendert.
+async function datensatzAnzeigen(rezensionId) {
+  const dl = document.getElementById('daRezension');
+  if (!dl || !window.letzteRezensionenLaden) return;
+  try {
+    const zeilen = await window.letzteRezensionenLaden();
+    const rezension = zeilen.find(z => Number(z.rezension_id) === Number(rezensionId));
+    if (!rezension) return;
+    dl.textContent = '';
+    for (const [feld, wert] of window.REZENSIONEN.datensatzZeilen(rezension)) {
+      const dt = document.createElement('dt');
+      dt.textContent = feld;
+      const dd = document.createElement('dd');
+      dd.textContent = wert;
+      dl.appendChild(dt);
+      dl.appendChild(dd);
+    }
+  } catch (fehler) {
+    console.warn('Datensatz der Rezension:', fehler);
+  }
 }
 
 document.getElementById('sterneWahl').addEventListener('change', e => sterneAnzeigen(Number(e.target.value)));
@@ -5017,6 +5070,8 @@ const EVENT_CONFIG = {
   CAROUSEL:  { icon: 'ev-icon-hero',   emoji: '🎠' },
   CHATBOT:   { icon: 'ev-icon-chat',   emoji: '💬' },
   VIEW:      { icon: 'ev-icon-view',   emoji: '👁️' },
+  REVIEW_OPEN: { icon: 'ev-icon-view', emoji: '📝' },
+  REVIEW:      { icon: 'ev-icon-view', emoji: '⭐' },
 };
 
 function logEvent(type, title, detail) {
