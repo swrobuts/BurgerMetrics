@@ -20,7 +20,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 |---|---|
 | `aufbau/0001_schema_und_dimensionen.sql` | Schema und die zehn Dimensionstabellen |
 | `aufbau/0002_fakten.sql` | `fact_orders` (Grain: Bestellung) und `fact_order_items` (Grain: Position), Fremdschlüssel, Indizes |
-| `lade_csv.py` | lädt die zwölf CSV-Dateien per `COPY`, eine Transaktion, alles oder nichts |
+| `lade_csv.py` | lädt die dreizehn CSV-Dateien per `COPY`, eine Transaktion, alles oder nichts; `--nur fact_orders` leert wegen des Fremdschlüssels auch `fact_reviews` mit (`TRUNCATE … CASCADE`) — danach `fact_reviews` erneut laden |
 | `aufbau/0003_obt.sql` | `obt_orders` — **nicht hochgeladen**, sondern im Server aus dem Galaxy-Schema erzeugt |
 | `aufbau/0004_sicherheit.sql` | Grants, Row Level Security (nur `SELECT`) |
 | `aufbau/0005_semantik.sql` | die Sichten der Semantikschicht |
@@ -39,12 +39,16 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `aufbau/0018_wawi_sichten_und_schreiben.sql` | `v_speisekarte`, `v_filialliste`, `v_bestellung_letzte` und die Schreibfunktion `bestellung_anlegen()`; Rechte |
 | `aufbau/0019_wawi_zu_burgermetrics.sql` | ETL `wawi` → `burgermetrics`: stg-Sichten, `uebernahme_aus_wawi()`, `etl_probe()`, `uebungsbestellungen_loeschen()` |
 | `aufbau/0020_demo_rolle.sql` | Rolle `studi_daba` (Kennwort `thws`): nur lesen, beide Schemata, zehn Minuten je Abfrage — als `supabase_admin` ausführen |
+| `aufbau/0021_rezensionen.sql` | Rezensionen: `wawi.rezension`, `fact_reviews`, Schreibweg `rezension_anlegen()` für den Shop, ETL und Probe erweitert — zweimal ausführen, dazwischen `lade_csv.py --nur fact_reviews` |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
+| `skript_ausfuehren.py` | führt ein Aufbauskript als `postgres` in einer Transaktion aus und zeigt die NOTICE-Meldungen |
 | `betrieb/studi_daba_verwaltung.sql` | einmalig als `supabase_admin`: `postgres` darf die Einstellungen von `studi_daba` ändern, danach geht `ALTER ROLE studi_daba SET ...` über den MCP-Server |
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
 python3 db/lade_csv.py    # 3.704.595 Zeilen, rund 110 Sekunden
+python3 db/lade_csv.py --nur fact_reviews   # nur eine Tabelle
+python3 db/skript_ausfuehren.py db/aufbau/0021_rezensionen.sql
 ```
 
 Die SQL-Dateien sind idempotent: Sie laufen zweimal hintereinander fehlerfrei.
@@ -93,6 +97,27 @@ und `zahlungsart` gibt es in `velocity` **und** in `wawi` — ein gemeinsamer
 Suchpfad wäre mehrdeutig. Deshalb je Projekt eine Rolle mit gleichem
 Kennwort; `studi` sieht `burgermetrics` und `wawi` nicht, `studi_daba` sieht
 `velocity` nicht.
+
+## Rezensionen: vom Shop ins Warehouse
+
+Seit `0021` gibt es einen dritten Sachverhalt. Operativ schreibt der Shop über
+`wawi.rezension_anlegen(artikel_id, sterne, inhalt, filiale_id, sitzung)` — die
+einzige Schreibfunktion neben `bestellung_anlegen()`, mit denselben Riegeln:
+Prüfung der Eingaben, 20 Rezensionen je Sitzung in zehn Minuten, 200 je Stunde
+insgesamt. Der Simulationsbestand (`dataset/fact_reviews.csv`) liegt in beiden
+Schemata mit denselben Kennungen; `uebernahme_aus_wawi()` trägt Shop-Rezensionen
+nach `fact_reviews`, `etl_probe()` vergleicht beide Seiten, und
+`uebungsrezensionen_loeschen()` räumt die Übungsrezensionen wieder ab.
+
+Öffentlich sichtbar sind nur Aggregate (`v_rezension_produkt`) und die drei
+jüngsten Simulationstexte je Artikel (`v_kundenstimmen`). Was Besucher schreiben,
+erscheint nirgends auf einer Seite — nur in `v_rezension_letzte` für die
+Übungsgruppe. `studi_daba` liest alles, schreibt nichts und darf die Funktion nicht
+aufrufen; das prüft die Probe am Ende von `0021`.
+
+Nach jeder Änderung an Sichten oder Funktionen braucht PostgREST einen Neustart
+(`docker compose restart rest` auf dem Server), sonst kennt es die neuen Objekte
+nicht.
 
 ## Warum eine Semantikschicht
 
@@ -294,6 +319,10 @@ SELECT * FROM burgermetrics.uebernahme_aus_wawi();   -- neue Belege ins Galaxy-S
 SELECT * FROM wawi.etl_probe();                      -- muss 0 und 0 je Tabelle liefern
 SELECT * FROM wawi.uebungsbestellungen_loeschen();   -- Übung zurücksetzen, Bestand bleibt
 ```
+
+`uebernahme_aus_wawi()` liefert seit `0021` vier Rückgabespalten
+(`neue_tage, neue_bestellungen, neue_positionen, neue_rezensionen`; zuvor drei,
+ohne `neue_rezensionen`).
 
 Danach `python3 db/materialisieren.py --neu`, sonst zeigt das Dashboard den
 alten Stand. `etl_probe()` ist der Gleichheitsbeweis aus

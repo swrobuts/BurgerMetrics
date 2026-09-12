@@ -203,6 +203,19 @@ def main():
            ((burger & fries & cola).sum() / n) / ((burger.sum() / n) * (fries.sum() / n) * (cola.sum() / n)),
            2.30, 0.01)
 
+    print("\n--- Rezensionen ---")
+    rz = lade("fact_reviews.csv")
+    pruefe("Rezensionen", len(rz), 10_000, 0)
+    pruefe("Rezensionen: je Bestellung hoechstens eine", rz.order_id.is_unique, 1, 0)
+    anteile = rz.stars.value_counts(normalize=True) * 100
+    for sterne, erwartet in [(5, 38.0), (4, 27.0), (3, 13.0), (2, 9.0), (1, 13.0)]:
+        pruefe(f"Anteil {sterne} Sterne (%)", anteile[sterne], erwartet, 0.02)
+    pruefe("Rezensionen: Sterne im Mittel", rz.stars.mean(), 3.68)
+    rzo = rz.merge(fo[["order_id", "satisfaction_score", "order_duration_min"]], on="order_id")
+    pruefe("Korrelation Sterne~Zufriedenheit", rzo.stars.corr(rzo.satisfaction_score), 0.768, 0.05)
+    pruefe("Korrelation Sterne~Dauer", rzo.stars.corr(rzo.order_duration_min), -0.161, 0.10)
+    pruefe("Rezensionen umgangssprachlich (%)", rz.review_text.str.match(r"^[a-z]").mean() * 100, 15.4, 0.05)
+
     bestanden = sum(_ergebnisse)
     gesamt = len(_ergebnisse)
     print(f"\n==> {bestanden} von {gesamt} Angaben bestaetigt, {gesamt - bestanden} abweichend")

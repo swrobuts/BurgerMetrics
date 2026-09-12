@@ -5,10 +5,12 @@
 **BurgerMetrics GmbH** ist eine fiktive Burger-Kette mit 8 Filialen in Würzburg. Die Kette positioniert sich als modernes Quick-Service-Restaurant mit digitaler Bestellinfrastruktur (App, Kiosk, Drive-Through) und einem Loyalitätsprogramm. Die Daten simulieren den Export aus einem integrierten Warenwirtschaftssystem (ERP), der für analytische Zwecke aufzubereiten ist.
 
 **Zeitraum:** 15. März 2017 – 31. März 2026
-**Umfang:** 754.513 Bestellungen · 2.950.082 Bestellpositionen · 25.000 Kunden · 14,52 Mio. € Nettoumsatz
+**Umfang:** 754.513 Bestellungen · 2.950.082 Bestellpositionen · 25.000 Kunden · 10.000 Rezensionen · 14,52 Mio. € Nettoumsatz
 **Durchschnittlicher Bestellwert:** 19,25 €
 
 > Alle Zahlen in diesem Dokument wurden am 25. August 2026 aus den CSV-Dateien nachgerechnet. Siehe [Prüfstand](#prüfstand) am Ende.
+>
+> Die Rezensionen kamen am 12. September 2026 hinzu (siehe Prüfstand).
 
 ---
 
@@ -32,10 +34,16 @@ Das Modell hat **zwei Faktentabellen auf unterschiedlicher Granularität**, die 
                       (Position)
                       2.950.082 Zeilen
 
+                   fact_reviews ◀──── dim_product · dim_customer · dim_branch · dim_date
+                      (Rezension)     order_id → fact_orders (optional)
+                      10.000 Zeilen
+
    dim_time_slot   (über hour an fact_orders anschließbar, aber nicht verknüpft)
    dim_employee    (hängt an dim_branch, hat keinen Bezug zu den Fakten)
    dim_supplier    (Orphan Dimension — an nichts angebunden)
 ```
+
+Seit September 2026 gibt es eine dritte Faktentabelle, `fact_reviews`, mit einer Zeile je Rezension. Sie hängt über `order_id` an der Bestellung, aus der die Rezension stammt.
 
 Die beiden Fakten unterscheiden sich in der **Granularität** (grain): `fact_orders` hat eine Zeile je Bestellung, `fact_order_items` eine Zeile je Bestellposition. Diese Unterscheidung ist die wichtigste Modellierungsentscheidung im Datensatz — wer die beiden Ebenen in einem Join vermischt, vervielfacht Bestellungen und bläht jede Umsatzsumme auf (Fan Trap).
 
@@ -55,6 +63,8 @@ Die beiden Fakten unterscheiden sich in der **Granularität** (grain): `fact_ord
 | `dim_weather.csv` | Dimension | 3.377 | Tägliche Wetterdaten für Würzburg |
 | `fact_orders.csv` | Fakt | 754.513 | Bestellungen (Kopf) |
 | `fact_order_items.csv` | Fakt | 2.950.082 | Bestellpositionen (Detail) |
+| `fact_reviews.csv` | Fakt | 10.000 | Rezensionen mit Sternen und deutschem Text, eine je Bestellung; sprachlich geglättet |
+| `fact_reviews_roh.csv` | Fakt | 10.000 | derselbe Bestand vor der Glättung — Ausgabe von `generate_reviews.py` |
 | `obt_orders.csv` | OBT | 754.513 | One Big Table, denormalisiert auf Bestellebene (41 Spalten) |
 
 ### Schlüsselbeziehungen
@@ -69,6 +79,11 @@ fact_order_items.order_id  → fact_orders.order_id
 fact_order_items.product_id→ dim_product.product_id
 dim_employee.branch_id     → dim_branch.branch_id
 dim_weather.date           → dim_date.date
+fact_reviews.order_id      → fact_orders.order_id
+fact_reviews.product_id    → dim_product.product_id
+fact_reviews.customer_id   → dim_customer.customer_id
+fact_reviews.branch_id     → dim_branch.branch_id
+fact_reviews.date          → dim_date.date
 ```
 
 ### Bewusst eingebaute Modellierungsschwächen
@@ -156,6 +171,14 @@ Regel 18 eignet sich besonders als Lehrbeispiel, weil sie den Unterschied zwisch
 | 20 | **Wartezeit vs. Zufriedenheit** | Der Zusammenhang ist **schwach** (Korrelation −0,061). Bis 15 Minuten fällt die Zufriedenheit von 3,83 auf 3,69, im Bereich 15–20 Minuten auf 3,47 — aber dieser Bereich umfasst nur 282 Bestellungen, jenseits von 20 Minuten liegen **2**. Wer daraus eine Kurve zeichnet, illustriert vor allem, wie dünn besetzte Randklassen Scheinmuster erzeugen. |
 | 21 | **Keine Kundensegmente nach Standort** | Kundenherkunft (`home_district`) ist über alle 12 Würzburger Bezirke **gleichverteilt** (2.023 bis 2.185 Kunden je Bezirk), und die App-Nutzung liegt in **allen** Filialen bei 43–45 %. Ein Clustering nach Kundenprofil je Standort findet nichts — was die Standorte unterscheidet, sind Kanalmix, Bestellwert und Wochenendanteil, nicht die Kundschaft. |
 
+### Rezensionen
+
+| # | Muster | Befund |
+|---|--------|--------|
+| 22 | **Sterne folgen der Bestellung** | Jede Rezension gehört zu einer bewerteten Bestellung. Die Sterne korrelieren mit `satisfaction_score` (r = 0,768) und negativ mit `order_duration_min` (r = −0,161). Wer den Text nach Polarität klassifiziert, kann das Ergebnis gegen die Sterne prüfen. |
+| 23 | **Schiefe Verteilung** | 38,0 % fünf Sterne, 27,0 % vier, 13,0 % drei, 9,0 % zwei, 13,0 % ein Stern — wie auf Bewertungsportalen. Ein Klassifikator, der immer „positiv" sagt, liegt schon bei 65,0 % richtig; Accuracy allein ist deshalb kein Gütemaß. |
+| 24 | **Umgangssprache** | Rund 15,4 % der Texte sind klein geschrieben und ersetzen Umlaute durch ae/oe/ue. Vorverarbeitung (Kleinschreibung, Umlautnormierung) ist Teil der Aufgabe. |
+
 ---
 
 ## Infrastruktur-Empfehlungen
@@ -227,6 +250,7 @@ streamlit       → Schnelle Dashboard-Prototypen
 12. **Dashboard-Design:** KPI-Dashboard in Power BI / Superset / Dash
 13. **Datenqualität:** Orphan Dimensions aufspüren und dokumentieren
 14. **Reporting:** Automatisierte Monatsberichte mit Python
+15. **Sentiment-Analyse:** Polarität der Rezensionstexte gegen die Sterne prüfen (`fact_reviews.csv`)
 
 ---
 
@@ -309,7 +333,7 @@ python load_duckdb.py --lokal          # lokale Datei burger_metrics.duckdb
 python load_duckdb.py --motherduck     # MotherDuck (Token in motherduck_token)
 ```
 
-Lädt alle 13 Tabellen und prüft jede Zeilenzahl gegen die Sollwerte aus diesem Dokument. Laufzeit lokal rund 10 Sekunden. Erkennt außerdem, wenn statt der Daten Git-LFS-Verweisdateien vorliegen, und nennt die Abhilfe.
+Lädt alle 14 Tabellen und prüft jede Zeilenzahl gegen die Sollwerte aus diesem Dokument. Laufzeit lokal rund 10 Sekunden. Erkennt außerdem, wenn statt der Daten Git-LFS-Verweisdateien vorliegen, und nennt die Abhilfe.
 
 ### One Big Table neu erzeugen
 
@@ -319,11 +343,22 @@ python generate_obt.py
 
 Erzeugt `obt_orders.csv` aus den Star-Schema-CSVs (754.513 Zeilen × 41 Spalten, ~185 MB, Laufzeit rund 10 Sekunden). Das Ergebnis ist byte-identisch zur mitgelieferten Datei.
 
+### Rezensionen neu erzeugen
+
+```bash
+python3 generate_reviews.py                 # fact_reviews_roh.csv, Seed 2026, byte-identisch
+python3 glaettung/lose_schreiben.py         # 100 Lose à 100 Texte
+# … Lose sprachlich glätten (glaettung/PROMPT.md) …
+python3 glaettung/zusammenfuehren.py        # fact_reviews.csv, mit Prüfung
+```
+
+Der Rohstand ist deterministisch; die Glättung ist es nicht, deshalb ist `fact_reviews.csv` der eingefrorene Bestand. Stand: 10.000 von 10.000 Texten geglättet. Nach der Glättung wurden 218 Produktaussagen gezielt nachgebessert, bei denen der Text nicht zum Produkt passte — etwa Burger-Vokabular in Rezensionen zur Green Goddess Bowl oder Frittier-Vokabular bei Side Salad und Coleslaw.
+
 ---
 
 ## Prüfstand
 
-Sämtliche Kennzahlen, Zeilenzahlen und Muster in diesem Dokument wurden am **25. August 2026** mit pandas direkt aus den CSV-Dateien nachgerechnet — **79 Angaben, alle bestätigt**.
+Sämtliche Kennzahlen, Zeilenzahlen und Muster in diesem Dokument wurden am **25. August 2026** mit pandas direkt aus den CSV-Dateien nachgerechnet — **90 Angaben, alle bestätigt** (Stand 12. September 2026: 79 zum Bestand vom 25. August 2026, 11 zu den Rezensionen).
 
 Das ist nachvollziehbar und wiederholbar:
 
@@ -352,10 +387,10 @@ Zwei Skripte führen die Zusammenführung vor, die sonst nur als Diagramm existi
 
 | Datei | Inhalt |
 |---|---|
-| [`wawi_mini.sql`](wawi_mini.sql) | Ausschnitt des operativen 3NF-Modells (14 Tabellen, deutsche Namen), befüllt mit denselben 19 Bestellungen wie `burgermetrics_mini.sql`. „Keine Aktion" ist hier `NULL` am Beleg, nicht eine Zeile. |
+| [`wawi_mini.sql`](wawi_mini.sql) | Ausschnitt des operativen 3NF-Modells (14 Tabellen, deutsche Namen), befüllt mit denselben 19 Bestellungen und zwölf Rezensionen wie `burgermetrics_mini.sql`. „Keine Aktion" ist hier `NULL` am Beleg, nicht eine Zeile. |
 | [`wawi_zu_analytisch.sql`](wawi_zu_analytisch.sql) | Die Sichten, die per JOIN und Umbenennung daraus das analytische Schema bauen — inklusive generierter `dim_date` und der `No Promotion`-Zeile aus operativem `NULL`. |
 
-Nach dem Laden beider Skripte (plus `burgermetrics_mini.sql` zum Vergleich) ist jede der acht
+Nach dem Laden beider Skripte (plus `burgermetrics_mini.sql` zum Vergleich) ist jede der neun
 Zieltabellen **zeilengleich** mit ihrem Original — die Prüfabfrage steht am Ende von
 `wawi_zu_analytisch.sql`. Läuft in DuckDB; PostgreSQL braucht statt `monthname()`/`dayname()`
 die `to_char`-Entsprechungen.
