@@ -2,6 +2,7 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -29,6 +30,12 @@ def test_kandidaten_sind_bewertete_bestellungen_ohne_extras(kandidaten):
     assert kandidaten.satisfaction_score.notna().all()
     assert (kandidaten.category != "Extra").all()
     assert len(kandidaten) > 500_000
+    ohne_app_am_schalter = kandidaten[(kandidaten.order_channel == "Counter") & (kandidaten.has_app == False)]
+    jahr = pd.to_datetime(ohne_app_am_schalter.date).dt.year
+    erwartetes_gewicht = 1 + (jahr - 2017) / 3
+    assert np.isclose(ohne_app_am_schalter.gewicht, erwartetes_gewicht).all()
+    assert np.isclose(kandidaten.gewicht.min(), 1.0)
+    assert np.isclose(kandidaten.gewicht.max(), 4 * 3 * 2)
 
 
 def test_spalten_und_umfang(probe):

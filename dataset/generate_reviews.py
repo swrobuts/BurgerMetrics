@@ -56,7 +56,7 @@ def lade_kandidaten(basis):
         SELECT o.order_id, o.date, o.branch_id, o.customer_id, o.order_channel,
                o.order_duration_min, o.satisfaction_score, o.promo_id,
                i.product_id, p.product_name, p.category, c.has_app, b.branch_name,
-               (extract(year FROM o.date) - 2016)
+               (1 + (extract(year FROM o.date) - 2017) / 3.0)
                * CASE o.order_channel WHEN 'App Order' THEN 3 WHEN 'Kiosk' THEN 1.5 ELSE 1 END
                * CASE WHEN c.has_app THEN 2 ELSE 1 END AS gewicht
         FROM read_csv_auto('{pfad("fact_orders")}', header = true) o
