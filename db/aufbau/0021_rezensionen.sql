@@ -24,6 +24,12 @@
 --   python3 db/materialisieren.py                                    -- neue Sicht materialisieren
 --   SELECT * FROM wawi.etl_probe();                                   -- 0 und 0, auch fuer fact_reviews
 --
+-- Neuladen der CSV nach der Bestandskopie: die Kopie laeuft nur, solange
+-- wawi.rezension keine Simulationszeilen hat. Wer fact_reviews.csv neu laedt,
+-- entfernt vorher den alten Stand:
+--   DELETE FROM wawi.rezension WHERE quelle = 'simulation';
+-- und faehrt dieses Skript danach erneut. etl_probe() zeigt jede Abweichung.
+--
 -- Voraussetzung: 0001-0020 sind gelaufen; als postgres ausfuehren.
 -- Objekte: burgermetrics.fact_reviews, burgermetrics.v_rezension_produkt,
 --          wawi.rezension, wawi.stg_fact_reviews, wawi.v_rezension_produkt,
@@ -138,7 +144,7 @@ ANALYZE burgermetrics.fact_reviews;
 CREATE OR REPLACE VIEW wawi.stg_fact_reviews AS
 SELECT r.rezension_id                                          AS review_id,
        (r.erstellt_am AT TIME ZONE 'Europe/Berlin')::date       AS date,
-       (r.erstellt_am AT TIME ZONE 'Europe/Berlin')::time(0)    AS time,
+       date_trunc('second', r.erstellt_am AT TIME ZONE 'Europe/Berlin')::time AS time,
        r.kunde_id                                              AS customer_id,
        r.artikel_id                                            AS product_id,
        r.filiale_id                                            AS branch_id,
