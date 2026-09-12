@@ -60,6 +60,7 @@ def main():
     pfad = Path(sys.argv[1])
     if not pfad.exists():
         sys.exit(f"FEHLER: {pfad} gibt es nicht")
+    lade_env()
     print(f"Führe {pfad.name} als {os.environ.get('PGUSER', '?')} aus ...")
     try:
         for zeile in skript_ausfuehren(pfad):
