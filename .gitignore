@@ -33,3 +33,8 @@ mcp/.venv/
 
 # Lose der Rezensionsglättung — Zwischenstand, reproduzierbar aus fact_reviews_roh.csv
 dataset/glaettung/lose/
+
+# Notebooks und Dash
+notebooks/.ipynb_checkpoints/
+dash/__pycache__/
+notebooks/export/
