@@ -4363,7 +4363,7 @@ body.data-mode .phone-mockup { animation: none; }
     <h3 id="reviewTitle">Bewerten</h3>
     <div class="review-product" id="reviewProduct"></div>
     <div class="review-stand" id="reviewStand"></div>
-    <form id="reviewForm" onsubmit="return false">
+    <form id="reviewForm" onsubmit="submitReview(event)">
       <fieldset class="sterne-wahl" id="sterneWahl">
         <legend>Sterne</legend>
         <input type="radio" name="sterne" id="stern1" value="1"><label for="stern1" title="1 Stern">★</label>
@@ -4756,6 +4756,57 @@ function stimmenAnzeigen(artikelId) {
     li.appendChild(text);
     liste.appendChild(li);
   }
+}
+
+// Sendet die Rezension: erst die Prüfung im Browser (sofortige Meldung), dann
+// rezension_anlegen() in der Datenbank, die ihrerseits prüft und bremst.
+// Die Rezensionsnummer vergibt die Datenbank.
+function submitReview(event) {
+  event.preventDefault();
+  const gewaehlt = document.querySelector('#sterneWahl input:checked');
+  const eingabe = {
+    sterne: gewaehlt ? Number(gewaehlt.value) : 0,
+    inhalt: document.getElementById('reviewText').value,
+  };
+  const befunde = window.REZENSIONEN.pruefeEingabe(eingabe);
+  if (befunde.length) { reviewMeldung('err', befunde.join(' ')); return; }
+  if (!window.rezensionSpeichern) { reviewMeldung('err', 'Keine Verbindung zum operativen System.'); return; }
+
+  const filiale = document.getElementById('reviewBranch').value;
+  const rezension = {
+    artikel_id: reviewProduktId,
+    sterne:     eingabe.sterne,
+    inhalt:     eingabe.inhalt.trim(),
+    filiale_id: filiale ? Number(filiale) : null,
+  };
+  const knopf = document.getElementById('reviewSenden');
+  knopf.disabled = true;
+  reviewMeldung('', 'Wird gespeichert …');
+
+  window.rezensionSpeichern(rezension).then(antwort => {
+    reviewMeldung('ok', `Gespeichert als wawi.rezension #${antwort.rezension_id}`);
+    document.getElementById('reviewForm').reset();
+    sterneAnzeigen(0);
+    reviewZaehler();
+    return bewertungenAktualisieren();
+  }).catch(fehler => {
+    // Die Meldung der Datenbank, z. B. die Bremse — nichts wird umformuliert.
+    reviewMeldung('err', fehler.message);
+  }).finally(() => {
+    knopf.disabled = false;
+  });
+}
+
+// Bewertungsstand aller Karten und des offenen Modals neu aus der Sicht holen.
+async function bewertungenAktualisieren() {
+  if (!window.bewertungenLaden) return;
+  BEWERTUNGEN = await window.bewertungenLaden();
+  document.querySelectorAll('[data-rating]').forEach(el => {
+    const artikelId = Number(el.dataset.rating);
+    el.textContent = bewertungVon(artikelId);
+    el.classList.toggle('leer', bewertungKlasse(artikelId) === 'leer');
+  });
+  if (reviewProduktId !== null) reviewStandAnzeigen();
 }
 
 document.getElementById('sterneWahl').addEventListener('change', e => sterneAnzeigen(Number(e.target.value)));
@@ -5982,6 +6033,16 @@ try {
   // wawi.artikel.
   window.bestellungSpeichern = (bestellung) =>
     quelle.bestellungAnlegen({ ...bestellung, sitzung: SITZUNG });
+
+  // Der zweite Schreibweg: submitReview (klassischer Block) ruft ihn. Die
+  // Sitzungskennung ist dieselbe wie bei Bestellungen, damit eine Gruppe ihre
+  // Rezensionen in wawi.v_rezension_letzte wiederfindet.
+  window.rezensionSpeichern = (rezension) =>
+    quelle.rezensionAnlegen({ ...rezension, sitzung: SITZUNG });
+  // Nach dem Speichern wird der Bewertungsstand neu geholt — die Sicht rechnet,
+  // nicht der Browser.
+  window.bewertungenLaden = async () => nachArtikel(await quelle.rezensionenProdukt());
+  window.letzteRezensionenLaden = () => quelle.letzteRezensionen();
 
   // Die vier Kennzahlen im Kopfbereich standen als data-count fest im HTML:
   // 8 Filialen, 50 Produkte, 100 Tausend Kunden, 4,8 Sterne. Drei davon
