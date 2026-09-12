@@ -14,8 +14,9 @@
 --        Privileges geerbt: GRANT SELECT an studi_daba, anon, authenticated;
 --        Row Level Security mit lesen_alle auf beiden Tabellen. Schreiben
 --        darf anon nur ueber rezension_anlegen(): Sterne 1-5, Text 5-500
---        Zeichen, hoechstens 20 Rezensionen je Sitzung in zehn Minuten und
---        200 je Stunde insgesamt.
+--        Zeichen, hoechstens 20 Rezensionen je Sitzung in zehn Minuten
+--        (Aufrufe ohne Sitzung teilen sich einen Eimer) und 600 je Stunde
+--        insgesamt.
 --
 -- Aufruf (als postgres):
 --   python3 db/skript_ausfuehren.py db/aufbau/0021_rezensionen.sql   -- Tabellen anlegen
@@ -129,7 +130,7 @@ BEGIN
   WHERE  r.source = 'simulation'
   ORDER  BY r.review_id;
   GET DIAGNOSTICS n = ROW_COUNT;
-  RAISE NOTICE 'wawi.rezension: % Rezensionen uebernommen.', n;
+  RAISE NOTICE 'wawi.rezension: % Rezensionen übernommen.', n;
   PERFORM setval(pg_get_serial_sequence('wawi.rezension', 'rezension_id'),
                  GREATEST((SELECT max(rezension_id) FROM wawi.rezension), 1));
 END $$;
@@ -310,23 +311,29 @@ BEGIN
     RAISE EXCEPTION 'unbekannte Filiale: %', filiale_id USING ERRCODE = '23503';
   END IF;
 
-  -- Bremse je Sitzung: 20 Rezensionen in zehn Minuten reichen fuer jede Uebung.
-  IF sitzung IS NOT NULL THEN
-    SELECT count(*) INTO v_kuerzlich
-    FROM   rezension r
-    WHERE  r.sitzung = sitzung AND r.erstellt_am > v_jetzt - interval '10 minutes';
-    IF v_kuerzlich >= 20 THEN
-      RAISE EXCEPTION 'zu viele Rezensionen in kurzer Zeit — bitte kurz warten'
-        USING ERRCODE = '53400';
-    END IF;
+  IF sitzung IS NOT NULL AND char_length(sitzung) > 100 THEN
+    RAISE EXCEPTION 'sitzung darf höchstens 100 Zeichen lang sein' USING ERRCODE = '22023';
   END IF;
-  -- Notbremse insgesamt: Der Weg ist oeffentlich; 200 Shop-Rezensionen je
-  -- Stunde decken einen ganzen Kurs ab, ein Skript nicht.
+
+  -- Bremse je Sitzung: 20 Rezensionen in zehn Minuten reichen fuer jede Uebung.
+  -- Aufrufe ohne Sitzung teilen sich einen gemeinsamen Eimer (IS NOT DISTINCT FROM
+  -- behandelt NULL wie einen Wert).
+  SELECT count(*) INTO v_kuerzlich
+  FROM   rezension r
+  WHERE  r.sitzung IS NOT DISTINCT FROM sitzung
+  AND    r.erstellt_am > v_jetzt - interval '10 minutes';
+  IF v_kuerzlich >= 20 THEN
+    RAISE EXCEPTION 'zu viele Rezensionen in kurzer Zeit — bitte kurz warten'
+      USING ERRCODE = '53400';
+  END IF;
+  -- Notbremse insgesamt: Der Weg ist oeffentlich. 600 Shop-Rezensionen je Stunde
+  -- decken auch einen grossen Kurs ab; ein Skript, das sich Sitzungen ausdenkt,
+  -- kommt nicht weiter. uebungsrezensionen_loeschen() raeumt danach auf.
   SELECT count(*) INTO v_kuerzlich
   FROM   rezension r
   WHERE  r.quelle = 'shop' AND r.erstellt_am > v_jetzt - interval '1 hour';
-  IF v_kuerzlich >= 200 THEN
-    RAISE EXCEPTION 'zu viele Rezensionen in der letzten Stunde — bitte spaeter erneut'
+  IF v_kuerzlich >= 600 THEN
+    RAISE EXCEPTION 'zu viele Rezensionen in der letzten Stunde — bitte später erneut'
       USING ERRCODE = '53400';
   END IF;
 
@@ -501,7 +508,7 @@ BEGIN
     RAISE EXCEPTION 'Simulationsbestand: % Zeilen in wawi, % in burgermetrics', v_sim, v_fr;
   END IF;
   IF NOT has_function_privilege('anon', v_fn, 'EXECUTE') THEN
-    RAISE EXCEPTION 'anon darf rezension_anlegen() nicht ausfuehren';
+    RAISE EXCEPTION 'anon darf rezension_anlegen() nicht ausführen';
   END IF;
   IF NOT has_table_privilege('anon', 'wawi.v_kundenstimmen', 'SELECT') THEN
     RAISE EXCEPTION 'anon liest v_kundenstimmen nicht';
@@ -516,7 +523,7 @@ BEGIN
       RAISE EXCEPTION 'studi_daba darf Rezensionen schreiben';
     END IF;
     IF has_function_privilege('studi_daba', v_fn, 'EXECUTE') THEN
-      RAISE EXCEPTION 'studi_daba darf rezension_anlegen() ausfuehren';
+      RAISE EXCEPTION 'studi_daba darf rezension_anlegen() ausführen';
     END IF;
   END IF;
   RAISE NOTICE 'Rezensionen: % Simulationszeilen in beiden Schemata; Rechte wie vorgesehen.', v_sim;

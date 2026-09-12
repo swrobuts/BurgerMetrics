@@ -96,12 +96,12 @@ MAX_ZEICHEN = 60_000
 ERKLAERUNG = {
     "wawi": ("Operatives Warenwirtschaftsmodell, 3NF, deutsche Namen. Kasse "
              "und Shop lesen hier Speisekarte und Filialliste und schreiben "
-             "jeden Beleg hinein (kundenbestellung, bestellposition, rechnung). "
-             "15 Tabellen, drei Sichten fuer die Anwendungen, drei stg-Sichten "
+             "jeden Beleg hinein (kundenbestellung, bestellposition, rechnung); Rezensionen aus dem Shop landen in rezension. "
+             "16 Tabellen, drei Sichten fuer die Anwendungen, drei stg-Sichten "
              "fuer den ETL-Schritt."),
     "burgermetrics": ("Auswertungsmodell: Galaxy-Schema mit zehn dim_-Tabellen, "
                       "fact_orders (Grain Bestellung), fact_order_items (Grain "
-                      "Position) und obt_orders. Darueber die Semantikschicht: "
+                      "Position), fact_reviews (Grain Rezension, 10.000 Zeilen) und obt_orders. Darueber die Semantikschicht: "
                       "materialisierte Sichten v_*, aus denen das Dashboard "
                       "liest. Wird per ETL aus wawi beladen (0019)."),
 }
@@ -250,7 +250,7 @@ def schemata_erklaeren() -> str:
         "burgermetrics.uebernahme_aus_wawi() (ETL, nicht automatisch) -> "
         "Galaxy-Schema -> materialisierte Sichten -> Dashboard. "
         "Beide Schemata tragen denselben Bestand: 754.513 Bestellungen, "
-        "2.950.082 Positionen.")
+        "2.950.082 Positionen und 10.000 Rezensionen (0021).")
 
 
 @server.tool()

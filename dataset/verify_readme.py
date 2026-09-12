@@ -211,6 +211,8 @@ def main():
     for sterne, erwartet in [(5, 38.0), (4, 27.0), (3, 13.0), (2, 9.0), (1, 13.0)]:
         pruefe(f"Anteil {sterne} Sterne (%)", anteile[sterne], erwartet, 0.02)
     pruefe("Rezensionen: Sterne im Mittel", rz.stars.mean(), 3.68)
+    pruefe("Rezensionen: Filiale, Kunde, Bestellung ohne Luecke",
+           int(rz[["branch_id", "customer_id", "order_id"]].notna().all().all()), 1, 0)
     rzo = rz.merge(fo[["order_id", "satisfaction_score", "order_duration_min"]], on="order_id")
     pruefe("Korrelation Sterne~Zufriedenheit", rzo.stars.corr(rzo.satisfaction_score), 0.768, 0.05)
     pruefe("Korrelation Sterne~Dauer", rzo.stars.corr(rzo.order_duration_min), -0.161, 0.10)

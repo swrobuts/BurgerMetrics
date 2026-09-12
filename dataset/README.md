@@ -45,6 +45,8 @@ Das Modell hat **zwei Faktentabellen auf unterschiedlicher Granularität**, die 
 
 Seit September 2026 gibt es eine dritte Faktentabelle, `fact_reviews`, mit einer Zeile je Rezension. Sie hängt über `order_id` an der Bestellung, aus der die Rezension stammt.
 
+Spalten: `review_id`, `date` und `time` (Zeitpunkt der Rezension, 7 bis 24 Uhr, am Tag der Bestellung oder bis drei Tage danach), `customer_id`, `product_id`, `branch_id`, `order_id`, `stars` (1–5), `review_text` (deutsch, 5–500 Zeichen, ohne Zeilenumbruch) und `source` (`simulation`; Rezensionen aus dem Shop tragen `shop`). Im Mittel 3,68 Sterne; jede der 10.000 Zeilen trägt Filiale, Kunde und Bestellung.
+
 Die beiden Fakten unterscheiden sich in der **Granularität** (grain): `fact_orders` hat eine Zeile je Bestellung, `fact_order_items` eine Zeile je Bestellposition. Diese Unterscheidung ist die wichtigste Modellierungsentscheidung im Datensatz — wer die beiden Ebenen in einem Join vermischt, vervielfacht Bestellungen und bläht jede Umsatzsumme auf (Fan Trap).
 
 ### Dateien
@@ -358,7 +360,7 @@ Der Rohstand ist deterministisch; die Glättung ist es nicht, deshalb ist `fact_
 
 ## Prüfstand
 
-Sämtliche Kennzahlen, Zeilenzahlen und Muster in diesem Dokument wurden am **25. August 2026** mit pandas direkt aus den CSV-Dateien nachgerechnet — **90 Angaben, alle bestätigt** (Stand 12. September 2026: 79 zum Bestand vom 25. August 2026, 11 zu den Rezensionen).
+Sämtliche Kennzahlen, Zeilenzahlen und Muster in diesem Dokument wurden am **25. August 2026** mit pandas direkt aus den CSV-Dateien nachgerechnet — **91 Angaben, alle bestätigt** (Stand 12. September 2026: 79 zum Bestand vom 25. August 2026, 12 zu den Rezensionen).
 
 Das ist nachvollziehbar und wiederholbar:
 

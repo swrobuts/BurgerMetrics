@@ -20,7 +20,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 |---|---|
 | `aufbau/0001_schema_und_dimensionen.sql` | Schema und die zehn Dimensionstabellen |
 | `aufbau/0002_fakten.sql` | `fact_orders` (Grain: Bestellung) und `fact_order_items` (Grain: Position), Fremdschlüssel, Indizes |
-| `lade_csv.py` | lädt die dreizehn CSV-Dateien per `COPY`, eine Transaktion, alles oder nichts; `--nur fact_orders` leert wegen des Fremdschlüssels auch `fact_reviews` mit (`TRUNCATE … CASCADE`) — danach `fact_reviews` erneut laden |
+| `lade_csv.py` | lädt die dreizehn CSV-Dateien per `COPY`, eine Transaktion, alles oder nichts; `--nur TABELLE …` leert und lädt nur die genannten Tabellen, ohne `CASCADE` — wer `fact_orders` neu lädt, nennt die abhängigen Tabellen mit (`--nur fact_orders fact_order_items fact_reviews`), sonst bricht PostgreSQL ab; der Volllauf überspringt `fact_reviews`, solange `0021` die Tabelle noch nicht angelegt hat |
 | `aufbau/0003_obt.sql` | `obt_orders` — **nicht hochgeladen**, sondern im Server aus dem Galaxy-Schema erzeugt |
 | `aufbau/0004_sicherheit.sql` | Grants, Row Level Security (nur `SELECT`) |
 | `aufbau/0005_semantik.sql` | die Sichten der Semantikschicht |
@@ -46,9 +46,11 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
-python3 db/lade_csv.py    # 3.704.595 Zeilen, rund 110 Sekunden
-python3 db/lade_csv.py --nur fact_reviews   # nur eine Tabelle
-python3 db/skript_ausfuehren.py db/aufbau/0021_rezensionen.sql
+python3 db/lade_csv.py    # Fakten 3.704.595 Zeilen, rund 110 Sekunden (fact_reviews erst nach 0021)
+python3 db/skript_ausfuehren.py db/aufbau/0021_rezensionen.sql   # legt fact_reviews und wawi.rezension an
+python3 db/lade_csv.py --nur fact_reviews                        # 10.000 Rezensionen
+python3 db/skript_ausfuehren.py db/aufbau/0021_rezensionen.sql   # kopiert den Bestand nach wawi.rezension
+python3 db/materialisieren.py                                    # v_rezension_produkt materialisieren
 ```
 
 Die SQL-Dateien sind idempotent: Sie laufen zweimal hintereinander fehlerfrei.
@@ -103,8 +105,8 @@ Kennwort; `studi` sieht `burgermetrics` und `wawi` nicht, `studi_daba` sieht
 Seit `0021` gibt es einen dritten Sachverhalt. Operativ schreibt der Shop über
 `wawi.rezension_anlegen(artikel_id, sterne, inhalt, filiale_id, sitzung)` — die
 einzige Schreibfunktion neben `bestellung_anlegen()`, mit denselben Riegeln:
-Prüfung der Eingaben, 20 Rezensionen je Sitzung in zehn Minuten, 200 je Stunde
-insgesamt. Der Simulationsbestand (`dataset/fact_reviews.csv`) liegt in beiden
+Prüfung der Eingaben, 20 Rezensionen je Sitzung in zehn Minuten, 600 je Stunde
+insgesamt; Aufrufe ohne Sitzung teilen sich einen Eimer. Der Simulationsbestand (`dataset/fact_reviews.csv`) liegt in beiden
 Schemata mit denselben Kennungen; `uebernahme_aus_wawi()` trägt Shop-Rezensionen
 nach `fact_reviews`, `etl_probe()` vergleicht beide Seiten, und
 `uebungsrezensionen_loeschen()` räumt die Übungsrezensionen wieder ab.
@@ -328,13 +330,17 @@ Danach `python3 db/materialisieren.py --neu`, sonst zeigt das Dashboard den
 alten Stand. `etl_probe()` ist der Gleichheitsbeweis aus
 `dataset/wawi_zu_analytisch.sql`, nur über den ganzen Bestand statt über 19
 Belege: die symmetrische Differenz von `stg_fact_orders` gegen `fact_orders`
-und von `stg_fact_order_items` gegen `fact_order_items`.
+und von `stg_fact_order_items` gegen `fact_order_items` und von `stg_fact_reviews` gegen `fact_reviews`.
 
-**Was `anon` darf:** beide Schemata lesen und genau diese eine Funktion
-aufrufen. Kein `INSERT` auf eine Tabelle, kein Aufruf der drei
-Betriebsfunktionen. Die Funktion prüft Filiale, Zahlart, Kanal, Artikel und
+**Was `anon` darf:** beide Schemata lesen und die beiden Schreibfunktionen
+`bestellung_anlegen()` und `rezension_anlegen()` aufrufen. Kein `INSERT` auf eine
+Tabelle, kein Aufruf der vier Betriebsfunktionen (`uebernahme_aus_wawi()`,
+`etl_probe()`, `uebungsbestellungen_loeschen()`, `uebungsrezensionen_loeschen()`).
+Die Funktion prüft Filiale, Zahlart, Kanal, Artikel und
 Mengen, fasst doppelte Artikel zusammen und lehnt mehr als sechzig Belege je
-Sitzung und zehn Minuten ab. Ein öffentlich beschreibbarer Bestand ohne diese
+Sitzung und zehn Minuten ab. `rezension_anlegen()` prüft Artikel, Sterne und
+Textlänge und bremst bei 20 Rezensionen je Sitzung und zehn Minuten sowie
+600 je Stunde insgesamt. Ein öffentlich beschreibbarer Bestand ohne diese
 Bremse wäre eine Einladung.
 
 Beide Seiten sind ES-Module und benutzen dieselbe `datenquelle.js` wie das

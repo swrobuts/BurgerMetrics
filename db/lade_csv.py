@@ -58,9 +58,27 @@ con.autocommit = False
 cur = con.cursor()
 cur.execute("SET search_path TO burgermetrics")
 
-# Leeren in umgekehrter Reihenfolge (Fremdschluessel)
-for t in reversed(TABELLEN):
-    cur.execute(f"TRUNCATE TABLE {t} CASCADE")
+
+def vorhanden(tabelle):
+    """Sagt, ob die Tabelle im Schema burgermetrics schon angelegt ist."""
+    cur.execute("SELECT to_regclass(%s) IS NOT NULL", (f"burgermetrics.{tabelle}",))
+    return cur.fetchone()[0]
+
+
+# fact_reviews entsteht erst mit 0021 — beim Erstaufbau fehlt die Tabelle noch.
+fehlend = [t for t in TABELLEN if not vorhanden(t)]
+if fehlend and ARGS.nur:
+    sys.exit(f"FEHLER: Tabelle(n) fehlen noch: {', '.join(fehlend)} — erst das Aufbauskript ausführen (fact_reviews: 0021)")
+for t in fehlend:
+    print(f"  {t:<22} übersprungen — Tabelle fehlt noch (0021 legt sie an)")
+TABELLEN = [t for t in TABELLEN if t not in fehlend]
+
+# Leeren in einem Schritt. Der Volllauf darf per CASCADE auch Abhängiges leeren,
+# eine Auswahl (--nur) nicht: Sonst verschwinden still Tabellen, die gar nicht neu
+# geladen werden. PostgreSQL bricht dann mit einer klaren Meldung ab, und man nennt
+# die abhängigen Tabellen einfach mit (--nur fact_orders fact_order_items fact_reviews).
+kaskade = "" if ARGS.nur else " CASCADE"
+cur.execute("TRUNCATE TABLE " + ", ".join(TABELLEN) + kaskade)
 
 for t in TABELLEN:
     pfad = BASIS / f"{t}.csv"
