@@ -1,6 +1,6 @@
 -- wawi_mini.sql
 -- Ausschnitt des operativen Warenwirtschaftsmodells (3NF, deutsche Namen),
--- befuellt mit denselben 19 Bestellungen wie burgermetrics_mini.sql.
+-- befuellt mit denselben 19 Bestellungen und zwoelf Rezensionen wie burgermetrics_mini.sql.
 --
 -- Zweck: den Weg VOM operativen Modell ZUM analytischen vorfuehrbar machen.
 -- Nach diesem Skript wawi_zu_analytisch.sql ausfuehren — es baut per JOIN
@@ -277,3 +277,21 @@ INSERT INTO rechnung VALUES
   (17, 617464, '2025-04-01', 5.78, 0.92, 4),
   (18, 690739, '2025-10-03', 14.43, 2.3, 3),
   (19, 737635, '2026-02-12', 12.04, 1.92, 3);
+
+-- Rezensionen: der Shop schreibt sie, der ETL-Schritt nimmt sie mit. quelle wie
+-- bei kundenbestellung: 'simulation' ist der kuratierte Bestand, 'shop' entsteht
+-- an der Oberflaeche. erstellt_am ist Ortszeit Europe/Berlin.
+DROP TABLE IF EXISTS rezension; CREATE TABLE rezension (rezension_id INTEGER PRIMARY KEY, artikel_id INTEGER, kunde_id INTEGER, bestellung_id INTEGER, filiale_id INTEGER, sterne INTEGER, inhalt VARCHAR(500), erstellt_am TIMESTAMP, quelle VARCHAR(10));
+INSERT INTO rezension VALUES
+  (1, 4, 21454, 19540, 1, 4, 'Der Bacon King war saftig und gut belegt. Am Drive-Through ging es zügig.', '2018-05-13 18:40:00', 'simulation'),
+  (2, 36, 22612, 33218, 2, 3, 'Der Milkshake Strawberry war in Ordnung, aber sehr süß. Neun Minuten Wartezeit sind für einen Imbiss zu viel.', '2018-10-11 19:05:00', 'simulation'),
+  (3, 10, 5967, 50804, 3, 5, 'Der Beyond Burger schmeckt besser als erwartet, gut gewürzt und heiß serviert. Gern wieder.', '2019-04-05 13:20:00', 'simulation'),
+  (4, 8, 1943, 107470, 1, 2, 'Der Kids Burger war trocken und lauwarm. Für den Preis hätte ich mehr erwartet.', '2020-04-23 12:15:00', 'simulation'),
+  (5, 21, 249, 130918, 3, 1, 'Vierzehn Minuten Wartezeit für einen Side Salad, und der war nicht frisch. Das war nichts.', '2020-10-03 09:30:00', 'simulation'),
+  (6, 37, 16010, 191492, 3, 5, 'Über die App bestellt, nach zwei Minuten abgeholt. Der Fresh OJ war frisch gepresst und kalt.', '2021-10-04 20:45:00', 'simulation'),
+  (7, 10, 8315, 298962, 1, 4, 'Solider Beyond Burger, die Fries dazu waren knusprig. Die Filiale BM Europastern war gut besucht.', '2022-10-02 18:10:00', 'simulation'),
+  (8, 18, 8662, 353674, 4, 3, 'Die Chicken Nuggets 6pc waren okay, nicht mehr. Die Portion ist klein für den Preis.', '2023-04-01 14:00:00', 'simulation'),
+  (9, 20, 23371, 424018, 4, 2, 'Onion Rings waren fettig und weich statt knusprig. Schade, sonst mag ich die Filiale.', '2023-10-07 19:30:00', 'simulation'),
+  (10, 40, 9669, 494362, 6, 5, 'Die Craft Lemonade ist erfrischend und nicht zu süß. Bestellung am Drive-Through lief problemlos.', '2024-05-01 08:20:00', 'simulation'),
+  (11, 13, 14240, 690739, 2, 4, 'Die Green Goddess Bowl war frisch und reichlich. Elf Minuten Wartezeit am Counter waren allerdings lang.', '2025-10-03 13:05:00', 'simulation'),
+  (12, 32, 19890, 737635, 4, 3, 'Der Coffee war heiß, aber dünn. Service am Counter freundlich und schnell.', '2026-02-12 15:50:00', 'simulation');

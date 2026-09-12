@@ -14,6 +14,7 @@
 --   SELECT COUNT(*) FROM fact_orders;                  -->  19
 --   SELECT COUNT(*) FROM fact_order_items;             -->  55
 --   SELECT ROUND(SUM(net_total), 2) FROM fact_orders;  -->  200.85
+--   SELECT COUNT(*) FROM fact_reviews;                 -->  12
 --
 -- Der Fan Trap, zum Selbstausprobieren:
 --   SELECT ROUND(SUM(o.net_total), 2)
@@ -232,3 +233,19 @@ INSERT INTO fact_order_items (order_item_id, order_id, product_id, quantity, uni
   (2883128, 737635, 31, 2, 3.27, 6.54),
   (2883129, 737635, 28, 1, 2.88, 2.88),
   (2883130, 737635, 32, 1, 2.62, 2.62);
+
+DROP TABLE IF EXISTS fact_reviews;
+CREATE TABLE fact_reviews (review_id INTEGER PRIMARY KEY, date DATE, time TIME, customer_id INTEGER, product_id INTEGER, branch_id INTEGER, order_id INTEGER, stars INTEGER, review_text VARCHAR(500), source VARCHAR(10));
+INSERT INTO fact_reviews (review_id, date, time, customer_id, product_id, branch_id, order_id, stars, review_text, source) VALUES
+  (1, '2018-05-13', '18:40:00', 21454, 4, 1, 19540, 4, 'Der Bacon King war saftig und gut belegt. Am Drive-Through ging es zügig.', 'simulation'),
+  (2, '2018-10-11', '19:05:00', 22612, 36, 2, 33218, 3, 'Der Milkshake Strawberry war in Ordnung, aber sehr süß. Neun Minuten Wartezeit sind für einen Imbiss zu viel.', 'simulation'),
+  (3, '2019-04-05', '13:20:00', 5967, 10, 3, 50804, 5, 'Der Beyond Burger schmeckt besser als erwartet, gut gewürzt und heiß serviert. Gern wieder.', 'simulation'),
+  (4, '2020-04-23', '12:15:00', 1943, 8, 1, 107470, 2, 'Der Kids Burger war trocken und lauwarm. Für den Preis hätte ich mehr erwartet.', 'simulation'),
+  (5, '2020-10-03', '09:30:00', 249, 21, 3, 130918, 1, 'Vierzehn Minuten Wartezeit für einen Side Salad, und der war nicht frisch. Das war nichts.', 'simulation'),
+  (6, '2021-10-04', '20:45:00', 16010, 37, 3, 191492, 5, 'Über die App bestellt, nach zwei Minuten abgeholt. Der Fresh OJ war frisch gepresst und kalt.', 'simulation'),
+  (7, '2022-10-02', '18:10:00', 8315, 10, 1, 298962, 4, 'Solider Beyond Burger, die Fries dazu waren knusprig. Die Filiale BM Europastern war gut besucht.', 'simulation'),
+  (8, '2023-04-01', '14:00:00', 8662, 18, 4, 353674, 3, 'Die Chicken Nuggets 6pc waren okay, nicht mehr. Die Portion ist klein für den Preis.', 'simulation'),
+  (9, '2023-10-07', '19:30:00', 23371, 20, 4, 424018, 2, 'Onion Rings waren fettig und weich statt knusprig. Schade, sonst mag ich die Filiale.', 'simulation'),
+  (10, '2024-05-01', '08:20:00', 9669, 40, 6, 494362, 5, 'Die Craft Lemonade ist erfrischend und nicht zu süß. Bestellung am Drive-Through lief problemlos.', 'simulation'),
+  (11, '2025-10-03', '13:05:00', 14240, 13, 2, 690739, 4, 'Die Green Goddess Bowl war frisch und reichlich. Elf Minuten Wartezeit am Counter waren allerdings lang.', 'simulation'),
+  (12, '2026-02-12', '15:50:00', 19890, 32, 4, 737635, 3, 'Der Coffee war heiß, aber dünn. Service am Counter freundlich und schnell.', 'simulation');
