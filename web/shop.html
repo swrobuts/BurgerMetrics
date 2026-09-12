@@ -597,6 +597,28 @@ ul { list-style: none; }
   line-height: 1.5;
   margin-bottom: 12px;
 }
+/* Bewertungszeile: Stand aus wawi.v_rezension_produkt; der Knopf öffnet das Formular */
+.menu-card-rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: .8rem;
+  margin-bottom: 10px;
+}
+.menu-card-rating .rating-text { color: var(--gold); font-weight: 600; }
+.menu-card-rating .rating-text.leer { color: var(--stone-400); font-weight: 400; }
+.bewerten-btn {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--red);
+  background: none;
+  padding: 6px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.bewerten-btn:hover { color: var(--red-light); }
 .menu-card-nutrition {
   display: flex;
   gap: 12px;
@@ -4316,6 +4338,8 @@ let PRODUCTS = [];   // wird aus v_speisekarte geladen
 
 
 let BRANCHES = [];   // wird aus v_filialliste geladen
+let BEWERTUNGEN = new Map();   // artikel_id -> Zeile aus wawi.v_rezension_produkt
+let STIMMEN = new Map();       // artikel_id -> bis zu drei Kundenstimmen (nur Simulation)
 
 
 // =============================================================================
@@ -4330,6 +4354,18 @@ let appDiscount = false; // toggled randomly for demo
 // =============================================================================
 const menuGrid = document.getElementById('menuGrid');
 let activeFilter = 'all';
+
+// Bewertungstext einer Karte; die Formatierung liegt in js/rezensionen.js
+// (Modul), der klassische Block erreicht sie über window.REZENSIONEN.
+function bewertungVon(artikelId) {
+  return window.REZENSIONEN ? window.REZENSIONEN.bewertungText(BEWERTUNGEN.get(artikelId)) : '';
+}
+
+// „leer" färbt die Zeile grau, solange ein Artikel keine Rezension hat.
+function bewertungKlasse(artikelId) {
+  const zeile = BEWERTUNGEN.get(artikelId);
+  return zeile && zeile.anzahl ? '' : 'leer';
+}
 
 function renderMenu(filter) {
   const items = filter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.cat === filter);
@@ -4347,6 +4383,9 @@ function renderMenu(filter) {
       <div class="menu-card-body">
         <div class="menu-card-cat">${p.sub}</div>
         <div class="menu-card-name">${p.name}</div>
+        <div class="menu-card-rating">
+          <span class="rating-text ${bewertungKlasse(p.id)}" data-rating="${p.id}">${bewertungVon(p.id)}</span>
+        </div>
         <div class="menu-card-desc">${p.desc}</div>
         <div class="menu-card-nutrition">
           <div class="nutrition-item"><div class="nutrition-val">${p.cal}</div><div class="nutrition-label">kcal</div></div>
@@ -5185,9 +5224,11 @@ renderMenu = function(filter) {
   setTimeout(initTilt, 600);
 };
 // Der Shop startet, sobald Speisekarte und Filialliste da sind.
-window.shopStarten = function(artikel, filialen) {
+window.shopStarten = function(artikel, filialen, bewertungen, stimmen) {
   PRODUCTS = artikel;
   BRANCHES = filialen;
+  BEWERTUNGEN = bewertungen || new Map();
+  STIMMEN = stimmen || new Map();
   renderMenu(activeFilter);
   renderBranches();
   if (document.getElementById('map') && !window.__karteGebaut) {
@@ -5746,9 +5787,13 @@ setTimeout(() => {
 import { QUELLE } from './js/konfiguration.js';
 import { waehleQuelle } from './js/datenquelle.js';
 import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js';
+import { bewertungText, pruefeEingabe, zaehlerText, datumText, nachArtikel,
+         stimmenNachArtikel, datensatzZeilen } from './js/rezensionen.js';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;
+// Die Rezensionslogik ebenso — der klassische Block ruft sie über window.REZENSIONEN.
+window.REZENSIONEN = { bewertungText, pruefeEingabe, zaehlerText, datumText, datensatzZeilen };
 
 // Sitzungskennung, damit eine Uebungsgruppe ihre Bestellungen in
 // wawi.v_bestellung_letzte wiederfindet. Lebt nur in diesem Tab.
@@ -5776,8 +5821,11 @@ try {
   // Kunden im Jahr und 3,8 Sterne. Auf der Kundenseite eine Bewertung zu
   // behaupten, die der eigene Bestand nicht hergibt, ist der schlimmste Fall
   // davon. Deshalb kommen sie jetzt aus derselben Quelle wie alles andere.
-  const [karte, filialen, einzel] = await Promise.all([
-    quelle.speisekarte(), quelle.filialliste(), quelle.einzelwerte()]);
+  // Bewertungsstand und Kundenstimmen kommen mit derselben Abfrage wie die
+  // Speisekarte — beides aus dem operativen Schema, nichts steht im Quelltext.
+  const [karte, filialen, einzel, bewertungsstand, stimmen] = await Promise.all([
+    quelle.speisekarte(), quelle.filialliste(), quelle.einzelwerte(),
+    quelle.rezensionenProdukt(), quelle.kundenstimmen()]);
 
   const artikel = karte.map(a => ({
     id: a.artikel_id, name: a.name, cat: a.kategorie, sub: a.unterkategorie,
@@ -5916,8 +5964,9 @@ try {
   };
 
   schirm.remove();
-  window.shopStarten(artikel, standorte);
-  console.info(`Shop: ${artikel.length} Artikel und ${standorte.length} Filialen `
+  window.shopStarten(artikel, standorte, nachArtikel(bewertungsstand), stimmenNachArtikel(stimmen));
+  console.info(`Shop: ${artikel.length} Artikel, ${standorte.length} Filialen und `
+             + `${bewertungsstand.filter(b => b.anzahl > 0).length} Artikel mit Bewertung `
              + `aus ${QUELLE.art} geladen.`);
 } catch (fehler) {
   schirm.innerHTML = '<div><b style="color:#b91c1c">Die Datenquelle antwortet nicht.</b>'
