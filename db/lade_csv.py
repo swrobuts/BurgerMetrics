@@ -8,8 +8,9 @@ ausserhalb des Schemas). obt_orders wird NICHT geladen, sondern in
 0003_obt.sql aus dem Galaxy-Schema erzeugt — derselbe Weg wie im Deck.
 
     python3 db/lade_csv.py [dataset-Verzeichnis]
+    python3 db/lade_csv.py --nur fact_reviews     # nur eine Tabelle leeren und laden
 """
-import os, sys, time
+import argparse, os, sys, time
 import psycopg2
 from pathlib import Path
 
@@ -27,10 +28,28 @@ def lade_env():
 
 lade_env()
 
-BASIS = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "dataset"
 REIHENFOLGE = ["dim_branch", "dim_customer", "dim_date", "dim_payment_method",
                "dim_product", "dim_promotion", "dim_supplier", "dim_time_slot",
-               "dim_weather", "dim_employee", "fact_orders", "fact_order_items"]
+               "dim_weather", "dim_employee", "fact_orders", "fact_order_items",
+               "fact_reviews"]
+
+
+def argumente():
+    """Liest Verzeichnis und optionale Tabellenauswahl von der Kommandozeile."""
+    ap = argparse.ArgumentParser(description="dataset/*.csv per COPY in das Schema burgermetrics laden")
+    ap.add_argument("verzeichnis", nargs="?", default=None,
+                    help="Ordner mit den CSV-Dateien (Standard: dataset/)")
+    ap.add_argument("--nur", nargs="+", metavar="TABELLE",
+                    help="nur diese Tabellen leeren und neu laden")
+    return ap.parse_args()
+
+
+ARGS = argumente()
+BASIS = Path(ARGS.verzeichnis) if ARGS.verzeichnis else Path(__file__).resolve().parent.parent / "dataset"
+unbekannt = [t for t in (ARGS.nur or []) if t not in REIHENFOLGE]
+if unbekannt:
+    sys.exit(f"FEHLER: unbekannte Tabelle(n): {', '.join(unbekannt)} — erlaubt: {', '.join(REIHENFOLGE)}")
+TABELLEN = [t for t in REIHENFOLGE if not ARGS.nur or t in ARGS.nur]
 
 con = psycopg2.connect(host=os.environ["PGHOST"], port=os.environ["PGPORT"],
                        dbname=os.environ["PGDATABASE"], user=os.environ["PGUSER"],
@@ -40,10 +59,10 @@ cur = con.cursor()
 cur.execute("SET search_path TO burgermetrics")
 
 # Leeren in umgekehrter Reihenfolge (Fremdschluessel)
-for t in reversed(REIHENFOLGE):
+for t in reversed(TABELLEN):
     cur.execute(f"TRUNCATE TABLE {t} CASCADE")
 
-for t in REIHENFOLGE:
+for t in TABELLEN:
     pfad = BASIS / f"{t}.csv"
     start = time.time()
     with open(pfad, encoding="utf-8") as f:
