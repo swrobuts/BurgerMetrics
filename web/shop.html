@@ -2922,6 +2922,37 @@ body.data-mode .phone-mockup { animation: none; }
   border: 1px solid var(--stone-200);
   color: var(--stone-600);
 }
+/* ── Rezension: Formular im Modal ────────────────────────────────────────── */
+.review-box { text-align: left; max-width: 520px; padding: 40px; position: relative; max-height: 92vh; overflow-y: auto; }
+.review-close { position: absolute; top: 12px; right: 16px; font-size: 1.6rem; line-height: 1; background: none; color: var(--stone-400); cursor: pointer; }
+.review-close:hover { color: var(--charcoal); }
+.review-box h3 { text-align: center; }
+.review-product { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: .5px; text-align: center; }
+.review-stand { text-align: center; color: var(--gold); font-weight: 600; font-size: .9rem; margin-bottom: 16px; }
+.review-stand.leer { color: var(--stone-400); font-weight: 400; }
+.sterne-wahl { border: none; padding: 0; margin: 0 0 12px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.sterne-wahl legend { font-size: .8rem; font-weight: 600; color: var(--stone-600); margin-bottom: 4px; width: 100%; }
+.sterne-wahl input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sterne-wahl label { font-size: 2rem; line-height: 1; color: var(--stone-200); cursor: pointer; transition: color .15s; }
+.sterne-wahl label.aktiv { color: var(--gold); }
+.sterne-wahl input:focus-visible + label { outline: 2px solid var(--red); outline-offset: 2px; border-radius: 4px; }
+.review-label { display: block; font-size: .8rem; font-weight: 600; color: var(--stone-600); margin: 10px 0 4px; }
+#reviewText { width: 100%; border: 1px solid var(--stone-200); border-radius: var(--radius); padding: 10px 12px; font: inherit; font-size: .9rem; resize: vertical; }
+#reviewText:focus { outline: 2px solid var(--gold); border-color: transparent; }
+.review-zaehler { text-align: right; font-size: .75rem; color: var(--stone-400); margin-top: 2px; }
+#reviewBranch { width: 100%; border: 1px solid var(--stone-200); border-radius: var(--radius); padding: 10px 12px; font: inherit; font-size: .9rem; background: var(--white); }
+.review-meldung { min-height: 1.4em; font-size: .85rem; margin: 10px 0; color: var(--stone-600); }
+.review-meldung.ok { color: #166534; font-weight: 600; }
+.review-meldung.err { color: var(--red); font-weight: 600; }
+#reviewSenden { width: 100%; justify-content: center; }
+.review-stimmen { margin-top: 24px; border-top: 1px solid var(--stone-200); padding-top: 16px; }
+.review-stimmen h4 { font-size: .8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.review-stimmen ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; max-height: 220px; overflow-y: auto; }
+.stimme { font-size: .85rem; color: var(--stone-600); line-height: 1.5; }
+.stimme-kopf { color: var(--gold); font-weight: 600; font-size: .8rem; }
+.stimme p { margin: 2px 0 0; }
+.stimme.leer { color: var(--stone-400); }
+@media (max-width: 600px) { .review-box { padding: 28px 20px; } .review-stimmen ul { max-height: 160px; } }
 </style>
 <style>
 /* ============================================
@@ -4325,6 +4356,37 @@ body.data-mode .phone-mockup { animation: none; }
   </div>
 </div>
 
+<!-- ===================== REZENSION ===================== -->
+<div class="modal-overlay" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+  <div class="modal-box review-box">
+    <button type="button" class="review-close" onclick="closeReview()" aria-label="Schließen">&times;</button>
+    <h3 id="reviewTitle">Bewerten</h3>
+    <div class="review-product" id="reviewProduct"></div>
+    <div class="review-stand" id="reviewStand"></div>
+    <form id="reviewForm" onsubmit="return false">
+      <fieldset class="sterne-wahl" id="sterneWahl">
+        <legend>Sterne</legend>
+        <input type="radio" name="sterne" id="stern1" value="1"><label for="stern1" title="1 Stern">★</label>
+        <input type="radio" name="sterne" id="stern2" value="2"><label for="stern2" title="2 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern3" value="3"><label for="stern3" title="3 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern4" value="4"><label for="stern4" title="4 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern5" value="5"><label for="stern5" title="5 Sterne">★</label>
+      </fieldset>
+      <label for="reviewText" class="review-label">Ihre Rezension</label>
+      <textarea id="reviewText" maxlength="500" rows="4" placeholder="Was hat gepasst, was nicht? 5 bis 500 Zeichen." oninput="reviewZaehler()"></textarea>
+      <div class="review-zaehler" id="reviewZaehler">0 / 500</div>
+      <label for="reviewBranch" class="review-label">Filiale</label>
+      <select id="reviewBranch"></select>
+      <div class="review-meldung" id="reviewMeldung" aria-live="polite"></div>
+      <button type="submit" class="btn btn-primary" id="reviewSenden">Senden</button>
+    </form>
+    <div class="review-stimmen">
+      <h4>Kundenstimmen</h4>
+      <ul id="reviewStimmen"></ul>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== TOAST ===================== -->
 <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastMsg"></span></div>
 
@@ -4385,6 +4447,7 @@ function renderMenu(filter) {
         <div class="menu-card-name">${p.name}</div>
         <div class="menu-card-rating">
           <span class="rating-text ${bewertungKlasse(p.id)}" data-rating="${p.id}">${bewertungVon(p.id)}</span>
+          <button type="button" class="bewerten-btn" onclick="openReview(${p.id})">Bewerten</button>
         </div>
         <div class="menu-card-desc">${p.desc}</div>
         <div class="menu-card-nutrition">
@@ -4593,6 +4656,111 @@ function placeOrder() {
 function closeModal() {
   document.getElementById('orderModal').classList.remove('open');
 }
+
+// =============================================================================
+// REZENSION — Modal mit Sternen, Text, Filiale und Kundenstimmen
+// =============================================================================
+let reviewProduktId = null;   // der Artikel, der gerade bewertet wird
+
+// Öffnet das Formular für einen Artikel: Stand, Filiale aus dem Warenkorb,
+// Kundenstimmen aus der Simulation. Das Formular startet leer.
+function openReview(artikelId) {
+  const produkt = PRODUCTS.find(p => p.id === artikelId);
+  if (!produkt) return;
+  reviewProduktId = artikelId;
+  document.getElementById('reviewProduct').textContent = produkt.name;
+  reviewStandAnzeigen();
+  document.getElementById('reviewForm').reset();
+  sterneAnzeigen(0);
+  reviewZaehler();
+  reviewMeldung('', '');
+  document.getElementById('reviewSenden').disabled = false;
+  filialwahlFuellen();
+  stimmenAnzeigen(artikelId);
+  document.getElementById('reviewModal').classList.add('open');
+  document.getElementById('stern1').focus();
+  logEvent('REVIEW_OPEN', `Bewerten: ${produkt.name}`, 'Formular geöffnet · Ziel: wawi.rezension');
+}
+
+function closeReview() {
+  document.getElementById('reviewModal').classList.remove('open');
+}
+
+// Bewertungsstand des offenen Artikels im Modal (auch nach dem Speichern).
+function reviewStandAnzeigen() {
+  const stand = document.getElementById('reviewStand');
+  stand.textContent = bewertungVon(reviewProduktId);
+  stand.className = 'review-stand ' + bewertungKlasse(reviewProduktId);
+}
+
+// Färbt die Sterne bis zur gewählten Zahl; die Auswahl selbst liegt in den
+// Radios, deshalb bleibt sie mit der Tastatur bedienbar.
+function sterneAnzeigen(anzahl) {
+  document.querySelectorAll('#sterneWahl label').forEach((label, i) => {
+    label.classList.toggle('aktiv', i < anzahl);
+  });
+}
+
+function reviewZaehler() {
+  const text = document.getElementById('reviewText').value;
+  document.getElementById('reviewZaehler').textContent = window.REZENSIONEN.zaehlerText(text);
+}
+
+// Meldung unter dem Formular: '' (neutral), 'ok' oder 'err'.
+function reviewMeldung(art, text) {
+  const el = document.getElementById('reviewMeldung');
+  el.className = 'review-meldung' + (art ? ' ' + art : '');
+  el.textContent = text;
+}
+
+// Filialwahl aus derselben Liste wie der Warenkorb, dort gewählte Filiale vorbelegt.
+function filialwahlFuellen() {
+  const wahl = document.getElementById('reviewBranch');
+  wahl.textContent = '';
+  const keine = document.createElement('option');
+  keine.value = '';
+  keine.textContent = 'keine Angabe';
+  wahl.appendChild(keine);
+  for (const f of BRANCHES) {
+    const o = document.createElement('option');
+    o.value = f.id;
+    o.textContent = f.name;
+    wahl.appendChild(o);
+  }
+  const warenkorb = document.getElementById('cartBranch');
+  if (warenkorb && warenkorb.value) wahl.value = warenkorb.value;
+}
+
+// Kundenstimmen: nur Simulationstexte aus wawi.v_kundenstimmen, immer per
+// textContent — nie innerHTML, weil hier Text aus der Datenbank steht.
+function stimmenAnzeigen(artikelId) {
+  const liste = document.getElementById('reviewStimmen');
+  liste.textContent = '';
+  const stimmen = STIMMEN.get(artikelId) || [];
+  if (!stimmen.length) {
+    const li = document.createElement('li');
+    li.className = 'stimme leer';
+    li.textContent = 'Noch keine Kundenstimme zu diesem Produkt.';
+    liste.appendChild(li);
+    return;
+  }
+  for (const s of stimmen) {
+    const li = document.createElement('li');
+    li.className = 'stimme';
+    const kopf = document.createElement('div');
+    kopf.className = 'stimme-kopf';
+    kopf.textContent = '★'.repeat(s.sterne) + '☆'.repeat(5 - s.sterne) + ' · ' + window.REZENSIONEN.datumText(s.datum);
+    const text = document.createElement('p');
+    text.textContent = s.inhalt;
+    li.appendChild(kopf);
+    li.appendChild(text);
+    liste.appendChild(li);
+  }
+}
+
+document.getElementById('sterneWahl').addEventListener('change', e => sterneAnzeigen(Number(e.target.value)));
+document.getElementById('reviewModal').addEventListener('click', e => { if (e.target.id === 'reviewModal') closeReview(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReview(); });
 
 // =============================================================================
 // MAP
