@@ -4,6 +4,12 @@
  * shop.html kümmert sich nur um die Darstellung.
  */
 
+/** Leerraum wie die Datenbank behandeln: Folgen zu einem Leerzeichen, Ränder weg —
+ *  rezension_anlegen() misst genau diesen Text. */
+export function normalisiereText(inhalt) {
+  return String(inhalt ?? '').replace(/\s+/g, ' ').trim();
+}
+
 /** Formatiert den Bewertungsstand eines Artikels: „★ 4,3 · 128 Bewertungen". */
 export function bewertungText(zeile) {
   if (!zeile || !zeile.anzahl) return 'noch keine Bewertung';
@@ -19,7 +25,7 @@ export function pruefeEingabe({ sterne, inhalt }) {
   const befunde = [];
   const s = Number(sterne);
   if (!Number.isInteger(s) || s < 1 || s > 5) befunde.push('Bitte 1 bis 5 Sterne wählen.');
-  const text = String(inhalt ?? '').trim();
+  const text = normalisiereText(inhalt);
   if (text.length < 5) befunde.push('Der Text braucht mindestens 5 Zeichen.');
   if (text.length > 500) befunde.push('Der Text darf höchstens 500 Zeichen haben.');
   return befunde;
@@ -27,7 +33,7 @@ export function pruefeEingabe({ sterne, inhalt }) {
 
 /** Zähler unter dem Textfeld: „37 / 500" — gezählt wie die Datenbank, nach Trim. */
 export function zaehlerText(inhalt) {
-  return `${String(inhalt ?? '').trim().length} / 500`;
+  return `${normalisiereText(inhalt).length} / 500`;
 }
 
 /** Ein ISO-Datum (auch mit Uhrzeit) als Tag.Monat.Jahr. */

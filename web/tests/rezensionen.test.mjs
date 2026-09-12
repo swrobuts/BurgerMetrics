@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { bewertungText, pruefeEingabe, zaehlerText, datumText, nachArtikel,
-         stimmenNachArtikel, datensatzZeilen } from '../js/rezensionen.js';
+         stimmenNachArtikel, datensatzZeilen, normalisiereText } from '../js/rezensionen.js';
 
 test('bewertungText: Mittel mit Komma, Anzahl mit Tausenderpunkt, Einzahl', () => {
   assert.equal(bewertungText({ anzahl: 128, sterne_mittel: 4.3 }), '★ 4,3 · 128 Bewertungen');
@@ -57,4 +57,12 @@ test('datensatzZeilen: ohne inhalt, mit Warehouse-Hinweis', () => {
   assert.equal(zeilen[4][1], '12.9.2026, 20:33:47');
   assert.match(zeilen[6][1], /^nein/);
   assert.equal(datensatzZeilen({ rezension_id: 1, sterne: 5, im_warehouse: true })[6][1], 'ja');
+});
+
+test('normalisiereText und pruefeEingabe zählen wie die Datenbank (Leerraumfolgen = ein Leerzeichen)', () => {
+  assert.equal(normalisiereText('a          b'), 'a b');
+  assert.equal(normalisiereText(' Zeile\n\n zwei \t drei '), 'Zeile zwei drei');
+  assert.deepEqual(pruefeEingabe({ sterne: 3, inhalt: 'a          b' }), ['Der Text braucht mindestens 5 Zeichen.']);
+  assert.deepEqual(pruefeEingabe({ sterne: 3, inhalt: 'abcde' + ' '.repeat(600) + 'fghij' }), []);
+  assert.equal(zaehlerText('a          b'), '3 / 500');
 });
