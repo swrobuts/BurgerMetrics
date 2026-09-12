@@ -70,6 +70,26 @@ export class Datenquelle {
    *  positionen, brutto_gesamt, rabatt_betrag, netto_gesamt, erfasst_am,
    *  im_warehouse */
   letzteBestellungen() { throw new Error('nicht umgesetzt'); }
+  /** Bewertungsstand je Artikel (operatives Schema, über alle Quellen):
+   *  artikel_id, name, anzahl, sterne_mittel (eine Nachkommastelle, null ohne
+   *  Rezension), letzte (Datum der jüngsten Rezension) — immer frisch geholt,
+   *  weil sich der Stand nach jeder gespeicherten Rezension ändert. */
+  rezensionenProdukt() { throw new Error('nicht umgesetzt'); }
+  /** Die drei jüngsten Simulationstexte je Artikel — das Einzige, was der Shop
+   *  an Rezensionstext zeigt: artikel_id, rezension_id, sterne, inhalt, datum */
+  kundenstimmen() { throw new Error('nicht umgesetzt'); }
+  /**
+   * Eine Rezension im operativen System anlegen — der zweite Schreibweg.
+   * @param {object} rezension  artikel_id, sterne (1–5), inhalt (5–500 Zeichen
+   *   nach Trim); optional filiale_id, sitzung. Die Datenbank prüft alles und
+   *   bremst: 20 je Sitzung und zehn Minuten, 600 je Stunde insgesamt.
+   * @returns {Promise<object>} rezension_id, artikel, sterne, erstellt_am, quelle
+   */
+  rezensionAnlegen(rezension) { throw new Error('nicht umgesetzt'); }
+  /** Die 50 jüngsten Shop-Rezensionen: rezension_id, sitzung, artikel, filiale,
+   *  sterne, inhalt, erstellt_am, im_warehouse. inhalt ist Besuchertext und
+   *  wird auf keiner Seite gerendert. */
+  letzteRezensionen() { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden, bestellungen, umsatz, umsatzanteil_pct */
   alterUmsatz() { throw new Error('nicht umgesetzt'); }
   /** eine Zeile: bestellungen, aus_heimatbezirk, anteil_pct, filialbezirke, wohnbezirke */
@@ -201,6 +221,10 @@ export class PostgrestQuelle extends Datenquelle {
   filialliste()        { return this.hole('v_filialliste', '', { schema: this.schemaWawi }); }
   bestellungAnlegen(b) { return this.rufe('bestellung_anlegen', b); }
   letzteBestellungen() { return this.hole('v_bestellung_letzte', '', { schema: this.schemaWawi, frisch: true }); }
+  rezensionenProdukt() { return this.hole('v_rezension_produkt', 'order=artikel_id', { schema: this.schemaWawi, frisch: true }); }
+  kundenstimmen()      { return this.hole('v_kundenstimmen', 'order=artikel_id,rezension_id.desc', { schema: this.schemaWawi }); }
+  rezensionAnlegen(r)  { return this.rufe('rezension_anlegen', r); }
+  letzteRezensionen()  { return this.hole('v_rezension_letzte', '', { schema: this.schemaWawi, frisch: true }); }
   alterUmsatz()        { return this.hole('v_alter_umsatz', 'order=umsatz.desc'); }
   heimatbezirk()       { return this.hole('v_heimatbezirk', ''); }
   kundenLoyalty()      { return this.hole('v_kunde_loyalty', ''); }
