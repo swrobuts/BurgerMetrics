@@ -59,7 +59,7 @@ test('datensatzZeilen: ohne inhalt, mit Warehouse-Hinweis', () => {
   assert.equal(datensatzZeilen({ rezension_id: 1, sterne: 5, im_warehouse: true })[6][1], 'ja');
 });
 
-test('normalisiereText und pruefeEingabe zählen wie die Datenbank (Leerraumfolgen = ein Leerzeichen)', () => {
+test('normalisiereText, pruefeEingabe und zaehlerText zählen wie die Datenbank (Leerraumfolgen = ein Leerzeichen)', () => {
   assert.equal(normalisiereText('a          b'), 'a b');
   assert.equal(normalisiereText(' Zeile\n\n zwei \t drei '), 'Zeile zwei drei');
   assert.deepEqual(pruefeEingabe({ sterne: 3, inhalt: 'a          b' }), ['Der Text braucht mindestens 5 Zeichen.']);

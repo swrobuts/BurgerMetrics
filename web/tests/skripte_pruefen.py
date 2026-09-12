@@ -26,7 +26,7 @@ def bloecke(html):
 
 
 def pruefe(datei):
-    """Schreibt jeden Block in eine Datei (.mjs für Module) und lässt node --check darüber laufen."""
+    """Schreibt jeden Block in eine Datei (.mjs für Module), lässt node --check darüber laufen und räumt die Datei weg."""
     fehler = 0
     for nummer, modul, code in bloecke(Path(datei).read_text(encoding='utf-8')):
         with tempfile.NamedTemporaryFile('w', suffix='.mjs' if modul else '.js',
@@ -34,6 +34,7 @@ def pruefe(datei):
             f.write(code)
             pfad = f.name
         lauf = subprocess.run(['node', '--check', pfad], capture_output=True, text=True)
+        Path(pfad).unlink()
         if lauf.returncode:
             fehler += 1
             print(f'FEHLER in Skriptblock {nummer} ({"Modul" if modul else "klassisch"}):\n{lauf.stderr.strip()}')

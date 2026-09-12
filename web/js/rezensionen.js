@@ -23,15 +23,15 @@ export function bewertungText(zeile) {
  *  damit die Meldung sofort erscheint und nicht erst aus der Datenbank. */
 export function pruefeEingabe({ sterne, inhalt }) {
   const befunde = [];
-  const s = Number(sterne);
-  if (!Number.isInteger(s) || s < 1 || s > 5) befunde.push('Bitte 1 bis 5 Sterne wählen.');
+  const sterneZahl = Number(sterne);
+  if (!Number.isInteger(sterneZahl) || sterneZahl < 1 || sterneZahl > 5) befunde.push('Bitte 1 bis 5 Sterne wählen.');
   const text = normalisiereText(inhalt);
   if (text.length < 5) befunde.push('Der Text braucht mindestens 5 Zeichen.');
   if (text.length > 500) befunde.push('Der Text darf höchstens 500 Zeichen haben.');
   return befunde;
 }
 
-/** Zähler unter dem Textfeld: „37 / 500" — gezählt wie die Datenbank, nach Trim. */
+/** Zähler unter dem Textfeld: „37 / 500" — gezählt wie die Datenbank: Leerraumfolgen als ein Zeichen, Ränder weg. */
 export function zaehlerText(inhalt) {
   return `${normalisiereText(inhalt).length} / 500`;
 }

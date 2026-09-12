@@ -1289,9 +1289,12 @@ ul { list-style: none; }
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition);
+  /* visibility nimmt das geschlossene Modal aus Tab-Reihenfolge und
+     Accessibility-Baum; der verzögerte Wechsel lässt die Ausblendung ausblenden. */
+  visibility: hidden;
+  transition: opacity var(--transition), visibility 0s var(--transition);
 }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-overlay.open { opacity: 1; pointer-events: all; visibility: visible; transition-delay: 0s; }
 .modal-box {
   background: var(--white);
   border-radius: var(--radius-lg);
@@ -2011,7 +2014,7 @@ body.data-mode .data-annotation { display: block; }
 .da-datensatz { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 6px 0 10px; font-family: 'Courier New', monospace; font-size: .78rem; }
 .da-datensatz dt { color: #7DE0FF; }
 .da-datensatz dd { margin: 0; color: #fff; word-break: break-word; }
-.da-datensatz dd.leer { grid-column: 1 / -1; color: rgba(255,255,255,.55); }
+.da-datensatz dd.leer { color: rgba(255,255,255,.55); }
 
 /* Live event flash on interacted elements */
 body.data-mode .menu-card { position: relative; }
@@ -3693,7 +3696,7 @@ body.data-mode .phone-mockup { animation: none; }
         <span class="schema-box schema-box-fact">fact_reviews</span>
       </div>
       Zuletzt in dieser Sitzung gespeichert:
-      <dl class="da-datensatz" id="daRezension"><dd class="leer">noch keine Rezension</dd></dl>
+      <dl class="da-datensatz" id="daRezension"><dt>Stand</dt><dd class="leer">noch keine Rezension</dd></dl>
       <span class="da-metric">stars</span>
       <span class="da-metric">review_text</span>
       <span class="da-metric">source = shop</span><br><br>
@@ -4392,14 +4395,14 @@ body.data-mode .phone-mockup { animation: none; }
     <form id="reviewForm" onsubmit="submitReview(event)">
       <fieldset class="sterne-wahl" id="sterneWahl">
         <legend>Sterne</legend>
-        <input type="radio" name="sterne" id="stern1" value="1"><label for="stern1" title="1 Stern">★</label>
-        <input type="radio" name="sterne" id="stern2" value="2"><label for="stern2" title="2 Sterne">★</label>
-        <input type="radio" name="sterne" id="stern3" value="3"><label for="stern3" title="3 Sterne">★</label>
-        <input type="radio" name="sterne" id="stern4" value="4"><label for="stern4" title="4 Sterne">★</label>
-        <input type="radio" name="sterne" id="stern5" value="5"><label for="stern5" title="5 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern1" value="1" aria-label="1 Stern"><label for="stern1" title="1 Stern">★</label>
+        <input type="radio" name="sterne" id="stern2" value="2" aria-label="2 Sterne"><label for="stern2" title="2 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern3" value="3" aria-label="3 Sterne"><label for="stern3" title="3 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern4" value="4" aria-label="4 Sterne"><label for="stern4" title="4 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern5" value="5" aria-label="5 Sterne"><label for="stern5" title="5 Sterne">★</label>
       </fieldset>
       <label for="reviewText" class="review-label">Ihre Rezension</label>
-      <textarea id="reviewText" maxlength="500" rows="4" placeholder="Was hat gepasst, was nicht? 5 bis 500 Zeichen." oninput="reviewZaehler()"></textarea>
+      <textarea id="reviewText" maxlength="500" rows="4" aria-describedby="reviewZaehler" placeholder="Was hat gepasst, was nicht? 5 bis 500 Zeichen." oninput="reviewZaehler()"></textarea>
       <div class="review-zaehler" id="reviewZaehler">0 / 500</div>
       <label for="reviewBranch" class="review-label">Filiale</label>
       <select id="reviewBranch"></select>
@@ -4473,7 +4476,7 @@ function renderMenu(filter) {
         <div class="menu-card-name">${p.name}</div>
         <div class="menu-card-rating">
           <span class="rating-text ${bewertungKlasse(p.id)}" data-rating="${p.id}">${bewertungVon(p.id)}</span>
-          <button type="button" class="bewerten-btn" onclick="openReview(${p.id})">Bewerten</button>
+          <button type="button" class="bewerten-btn" onclick="openReview(${p.id})" aria-label="${p.name} bewerten">Bewerten</button>
         </div>
         <div class="menu-card-desc">${p.desc}</div>
         <div class="menu-card-nutrition">
@@ -4687,6 +4690,7 @@ function closeModal() {
 // REZENSION — Modal mit Sternen, Text, Filiale und Kundenstimmen
 // =============================================================================
 let reviewProduktId = null;   // der Artikel, der gerade bewertet wird
+let reviewAusloeser = null;   // der Knopf, der das Modal geöffnet hat — bekommt den Fokus zurück
 
 // Öffnet das Formular für einen Artikel: Stand, Filiale aus dem Warenkorb,
 // Kundenstimmen aus der Simulation. Das Formular startet leer.
@@ -4703,13 +4707,16 @@ function openReview(artikelId) {
   document.getElementById('reviewSenden').disabled = false;
   filialwahlFuellen();
   stimmenAnzeigen(artikelId);
+  reviewAusloeser = document.activeElement;
   document.getElementById('reviewModal').classList.add('open');
   document.getElementById('stern1').focus();
   logEvent('REVIEW_OPEN', `Bewerten: ${produkt.name}`, 'Formular geöffnet · Ziel: wawi.rezension');
 }
 
+// Schließt das Modal und gibt den Fokus an den auslösenden Knopf zurück.
 function closeReview() {
   document.getElementById('reviewModal').classList.remove('open');
+  if (reviewAusloeser && typeof reviewAusloeser.focus === 'function') reviewAusloeser.focus();
 }
 
 // Bewertungsstand des offenen Artikels im Modal (auch nach dem Speichern).
@@ -4727,6 +4734,7 @@ function sterneAnzeigen(anzahl) {
   });
 }
 
+// Zähler „n / 500" unter dem Textfeld, gezählt wie die Datenbank.
 function reviewZaehler() {
   const text = document.getElementById('reviewText').value;
   document.getElementById('reviewZaehler').textContent = window.REZENSIONEN.zaehlerText(text);
@@ -4825,6 +4833,7 @@ function submitReview(event) {
     reviewMeldung('err', fehler.message);
   }).finally(() => {
     knopf.disabled = false;
+    knopf.focus();
   });
 }
 

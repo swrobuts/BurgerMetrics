@@ -81,7 +81,7 @@ export class Datenquelle {
   /**
    * Eine Rezension im operativen System anlegen — der zweite Schreibweg.
    * @param {object} rezension  artikel_id, sterne (1–5), inhalt (5–500 Zeichen
-   *   nach Trim); optional filiale_id, sitzung. Die Datenbank prüft alles und
+   *   nach Normalisierung: Leerraumfolgen ein Zeichen, Ränder weg); optional filiale_id, sitzung. Die Datenbank prüft alles und
    *   bremst: 20 je Sitzung und zehn Minuten, 600 je Stunde insgesamt.
    * @returns {Promise<object>} rezension_id, artikel, sterne, erstellt_am, quelle
    */
