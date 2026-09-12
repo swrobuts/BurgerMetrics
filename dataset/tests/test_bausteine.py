@@ -1,3 +1,4 @@
+import difflib
 import json
 import re
 from pathlib import Path
@@ -58,3 +59,16 @@ def test_form(bausteine):
 def test_keine_doppelten(bausteine):
     saetze = alle_saetze(bausteine)
     assert len(saetze) == len(set(saetze))
+
+
+def normalisiert(satz):
+    """Platzhalter, Satzzeichen und Großschreibung ausblenden, damit nur der Wortlaut zählt."""
+    satz = satz.replace("{produkt}", "").replace("{filiale}", "").lower()
+    return re.sub(r"[^a-zäöüß ]+", " ", satz).strip()
+
+
+def test_keine_beinahe_doppelten(bausteine):
+    saetze = [normalisiert(s) for s in alle_saetze(bausteine)]
+    for i, a in enumerate(saetze):
+        for b in saetze[i + 1:]:
+            assert difflib.SequenceMatcher(None, a, b).ratio() < 0.85, (a, b)
