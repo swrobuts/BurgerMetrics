@@ -688,6 +688,8 @@ def erzeuge_text(zeile, sterne, bausteine, rng):
     if sterne != 3 and rng.random() < 0.35:
         saetze.append(rng.choice(bausteine["schluss"][stufe]))
     text = " ".join(saetze)
+    if len(text) > 500:
+        text = " ".join(saetze[:2])       # Einstieg und Produktsatz reichen immer unter 500 Zeichen
     if rng.random() < ANTEIL_UMGANGSSPRACHE:
         text = umgangssprachlich(text, rng)
     return text
@@ -1724,7 +1726,7 @@ cur.execute("SELECT * FROM wawi.etl_probe()"); print("Probe:", cur.fetchall())
 cur.execute("SELECT * FROM wawi.uebungsrezensionen_loeschen()"); print("gelöscht:", cur.fetchone())
 EOF
 ```
-Expected: `angelegt: {'rezension_id': 1, 'artikel': 'Classic Burger', …}`; drei Zeilen `abgewiesen: …` (Sterne, Artikel, Textlänge); `letzte:` eine Zeile mit `im_warehouse = False`; `ETL: (0, 0, 0, 1)`; `Probe:` drei Zeilen mit `0, 0`; `gelöscht: (1, 1)`.
+Expected: `angelegt: {'rezension_id': 1, 'artikel': 'Classic Burger', …}`; drei Zeilen `abgewiesen: …` (Sterne, Artikel, Textlänge); `letzte:` eine Zeile mit `im_warehouse = False`; `ETL: (1, 0, 0, 1)` — der heutige Tag fehlt in `dim_date` (endet 2026-03-31) und wird ergänzt, wie bei Übungsbestellungen; `Probe:` drei Zeilen mit `0, 0`; `gelöscht: (1, 1)`.
 
 - [ ] **Step 5: Commit**
 
@@ -1782,7 +1784,7 @@ con = psycopg2.connect(host="supabase.butscher.cloud", port=5433, dbname="postgr
 con.autocommit = True; cur = con.cursor()
 cur.execute("SELECT count(*) FROM fact_reviews"); print("fact_reviews:", cur.fetchone()[0])
 cur.execute("SELECT count(*) FROM rezension"); print("wawi.rezension:", cur.fetchone()[0])
-cur.execute("SELECT product_name, sterne_mittel FROM v_rezension_produkt ORDER BY sterne_mittel DESC LIMIT 1"); print("beste:", cur.fetchone())
+cur.execute("SELECT product_name, sterne_mittel FROM burgermetrics.v_rezension_produkt ORDER BY sterne_mittel DESC LIMIT 1"); print("beste:", cur.fetchone())
 try:
     cur.execute("SELECT wawi.rezension_anlegen(1, 5, 'Das darf studi_daba nicht.')"); print("FEHLT: Schreibweg offen")
 except Exception as e:
