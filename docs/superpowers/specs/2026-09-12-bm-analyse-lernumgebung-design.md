@@ -16,6 +16,13 @@ anwenden und externe Daten anbinden. Dafür entstehen vier Dinge:
 3. eine Erweiterung des Bestands um **Rezensionen** (Datenbank, Generator, Shop-Feature),
 4. eine interaktive Lernumgebung **BM-Lab** als eigenes Repo auf GitHub Pages.
 
+**Produktionsbereite Übergabe.** Robert führt vor oder in einer Lehrveranstaltung keine
+Skripte aus und arbeitet dort oft nicht am eigenen Rechner. Deshalb gilt für jede Phase: Was
+gebaut wird, wird von der Sitzung selbst in Betrieb genommen — Aufbauskripte auf der
+Instanz eingespielt (über den MCP-Server `burgermetrics-db`, `ausfuehren()`), CSV geladen,
+Sichten materialisiert, Seiten veröffentlicht, Notebooks ausgeführt, Verweise gesetzt. Eine
+Phase ist erst abgeschlossen, wenn der Stand ohne weiteren Handgriff nutzbar ist.
+
 Zielgruppe: Bachelor Business Analytics ohne tiefe Programmiererfahrung. Alles Material ist
 sachlich, nur deutsch, englische Fachbegriffe bleiben englisch, echte Umlaute, Code für
 Anfänger (kurze Funktionen, deutsche Namen, ein Kommentar je Funktion, keine Tricks).
@@ -438,6 +445,7 @@ Alle Übungen sind aus dem Text lösbar, mit `hinweis` und `loesung`; SQL-Lösun
 | Dash | startet lokal, vier Karten mit Daten; Screenshot für das Deck |
 | Deck | Prüfskripte ohne offenen Befund, Render angesehen, PDF-Seitenzahl = Folienzahl, Quellenzeilen vollständig |
 | BM-Lab | `verify.mjs` ohne Befund; jede SQL-Lösung geprüft; Pages erreichbar; Verweise in beide Richtungen funktionieren |
+| Übergabe je Phase | Stand ist produktiv, ohne dass Robert etwas ausführt: `0021` auf der Instanz eingespielt und `fact_reviews` gefüllt; `materialisieren.py --neu` gelaufen; Shop auf Pages mit Bewertungsfunktion; Notebooks mit Ausgaben auf GitHub; BM-Lab veröffentlicht; `README.md` und `web/index.html` verweisen darauf |
 
 ## 12 Reihenfolge
 
