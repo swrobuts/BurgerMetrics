@@ -455,6 +455,8 @@ jeder Seite im Browser (Kopf, Navigation, Übungen, Datenbankband), Aufruf von
 | BM-Lab | `verify.mjs` ohne Befund; jede SQL-Lösung geprüft; Pages erreichbar; Verweise in beide Richtungen funktionieren |
 | Übergabe je Phase | Stand ist produktiv, ohne dass Robert etwas ausführt: `0021` auf der Instanz eingespielt und `fact_reviews` gefüllt; `materialisieren.py --neu` gelaufen; Shop auf Pages mit Bewertungsfunktion; Notebooks mit Ausgaben auf GitHub; BM-Lab veröffentlicht; `README.md` und `web/index.html` verweisen darauf |
 
+**Stand 12. September 2026 (Phase 2):** `0021`, Generator und Glättung sind abgenommen; von der Übergabe je Phase ist der Datenbankteil erfüllt (`0021` eingespielt, `fact_reviews` und `wawi.rezension` mit 10.000 Zeilen, `v_rezension_produkt` materialisiert, PostgREST neu gestartet). Shop, Notebooks, Dash, Deck und BM-Lab folgen in den Phasen 3–6.
+
 ## 12 Reihenfolge
 
 1. Spec committen (erledigt in dieser Sitzung).
