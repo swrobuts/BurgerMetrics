@@ -105,7 +105,7 @@ filiale_id bigint DEFAULT NULL, sitzung text DEFAULT NULL) RETURNS jsonb` — na
 `bestellung_anlegen()`: `SECURITY DEFINER`, `SET search_path = wawi, pg_temp`,
 `#variable_conflict use_variable`. Prüfungen: Artikel bekannt, Sterne 1–5, Text nach `btrim`
 5–500 Zeichen, Filiale bekannt falls angegeben. Bremse: höchstens 20 Rezensionen je Sitzung in
-zehn Minuten (`ERRCODE 53400`). `quelle` ist fest `'shop'`, `kunde_id` bleibt leer (der Shop hat
+zehn Minuten (`ERRCODE 53400`); Aufrufe ohne `sitzung` teilen sich einen gemeinsamen Eimer; dazu eine Notbremse von 600 Shop-Rezensionen je Stunde insgesamt; `sitzung` höchstens 100 Zeichen. `quelle` ist fest `'shop'`, `kunde_id` bleibt leer (der Shop hat
 kein Kundenkonto). Rückgabe `{"rezension_id", "artikel", "sterne", "erstellt_am"}`. Rechte:
 `REVOKE ALL FROM PUBLIC`, `GRANT EXECUTE TO anon, authenticated`, ausdrücklich `REVOKE` für
 `studi_daba`.
@@ -142,11 +142,11 @@ CREATE TABLE IF NOT EXISTS burgermetrics.fact_reviews (
 Indizes auf `date`, `product_id`, `customer_id`. Row Level Security mit Policy `lesen_alle`
 wie alle Tabellen in `burgermetrics` (0004). Grain: eine Rezension. Kennzahl in der
 Semantikschicht: `burgermetrics.v_rezension_produkt` (materialisiert wie die anderen `v_*`):
-je Produkt `product_name`, `category`, `anzahl`, `sterne_mittel`, `anteil_positiv` (4–5
-Sterne), `anteil_negativ` (1–2 Sterne). `materialisieren.py` nimmt die Sicht automatisch mit.
+je Produkt `product_name`, `category`, `anzahl`, `sterne_mittel`, `anteil_positiv_pct` (4–5
+Sterne), `anteil_negativ_pct` (1–2 Sterne). `materialisieren.py` nimmt die Sicht automatisch mit.
 
-**ETL** (Erweiterung von `0019`, in `0021`): Sicht `wawi.stg_fact_reviews` (nur
-`quelle = 'shop'`, Spaltennamen ins Auswertungsvokabular). `burgermetrics.uebernahme_aus_wawi()`
+**ETL** (Erweiterung von `0019`, in `0021`): Sicht `wawi.stg_fact_reviews` (über alle Quellen, damit `etl_probe()` den vollständigen
+Gleichstand prüft; Spaltennamen ins Auswertungsvokabular). `burgermetrics.uebernahme_aus_wawi()`
 wird per `DROP FUNCTION` + `CREATE` um `neue_rezensionen integer` in der Rückgabe erweitert; die
 Tage-Ergänzung in `dim_date` berücksichtigt auch Rezensionsdaten. `wawi.etl_probe()` bekommt
 eine Zeile `rezension`.
@@ -454,6 +454,8 @@ jeder Seite im Browser (Kopf, Navigation, Übungen, Datenbankband), Aufruf von
 | Deck | Prüfskripte ohne offenen Befund, Render angesehen, PDF-Seitenzahl = Folienzahl, Quellenzeilen vollständig |
 | BM-Lab | `verify.mjs` ohne Befund; jede SQL-Lösung geprüft; Pages erreichbar; Verweise in beide Richtungen funktionieren |
 | Übergabe je Phase | Stand ist produktiv, ohne dass Robert etwas ausführt: `0021` auf der Instanz eingespielt und `fact_reviews` gefüllt; `materialisieren.py --neu` gelaufen; Shop auf Pages mit Bewertungsfunktion; Notebooks mit Ausgaben auf GitHub; BM-Lab veröffentlicht; `README.md` und `web/index.html` verweisen darauf |
+
+**Stand 12. September 2026 (Phase 2):** `0021`, Generator und Glättung sind abgenommen; von der Übergabe je Phase ist der Datenbankteil erfüllt (`0021` eingespielt, `fact_reviews` und `wawi.rezension` mit 10.000 Zeilen, `v_rezension_produkt` materialisiert, PostgREST neu gestartet). Shop, Notebooks, Dash, Deck und BM-Lab folgen in den Phasen 3–6.
 
 ## 12 Reihenfolge
 

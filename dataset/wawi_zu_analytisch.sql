@@ -115,12 +115,26 @@ SELECT position_id         AS order_item_id,
        positionsbetrag     AS line_total
 FROM bestellposition;
 
+-- ── fact_reviews: Zeitstempel wird zu Datum und Uhrzeit, sonst Umbenennung ──
+CREATE OR REPLACE VIEW fact_reviews_neu AS
+SELECT rezension_id                         AS review_id,
+       CAST(erstellt_am AS DATE)            AS date,
+       CAST(erstellt_am AS TIME)            AS time,
+       kunde_id                             AS customer_id,
+       artikel_id                           AS product_id,
+       filiale_id                           AS branch_id,
+       bestellung_id                        AS order_id,
+       sterne                               AS stars,
+       inhalt                               AS review_text,
+       quelle                               AS source
+FROM rezension;
+
 -- ── Gleichheitsbeweis ──────────────────────────────────────────────────────
--- Nach zusaetzlichem Laden von burgermetrics_mini.sql muss jede der acht
+-- Nach zusaetzlichem Laden von burgermetrics_mini.sql muss jede der neun
 -- Pruefungen 0 liefern (symmetrische Differenz der Zeilenmengen):
 --
 --   SELECT count(*) FROM ((SELECT * FROM dim_product_neu EXCEPT SELECT * FROM dim_product)
 --                  UNION ALL (SELECT * FROM dim_product EXCEPT SELECT * FROM dim_product_neu)) t;
 --
 -- ... und analog fuer dim_branch, dim_customer, dim_payment_method,
--- dim_promotion, dim_date, fact_orders, fact_order_items.
+-- dim_promotion, dim_date, fact_orders, fact_order_items, fact_reviews.

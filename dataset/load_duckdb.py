@@ -59,6 +59,7 @@ TABELLEN = [
     ("dim_weather", "dim_weather.csv"),
     ("fact_orders", "fact_orders.csv"),
     ("fact_order_items", "fact_order_items.csv"),
+    ("fact_reviews", "fact_reviews.csv"),
     ("obt_orders", "obt_orders.csv"),
 ]
 
@@ -77,6 +78,7 @@ SOLL = {
     "dim_weather": 3_377,
     "fact_orders": 754_513,
     "fact_order_items": 2_950_082,
+    "fact_reviews": 10_000,
     "obt_orders": 754_513,
 }
 

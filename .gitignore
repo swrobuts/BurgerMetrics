@@ -30,3 +30,6 @@ slides/
 
 # Umgebung des MCP-Servers — reproduzierbar aus mcp/requirements.txt
 mcp/.venv/
+
+# Lose der Rezensionsglättung — Zwischenstand, reproduzierbar aus fact_reviews_roh.csv
+dataset/glaettung/lose/
