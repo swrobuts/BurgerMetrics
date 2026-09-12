@@ -354,7 +354,7 @@ python3 glaettung/lose_schreiben.py         # 100 Lose à 100 Texte
 python3 glaettung/zusammenfuehren.py        # fact_reviews.csv, mit Prüfung
 ```
 
-Der Rohstand ist deterministisch; die Glättung ist es nicht, deshalb ist `fact_reviews.csv` der eingefrorene Bestand. Stand: 10.000 von 10.000 Texten geglättet. Nach der Glättung wurden 218 Produktaussagen gezielt nachgebessert, bei denen der Text nicht zum Produkt passte — etwa Burger-Vokabular in Rezensionen zur Green Goddess Bowl oder Frittier-Vokabular bei Side Salad und Coleslaw.
+Der Rohstand ist deterministisch; die Glättung ist es nicht, deshalb ist `fact_reviews.csv` der eingefrorene Bestand. Stand: 10.000 von 10.000 Texten geglättet. Nach der Glättung wurden 371 Produktaussagen in zwei Durchgängen gezielt nachgebessert, bei denen der Text nicht zum Produkt passte — etwa Burger-Vokabular in Rezensionen zur Green Goddess Bowl, Frittier-Vokabular bei Side Salad und Coleslaw oder „süß" und „gut gemischt" bei Wasser und Bier.
 
 ---
 

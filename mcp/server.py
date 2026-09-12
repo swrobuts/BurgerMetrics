@@ -97,7 +97,7 @@ ERKLAERUNG = {
     "wawi": ("Operatives Warenwirtschaftsmodell, 3NF, deutsche Namen. Kasse "
              "und Shop lesen hier Speisekarte und Filialliste und schreiben "
              "jeden Beleg hinein (kundenbestellung, bestellposition, rechnung); Rezensionen aus dem Shop landen in rezension. "
-             "16 Tabellen, drei Sichten fuer die Anwendungen, drei stg-Sichten "
+             "16 Tabellen, sechs Sichten fuer die Anwendungen, vier stg-Sichten "
              "fuer den ETL-Schritt."),
     "burgermetrics": ("Auswertungsmodell: Galaxy-Schema mit zehn dim_-Tabellen, "
                       "fact_orders (Grain Bestellung), fact_order_items (Grain "
@@ -341,7 +341,7 @@ def tabelle_beschreiben(name: str) -> str:
 def beziehungen_auflisten(schema: str = "wawi") -> str:
     """Alle Fremdschluessel eines Schemas: das Datenmodell als Liste.
 
-    schema  "wawi" (15 Tabellen, 3NF) oder "burgermetrics" (Galaxy-Schema).
+    schema  "wawi" (16 Tabellen, 3NF) oder "burgermetrics" (Galaxy-Schema).
     """
     try:
         _schema_pruefen(schema)
