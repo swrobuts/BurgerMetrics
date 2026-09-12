@@ -132,7 +132,8 @@ CREATE TABLE IF NOT EXISTS burgermetrics.fact_reviews (
 );
 ```
 
-Indizes auf `date`, `product_id`, `customer_id`. Grain: eine Rezension. Kennzahl in der
+Indizes auf `date`, `product_id`, `customer_id`. Row Level Security mit Policy `lesen_alle`
+wie alle Tabellen in `burgermetrics` (0004). Grain: eine Rezension. Kennzahl in der
 Semantikschicht: `burgermetrics.v_rezension_produkt` (materialisiert wie die anderen `v_*`):
 je Produkt `product_name`, `category`, `anzahl`, `sterne_mittel`, `anteil_positiv` (4–5
 Sterne), `anteil_negativ` (1–2 Sterne). `materialisieren.py` nimmt die Sicht automatisch mit.
@@ -159,8 +160,14 @@ Rezensionen zu vorhandenen Belegen, `dataset/wawi_zu_analytisch.sql` die Abbildu
 
 ### 3.4 Rechte und Proben
 
-`studi_daba` liest neue Tabellen und Sichten über die Default-Privileges (0020). Das Skript
-endet mit einem `DO`-Block, der prüft: `studi_daba` liest `wawi.rezension` und
+`0021` läuft **als `postgres`** (über den MCP-Server oder `psql` mit dem Betreiberkonto), nicht als
+`supabase_admin`: Die Default-Privileges aus 0020 und 0018 gelten nur für Objekte, die `postgres`
+anlegt. Unabhängig davon setzt das Skript die Rechte ausdrücklich — `GRANT SELECT` auf
+`wawi.rezension`, `burgermetrics.fact_reviews` und die neuen Sichten an `studi_daba`, `anon`,
+`authenticated`; `ENABLE ROW LEVEL SECURITY` plus Policy `lesen_alle` auf beiden Tabellen —, damit
+kein Leserecht an der Reihenfolge der Ausführung hängt. Stand 12.09.2026, live geprüft: `studi_daba`
+liest alle 71 Objekte beider Schemata, schreibt keines, darf `bestellung_anlegen()` nicht ausführen
+und sieht das Schema `velocity` nicht. Das Skript endet mit einem `DO`-Block, der prüft: `studi_daba` liest `wawi.rezension` und
 `burgermetrics.fact_reviews`, schreibt keines, darf `rezension_anlegen()` nicht ausführen;
 `anon` darf sie ausführen; Zeilenzahl `fact_reviews` = Zeilenzahl `rezension` mit
 `quelle = 'simulation'` = 10.000.
@@ -458,6 +465,10 @@ parallelisieren, sobald Phase 2 steht.
   4.2 hält den Bestand konsistent, auch wenn nicht alle Lose geglättet werden.
 * **Synthetischer Bestand.** Effekte externer Daten sind nicht real; jedes Notebook, das externe
   Daten nutzt, sagt das im Abschnitt „Was offen bleibt".
+* **Tableau und Nur-Lese-Transaktionen.** `studi_daba` hat `default_transaction_read_only = on`;
+  Tableau legt für manche Filter und Extrakte temporäre Tabellen an, was dann scheitert. In der Regel
+  weicht Tableau selbst aus — in Phase 6 mit dem Demo-Konto durchspielen und im Lab 05 als
+  Stolperstein mit der wörtlichen Meldung aufnehmen, falls sie auftritt.
 * **Öffentlicher Schreibweg.** Wie bei Bestellungen: Längen- und Ratenbegrenzung, keine
   Anzeige von Besuchertexten, Rücksetzfunktion. Ein Missbrauch verändert keine Kennzahl des
   kuratierten Bestands, weil der ETL bewusst aufgerufen wird.
