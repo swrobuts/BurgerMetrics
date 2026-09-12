@@ -141,7 +141,8 @@ ANALYZE burgermetrics.fact_reviews;
 -- stg: alle Rezensionen im Auswertungsvokabular, Spaltenfolge wie
 -- fact_reviews. Die Probe vergleicht beide Seiten vollstaendig.
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE VIEW wawi.stg_fact_reviews AS
+DROP VIEW IF EXISTS wawi.stg_fact_reviews CASCADE;
+CREATE VIEW wawi.stg_fact_reviews AS
 SELECT r.rezension_id                                          AS review_id,
        (r.erstellt_am AT TIME ZONE 'Europe/Berlin')::date       AS date,
        date_trunc('second', r.erstellt_am AT TIME ZONE 'Europe/Berlin')::time AS time,
