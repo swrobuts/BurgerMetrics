@@ -4788,7 +4788,9 @@ function submitReview(event) {
     document.getElementById('reviewForm').reset();
     sterneAnzeigen(0);
     reviewZaehler();
-    return bewertungenAktualisieren();
+    // Der neue Stand ist Beiwerk: Scheitert das Nachladen, bleibt die
+    // Bestätigung stehen — die Rezension ist gespeichert.
+    bewertungenAktualisieren().catch(fehler => console.warn('Bewertungsstand nicht neu geladen:', fehler));
   }).catch(fehler => {
     // Die Meldung der Datenbank, z. B. die Bremse — nichts wird umformuliert.
     reviewMeldung('err', fehler.message);
