@@ -1,6 +1,6 @@
 # BurgerMetrics — Analyse-Deck, Notebooks, Rezensionen und BM-Lab
 
-Entwurf vom 12.09.2026, mit Robert abgestimmt. Dieses Dokument ist die Vorlage für die
+Entwurf vom 12.09.2026, mit Robert abgestimmt; am selben Tag auf ein Repo umgestellt (BM-Lab unter `web/lab/`). Dieses Dokument ist die Vorlage für die
 Umsetzung in einer neuen Sitzung im Repo `BurgerMetrics_Website`; der Implementierungsplan
 entsteht daraus je Phase mit dem Skill `writing-plans`.
 
@@ -14,7 +14,7 @@ anwenden und externe Daten anbinden. Dafür entstehen vier Dinge:
 1. ein Foliendeck `BurgerMetrics_3_Analyse.pptx` als dritter Teil der bestehenden Reihe,
 2. neun Jupyter-Notebooks und eine Dash-App im BM-Repo,
 3. eine Erweiterung des Bestands um **Rezensionen** (Datenbank, Generator, Shop-Feature),
-4. eine interaktive Lernumgebung **BM-Lab** als eigenes Repo auf GitHub Pages.
+4. eine interaktive Lernumgebung **BM-Lab** unter `web/lab/` im selben Repo, auf GitHub Pages.
 
 **Produktionsbereite Übergabe.** Robert führt vor oder in einer Lehrveranstaltung keine
 Skripte aus und arbeitet dort oft nicht am eigenen Rechner. Deshalb gilt für jede Phase: Was
@@ -34,8 +34,8 @@ Anfänger (kurze Funktionen, deutsche Namen, ein Kommentar je Funktion, keine Tr
 | Was | Wo |
 |---|---|
 | BM-Repo | `Vorlesungen/Datenbasierte Fallstudien/BurgerMetrics/BurgerMetrics_Website` — GitHub `swrobuts/BurgerMetrics`, Pages `swrobuts.github.io/BurgerMetrics/` (nur `web/`) |
-| Arbeitszweig | `bm-analyse`, am Ende ein PR auf `main` |
-| Lernumgebung | `Vorlesungen/Lernumgebungen/BM-Lab` — neues Repo `swrobuts/BM-Lab`, public, Pages von `main` und `/`, `.nojekyll`; die Sitzung legt es mit `gh` an |
+| Arbeitszweig | `bm-analyse`; je Phase ein PR auf `main`, weil Pages aus `main` ausliefert und jede Phase produktiv enden soll |
+| Lernumgebung | `web/lab/` im BM-Repo → `swrobuts.github.io/BurgerMetrics/lab/`, ausgeliefert vom vorhandenen Workflow (`path: 'web'`); kein eigenes Repo. Hinweisdatei `Vorlesungen/Lernumgebungen/BM-Lab.md` mit dem Pfad, damit der Ordner der Lernumgebungen vollständig bleibt |
 | Deck | `BurgerMetrics/BurgerMetrics_3_Analyse.pptx`, gebaut von `slides/bau_analyse.py`; PPTX nicht versioniert (Schriftlizenz) |
 | Vorlage Lab | `Vorlesungen/Lernumgebungen/WInf-SP` (Laufzeit, Übungstypen, Autorenleitfaden `tools/AUTORENLEITFADEN.md`) |
 
@@ -369,8 +369,8 @@ Diagramme.
 ### 9.1 Aufbau
 
 ```
-BM-Lab/
-  index.html                 Übersicht: acht Kacheln, Gesamtfortschritt, Verweis auf BM-Repo, Shop, Dashboard, Notebooks
+web/lab/
+  index.html                 Übersicht: acht Kacheln, Gesamtfortschritt, Verweise auf Startseite, Shop, Dashboard, Notebooks
   lab-01-zugang.html         Zugang und Datenbank
   lab-02-daten.html          Daten beschaffen
   lab-03-datenmodell.html    Analytisches Datenmodell
@@ -387,9 +387,14 @@ BM-Lab/
   data/regal-bestellungen.json   2.000 Zeilen Stichprobe aus obt_orders: monat, wochentag, stunde, filiale, kanal, kategorie, zahlart, umsatz, positionen, zufriedenheit
   data/uebungen/lab-0N.json  Befehlskarten, Übungen, Spielplätze je Lab
   vorlagen/                  Kopiervorlagen: Verbindungszeilen, Measures, Calculated Fields, Notebook-Zelle
-  tools/verify.mjs, tools/sql.mjs   aus WInf-SP; Zweisprachigkeitsprüfung durch Deutsch-Prüfung ersetzt
-  README.md, .nojekyll, .gitignore
+  tools/verify.mjs, tools/sql.mjs   aus WInf-SP; Zweisprachigkeitsprüfung durch Deutsch-Prüfung ersetzt; von keiner Seite referenziert
+  README.md                  Aufbau, Konventionen, Abnahmelauf (Autorenhinweise)
 ```
+
+Alles liegt unter `web/`, weil der Pages-Workflow genau dieses Verzeichnis ausliefert; `web/.nojekyll`
+besteht bereits. Die PGlite-Assets (rund 19 MB) werden ins Repo gelegt, nicht vom CDN geladen, damit
+die SQL-Übungen im Hörsaal an keinem fremden Dienst hängen; das Pages-Paket wächst von 530 KB auf
+rund 20 MB, was für Pages unkritisch ist.
 
 Terminal- und Deploy-Simulator werden nicht übernommen (kein Lab braucht sie); `terminal.js`,
 `deploy.js`, `sqljs/` entfallen. Die Seitendatenbank ist überall `data-datenbank="postgres"`.
@@ -412,26 +417,29 @@ Alle Übungen sind aus dem Text lösbar, mit `hinweis` und `loesung`; SQL-Lösun
 
 ### 9.3 Veröffentlichen
 
-`gh repo create swrobuts/BM-Lab --public --source=. --push`, dann Pages über die API
-(`source[branch]=main`, `source[path]=/`). Lokal: `python3 -m http.server 8777`. Abnahme:
-`node tools/verify.mjs` ohne Befund, Sichtprüfung jeder Seite im Browser (Kopf, Navigation,
-Übungen, Datenbankband), Aufruf der veröffentlichten Adresse.
+Kein eigenes Setup: Der Merge auf `main` löst den vorhandenen Workflow `static.yml` aus, der `web/`
+samt `web/lab/` ausliefert. Lokal wie bei den anderen Seiten: `cd web && python3 -m http.server 8731`
+→ `http://localhost:8731/lab/`. Abnahme: `node web/lab/tools/verify.mjs` ohne Befund, Sichtprüfung
+jeder Seite im Browser (Kopf, Navigation, Übungen, Datenbankband), Aufruf von
+`https://swrobuts.github.io/BurgerMetrics/lab/` nach dem Deploy.
 
 ## 10 Verknüpfungen und Dokumentation im BM-Repo
 
-* `web/index.html`: vierte Kachel `c-orange` „Lernumgebung BM-Lab" → `https://swrobuts.github.io/BM-Lab/`
+* `web/index.html`: vierte Kachel `c-orange` „Lernumgebung BM-Lab" → `lab/` (relativ, funktioniert lokal und auf Pages)
   (Kartenraster auf vier Spalten, ab 1024 px zwei, mobil eine); Tastenkürzel `4`; im Abschnitt
   Analytics-Projektablauf ein Satz zu Notebooks und Dash mit Link ins Repo.
-* `README.md`: Abschnitte „Notebooks und Dash" und „Lernumgebung"; Tabelle „Was wo liegt" um
-  `notebooks/`, `dash/` ergänzt; Rezensionen in „Die Kette" (Schritt 4 und 5).
+* `README.md`: Abschnitte „Notebooks und Dash" und „Lernumgebung" (Adresse
+  `swrobuts.github.io/BurgerMetrics/lab/`); Tabelle „Was wo liegt" um `notebooks/`, `dash/` und
+  `web/lab/` ergänzt; Rezensionen in „Die Kette" (Schritt 4 und 5).
 * `db/README.md`: Zeile `0021`, Rezensionsweg, `uebungsrezensionen_loeschen()`.
 * `docs/02-datenmodell.md` (fact_reviews im Galaxy-Schema), `docs/05-anwendungen.md`
   (Shop-Feature), `docs/07-lehrbezug.md` (Modul Datenbasierte Fallstudien, Notebooks, BM-Lab),
   `docs/08-entscheidungen.md` (Rezensionen über CSV, Besuchertexte nicht öffentlich,
   Generator + Glättung).
 * `slides/README.md`: dritte Zeile, neue Diagramme und Bildschirmfotos.
-* BM-Lab `README.md` und `index.html` verweisen auf `github.com/swrobuts/BurgerMetrics` und
-  `swrobuts.github.io/BurgerMetrics/`.
+* `web/lab/index.html` verweist zurück auf die Startseite (`../`), Shop, Dashboard und die
+  Notebooks im Repo; `web/lab/README.md` nennt Aufbau und Abnahmelauf.
+* `Vorlesungen/Lernumgebungen/BM-Lab.md` (außerhalb des Repos): drei Zeilen mit Pfad und Adresse.
 
 ## 11 Abnahmekriterien
 
@@ -454,8 +462,8 @@ Alle Übungen sind aus dem Text lösbar, mit `hinweis` und `loesung`; SQL-Lösun
 3. Shop-Feature.
 4. Notebooks und Dash (Notebook 08 braucht Phase 2).
 5. Deck (braucht Bildschirmfotos aus 3 und 4).
-6. BM-Lab (verweist auf 3, 4 und das Deck).
-7. Verknüpfungen, Dokumentation, PR im BM-Repo, Veröffentlichung von BM-Lab.
+6. BM-Lab unter `web/lab/` (verweist auf 3, 4 und das Deck).
+7. Verknüpfungen, Dokumentation, letzter PR; der Merge veröffentlicht Startseite, Shop und Lab zusammen.
 
 Je Phase ein eigener Implementierungsplan mit `writing-plans`; Phasen 3 bis 5 lassen sich
 parallelisieren, sobald Phase 2 steht.
