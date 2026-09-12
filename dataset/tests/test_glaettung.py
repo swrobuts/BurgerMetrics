@@ -55,6 +55,14 @@ def test_zusammenfuehren_behaelt_sterne_und_reihenfolge():
     assert list(ergebnis.review_id) == [1, 2, 3]
 
 
+def test_zusammenfuehren_leeres_feld_ist_fehler():
+    roh = roh_beispiel()
+    geglaettet = pd.DataFrame({"review_id": [1], "review_text": [float("nan")]})
+    ergebnis, befunde = z.zusammenfuehren(roh, geglaettet)
+    assert any(b.startswith("FEHLER") and "1" in b and "leer" in b for b in befunde)
+    assert ergebnis.loc[ergebnis.review_id == 1, "review_text"].item() == roh.loc[0, "review_text"]
+
+
 def test_lose_schreiben(tmp_path):
     roh = pd.concat([roh_beispiel()] * 70, ignore_index=True)
     roh["review_id"] = range(1, len(roh) + 1)

@@ -62,9 +62,11 @@ def zusammenfuehren(roh, geglaettet):
         if zeile.review_id not in neu:
             fehlend.append(int(zeile.review_id))
             continue
-        for befund in pruefe_text(zeile.review_text, neu[zeile.review_id]):
-            befunde.append(f"FEHLER: review_id {zeile.review_id}: {befund}")
-        ergebnis.at[i, "review_text"] = neu[zeile.review_id].strip()
+        befunde_text = pruefe_text(zeile.review_text, neu[zeile.review_id])
+        if befunde_text:
+            befunde.extend(f"FEHLER: review_id {zeile.review_id}: {b}" for b in befunde_text)
+        else:
+            ergebnis.at[i, "review_text"] = neu[zeile.review_id].strip()
     if fehlend:
         befunde.append(f"{len(fehlend)} Rezensionen ohne geglätteten Text, roh belassen (z. B. {fehlend[:5]})")
     return ergebnis, befunde
