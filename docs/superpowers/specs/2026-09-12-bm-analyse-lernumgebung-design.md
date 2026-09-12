@@ -457,6 +457,8 @@ jeder Seite im Browser (Kopf, Navigation, Übungen, Datenbankband), Aufruf von
 
 **Stand 12. September 2026 (Phase 2):** `0021`, Generator und Glättung sind abgenommen; von der Übergabe je Phase ist der Datenbankteil erfüllt (`0021` eingespielt, `fact_reviews` und `wawi.rezension` mit 10.000 Zeilen, `v_rezension_produkt` materialisiert, PostgREST neu gestartet). Shop, Notebooks, Dash, Deck und BM-Lab folgen in den Phasen 3–6.
 
+**Stand 12. September 2026 (Phase 3):** Shop abgenommen — Rezension im Browser gespeichert, in `v_rezension_letzte` sichtbar, Ø am Produkt aktualisiert, `uebungsrezensionen_loeschen()` räumt auf, Datenmodus zeigt den Datensatz. „Karte und Detail" in Abschnitt 5 meint Karte und Modal — der Shop hat keine Produktdetailseite. Die Bremse (`ERRCODE 53400`) erreicht den Browser als HTTP 503 mit der Meldung der Datenbank; die Dokumentation in Phase 7 nennt das. Von der Übergabe je Phase ist damit auch „Shop auf Pages mit Bewertungsfunktion" erfüllt, sobald der PR auf `main` ist.
+
 ## 12 Reihenfolge
 
 1. Spec committen (erledigt in dieser Sitzung).

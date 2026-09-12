@@ -597,6 +597,28 @@ ul { list-style: none; }
   line-height: 1.5;
   margin-bottom: 12px;
 }
+/* Bewertungszeile: Stand aus wawi.v_rezension_produkt; der Knopf öffnet das Formular */
+.menu-card-rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: .8rem;
+  margin-bottom: 10px;
+}
+.menu-card-rating .rating-text { color: var(--gold); font-weight: 600; }
+.menu-card-rating .rating-text.leer { color: var(--stone-400); font-weight: 400; }
+.bewerten-btn {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--red);
+  background: none;
+  padding: 6px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.bewerten-btn:hover { color: var(--red-light); }
 .menu-card-nutrition {
   display: flex;
   gap: 12px;
@@ -1267,9 +1289,12 @@ ul { list-style: none; }
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition);
+  /* visibility nimmt das geschlossene Modal aus Tab-Reihenfolge und
+     Accessibility-Baum; der verzögerte Wechsel lässt die Ausblendung ausblenden. */
+  visibility: hidden;
+  transition: opacity var(--transition), visibility 0s var(--transition);
 }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-overlay.open { opacity: 1; pointer-events: all; visibility: visible; transition-delay: 0s; }
 .modal-box {
   background: var(--white);
   border-radius: var(--radius-lg);
@@ -1984,6 +2009,12 @@ body.data-mode .data-annotation { display: block; }
   line-height: 1.7;
 }
 .data-annotation .da-advantage strong { color: #FFC060; }
+
+/* Der zuletzt gespeicherte Datensatz in der Datenperspektive: Feld → Wert, ohne inhalt */
+.da-datensatz { display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; margin: 6px 0 10px; font-family: 'Courier New', monospace; font-size: .78rem; }
+.da-datensatz dt { color: #7DE0FF; }
+.da-datensatz dd { margin: 0; color: #fff; word-break: break-word; }
+.da-datensatz dd.leer { color: rgba(255,255,255,.55); }
 
 /* Live event flash on interacted elements */
 body.data-mode .menu-card { position: relative; }
@@ -2900,6 +2931,37 @@ body.data-mode .phone-mockup { animation: none; }
   border: 1px solid var(--stone-200);
   color: var(--stone-600);
 }
+/* ── Rezension: Formular im Modal ────────────────────────────────────────── */
+.review-box { text-align: left; max-width: 520px; padding: 40px; position: relative; max-height: 92vh; overflow-y: auto; }
+.review-close { position: absolute; top: 12px; right: 16px; font-size: 1.6rem; line-height: 1; background: none; color: var(--stone-400); cursor: pointer; }
+.review-close:hover { color: var(--charcoal); }
+.review-box h3 { text-align: center; }
+.review-product { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: .5px; text-align: center; }
+.review-stand { text-align: center; color: var(--gold); font-weight: 600; font-size: .9rem; margin-bottom: 16px; }
+.review-stand.leer { color: var(--stone-400); font-weight: 400; }
+.sterne-wahl { border: none; padding: 0; margin: 0 0 12px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.sterne-wahl legend { font-size: .8rem; font-weight: 600; color: var(--stone-600); margin-bottom: 4px; width: 100%; }
+.sterne-wahl input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sterne-wahl label { font-size: 2rem; line-height: 1; color: var(--stone-200); cursor: pointer; transition: color .15s; }
+.sterne-wahl label.aktiv { color: var(--gold); }
+.sterne-wahl input:focus-visible + label { outline: 2px solid var(--red); outline-offset: 2px; border-radius: 4px; }
+.review-label { display: block; font-size: .8rem; font-weight: 600; color: var(--stone-600); margin: 10px 0 4px; }
+#reviewText { width: 100%; border: 1px solid var(--stone-200); border-radius: var(--radius); padding: 10px 12px; font: inherit; font-size: .9rem; resize: vertical; }
+#reviewText:focus { outline: 2px solid var(--gold); border-color: transparent; }
+.review-zaehler { text-align: right; font-size: .75rem; color: var(--stone-400); margin-top: 2px; }
+#reviewBranch { width: 100%; border: 1px solid var(--stone-200); border-radius: var(--radius); padding: 10px 12px; font: inherit; font-size: .9rem; background: var(--white); }
+.review-meldung { min-height: 1.4em; font-size: .85rem; margin: 10px 0; color: var(--stone-600); }
+.review-meldung.ok { color: #166534; font-weight: 600; }
+.review-meldung.err { color: var(--red); font-weight: 600; }
+#reviewSenden { width: 100%; justify-content: center; }
+.review-stimmen { margin-top: 24px; border-top: 1px solid var(--stone-200); padding-top: 16px; }
+.review-stimmen h4 { font-size: .8rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.review-stimmen ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; max-height: 220px; overflow-y: auto; }
+.stimme { font-size: .85rem; color: var(--stone-600); line-height: 1.5; }
+.stimme-kopf { color: var(--gold); font-weight: 600; font-size: .8rem; }
+.stimme p { margin: 2px 0 0; }
+.stimme.leer { color: var(--stone-400); }
+@media (max-width: 600px) { .review-box { padding: 28px 20px; } .review-stimmen ul { max-height: 160px; } }
 </style>
 <style>
 /* ============================================
@@ -3620,6 +3682,26 @@ body.data-mode .phone-mockup { animation: none; }
       Die Reihenfolge der Clicks und Add-to-Cart-Events ermöglicht Assoziationsregeln, die im Laden nur über POS-Bondaten (ohne Browsing-Kontext) möglich wären.
       <span class="da-ethical"><strong>🔍 Ethik:</strong> Empfehlungsalgorithmen können zum „Upselling" manipulativ eingesetzt werden. Transparenz gegenüber Kunden nötig (Dark Patterns vermeiden).</span>
     </div>
+
+    <div class="data-annotation" style="bottom:40px;right:20px;animation-delay:.3s;">
+      <div class="data-annotation-header">
+        <div class="data-annotation-icon da-icon-collect"><i class="fa-solid fa-star"></i></div>
+        <div class="data-annotation-title">REZENSIONEN</div>
+      </div>
+      Jede Bewertung im Shop ist ein Datensatz im operativen System; der ETL-Lauf übernimmt ihn ins Warehouse:
+      <div class="data-schema-mini" style="display:block;background:transparent;border:none;padding:0;margin:8px 0;text-align:left;">
+        <span class="schema-box">Rezension</span><span class="schema-arrow">→</span>
+        <span class="schema-box">wawi.rezension</span><span class="schema-arrow">→</span>
+        <span class="schema-box">ETL</span><span class="schema-arrow">→</span>
+        <span class="schema-box schema-box-fact">fact_reviews</span>
+      </div>
+      Zuletzt in dieser Sitzung gespeichert:
+      <dl class="da-datensatz" id="daRezension"><dt>Stand</dt><dd class="leer">noch keine Rezension</dd></dl>
+      <span class="da-metric">stars</span>
+      <span class="da-metric">review_text</span>
+      <span class="da-metric">source = shop</span><br><br>
+      → 10.000 simulierte Rezensionen liegen bereits in <code>fact_reviews</code> (Sentiment-Analyse). Besuchertexte zeigt der Shop nicht an; die Kundenstimmen kommen aus der Simulation.
+    </div>
   </div>
 </section>
 
@@ -4303,6 +4385,37 @@ body.data-mode .phone-mockup { animation: none; }
   </div>
 </div>
 
+<!-- ===================== REZENSION ===================== -->
+<div class="modal-overlay" id="reviewModal" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+  <div class="modal-box review-box">
+    <button type="button" class="review-close" onclick="closeReview()" aria-label="Schließen">&times;</button>
+    <h3 id="reviewTitle">Bewerten</h3>
+    <div class="review-product" id="reviewProduct"></div>
+    <div class="review-stand" id="reviewStand"></div>
+    <form id="reviewForm" onsubmit="submitReview(event)">
+      <fieldset class="sterne-wahl" id="sterneWahl">
+        <legend>Sterne</legend>
+        <input type="radio" name="sterne" id="stern1" value="1" aria-label="1 Stern"><label for="stern1" title="1 Stern">★</label>
+        <input type="radio" name="sterne" id="stern2" value="2" aria-label="2 Sterne"><label for="stern2" title="2 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern3" value="3" aria-label="3 Sterne"><label for="stern3" title="3 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern4" value="4" aria-label="4 Sterne"><label for="stern4" title="4 Sterne">★</label>
+        <input type="radio" name="sterne" id="stern5" value="5" aria-label="5 Sterne"><label for="stern5" title="5 Sterne">★</label>
+      </fieldset>
+      <label for="reviewText" class="review-label">Ihre Rezension</label>
+      <textarea id="reviewText" maxlength="500" rows="4" aria-describedby="reviewZaehler" placeholder="Was hat gepasst, was nicht? 5 bis 500 Zeichen." oninput="reviewZaehler()"></textarea>
+      <div class="review-zaehler" id="reviewZaehler">0 / 500</div>
+      <label for="reviewBranch" class="review-label">Filiale</label>
+      <select id="reviewBranch"></select>
+      <div class="review-meldung" id="reviewMeldung" aria-live="polite"></div>
+      <button type="submit" class="btn btn-primary" id="reviewSenden">Senden</button>
+    </form>
+    <div class="review-stimmen">
+      <h4>Kundenstimmen</h4>
+      <ul id="reviewStimmen"></ul>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== TOAST ===================== -->
 <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastMsg"></span></div>
 
@@ -4316,6 +4429,8 @@ let PRODUCTS = [];   // wird aus v_speisekarte geladen
 
 
 let BRANCHES = [];   // wird aus v_filialliste geladen
+let BEWERTUNGEN = new Map();   // artikel_id -> Zeile aus wawi.v_rezension_produkt
+let STIMMEN = new Map();       // artikel_id -> bis zu drei Kundenstimmen (nur Simulation)
 
 
 // =============================================================================
@@ -4330,6 +4445,18 @@ let appDiscount = false; // toggled randomly for demo
 // =============================================================================
 const menuGrid = document.getElementById('menuGrid');
 let activeFilter = 'all';
+
+// Bewertungstext einer Karte; die Formatierung liegt in js/rezensionen.js
+// (Modul), der klassische Block erreicht sie über window.REZENSIONEN.
+function bewertungVon(artikelId) {
+  return window.REZENSIONEN ? window.REZENSIONEN.bewertungText(BEWERTUNGEN.get(artikelId)) : '';
+}
+
+// „leer" färbt die Zeile grau, solange ein Artikel keine Rezension hat.
+function bewertungKlasse(artikelId) {
+  const zeile = BEWERTUNGEN.get(artikelId);
+  return zeile && zeile.anzahl ? '' : 'leer';
+}
 
 function renderMenu(filter) {
   const items = filter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.cat === filter);
@@ -4347,6 +4474,10 @@ function renderMenu(filter) {
       <div class="menu-card-body">
         <div class="menu-card-cat">${p.sub}</div>
         <div class="menu-card-name">${p.name}</div>
+        <div class="menu-card-rating">
+          <span class="rating-text ${bewertungKlasse(p.id)}" data-rating="${p.id}">${bewertungVon(p.id)}</span>
+          <button type="button" class="bewerten-btn" onclick="openReview(${p.id})" aria-label="${p.name} bewerten">Bewerten</button>
+        </div>
         <div class="menu-card-desc">${p.desc}</div>
         <div class="menu-card-nutrition">
           <div class="nutrition-item"><div class="nutrition-val">${p.cal}</div><div class="nutrition-label">kcal</div></div>
@@ -4556,6 +4687,197 @@ function closeModal() {
 }
 
 // =============================================================================
+// REZENSION — Modal mit Sternen, Text, Filiale und Kundenstimmen
+// =============================================================================
+let reviewProduktId = null;   // der Artikel, der gerade bewertet wird
+let reviewAusloeser = null;   // der Knopf, der das Modal geöffnet hat — bekommt den Fokus zurück
+
+// Öffnet das Formular für einen Artikel: Stand, Filiale aus dem Warenkorb,
+// Kundenstimmen aus der Simulation. Das Formular startet leer.
+function openReview(artikelId) {
+  const produkt = PRODUCTS.find(p => p.id === artikelId);
+  if (!produkt) return;
+  reviewProduktId = artikelId;
+  document.getElementById('reviewProduct').textContent = produkt.name;
+  reviewStandAnzeigen();
+  document.getElementById('reviewForm').reset();
+  sterneAnzeigen(0);
+  reviewZaehler();
+  reviewMeldung('', '');
+  document.getElementById('reviewSenden').disabled = false;
+  filialwahlFuellen();
+  stimmenAnzeigen(artikelId);
+  reviewAusloeser = document.activeElement;
+  document.getElementById('reviewModal').classList.add('open');
+  document.getElementById('stern1').focus();
+  logEvent('REVIEW_OPEN', `Bewerten: ${produkt.name}`, 'Formular geöffnet · Ziel: wawi.rezension');
+}
+
+// Schließt das Modal und gibt den Fokus an den auslösenden Knopf zurück.
+function closeReview() {
+  document.getElementById('reviewModal').classList.remove('open');
+  if (reviewAusloeser && typeof reviewAusloeser.focus === 'function') reviewAusloeser.focus();
+}
+
+// Bewertungsstand des offenen Artikels im Modal (auch nach dem Speichern).
+function reviewStandAnzeigen() {
+  const stand = document.getElementById('reviewStand');
+  stand.textContent = bewertungVon(reviewProduktId);
+  stand.className = 'review-stand ' + bewertungKlasse(reviewProduktId);
+}
+
+// Färbt die Sterne bis zur gewählten Zahl; die Auswahl selbst liegt in den
+// Radios, deshalb bleibt sie mit der Tastatur bedienbar.
+function sterneAnzeigen(anzahl) {
+  document.querySelectorAll('#sterneWahl label').forEach((label, i) => {
+    label.classList.toggle('aktiv', i < anzahl);
+  });
+}
+
+// Zähler „n / 500" unter dem Textfeld, gezählt wie die Datenbank.
+function reviewZaehler() {
+  const text = document.getElementById('reviewText').value;
+  document.getElementById('reviewZaehler').textContent = window.REZENSIONEN.zaehlerText(text);
+}
+
+// Meldung unter dem Formular: '' (neutral), 'ok' oder 'err'.
+function reviewMeldung(art, text) {
+  const el = document.getElementById('reviewMeldung');
+  el.className = 'review-meldung' + (art ? ' ' + art : '');
+  el.textContent = text;
+}
+
+// Filialwahl aus derselben Liste wie der Warenkorb, dort gewählte Filiale vorbelegt.
+function filialwahlFuellen() {
+  const wahl = document.getElementById('reviewBranch');
+  wahl.textContent = '';
+  const keine = document.createElement('option');
+  keine.value = '';
+  keine.textContent = 'keine Angabe';
+  wahl.appendChild(keine);
+  for (const f of BRANCHES) {
+    const o = document.createElement('option');
+    o.value = f.id;
+    o.textContent = f.name;
+    wahl.appendChild(o);
+  }
+  const warenkorb = document.getElementById('cartBranch');
+  if (warenkorb && warenkorb.value) wahl.value = warenkorb.value;
+}
+
+// Kundenstimmen: nur Simulationstexte aus wawi.v_kundenstimmen, immer per
+// textContent — nie innerHTML, weil hier Text aus der Datenbank steht.
+function stimmenAnzeigen(artikelId) {
+  const liste = document.getElementById('reviewStimmen');
+  liste.textContent = '';
+  const stimmen = STIMMEN.get(artikelId) || [];
+  if (!stimmen.length) {
+    const li = document.createElement('li');
+    li.className = 'stimme leer';
+    li.textContent = 'Noch keine Kundenstimme zu diesem Produkt.';
+    liste.appendChild(li);
+    return;
+  }
+  for (const s of stimmen) {
+    const li = document.createElement('li');
+    li.className = 'stimme';
+    const kopf = document.createElement('div');
+    kopf.className = 'stimme-kopf';
+    kopf.textContent = '★'.repeat(s.sterne) + '☆'.repeat(5 - s.sterne) + ' · ' + window.REZENSIONEN.datumText(s.datum);
+    const text = document.createElement('p');
+    text.textContent = s.inhalt;
+    li.appendChild(kopf);
+    li.appendChild(text);
+    liste.appendChild(li);
+  }
+}
+
+// Sendet die Rezension: erst die Prüfung im Browser (sofortige Meldung), dann
+// rezension_anlegen() in der Datenbank, die ihrerseits prüft und bremst.
+// Die Rezensionsnummer vergibt die Datenbank.
+function submitReview(event) {
+  event.preventDefault();
+  const gewaehlt = document.querySelector('#sterneWahl input:checked');
+  const eingabe = {
+    sterne: gewaehlt ? Number(gewaehlt.value) : 0,
+    inhalt: document.getElementById('reviewText').value,
+  };
+  const befunde = window.REZENSIONEN.pruefeEingabe(eingabe);
+  if (befunde.length) { reviewMeldung('err', befunde.join(' ')); return; }
+  if (!window.rezensionSpeichern) { reviewMeldung('err', 'Keine Verbindung zum operativen System.'); return; }
+
+  const filiale = document.getElementById('reviewBranch').value;
+  const rezension = {
+    artikel_id: reviewProduktId,
+    sterne:     eingabe.sterne,
+    inhalt:     eingabe.inhalt.trim(),
+    filiale_id: filiale ? Number(filiale) : null,
+  };
+  const knopf = document.getElementById('reviewSenden');
+  knopf.disabled = true;
+  reviewMeldung('', 'Wird gespeichert …');
+
+  window.rezensionSpeichern(rezension).then(antwort => {
+    reviewMeldung('ok', `Gespeichert als wawi.rezension #${antwort.rezension_id}`);
+    document.getElementById('reviewForm').reset();
+    sterneAnzeigen(0);
+    reviewZaehler();
+    logEvent('REVIEW', 'Rezension gespeichert',
+      `INSERT INTO wawi.rezension · #${antwort.rezension_id} · ${'★'.repeat(antwort.sterne)} ${antwort.artikel}`);
+    datensatzAnzeigen(antwort.rezension_id);
+    // Der neue Stand ist Beiwerk: Scheitert das Nachladen, bleibt die
+    // Bestätigung stehen — die Rezension ist gespeichert.
+    bewertungenAktualisieren().catch(fehler => console.warn('Bewertungsstand nicht neu geladen:', fehler));
+  }).catch(fehler => {
+    // Die Meldung der Datenbank, z. B. die Bremse — nichts wird umformuliert.
+    reviewMeldung('err', fehler.message);
+  }).finally(() => {
+    knopf.disabled = false;
+    knopf.focus();
+  });
+}
+
+// Bewertungsstand aller Karten und des offenen Modals neu aus der Sicht holen.
+async function bewertungenAktualisieren() {
+  if (!window.bewertungenLaden) return;
+  BEWERTUNGEN = await window.bewertungenLaden();
+  document.querySelectorAll('[data-rating]').forEach(el => {
+    const artikelId = Number(el.dataset.rating);
+    el.textContent = bewertungVon(artikelId);
+    el.classList.toggle('leer', bewertungKlasse(artikelId) === 'leer');
+  });
+  if (reviewProduktId !== null) reviewStandAnzeigen();
+}
+
+// Zeigt den gespeicherten Datensatz in der Datenperspektive — aus der Sicht
+// wawi.v_rezension_letzte, nicht aus dem Formular, damit zu sehen ist, was
+// wirklich in der Datenbank steht. Ohne inhalt: Besuchertext wird nicht gerendert.
+async function datensatzAnzeigen(rezensionId) {
+  const dl = document.getElementById('daRezension');
+  if (!dl || !window.letzteRezensionenLaden) return;
+  try {
+    const zeilen = await window.letzteRezensionenLaden();
+    const rezension = zeilen.find(z => Number(z.rezension_id) === Number(rezensionId));
+    if (!rezension) return;
+    dl.textContent = '';
+    for (const [feld, wert] of window.REZENSIONEN.datensatzZeilen(rezension)) {
+      const dt = document.createElement('dt');
+      dt.textContent = feld;
+      const dd = document.createElement('dd');
+      dd.textContent = wert;
+      dl.appendChild(dt);
+      dl.appendChild(dd);
+    }
+  } catch (fehler) {
+    console.warn('Datensatz der Rezension:', fehler);
+  }
+}
+
+document.getElementById('sterneWahl').addEventListener('change', e => sterneAnzeigen(Number(e.target.value)));
+document.getElementById('reviewModal').addEventListener('click', e => { if (e.target.id === 'reviewModal') closeReview(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReview(); });
+
+// =============================================================================
 // MAP
 // =============================================================================
 function initMap() {
@@ -4757,6 +5079,8 @@ const EVENT_CONFIG = {
   CAROUSEL:  { icon: 'ev-icon-hero',   emoji: '🎠' },
   CHATBOT:   { icon: 'ev-icon-chat',   emoji: '💬' },
   VIEW:      { icon: 'ev-icon-view',   emoji: '👁️' },
+  REVIEW_OPEN: { icon: 'ev-icon-view', emoji: '📝' },
+  REVIEW:      { icon: 'ev-icon-view', emoji: '⭐' },
 };
 
 function logEvent(type, title, detail) {
@@ -5185,9 +5509,11 @@ renderMenu = function(filter) {
   setTimeout(initTilt, 600);
 };
 // Der Shop startet, sobald Speisekarte und Filialliste da sind.
-window.shopStarten = function(artikel, filialen) {
+window.shopStarten = function(artikel, filialen, bewertungen, stimmen) {
   PRODUCTS = artikel;
   BRANCHES = filialen;
+  BEWERTUNGEN = bewertungen || new Map();
+  STIMMEN = stimmen || new Map();
   renderMenu(activeFilter);
   renderBranches();
   if (document.getElementById('map') && !window.__karteGebaut) {
@@ -5746,9 +6072,13 @@ setTimeout(() => {
 import { QUELLE } from './js/konfiguration.js';
 import { waehleQuelle } from './js/datenquelle.js';
 import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js';
+import { bewertungText, pruefeEingabe, zaehlerText, datumText, nachArtikel,
+         stimmenNachArtikel, datensatzZeilen } from './js/rezensionen.js';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;
+// Die Rezensionslogik ebenso — der klassische Block ruft sie über window.REZENSIONEN.
+window.REZENSIONEN = { bewertungText, pruefeEingabe, zaehlerText, datumText, datensatzZeilen };
 
 // Sitzungskennung, damit eine Uebungsgruppe ihre Bestellungen in
 // wawi.v_bestellung_letzte wiederfindet. Lebt nur in diesem Tab.
@@ -5770,14 +6100,27 @@ try {
   window.bestellungSpeichern = (bestellung) =>
     quelle.bestellungAnlegen({ ...bestellung, sitzung: SITZUNG });
 
+  // Der zweite Schreibweg: submitReview (klassischer Block) ruft ihn. Die
+  // Sitzungskennung ist dieselbe wie bei Bestellungen, damit eine Gruppe ihre
+  // Rezensionen in wawi.v_rezension_letzte wiederfindet.
+  window.rezensionSpeichern = (rezension) =>
+    quelle.rezensionAnlegen({ ...rezension, sitzung: SITZUNG });
+  // Nach dem Speichern wird der Bewertungsstand neu geholt — die Sicht rechnet,
+  // nicht der Browser.
+  window.bewertungenLaden = async () => nachArtikel(await quelle.rezensionenProdukt());
+  window.letzteRezensionenLaden = () => quelle.letzteRezensionen();
+
   // Die vier Kennzahlen im Kopfbereich standen als data-count fest im HTML:
   // 8 Filialen, 50 Produkte, 100 Tausend Kunden, 4,8 Sterne. Drei davon
   // widersprachen den eigenen Daten — es sind 57 Produkte, rund 24 Tausend
   // Kunden im Jahr und 3,8 Sterne. Auf der Kundenseite eine Bewertung zu
   // behaupten, die der eigene Bestand nicht hergibt, ist der schlimmste Fall
   // davon. Deshalb kommen sie jetzt aus derselben Quelle wie alles andere.
-  const [karte, filialen, einzel] = await Promise.all([
-    quelle.speisekarte(), quelle.filialliste(), quelle.einzelwerte()]);
+  // Bewertungsstand und Kundenstimmen kommen mit derselben Abfrage wie die
+  // Speisekarte — beides aus dem operativen Schema, nichts steht im Quelltext.
+  const [karte, filialen, einzel, bewertungsstand, stimmen] = await Promise.all([
+    quelle.speisekarte(), quelle.filialliste(), quelle.einzelwerte(),
+    quelle.rezensionenProdukt(), quelle.kundenstimmen()]);
 
   const artikel = karte.map(a => ({
     id: a.artikel_id, name: a.name, cat: a.kategorie, sub: a.unterkategorie,
@@ -5916,8 +6259,9 @@ try {
   };
 
   schirm.remove();
-  window.shopStarten(artikel, standorte);
-  console.info(`Shop: ${artikel.length} Artikel und ${standorte.length} Filialen `
+  window.shopStarten(artikel, standorte, nachArtikel(bewertungsstand), stimmenNachArtikel(stimmen));
+  console.info(`Shop: ${artikel.length} Artikel, ${standorte.length} Filialen und `
+             + `${bewertungsstand.filter(b => b.anzahl > 0).length} Artikel mit Bewertung `
              + `aus ${QUELLE.art} geladen.`);
 } catch (fehler) {
   schirm.innerHTML = '<div><b style="color:#b91c1c">Die Datenquelle antwortet nicht.</b>'
