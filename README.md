@@ -42,6 +42,8 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 |---|---|
 | `dataset/` | die 13 CSV-Dateien, ein Ladeskript für DuckDB, ein Übungsblatt und `burgermetrics_mini.sql` — dieselbe Struktur in 13 KB zum Mitlesen |
 | `db/` | der Aufbau der Datenbank: Schema, Fakten, Semantikschicht, Sicherheit — als nummerierte SQL-Dateien in der Reihenfolge, in der sie laufen |
+| `notebooks/` | neun ausgeführte Notebooks, vom Zugang mit dem Demo-Konto bis zur Sentiment-Analyse; `notebooks/README.md` |
+| `dash/` | Dash-App mit vier Karten aus der Semantikschicht; `dash/README.md` |
 | `web/` | Online-Shop, Kassensystem und BI-Dashboard |
 | `docs/` | die ausführliche Dokumentation zu Modell, Kennzahlen und Betrieb |
 | `mcp/` | ein MCP-Server über beide Schemata für den Betreiber — Claude Desktop oder Claude Code als Fenster auf die Datenbank |

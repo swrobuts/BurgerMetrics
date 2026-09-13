@@ -1,0 +1,111 @@
+tag,liga,saison,gegner
+2016-08-14,bl2,2016,1. FC Kaiserslautern
+2016-09-09,bl2,2016,VfL Bochum
+2016-09-21,bl2,2016,1. FC Union Berlin
+2016-10-02,bl2,2016,TSV 1860 München
+2016-10-21,bl2,2016,Karlsruher SC
+2016-11-07,bl2,2016,FC St. Pauli
+2016-11-25,bl2,2016,Erzgebirge Aue
+2016-12-04,bl2,2016,Fortuna Düsseldorf
+2016-12-18,bl2,2016,VfB Stuttgart
+2017-01-28,bl2,2016,Eintracht Braunschweig
+2017-02-11,bl2,2016,1. FC Heidenheim 1846
+2017-02-24,bl2,2016,SpVgg Greuther Fürth
+2017-03-11,bl2,2016,Dynamo Dresden
+2017-04-01,bl2,2016,DSC Arminia Bielefeld
+2017-04-07,bl2,2016,Hannover 96
+2017-04-23,bl2,2016,1. FC Nürnberg
+2017-05-14,bl2,2016,SV Sandhausen
+2017-07-30,bl3,2017,Werder Bremen II
+2017-08-02,bl3,2017,Preußen Münster
+2017-08-20,bl3,2017,Hansa Rostock
+2017-09-09,bl3,2017,SC Paderborn 07
+2017-09-20,bl3,2017,FC Carl Zeiss Jena
+2017-09-30,bl3,2017,SpVgg Unterhaching
+2017-10-21,bl3,2017,SV Wehen Wiesbaden
+2017-11-04,bl3,2017,Hallescher FC
+2017-11-25,bl3,2017,Sportfreunde Lotte
+2017-12-08,bl3,2017,FC Rot-Weiß Erfurt
+2017-12-16,bl3,2017,SV Meppen
+2018-02-03,bl3,2017,1. FC Magdeburg
+2018-02-17,bl3,2017,FSV Zwickau
+2018-03-03,bl3,2017,VfR Aalen
+2018-03-10,bl3,2017,VfL Osnabrück
+2018-03-24,bl3,2017,Karlsruher SC
+2018-04-07,bl3,2017,Fortuna Köln
+2018-04-21,bl3,2017,Chemnitzer FC
+2018-05-05,bl3,2017,SG Sonnenhof Großaspach
+2018-08-04,bl3,2018,KFC Uerdingen 05
+2018-08-12,bl3,2018,Energie Cottbus
+2018-09-01,bl3,2018,SV Wehen Wiesbaden
+2018-09-22,bl3,2018,Eintracht Braunschweig
+2018-09-25,bl3,2018,SV Meppen
+2018-10-08,bl3,2018,SG Sonnenhof Großaspach
+2018-10-27,bl3,2018,Hallescher FC
+2018-11-09,bl3,2018,FSV Zwickau
+2018-12-01,bl3,2018,FC Carl Zeiss Jena
+2018-12-16,bl3,2018,Sportfreunde Lotte
+2018-12-22,bl3,2018,VfL Osnabrück
+2019-02-02,bl3,2018,VfR Aalen
+2019-02-17,bl3,2018,Hansa Rostock
+2019-03-04,bl3,2018,SpVgg Unterhaching
+2019-03-16,bl3,2018,TSV 1860 München
+2019-03-30,bl3,2018,Preußen Münster
+2019-04-15,bl3,2018,Karlsruher SC
+2019-04-27,bl3,2018,Fortuna Köln
+2019-05-11,bl3,2018,1. FC Kaiserslautern
+2019-07-20,bl3,2019,FC Bayern München II
+2019-07-30,bl3,2019,SG Sonnenhof Großaspach
+2019-08-17,bl3,2019,Preußen Münster
+2019-08-31,bl3,2019,FSV Zwickau
+2019-09-20,bl3,2019,SV Meppen
+2019-10-07,bl3,2019,TSV 1860 München
+2019-10-26,bl3,2019,MSV Duisburg
+2019-11-23,bl3,2019,KFC Uerdingen 05
+2019-12-07,bl3,2019,Viktoria Köln
+2020-01-25,bl3,2019,SpVgg Unterhaching
+2020-02-09,bl3,2019,FC Ingolstadt 04
+2020-02-22,bl3,2019,Eintracht Braunschweig
+2020-03-07,bl3,2019,SV Waldhof Mannheim
+2020-06-02,bl3,2019,1. FC Magdeburg
+2020-06-10,bl3,2019,FC Carl Zeiss Jena
+2020-06-16,bl3,2019,1. FC Kaiserslautern
+2020-06-19,bl3,2019,Chemnitzer FC
+2020-06-27,bl3,2019,Hansa Rostock
+2020-07-04,bl3,2019,Hallescher FC
+2020-09-19,bl2,2020,Erzgebirge Aue
+2020-10-04,bl2,2020,SpVgg Greuther Fürth
+2020-10-18,bl2,2020,Holstein Kiel
+2020-11-01,bl2,2020,VfL Bochum
+2020-11-22,bl2,2020,Hannover 96
+2020-12-06,bl2,2020,SV Sandhausen
+2021-01-02,bl2,2020,Karlsruher SC
+2021-01-06,bl2,2020,FC St. Pauli
+2021-01-15,bl2,2020,Eintracht Braunschweig
+2021-01-29,bl2,2020,Fortuna Düsseldorf
+2021-02-21,bl2,2020,Hamburger SV
+2021-03-05,bl2,2020,1. FC Heidenheim 1846
+2021-03-21,bl2,2020,Jahn Regensburg
+2021-04-11,bl2,2020,1. FC Nürnberg
+2021-04-20,bl2,2020,SV Darmstadt 98
+2021-05-08,bl2,2020,VfL Osnabrück
+2021-05-23,bl2,2020,SC Paderborn 07
+2021-08-02,bl3,2021,SC Verl
+2021-08-22,bl3,2021,VfL Osnabrück
+2021-08-29,bl3,2021,1. FC Saarbrücken
+2021-09-11,bl3,2021,TSV Havelse
+2021-09-25,bl3,2021,SV Wehen Wiesbaden
+2021-10-23,bl3,2021,Türkgücü München
+2021-11-27,bl3,2021,SV Meppen
+2021-11-30,bl3,2021,Eintracht Braunschweig
+2021-12-12,bl3,2021,FSV Zwickau
+2021-12-20,bl3,2021,TSV 1860 München
+2022-01-22,bl3,2021,SV Waldhof Mannheim
+2022-01-28,bl3,2021,SC Freiburg II
+2022-02-12,bl3,2021,MSV Duisburg
+2022-02-26,bl3,2021,1. FC Magdeburg
+2022-03-13,bl3,2021,Borussia Dortmund II
+2022-03-18,bl3,2021,Viktoria Köln
+2022-04-08,bl3,2021,1. FC Kaiserslautern
+2022-04-23,bl3,2021,FC Viktoria 1889 Berlin
+2022-05-08,bl3,2021,Hallescher FC
