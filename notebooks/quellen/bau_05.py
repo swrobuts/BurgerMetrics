@@ -49,11 +49,16 @@ Eine lineare Regression mit `statsmodels` — die Jahre als Kategorie fangen das
 die Monate die Jahreszeit — damit Wetter und Kalender nicht den Trend und die Saison erklären
 müssen. Referenz sind ein Montag ohne Ereignis.
 """),
-md("### Zuerst ohne Saisonkontrolle"),
+md("""
+### Zuerst mit Jahres-, aber ohne Monatskontrolle
+
+Die Jahre fangen das Wachstum ab, die Monate die Jahreszeit; wir lassen die Monate hier
+absichtlich zunächst weg.
+"""),
 code("""
 import statsmodels.formula.api as smf
 
-ohne_saison = smf.ols("umsatz ~ temperatur + niederschlag + C(wochentag, Treatment(reference='Monday')) + feiertag + C(ereignis, Treatment(reference='keines'))", data=tage).fit()
+ohne_saison = smf.ols("umsatz ~ temperatur + niederschlag + C(wochentag, Treatment(reference='Monday')) + feiertag + C(ereignis, Treatment(reference='keines')) + C(jahr)", data=tage).fit()
 pd.DataFrame({"koeffizient": ohne_saison.params, "p_wert": ohne_saison.pvalues}).loc[["temperatur", "niederschlag"]].round({"koeffizient": 2, "p_wert": 3})
 """),
 code("""
@@ -79,9 +84,10 @@ Sonntag (953,30 €), Donnerstag (459,60 €) und Mittwoch (221,24 €) signifik
 (p < 0,001); nur der Dienstag unterscheidet sich nicht von Montag (-7,60 €, p = 0,860).
 Kiliani liegt 1.139,77 € über einem Tag ohne Ereignis (p < 0,001). Mit Monat und Jahr in der
 Regression sind weder Temperatur (p = 0,171) noch Niederschlag (p = 0,920) bei p < 0,05
-signifikant. Das gilt auch für das Modell ohne Saisonkontrolle: Dort liegt die Temperatur bei
-rund 6,99 € je Grad (p = 0,343), Niederschlag bei rund 52,06 € (p = 0,119) — einen scheinbaren
-Wettereffekt, den erst die Jahreszeit erklären müsste, gibt es in diesem Bestand also nicht.
+signifikant. Mit Jahres-, aber ohne Monatskontrolle sieht das anders aus: Dort liegt die
+Temperatur bei rund 41,64 € je Grad und ist signifikant (p < 0,001), Niederschlag bleibt ohne
+Effekt (-5,37 €, p = 0,516) — der scheinbare Temperatureffekt war die Jahreszeit, die erst die
+Monatskontrolle abfängt.
 
 ### Externe Quellen holen (oder aus der Datei lesen)
 
@@ -274,11 +280,11 @@ Wochentag und Ereignisse erklären den Tagesumsatz am stärksten: Gegenüber ein
 Ereignis liegen alle Wochentage außer Dienstag signifikant höher, Kiliani liegt 1.139,77 € über
 einem Tag ohne Ereignis. Sobald Monat und Jahr die Saison und den Trend abfangen, ist weder die
 eingebaute noch die gemessene Temperatur bei p < 0,05 signifikant (p = 0,171 beziehungsweise
-p = 0,074); im Modell ohne Saisonkontrolle bleibt die eingebaute Temperatur ebenso ohne
-Effekt (rund 6,99 € je Grad, p = 0,343) — einen scheinbaren, durch die Jahreszeit erklärten
-Wettereffekt gibt es in diesem Bestand nicht. Die Rohkorrelation von Temperatur und gemessenem
-Tageshöchstwert liegt bei r = 0,791, ohne Jahreszeit (Abweichung vom Monatsmittel) bei
-r = -0,054. Ferien bleiben ohne messbaren Effekt; die
+p = 0,074); mit Jahres-, aber ohne Monatskontrolle liegt die eingebaute Temperatur dagegen
+bei rund 41,64 € je Grad und ist signifikant (p < 0,001) — der scheinbare Wettereffekt war die
+Jahreszeit, die erst die Monatskontrolle abfängt. Die Rohkorrelation von Temperatur und
+gemessenem Tageshöchstwert liegt bei r = 0,791, ohne Jahreszeit (Abweichung vom Monatsmittel)
+bei r = -0,054. Ferien bleiben ohne messbaren Effekt; die
 Regression zeigt für Heimspiele -251,50 € (p < 0,001), doch die Gegenprobe an vergleichbaren
 Tagen (gleicher Wochentag, Monat und Jahr) zeigt keinen negativen Unterschied (40,3 € gegenüber
 -1,3 €) — der Koeffizient ist ein Artefakt der additiven Monats- und Jahreskontrolle, kein
