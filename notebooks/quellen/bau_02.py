@@ -102,8 +102,9 @@ reproduzierbar, in SQL wie in Python.
 ### K-Means: Gruppen ohne Vorgabe
 
 RFM-Segmente folgen Regeln, die jemand festgelegt hat. K-Means sucht Gruppen in den Daten
-selbst. Frequency und Monetary sind schief verteilt; wir logarithmieren sie und
-standardisieren alle drei Größen, damit keine die Distanz dominiert.
+selbst. Alle drei Größen sind schief verteilt — Recency am stärksten (einzelne Kunden waren
+seit Jahren nicht da). Wir logarithmieren alle drei und standardisieren sie, damit
+keine Größe die Distanz allein bestimmt.
 """),
 code("""
 from sklearn.preprocessing import StandardScaler
@@ -111,7 +112,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 merkmale = pd.DataFrame({
-    "recency": rfm["recency_tage"],
+    "recency_log": np.log1p(rfm["recency_tage"]),
     "frequenz_log": np.log1p(rfm["frequenz"]),
     "monetaer_log": np.log1p(rfm["monetaer"]),
 })
@@ -133,12 +134,12 @@ abb, (links, rechts) = plt.subplots(1, 2, figsize=(9, 4))
 links.plot(bewertung["k"], bewertung["inertia"], marker="o")
 links.set_xlabel("k (Zahl der Cluster)")
 links.set_ylabel("Inertia (Summe der quadrierten Abstände)")
-links.set_title("Elbow: der Knick liegt bei k = 3 bis 4")
+links.set_title("Elbow: der Knick liegt bei k = 4")
 links.set_ylim(0)
 rechts.plot(bewertung["k"], bewertung["silhouette"], marker="o")
 rechts.set_xlabel("k (Zahl der Cluster)")
 rechts.set_ylabel("Silhouette (Stichprobe 5.000)")
-rechts.set_title("Silhouette: höher ist besser")
+rechts.set_title("Silhouette: am höchsten bei k = 2, ab k = 4 fallend")
 rechts.set_ylim(0)
 plt.tight_layout()
 plt.show()
@@ -159,9 +160,14 @@ md("""
 ## Ergebnis
 
 Die RFM-Segmente aus Python und aus der Datenbank stimmen überein; die Regeln lassen sich
-also überall gleich anwenden. K-Means mit vier Clustern trennt die Kunden vor allem nach
-Recency und Frequency — die Kreuztabelle zeigt, dass die Cluster die Regelsegmente grob
-nachbilden, aber die Grenzen anders ziehen: Cluster kennen kein „Champion", nur Nähe im Raum.
+also überall gleich anwenden. Cluster 2 (1.910 Kunden) hat mit Abstand die höchste Recency
+(im Mittel 337,9 Tage seit der letzten Bestellung) sowie die niedrigste Frequenz und den
+niedrigsten Umsatz. Cluster 3 (6.084 Kunden) hat die niedrigste Recency (11,1 Tage) bei hoher
+Frequenz (36,1) und hohem Umsatz (698,0 €). Cluster 1 (10.893 Kunden, die größte Gruppe)
+ähnelt Cluster 3 bei Frequenz und Umsatz, hat aber eine deutlich höhere Recency (95,7 Tage).
+Cluster 0 (6.105 Kunden) liegt bei allen drei Größen im Mittelfeld. Die Silhouette bevorzugt
+k = 2; wir wählen k = 4, weil vier Gruppen sich noch beschreiben lassen — eine Entscheidung,
+keine Messung.
 
 ## Was offen bleibt
 
