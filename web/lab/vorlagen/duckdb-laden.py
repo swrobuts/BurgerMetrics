@@ -14,7 +14,8 @@ import duckdb
 con = duckdb.connect("burger_metrics.duckdb")
 
 # Zwei Tabellen aus den CSV-Dateien; read_csv erkennt Spaltennamen und Typen
-# OR REPLACE ersetzt eine vorhandene Tabelle, damit das Skript mehrfach läuft
+# OR REPLACE ersetzt eine vorhandene Tabelle, damit das Skript mehrfach läuft;
+# das ist DuckDB-Syntax — PostgreSQL kennt OR REPLACE bei Tabellen nicht (dort CREATE TABLE ... AS)
 con.sql("CREATE OR REPLACE TABLE fact_orders AS SELECT * FROM read_csv('dataset/fact_orders.csv')")
 con.sql("CREATE OR REPLACE TABLE dim_branch AS SELECT * FROM read_csv('dataset/dim_branch.csv')")
 

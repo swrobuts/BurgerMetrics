@@ -64,13 +64,13 @@
           <tr>
             <td><strong>CSV aus Git LFS</strong><br>15 Dateien, 315 MB je Klon</td>
             <td>Ihr Rechner, mit dem Werkzeug, das die Datei liest</td>
-            <td>jeder Klon zählt auf das Bandbreitenkontingent des Repositorys: 10 GiB je Monat (Stand 09/2026)</td>
+            <td>jeder Klon zählt auf das Bandbreitenkontingent des Repository-Eigentümers: 10 GiB je Monat (Stand 09/2026)</td>
             <td>der vollständige Bestand auf dem eigenen Rechner; die Grundlage für DuckDB</td>
           </tr>
           <tr>
             <td><strong>DuckDB lokal</strong><br>eine Datei, kein Server</td>
             <td>Ihr Rechner; die Datei gehört Ihnen</td>
-            <td>keine der Rolle: <code>CREATE TABLE</code> und <code>CREATE VIEW</code> sind erlaubt</td>
+            <td>keine Grenzen der Rolle: <code>CREATE TABLE</code> und <code>CREATE VIEW</code> sind erlaubt</td>
             <td>SQL üben ohne Server, eigene Tabellen und Sichten, das analytische Modell aus Notebook 01 (<code>01_analytisches_datenmodell.ipynb</code>)</td>
           </tr>
         </tbody>
@@ -78,7 +78,7 @@
     </div>
     <div class="concept-box">
       <h3>Wer rechnet, entscheidet über den Weg</h3>
-      <p>Am Connector rechnet die Datenbank: Eine Sicht mit zehn Zeilen ist schnell da, und die 2.950.082 Positionen holt niemand vollständig in ein Notebook. Bei den CSV-Dateien und in DuckDB rechnet Ihr Rechner — dafür dürfen Sie dort anlegen, was die Rolle <code>studi_daba</code> verweigert. Und jeder Klon aus Git LFS kostet das Repository Bandbreite; deshalb bleibt für Colab der Connector der Weg.</p>
+      <p>Am Connector rechnet die Datenbank: Eine Sicht mit zehn Zeilen ist schnell da, und die 2.950.082 Positionen holt niemand vollständig in ein Notebook. Bei den CSV-Dateien und in DuckDB rechnet Ihr Rechner — dafür dürfen Sie dort anlegen, was die Rolle <code>studi_daba</code> verweigert. Und jeder Klon aus Git LFS belastet das Kontingent des Repository-Eigentümers; deshalb bleibt für Colab der Connector der Weg.</p>
     </div>
   </section>
 
@@ -89,7 +89,7 @@
     <div class="code-block">version https://git-lfs.github.com/spec/v1
 oid sha256:deef61177fc57b004e792f5e72c400b5fb2658c665af107930253e8a25060e8d
 size 53346072</div>
-    <p>Die letzte Zeile nennt die Größe der eigentlichen Datei: 53.346.072 Byte, in <code>ls -lh</code> als <code>51M</code> angezeigt. Wer das Repository ohne eingerichtetes Git LFS klont, bekommt für jede CSV-Datei genau diese drei Zeilen statt der Daten — und keine Fehlermeldung. Die Prüfung gehört deshalb zum Klonen dazu.</p>
+    <p>Die letzte Zeile nennt die Größe der eigentlichen Datei: 53.346.072 Byte, in <code>ls -lh</code> als <code>51M</code> angezeigt. Wer das Repository ohne eingerichtetes Git LFS klont, bekommt für jede CSV-Datei genau diese drei Zeilen statt der Daten — und keine Fehlermeldung. Die Prüfung gehört deshalb zum Klonen dazu. Voraussetzung: die Erweiterung git-lfs ist installiert (Prüfung: <code>git lfs version</code>).</p>
     <div data-befehl="B01"></div>
     <p>So sieht die Prüfung in beiden Fällen aus: mit Daten und mit Zeigerdatei.</p>
     <div class="shot">
@@ -121,7 +121,7 @@ Git LFS initialized.
     </ol>
     <div class="warn-box">
       <h3>Das Kontingent: 10 GiB je Monat</h3>
-      <p>GitHub rechnet jeden Download aus dem LFS-Speicher auf das Kontingent des Repositorys an — auch bei Forks und Klonen: 10 GiB Bandbreite je Monat (Stand 09/2026). Ein Klon zieht 315 MB; das Kontingent reicht damit für rund 30 Klone im Monat. Für einen Kurs mit vielen Teilnehmenden gibt diese Grenze den Weg vor: Die Notebooks lesen große Tabellen aus der Datenbank, <code>lade_csv()</code> ist auf Dimensionen beschränkt, und wer den ganzen Bestand lokal will, klont einmal und arbeitet danach in DuckDB.</p>
+      <p>GitHub rechnet jeden Download aus dem LFS-Speicher auf das Kontingent des Repository-Eigentümers an — auch bei Forks und Klonen: 10 GiB Bandbreite je Monat (Stand 09/2026). Ein Klon zieht 315 MB; das Kontingent reicht damit für rund 30 Klone im Monat. Für einen Kurs mit vielen Teilnehmenden gibt diese Grenze den Weg vor: Die Notebooks lesen große Tabellen aus der Datenbank, <code>lade_csv()</code> ist auf Dimensionen beschränkt, und wer den ganzen Bestand lokal will, klont einmal und arbeitet danach in DuckDB.</p>
     </div>
   </section>
 
@@ -186,7 +186,7 @@ Git LFS initialized.
 
   <section class="section-block" id="werkzeuge">
     <h2>Was in welches Werkzeug</h2>
-    <p>Die Tabelle fasst zusammen, welcher Weg zu welchem Ziel führt. Die Gründe stehen in den Abschnitten oben; die Werkzeuge selbst kommen in Lab 04 (Power BI), Lab 05 (Tableau) und Lab 06 (Python und Colab) an die Reihe. Stand 09/2026.</p>
+    <p>Die Tabelle fasst zusammen, welcher Weg zu welchem Ziel führt; die Werkzeuge selbst kommen in Lab 04 (Power BI), Lab 05 (Tableau) und Lab 06 (Python und Colab) an die Reihe. Stand 09/2026.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Ziel</th><th>Weg</th><th>Warum</th></tr></thead>
@@ -209,7 +209,7 @@ Git LFS initialized.
           <tr>
             <td>Notebook in Colab</td>
             <td><code>lade_sql()</code> über den Connector; <code>lade_csv()</code> nur für Dimensionen</td>
-            <td>Die Datenbank rechnet, das Notebook bekommt das Ergebnis. Jeder Abruf aus Git LFS zählt auf das Kontingent des Repositorys.</td>
+            <td>Die Datenbank rechnet, das Notebook bekommt das Ergebnis. Jeder Abruf aus Git LFS zählt auf das Kontingent des Repository-Eigentümers.</td>
           </tr>
           <tr>
             <td>Lokal ohne Server: SQL üben, eigene Tabellen anlegen</td>
@@ -228,7 +228,7 @@ Git LFS initialized.
 
   <section class="section-block" id="stolper">
     <h2>Stolpersteine</h2>
-    <p>Vier Situationen, in denen der Weg zu den Daten scheitert oder still das Falsche liefert. Die Meldungen stehen hier wörtlich.</p>
+    <p>Vier Situationen, in denen der Weg zu den Daten scheitert oder still das Falsche liefert.</p>
     <p><strong>Zeigerdatei statt Daten.</strong> Ein Klon ohne Git LFS enthält 15 Zeigerdateien und meldet nichts. Erst das Ladeskript bricht ab, mit der Abhilfe in derselben Meldung:</p>
     <p><code>FEHLER: Diese Dateien sind Git-LFS-Verweise, keine Daten:</code><br><code>Abhilfe:  git lfs install &amp;&amp; git lfs pull</code></p>
     <p>Wer eine Zeigerdatei stattdessen selbst mit <code>read_csv</code> oder <code>pd.read_csv</code> liest, bekommt eine Tabelle mit einer Spalte und zwei Zeilen — und keine Fehlermeldung, bis die erste Abfrage eine Spalte wie <code>branch_id</code> sucht.</p>
