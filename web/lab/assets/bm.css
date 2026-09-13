@@ -215,8 +215,9 @@ tr:nth-child(even) td { background: var(--bg-soft); }
   overflow: hidden;
 }
 .hero-inner { max-width: 880px; margin: 0 auto; position: relative; z-index: 2; }
+/* Akzent nur als Linie: als Schrift auf der Leitfarbe erreichte er 1,7:1. */
 .hero-tag {
-  border: 1.5px solid var(--signal); color: var(--signal);
+  border: 1.5px solid var(--signal); color: var(--on-primary);
   padding: 0.25rem 0.9rem; font-size: 0.72rem; font-weight: 800;
   letter-spacing: 0.12em; text-transform: uppercase; display: inline-block;
   margin-bottom: 1.4rem;
@@ -326,7 +327,7 @@ tr:nth-child(even) td { background: var(--bg-soft); }
   background: var(--primary); color: var(--on-primary);
 }
 .lab-header h1, .lab-header .lab-title { color: var(--on-primary); }
-.lab-num-big { font-weight: 800; font-size: 3.4rem; color: var(--signal); line-height: 1; }
+.lab-num-big { font-weight: 800; font-size: 3.4rem; color: var(--primary-l); line-height: 1; }
 .lab-title { font-size: 2.1rem; font-weight: 800; margin: 0.2rem 0 0.6rem; }
 .lab-intro { color: rgba(255, 255, 255, 0.9); max-width: 76ch; font-size: 1.05rem; }
 /* Inline-Code im dunklen Lab-Kopf: sonst weiße Schrift auf hellem Grund. */
@@ -343,7 +344,7 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 }
 .lab-einordnung dt {
   font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--signal); margin-bottom: 0.15rem;
+  color: var(--on-primary); margin-bottom: 0.15rem;
 }
 .lab-einordnung dd { color: rgba(255, 255, 255, 0.9); }
 
