@@ -459,6 +459,8 @@ jeder Seite im Browser (Kopf, Navigation, Übungen, Datenbankband), Aufruf von
 
 **Stand 12. September 2026 (Phase 3):** Shop abgenommen — Rezension im Browser gespeichert, in `v_rezension_letzte` sichtbar, Ø am Produkt aktualisiert, `uebungsrezensionen_loeschen()` räumt auf, Datenmodus zeigt den Datensatz. „Karte und Detail" in Abschnitt 5 meint Karte und Modal — der Shop hat keine Produktdetailseite. Die Bremse (`ERRCODE 53400`) erreicht den Browser als HTTP 503 mit der Meldung der Datenbank; die Dokumentation in Phase 7 nennt das. Von der Übergabe je Phase ist damit auch „Shop auf Pages mit Bewertungsfunktion" erfüllt, sobald der PR auf `main` ist.
 
+**Stand 13. September 2026 (Phase 4):** Notebooks und Dash abgenommen — `pruefe_notebooks.sh` führt alle neun gegen die Datenbank aus, die Ausgaben sind eingecheckt; Dash-App mit vier Karten und Test. Abweichungen: Kennzahlkacheln aus `v_kennzahlen_jahr` plus Zufriedenheit aus `v_kennzahl_einzeln`; Filialfilter über `fact_orders`; Schulferien über OpenHolidays statt ferien-api.de (HTTP 429); Kickers-Heimspiele nur für die Saisons mit OpenLigaDB-Abdeckung (2016/17 bis 2021/22); VPI als kuratierte CSV mit Quellenangabe; Fan Trap auf dem Auszug 2025 statt des ganzen Bestands; vierte Kopfzelle `zahl()` für deutsche Zahlen; RFM-Werte log-transformiert für K-Means; Regressionen in 05 mit Referenzkategorien, Saisonkontrolle und Vergleichstagen statt Heimspiel-Koeffizient; `notebooks/daten_extern/` ohne Git LFS mit GitHub-Fallback für Colab. Von der Übergabe je Phase ist „Notebooks mit Ausgaben auf GitHub" erfüllt, sobald der PR auf `main` ist.
+
 ## 12 Reihenfolge
 
 1. Spec committen (erledigt in dieser Sitzung).
