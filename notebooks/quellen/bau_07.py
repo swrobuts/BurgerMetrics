@@ -73,12 +73,17 @@ pd.DataFrame({"verfahren": ["z-Score", "IQR", "Isolation Forest"],
 """),
 md("### Treffer erklären"),
 code("""
-# Wie stark stimmen die drei Verfahren überein: z-Score und IQR je gegen den Isolation Forest gekreuzt
+# Wie stark stimmen die drei Verfahren überein: alle drei Paare gekreuzt
 print("z-Score gegen Isolation Forest, in Filialtagen:")
-print(pd.crosstab(tage["ausreisser_z"], tage["ausreisser_forest"]))
+print(pd.crosstab(tage["ausreisser_z"], tage["ausreisser_forest"], rownames=["z-Score"], colnames=["Isolation Forest"]))
 print()
 print("IQR gegen Isolation Forest, in Filialtagen:")
-print(pd.crosstab(tage["ausreisser_iqr"], tage["ausreisser_forest"]))
+print(pd.crosstab(tage["ausreisser_iqr"], tage["ausreisser_forest"], rownames=["IQR"], colnames=["Isolation Forest"]))
+print()
+print("z-Score gegen IQR, in Filialtagen:")
+print(pd.crosstab(tage["ausreisser_z"], tage["ausreisser_iqr"], rownames=["z-Score"], colnames=["IQR"]))
+print()
+print(f"{zahl(int((tage['ausreisser_forest'] & ~tage['ausreisser_z'] & ~tage['ausreisser_iqr']).sum()))} Forest-Treffer tragen keine der beiden anderen Markierungen.")
 """),
 code("""
 def erklaerung(zeile):
@@ -95,7 +100,7 @@ def erklaerung(zeile):
 
 treffer = tage[tage["ausreisser_forest"]].copy()
 treffer["erklaerung"] = treffer.apply(erklaerung, axis=1)
-treffer.groupby("erklaerung").agg(filialtage=("erklaerung", "size"), mittlerer_z=("z", "mean")).sort_values("filialtage", ascending=False).round(2)
+treffer.groupby("erklaerung").agg(filialtage=("erklaerung", "size"), mittlerer_z=("z", "mean"), z_min=("z", "min"), z_max=("z", "max")).sort_values("filialtage", ascending=False).round(2)
 """),
 code("""
 treffer.sort_values("anomalie_wert", ascending=False)[["tag", "filiale", "umsatz", "bestellungen", "z", "erklaerung", "ausreisser_z", "ausreisser_iqr"]].head(15).round({"umsatz": 2, "z": 2})
@@ -105,9 +110,8 @@ import matplotlib.pyplot as plt
 
 FILIALE = "BM Europastern"
 reihe = tage[tage["filiale"] == FILIALE].set_index("tag")
-markiert = reihe[reihe["ausreisser_forest"]].copy()
-markiert["erklaerung"] = markiert.apply(erklaerung, axis=1)
-zaehlung = markiert["erklaerung"].value_counts()
+markiert = reihe[reihe["ausreisser_forest"]]
+zaehlung = treffer[treffer["filiale"] == FILIALE]["erklaerung"].value_counts()
 print(f"{FILIALE}: {zahl(len(markiert))} markierte Tage — " + ", ".join(f"{zahl(n)} {name}" for name, n in zaehlung.items()))
 abb, achse = plt.subplots(figsize=(9, 4))
 achse.plot(reihe.index, reihe["umsatz"], linewidth=0.6, label="Tagesumsatz")
@@ -136,10 +140,10 @@ Mozartfest (26, 2,84), Weinfest (5, 2,57) und die Mainfranken Messe (2, 2,70) li
 über dem Filialmittel — das sind die Sommerfeste. Nach unten fallen vor allem Ostermontag
 (2, -2,27) und der Weihnachtsmarkt (8, -1,40); die 18 unerklärten Filialtage liegen im Mittel
 ebenfalls darunter (-1,60). Der Wochenendeffekt ist mit 60 Filialtagen uneinheitlich (mittlerer
-z-Wert 0,80): Wochenenden schlagen sowohl nach oben als auch nach unten aus. Eine
-Eröffnungsphase kommt unter den Treffern nicht vor. Beim Plot für BM Europastern bestätigt sich
-das Bild: 13 der 24 markierten Tage sind Kiliani, zwei weitere Mozartfest, der Rest verteilt
-sich auf Wochenenden, einen Feiertag und drei unerklärte Tage.
+z-Wert 0,80, Spanne -2,41 bis 3,73): Wochenenden schlagen sowohl nach oben als auch nach unten
+aus. Eine Eröffnungsphase kommt unter den Treffern nicht vor. Beim Plot für BM Europastern
+bestätigt sich das Bild: 13 der 24 markierten Tage sind Kiliani, zwei weitere Mozartfest, der
+Rest verteilt sich auf Wochenenden, einen Feiertag und drei unerklärte Tage.
 
 ## Was offen bleibt
 
