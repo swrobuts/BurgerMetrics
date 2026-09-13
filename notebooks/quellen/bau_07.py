@@ -56,7 +56,13 @@ def iqr_grenzen(gruppe):
 tage["ausreisser_iqr"] = tage.groupby("filiale", group_keys=False).apply(iqr_grenzen, include_groups=False)
 print(f"{zahl(int(tage['ausreisser_iqr'].sum()))} Filialtage nach der IQR-Regel.")
 """),
-md("### Isolation Forest"),
+md("""
+### Isolation Forest
+
+Anders als z-Score und IQR liefert der Isolation Forest keine Schwelle, sondern eine
+Rangfolge; `contamination=0.01` legt fest, dass das auffälligste Prozent der Filialtage
+markiert wird — die 178 Treffer sind also eine Vorgabe, kein Befund.
+"""),
 code("""
 from sklearn.ensemble import IsolationForest
 
@@ -130,7 +136,8 @@ Die drei Verfahren überschneiden sich deutlich, aber nicht vollständig. Jeder 
 z-Score-Ausreißer ist zugleich ein IQR-Ausreißer, und 59 von ihnen (75 Prozent) markiert auch
 der Isolation Forest. Von den 213 IQR-Ausreißern markiert der Isolation Forest 105 (49 Prozent);
 umgekehrt tragen 73 der 178 vom Isolation Forest markierten Tage (41 Prozent) keine der beiden
-anderen Markierungen. Die 15 auffälligsten Treffer nach dem Isolation Forest sind dabei
+anderen Markierungen — wobei `contamination=0.01` diese 178 als Vorgabe festlegt, nicht als
+Befund misst. Die 15 auffälligsten Treffer nach dem Isolation Forest sind dabei
 durchweg auch z-Score- und IQR-Ausreißer — die stärksten Ausschläge finden alle drei Verfahren
 gemeinsam; die nur vom Isolation Forest gefundenen Tage liegen entsprechend nicht unter den
 auffälligsten Werten.

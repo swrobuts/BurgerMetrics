@@ -42,6 +42,7 @@ meldet Fehlerausgaben und fehlende Abschnitte.
 ## Externe Daten
 
 `daten_extern/` enthält die einmal geholten Antworten der externen Quellen (Open-Meteo,
-OpenHolidays, OpenLigaDB) und den kuratierten Verbraucherpreisindex. Notebook 05 liest zuerst
-diese Dateien und ruft die Anbieter nur, wenn eine Datei fehlt oder `AKTUALISIEREN = True`
-gesetzt ist. Quellen und Stand stehen im Notebook.
+OpenHolidays, OpenLigaDB) und den kuratierten Verbraucherpreisindex, ohne Git LFS versioniert
+(eigene `.gitattributes`, sonst lägen in Colab nur LFS-Zeigerdateien vor). Notebook 05 liest
+zuerst diese Dateien, dann dieselben Dateien aus GitHub (`main`) und ruft die Anbieter nur, wenn
+auch das scheitert oder `AKTUALISIEREN = True` gesetzt ist. Quellen und Stand stehen im Notebook.

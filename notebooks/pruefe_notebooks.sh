@@ -4,6 +4,7 @@
 # das Skript ab. Danach prüft pruefe_ausgaben.py jedes Notebook auf Fehlerausgaben.
 set -euo pipefail
 cd "$(dirname "$0")"
+export PIP_DISABLE_PIP_VERSION_CHECK=1
 for nb in 0*.ipynb; do
   echo "== $nb"
   jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 "$nb"

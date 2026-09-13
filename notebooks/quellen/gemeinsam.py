@@ -12,7 +12,7 @@ from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 REPO = "swrobuts/BurgerMetrics"
 ORDNER = Path(__file__).resolve().parent.parent   # notebooks/
 
-PAKETE = "sqlalchemy psycopg2-binary duckdb scikit-learn mlxtend statsmodels holidays dash"
+PAKETE = "sqlalchemy psycopg2-binary duckdb scikit-learn 'mlxtend>=0.23.2' statsmodels holidays dash"
 
 VERBINDUNG = '''import pandas as pd
 from sqlalchemy import create_engine

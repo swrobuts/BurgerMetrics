@@ -32,8 +32,8 @@ def zahl(wert, nachkommastellen=0):
 
 def lade_kennzahlen():
     """Die vier Kacheln: drei Werte für 2025 aus v_kennzahlen_jahr, die Zufriedenheit aus v_kennzahl_einzeln."""
-    jahr = lade_sql("SELECT bestellungen, umsatz, aov FROM v_kennzahlen_jahr WHERE jahr = 2025").iloc[0]
-    zufriedenheit = lade_sql("SELECT wert FROM v_kennzahl_einzeln WHERE kennung = 'zufriedenheit_2025'").iloc[0, 0]
+    jahr = lade_sql("SELECT bestellungen, umsatz, aov FROM burgermetrics.v_kennzahlen_jahr WHERE jahr = 2025").iloc[0]
+    zufriedenheit = lade_sql("SELECT wert FROM burgermetrics.v_kennzahl_einzeln WHERE kennung = 'zufriedenheit_2025'").iloc[0, 0]
     return {
         "Umsatz 2025": zahl(jahr["umsatz"] / 1_000_000, 2) + " Mio. €",
         "Bestellungen 2025": zahl(jahr["bestellungen"]),
@@ -45,21 +45,21 @@ def lade_kennzahlen():
 def lade_umsatz_monat(branch_id):
     """Umsatz je Monat: ohne Filiale aus der Sicht, mit Filiale aus fact_orders gerechnet."""
     if branch_id is None:
-        return lade_sql("SELECT monat, umsatz FROM v_umsatz_monat ORDER BY monat")
+        return lade_sql("SELECT monat, umsatz FROM burgermetrics.v_umsatz_monat ORDER BY monat")
     return lade_sql(f"""
         SELECT to_char(date, 'YYYY-MM') AS monat, sum(net_total) AS umsatz
-        FROM fact_orders WHERE branch_id = {int(branch_id)}
+        FROM burgermetrics.fact_orders WHERE branch_id = {int(branch_id)}
         GROUP BY 1 ORDER BY 1""")
 
 
 def lade_filialen():
     """Filialen für die Auswahl."""
-    return lade_sql("SELECT branch_id, branch_name FROM v_filiale ORDER BY branch_id")
+    return lade_sql("SELECT branch_id, branch_name FROM burgermetrics.v_filiale ORDER BY branch_id")
 
 
 def lade_kanaele():
     """Kanalanteile je Jahr."""
-    return lade_sql("SELECT jahr, kanal, anteil_pct FROM v_kanal_jahr ORDER BY jahr, kanal")
+    return lade_sql("SELECT jahr, kanal, anteil_pct FROM burgermetrics.v_kanal_jahr ORDER BY jahr, kanal")
 
 
 def lade_rezensionen():
@@ -118,8 +118,9 @@ def baue_app():
         html.Div([html.H2("Kanalanteile je Jahr"), dcc.Graph(figure=figur_kanaele())], id="karte-kanaele", className="karte"),
         html.Div([html.H2("Ø Sterne je Produkt (die 20 meistbewerteten)"), dcc.Graph(figure=figur_rezensionen())],
                  id="karte-rezensionen", className="karte"),
-        html.P("Quelle: Sichten v_kennzahlen_jahr, v_kennzahl_einzeln, v_umsatz_monat, v_kanal_jahr, v_rezension_produkt; "
-               "Filialfilter über fact_orders.", className="quelle"),
+        html.P("Quelle: Sichten burgermetrics.v_kennzahlen_jahr, burgermetrics.v_kennzahl_einzeln, "
+               "burgermetrics.v_umsatz_monat, burgermetrics.v_kanal_jahr, burgermetrics.v_rezension_produkt; "
+               "Filialfilter über burgermetrics.fact_orders.", className="quelle"),
     ], className="seite")
 
     @dash_app.callback(Output("linie-umsatz", "figure"), Input("filiale", "value"))

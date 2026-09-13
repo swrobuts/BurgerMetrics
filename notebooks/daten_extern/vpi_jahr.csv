@@ -1,3 +1,11 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:a4cef432a25c1203a9817f3a51ca66d2c254a898e67135291d63b228d72d94e8
-size 672
+jahr,vpi_2020_100,quelle
+2017,96.4,Destatis lange Reihe (2015=100: 102.0) umbasiert
+2018,98.1,Destatis lange Reihe (2015=100: 103.8) umbasiert
+2019,99.5,Destatis lange Reihe (2015=100: 105.3) umbasiert
+2020,100.0,Destatis lange Reihe (2015=100: 105.8) umbasiert
+2021,103.1,Destatis Tabelle 61111 Jahresdurchschnitt Stand 2026-09-10
+2022,110.2,Destatis Tabelle 61111 Jahresdurchschnitt Stand 2026-09-10
+2023,116.7,Destatis Tabelle 61111 Jahresdurchschnitt Stand 2026-09-10
+2024,119.3,Destatis Tabelle 61111 Jahresdurchschnitt Stand 2026-09-10
+2025,121.9,Destatis Tabelle 61111 Jahresdurchschnitt Stand 2026-09-10
+2026,121.9,vorläufig: Wert 2025 (Jahr nicht abgeschlossen)

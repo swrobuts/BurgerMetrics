@@ -29,8 +29,10 @@ lade_sql("SELECT current_user, current_setting('search_path') AS suchpfad, "
 """),
 md("""
 Die Rolle `studi_daba` sieht beide Schemata über den Suchpfad `wawi, burgermetrics`, arbeitet
-nur lesend und darf höchstens zehn Minuten je Abfrage rechnen. Tabellen mit gleichem Namen in
-beiden Schemata gibt es nicht; wer sicher gehen will, schreibt den Schemanamen davor.
+nur lesend und darf höchstens zehn Minuten je Abfrage rechnen. Gleiche Namen in beiden Schemata
+gibt es: `v_rezension_produkt` ist in `wawi` eine Sicht je Artikel und in `burgermetrics` eine
+materialisierte Sicht je Produkt mit anderen Spalten — bei diesem Suchpfad gewinnt unqualifiziert
+die `wawi`-Fassung. Wer sicher gehen will, schreibt den Schemanamen davor.
 
 ### Schemata und Sichten
 """),
@@ -106,7 +108,7 @@ con.sql(\"\"\"
     SELECT branch_type AS filialtyp, count(*) AS filialen, round(avg(monthly_rent_eur)) AS miete_mittel
     FROM dim_branch
     GROUP BY branch_type
-    ORDER BY filialen DESC
+    ORDER BY filialen DESC, filialtyp
 \"\"\").df()
 """),
 md("""

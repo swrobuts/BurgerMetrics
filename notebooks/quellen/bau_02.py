@@ -171,9 +171,9 @@ keine Messung.
 
 ## Was offen bleibt
 
-Die Wahl von k ist eine Entscheidung, keine Messung: Elbow und Silhouette geben Hinweise, das
-Geschäft entscheidet, wie viele Gruppen es ansprechen kann. Die Kundendaten sind synthetisch
-und gleichverteilt über die Stadtteile — echte Segmente hätten mehr Struktur.
+Elbow und Silhouette geben Hinweise, das Geschäft entscheidet, wie viele Gruppen es ansprechen
+kann. Die Kundendaten sind synthetisch und gleichverteilt über die Stadtteile — echte Segmente
+hätten mehr Struktur.
 """),
 ]
 

@@ -49,28 +49,44 @@ Eine lineare Regression mit `statsmodels` — die Jahre als Kategorie fangen das
 die Monate die Jahreszeit — damit Wetter und Kalender nicht den Trend und die Saison erklären
 müssen. Referenz sind ein Montag ohne Ereignis.
 """),
+md("### Zuerst ohne Saisonkontrolle"),
 code("""
 import statsmodels.formula.api as smf
 
+ohne_saison = smf.ols("umsatz ~ temperatur + niederschlag + C(wochentag, Treatment(reference='Monday')) + feiertag + C(ereignis, Treatment(reference='keines'))", data=tage).fit()
+pd.DataFrame({"koeffizient": ohne_saison.params, "p_wert": ohne_saison.pvalues}).loc[["temperatur", "niederschlag"]].round({"koeffizient": 2, "p_wert": 3})
+"""),
+code("""
+import re
+import statsmodels.formula.api as smf
+
 def kurz(name):
-    # Kürzt statsmodels-Bezeichner wie C(ereignis, Treatment(reference='keines'))[T.Kiliani] auf ereignis[Kiliani]
-    return name.split("[T.")[0].split("(")[1].split(",")[0] + "[" + name.split("[T.")[1] if "[T." in name else name
+    # Kürzt statsmodels-Bezeichner: C(ereignis, Treatment(reference='keines'))[T.Kiliani] → ereignis[Kiliani]
+    treffer = re.match(r"C\((\w+).*\)\[T\.(.+)\]$", name)
+    if treffer is None:
+        return name
+    return f"{treffer.group(1)}[{treffer.group(2)}]"
 
 modell = smf.ols("umsatz ~ temperatur + niederschlag + C(wochentag, Treatment(reference='Monday')) + feiertag + C(ereignis, Treatment(reference='keines')) + C(monat) + C(jahr)", data=tage).fit()
-koeffizienten = pd.DataFrame({"koeffizient": modell.params, "p_wert": modell.pvalues}).round(3)
+koeffizienten = pd.DataFrame({"koeffizient": modell.params, "p_wert": modell.pvalues}).round({"koeffizient": 2, "p_wert": 3})
 koeffizienten.index = [kurz(n) for n in koeffizienten.index]
 print(f"R² = {zahl(modell.rsquared, 3)} auf {zahl(int(modell.nobs))} Tagen.")
 koeffizienten.loc[[z for z in koeffizienten.index if not z.startswith("jahr)") and not z.startswith("monat)")]]
 """),
 md("""
-Gegenüber einem Montag ohne Ereignis liegen Freitag (1.155,06 €), Samstag (1.614,88 €),
+Gegenüber einem Montag ohne Ereignis liegen Freitag (1.155,05 €), Samstag (1.614,88 €),
 Sonntag (953,30 €), Donnerstag (459,60 €) und Mittwoch (221,24 €) signifikant höher
 (p < 0,001); nur der Dienstag unterscheidet sich nicht von Montag (-7,60 €, p = 0,860).
 Kiliani liegt 1.139,77 € über einem Tag ohne Ereignis (p < 0,001). Mit Monat und Jahr in der
 Regression sind weder Temperatur (p = 0,171) noch Niederschlag (p = 0,920) bei p < 0,05
-signifikant — der Effekt aus der ersten Fassung war die Jahreszeit, nicht das Wetter.
+signifikant. Das gilt auch für das Modell ohne Saisonkontrolle: Dort liegt die Temperatur bei
+rund 6,99 € je Grad (p = 0,343), Niederschlag bei rund 52,06 € (p = 0,119) — einen scheinbaren
+Wettereffekt, den erst die Jahreszeit erklären müsste, gibt es in diesem Bestand also nicht.
 
 ### Externe Quellen holen (oder aus der Datei lesen)
+
+In Colab fehlt der Ordner `daten_extern/`; dann liest das Notebook die versionierten Dateien
+aus GitHub und ruft die Anbieter nur, wenn auch das scheitert.
 """),
 code("""
 import requests
@@ -78,12 +94,21 @@ from pathlib import Path
 
 DATEN = Path("daten_extern")
 AKTUALISIEREN = False   # True: Anbieter erneut abrufen und die CSV-Dateien überschreiben
+GITHUB = "https://raw.githubusercontent.com/swrobuts/BurgerMetrics/main/notebooks/daten_extern"
 
-def hole_oder_lies(name, holen):
-    # Liest daten_extern/<name>.csv, wenn vorhanden; sonst ruft die Quelle und speichert die Antwort
+def hole_oder_lies(name, holen=None):
+    # Liest daten_extern/<name>.csv, wenn vorhanden; sonst die Fassung aus GitHub (so läuft das
+    # Notebook in Colab); erst wenn auch die fehlt, ruft es den Anbieter und speichert die Antwort
     pfad = DATEN / f"{name}.csv"
     if pfad.exists() and not AKTUALISIEREN:
         return pd.read_csv(pfad)
+    if not AKTUALISIEREN:
+        try:
+            return pd.read_csv(f"{GITHUB}/{name}.csv")
+        except Exception:
+            pass
+    if holen is None:
+        raise FileNotFoundError(f"{name}.csv ist kuratiert und liegt weder lokal noch in GitHub vor")
     daten = holen()
     DATEN.mkdir(exist_ok=True)
     daten.to_csv(pfad, index=False)
@@ -128,7 +153,7 @@ def hole_kickers():
 wetter = hole_oder_lies("wetter_open_meteo", hole_wetter)
 schulferien = hole_oder_lies("schulferien_bayern", hole_schulferien)
 kickers = hole_oder_lies("kickers_heimspiele", hole_kickers)
-vpi = pd.read_csv(DATEN / "vpi_jahr.csv")   # kuratiert, siehe daten_extern/README.md
+vpi = hole_oder_lies("vpi_jahr")   # kuratiert, siehe daten_extern/README.md
 pd.DataFrame({"quelle": ["Open-Meteo", "Schulferien", "Kickers-Heimspiele", "VPI"],
               "zeilen": [len(wetter), len(schulferien), len(kickers), len(vpi)]})
 """),
@@ -206,7 +231,7 @@ modell_extern = smf.ols("umsatz ~ tmax + niederschlag_mm + C(wochentag, Treatmen
                         data=daten).fit()
 print(f"R² eingebaut: {zahl(modell.rsquared, 3)}, R² extern: {zahl(modell_extern.rsquared, 3)}")
 pd.DataFrame({"koeffizient": modell_extern.params, "p_wert": modell_extern.pvalues}).loc[
-    ["tmax", "niederschlag_mm", "feiertag", "ferien", "heimspiel"]].round(3)
+    ["tmax", "niederschlag_mm", "feiertag", "ferien", "heimspiel"]].round({"koeffizient": 2, "p_wert": 3})
 """),
 md("### Gegenprobe: Heimspieltage gegen vergleichbare Tage"),
 code("""
@@ -249,9 +274,11 @@ Wochentag und Ereignisse erklären den Tagesumsatz am stärksten: Gegenüber ein
 Ereignis liegen alle Wochentage außer Dienstag signifikant höher, Kiliani liegt 1.139,77 € über
 einem Tag ohne Ereignis. Sobald Monat und Jahr die Saison und den Trend abfangen, ist weder die
 eingebaute noch die gemessene Temperatur bei p < 0,05 signifikant (p = 0,171 beziehungsweise
-p = 0,074) — der scheinbare Wettereffekt aus der ersten Fassung war die Jahreszeit: Die
-Rohkorrelation von Temperatur und gemessenem Tageshöchstwert liegt bei r = 0,791, ohne
-Jahreszeit (Abweichung vom Monatsmittel) bei r = -0,054. Ferien bleiben ohne messbaren Effekt; die
+p = 0,074); im Modell ohne Saisonkontrolle bleibt die eingebaute Temperatur ebenso ohne
+Effekt (rund 6,99 € je Grad, p = 0,343) — einen scheinbaren, durch die Jahreszeit erklärten
+Wettereffekt gibt es in diesem Bestand nicht. Die Rohkorrelation von Temperatur und gemessenem
+Tageshöchstwert liegt bei r = 0,791, ohne Jahreszeit (Abweichung vom Monatsmittel) bei
+r = -0,054. Ferien bleiben ohne messbaren Effekt; die
 Regression zeigt für Heimspiele -251,50 € (p < 0,001), doch die Gegenprobe an vergleichbaren
 Tagen (gleicher Wochentag, Monat und Jahr) zeigt keinen negativen Unterschied (40,3 € gegenüber
 -1,3 €) — der Koeffizient ist ein Artefakt der additiven Monats- und Jahreskontrolle, kein

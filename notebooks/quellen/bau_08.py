@@ -132,10 +132,9 @@ als Fehler, weil die Texte eine Polarität haben.
 code("""
 import os
 os.environ.setdefault("HF_HUB_VERBOSITY", "error")
-import warnings
-warnings.filterwarnings("ignore")
 from transformers.utils import logging as hf_logging
 hf_logging.set_verbosity_error()
+hf_logging.disable_progress_bar()
 from transformers import pipeline
 
 klassifikator = pipeline("text-classification", model="oliverguhr/german-sentiment-bert", truncation=True)
@@ -197,7 +196,7 @@ BERT-Vergleich erreicht es 100,0 Prozent. BERT, das diese Bausteine nie gesehen 
 94,2 Prozent — niedriger, aber deutlich höher, als man für Texte mit uneindeutiger Sprache
 erwarten würde, ein Hinweis darauf, dass die generierten Rezensionen ihre Polarität sehr
 eindeutig formulieren. Der Anteil positiver Rezensionen fällt mit der Bestelldauer (78,63
-Prozent bis 5 Minuten, 41,67 Prozent über 15 Minuten) und unterscheidet sich zwischen den
+Prozent bis 5 Minuten, 41,67 Prozent über 15 Minuten bei nur 12 Rezensionen) und unterscheidet sich zwischen den
 Kanälen (68,61 Prozent am Counter, 82,70 Prozent bei App-Bestellungen) — genau wie die Sterne,
 aus denen der Generator die Texte gebaut hat.
 

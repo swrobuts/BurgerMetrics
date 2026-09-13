@@ -91,6 +91,7 @@ paare_q1 = paare.assign(paar=[paar(a, b) for a, b in zip(paare["A"], paare["B"])
 paare_q1 = paare_q1.groupby("paar", as_index=False).agg(lift_q1_2025=("lift", "first"), support_q1_2025=("support", "first"))
 vergleich = sicht.merge(paare_q1, on="paar", how="left")
 vergleich["support_q1_2025"] = (vergleich["support_q1_2025"] * 100).round(2)
+print(f"{zahl(int(vergleich['lift_q1_2025'].notna().sum()))} von {zahl(len(vergleich))} Paaren der Sicht haben im ersten Quartal eine Regel (Support ab 1 %, Lift ab 1).")
 vergleich[["produkt_a", "produkt_b", "support_pct", "support_q1_2025", "lift", "lift_q1_2025"]].round(2)
 """),
 md("### Die Paare ohne Signal: Lift nahe 1"),
@@ -116,7 +117,7 @@ untergrenze = min(vergleich["lift"].min(), vergleich["lift_q1_2025"].min()) * 0.
 achse.plot([untergrenze, grenze], [untergrenze, grenze], linestyle="--")
 achse.set_xlabel("Lift im ganzen Bestand (v_warenkorb_regeln)")
 achse.set_ylabel("Lift im ersten Quartal 2025 (Apriori)")
-achse.set_title("Ein Quartal reicht für die meisten Paare; die stärksten liegen im Quartal höher")
+achse.set_title("Wo das Quartal eine Regel findet, liegt der Lift nahe am Bestand; die stärksten Paare liegen im Quartal höher")
 achse.set_xlim(untergrenze, grenze)
 achse.set_ylim(untergrenze, grenze)
 plt.show()

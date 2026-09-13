@@ -94,7 +94,7 @@ plt.show()
 """),
 code("""
 # Zur Einordnung: mittlere Zufriedenheit je Dauerklasse
-daten["dauer_klasse"] = pd.cut(daten["dauer_min"], bins=[0, 5, 10, 15, 20, 60], labels=["bis 5", "6–10", "11–15", "16–20", "über 20"])
+daten["dauer_klasse"] = pd.cut(daten["dauer_min"], bins=[0, 5, 10, 15, 60], labels=["bis 5 min", "6–10 min", "11–15 min", "über 15 min"])
 daten.groupby("dauer_klasse", observed=True).agg(bestellungen=("zufriedenheit", "size"), zufriedenheit=("zufriedenheit", "mean")).round(2)
 """),
 md("""

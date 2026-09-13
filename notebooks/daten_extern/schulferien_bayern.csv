@@ -1,3 +1,71 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:8a68c0e9151bdfb9dd7b808f4191d4cd0d9406504a1be4550e16c06a55a4ebf2
-size 2559
+von,bis,name
+2016-12-24,2017-01-05,Weihnachtsferien
+2017-02-27,2017-03-03,Winterferien
+2017-04-10,2017-04-22,Osterferien
+2017-06-06,2017-06-16,Pfingstferien
+2017-07-29,2017-09-11,Sommerferien
+2017-10-30,2017-11-03,Herbstferien
+2017-11-22,2017-11-22,Herbstferien
+2017-12-23,2018-01-05,Weihnachtsferien
+2018-02-12,2018-02-16,Winterferien
+2018-03-26,2018-04-07,Osterferien
+2018-05-22,2018-06-02,Pfingstferien
+2018-07-30,2018-09-10,Sommerferien
+2018-10-29,2018-11-02,Herbstferien
+2018-11-21,2018-11-21,Herbstferien
+2018-12-22,2019-01-05,Weihnachtsferien
+2019-03-04,2019-03-08,Winterferien
+2019-04-15,2019-04-27,Osterferien
+2019-06-11,2019-06-21,Pfingstferien
+2019-07-29,2019-09-09,Sommerferien
+2019-10-28,2019-10-31,Herbstferien
+2019-11-20,2019-11-20,Herbstferien
+2019-12-23,2020-01-04,Weihnachtsferien
+2020-02-24,2020-02-28,Frühjahrsferien
+2020-04-06,2020-04-18,Osterferien
+2020-06-02,2020-06-13,Pfingstferien
+2020-07-27,2020-09-07,Sommerferien
+2020-10-31,2020-11-06,Herbstferien
+2020-11-18,2020-11-18,Buß- und Bettag
+2020-12-23,2021-01-09,Weihnachtsferien
+2021-03-29,2021-04-10,Osterferien
+2021-05-25,2021-06-04,Pfingstferien
+2021-07-30,2021-09-13,Sommerferien
+2021-11-02,2021-11-05,Herbstferien
+2021-11-17,2021-11-17,Buß- und Bettag
+2021-12-24,2022-01-08,Weihnachtsferien
+2022-02-28,2022-03-04,Frühjahrsferien
+2022-04-11,2022-04-23,Osterferien
+2022-06-07,2022-06-18,Pfingstferien
+2022-08-01,2022-09-12,Sommerferien
+2022-10-31,2022-11-04,Herbstferien
+2022-11-16,2022-11-16,Buß- und Bettag
+2022-12-24,2023-01-07,Weihnachtsferien
+2023-02-20,2023-02-24,Frühjahrsferien
+2023-04-03,2023-04-15,Osterferien
+2023-05-30,2023-06-09,Pfingstferien
+2023-07-31,2023-09-11,Sommerferien
+2023-10-30,2023-11-04,Herbstferien
+2023-11-22,2023-11-22,Buß- und Bettag
+2023-12-23,2024-01-05,Weihnachtsferien
+2024-02-12,2024-02-16,Frühjahrsferien
+2024-03-25,2024-04-06,Osterferien
+2024-05-21,2024-06-01,Pfingstferien
+2024-07-29,2024-09-09,Sommerferien
+2024-10-28,2024-10-31,Herbstferien
+2024-11-20,2024-11-20,Buß- und Bettag
+2024-12-23,2025-01-03,Weihnachtsferien
+2025-03-03,2025-03-07,Frühjahrsferien
+2025-04-14,2025-04-25,Osterferien
+2025-06-10,2025-06-20,Pfingstferien
+2025-08-01,2025-09-15,Sommerferien
+2025-11-03,2025-11-07,Herbstferien
+2025-11-19,2025-11-19,Buß- und Bettag
+2025-12-22,2026-01-05,Weihnachtsferien
+2026-02-16,2026-02-20,Frühjahrsferien
+2026-03-30,2026-04-10,Osterferien
+2026-05-26,2026-06-05,Pfingstferien
+2026-08-03,2026-09-14,Sommerferien
+2026-11-02,2026-11-06,Herbstferien
+2026-11-18,2026-11-18,Buß- und Bettag
+2026-12-24,2027-01-08,Weihnachtsferien

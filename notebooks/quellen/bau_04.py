@@ -76,7 +76,7 @@ md("""
 
 Wir trainieren auf allen Tagen bis zum 31. März 2025 und prüfen auf den zwölf Monaten danach —
 Daten, die das Modell beim Lernen nie gesehen hat. Merkmale: Wochentag und Monat als
-Kategorien, Wochenende, Feiertag, Ereignis, Temperatur, Niederschlag und eine laufende
+Kategorien, Feiertag, Ereignis, Temperatur, Niederschlag und eine laufende
 Tagesnummer für den Trend.
 """),
 code("""
@@ -84,7 +84,6 @@ import numpy as np
 
 merkmale = pd.DataFrame({
     "tag_nr": np.arange(len(tage)),
-    "wochenende": tage["wochenende"].fillna(False).astype(int),
     "feiertag": tage["feiertag"].fillna(False).astype(int),
     "ereignis": tage["ereignis"].notna().astype(int),
     "temperatur": tage["temperatur"].ffill().bfill(),
@@ -144,6 +143,7 @@ code("""
 # Fehler des Gradient Boosting je Tagestyp im Prüfzeitraum
 fehler = pd.DataFrame({"abs_fehler": (y_test - ergebnisse[1]["vorhersage"]).abs()}, index=y_test.index)
 fehler["tagestyp"] = "gewöhnlich"
+# Ein Tag, der Feiertag und Ereignis zugleich ist, zählt als Ereignis (letzte Zuweisung gewinnt)
 fehler.loc[merkmale.loc[y_test.index, "feiertag"] == 1, "tagestyp"] = "Feiertag"
 fehler.loc[merkmale.loc[y_test.index, "ereignis"] == 1, "tagestyp"] = "Ereignis"
 fehler.groupby("tagestyp").agg(tage=("abs_fehler", "size"), mae=("abs_fehler", "mean")).round(1)
@@ -161,16 +161,32 @@ jahre["umsatz_je_tag"] = jahre["umsatz"] / jahre["tage"]
 jahre["veraenderung_je_tag_pct"] = jahre["umsatz_je_tag"].pct_change() * 100
 jahre.round(1)
 """),
+code("""
+# Gleicher Zeitraum in beiden Jahren: Januar bis März 2025 gegen Januar bis März 2026
+q1 = tage[(tage.index.month <= 3) & (tage.index.year >= 2025)]
+q1.groupby(q1.index.year).agg(tage=("umsatz", "size"), umsatz_je_tag=("umsatz", "mean")).round(1)
+"""),
+md("""
+Der Rückgang je Tag in 2026 gegenüber dem Jahresmittel 2025 ist ein Jahreszeiteffekt: Das
+erste Quartal ist im Jahresverlauf das umsatzschwächste. Im Vergleich Januar–März zu
+Januar–März liegt 2026 mit 1.343,4 € je Tag sogar leicht über 2025 (1.336,7 €, +0,5 Prozent).
+"""),
 md("""
 ## Ergebnis
 
-Gradient Boosting schlägt die lineare Regression und beide schlagen den naiven Mittelwert.
-An Feiertagen ist der Fehler des Gradient Boosting mit 196,7 € je Tag am höchsten; an
-Ereignistagen liegt er mit 169,6 € nur wenig über dem Fehler an gewöhnlichen Tagen
-(157,1 €). Trend und Wochenmuster tragen zusammen rund 90 Prozent der Varianz des Umsatzes
-(66,8 plus 23,3 Prozent); in der Merkmalswichtigkeit des Gradient Boosting liegt Temperatur
-bei 4,5 Prozent, Niederschlag erscheint nicht unter den zehn wichtigsten Merkmalen.
-Notebook 05 untersucht den Wettereffekt genauer.
+Gradient Boosting und lineare Regression liegen nah beieinander: Gradient Boosting hat den
+niedrigeren mittleren Fehler in Euro (169,0 € gegenüber 172,4 €), die lineare Regression den
+niedrigeren prozentualen Fehler (11,9 gegenüber 12,2 Prozent); beide schlagen den naiven
+Mittelwert deutlich (286,6 €, 19,5 Prozent). An Feiertagen ist der Fehler des Gradient Boosting
+mit 197,3 € je Tag am höchsten; an Ereignistagen liegt er mit 147,2 € am niedrigsten, sogar unter
+dem Fehler an gewöhnlichen Tagen (172,1 €). Trend und Wochenmuster tragen zusammen rund 90
+Prozent der Varianz des Umsatzes (66,8 plus 23,3 Prozent); in der Merkmalswichtigkeit des
+Gradient Boosting liegt Temperatur bei 4,7 Prozent, Niederschlag erscheint nicht unter den zehn
+wichtigsten Merkmalen. Notebook 05 untersucht den Wettereffekt genauer.
+
+Der scheinbare Rückgang 2026 gegenüber dem Jahresmittel 2025 ist ein Basiseffekt der
+Rumpfjahre: Verglichen wird ein volles Jahr 2025 mit dem ersten, umsatzschwächsten Quartal 2026;
+im Vergleich je Tag über den gleichen Zeitraum (Januar–März) liegt 2026 leicht über 2025.
 
 ## Was offen bleibt
 
