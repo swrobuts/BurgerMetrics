@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 03 · Analytisches Datenmodell · BM-Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body class="lab-page" data-lab="lab-03">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <a class="header-back" href="index.html">← Zur Übersicht</a>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title">Abschnitte</div>
+  <a class="sidebar-link" href="#frage">Die Frage</a>
+  <a class="sidebar-link" href="#grain">Der Grain</a>
+  <a class="sidebar-link" href="#dimensionen">Dimensionen</a>
+  <a class="sidebar-link" href="#fakten">Fakten</a>
+  <a class="sidebar-link" href="#sicht">Die Sicht</a>
+  <a class="sidebar-link" href="#fantrap">Fan Trap</a>
+  <a class="sidebar-link" href="#rezensionen">Rezensionen</a>
+  <a class="sidebar-link" href="#stolper">Stolpersteine</a>
+  <a class="sidebar-link" href="#spielplatz">Spielplatz</a>
+  <a class="sidebar-link" href="#uebungen">Übungen</a>
+  <a class="sidebar-link" href="#zusammenfassung">Zusammenfassung</a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">03</div>
+  <h1 class="lab-title">Analytisches Datenmodell</h1>
+  <p class="lab-intro">In Lab 01 haben Sie die beiden Schemata der Fallstudie gesehen: <code>wawi</code>, in das Kasse und Online-Shop schreiben, und <code>burgermetrics</code>, aus dem Dashboard und Notebooks lesen. Dieses Lab baut den Weg vom einen zum anderen nach — in vier Entscheidungen, die in fester Reihenfolge fallen: Frage, Grain, Dimensionen, Fakten. Am Ende steht eine Sicht, die die Frage beantwortet, und die Fan Trap: ein Fehler, der fehlerfrei läuft. Jeder Schritt läuft in der Datenbank dieser Seite; die echte Datenbank bleibt unberührt, und die Rolle <code>studi_daba</code> könnte dort ohnehin keine Tabelle anlegen.</p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Frage · Grain · Dimensionen · Fakten</span>
+    <span class="lernziel-chip">CREATE TABLE … AS SELECT</span>
+    <span class="lernziel-chip">Denormalisierung</span>
+    <span class="lernziel-chip">Fan Trap</span>
+    <span class="lernziel-chip">Galaxy-Schema · fact_reviews</span>
+  </div>
+  <div data-einordnung></div>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="frage">
+    <h2>Die Frage bestimmt das Modell</h2>
+    <p>Ein analytisches Modell beginnt nicht bei den Tabellen, sondern bei der Frage, die es beantworten soll. Die Frage dieses Labs lautet „Umsatz je Filiale und Jahr“ — dieselbe, die Notebook 01 (<code>01_analytisches_datenmodell.ipynb</code>) auf dem Bestand stellt. Bevor eine Zeile SQL entsteht, sind drei Dinge festzulegen:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Festlegung</th><th>Für diese Frage</th><th>Wo es im operativen Modell steht</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Kennzahl</strong></td>
+            <td>die Summe von <code>netto_gesamt</code> — der Bestellwert nach Rabatt</td>
+            <td><code>wawi.kundenbestellung</code>, eine Zeile je Bestellung; <code>brutto_gesamt</code> ist der Wert vor Rabatt, <code>rabatt_betrag</code> die Differenz</td>
+          </tr>
+          <tr>
+            <td><strong>Auflösung</strong></td>
+            <td>je Filiale und je Jahr — eine Zeile der Antwort ist eine Filiale in einem Jahr</td>
+            <td>der Filialname in <code>wawi.filiale</code>, das Jahr aus <code>bestelldatum</code></td>
+          </tr>
+          <tr>
+            <td><strong>Zeitraum</strong></td>
+            <td>alle Jahre des Bestands, 2017 bis 2026</td>
+            <td>im Browser 19 Bestellungen über zehn Jahre; Notebook 01 nimmt nur 2025 mit 136.557 Bestellungen</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-box">
+      <p>„Netto“ meint hier <em>nach Rabatt</em>, nicht <em>ohne Mehrwertsteuer</em>. Die steuerlichen Beträge stehen in <code>wawi.rechnung</code> (<code>zahlbetrag</code>, <code>mwst_betrag</code>) und spielen für den Umsatz je Filiale keine Rolle — zwei Fachsprachen, ein Wort.</p>
+    </div>
+    <p>Aus der Frage folgt, welche Tabellen gebraucht werden — und welche nicht:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Tabelle im Schema wawi</th><th>Gebraucht</th><th>Warum</th></tr></thead>
+        <tbody>
+          <tr><td><code>kundenbestellung</code></td><td>ja</td><td>trägt Betrag, Datum und <code>filiale_id</code> — alles, was Kennzahl und Auflösung brauchen</td></tr>
+          <tr><td><code>filiale</code></td><td>ja</td><td>liefert den Namen zur <code>filiale_id</code></td></tr>
+          <tr><td><code>bestellposition</code></td><td>nein</td><td>dort entstehen Mengen je Artikel, nicht der Umsatz; ein Verbund dorthin vervielfacht den Betrag (Abschnitt „Fan Trap“)</td></tr>
+          <tr><td><code>artikel</code>, <code>artikelunterkategorie</code>, <code>artikelkategorie</code></td><td>nein</td><td>erst für Fragen nach Produkten und Kategorien</td></tr>
+          <tr><td><code>kunde</code>, <code>zahlungsart</code>, <code>promotion</code></td><td>nein</td><td>erst für Fragen nach Kundengruppen, Zahlarten und Aktionen</td></tr>
+          <tr><td><code>rechnung</code></td><td>nein</td><td>führt die steuerlichen Beträge — der andere Begriff von „netto“</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Die Frage ist die erste von vier Entscheidungen. Die übrigen drei folgen in fester Reihenfolge, und eine Sicht liefert am Ende den Nachweis:</p>
+    <div class="kette">
+      <div class="glied hell"><span class="titel">Frage</span><span class="was">Kennzahl, Auflösung, Zeitraum</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Grain</span><span class="was">wofür eine Zeile der Faktentabelle steht</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Dimensionen</span><span class="was">wonach gefiltert und gruppiert wird</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Fakten</span><span class="was">Schlüssel und Maße auf dem Grain</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied betont"><span class="titel">Sicht</span><span class="was">die Antwort und der Abgleich</span></div>
+    </div>
+    <p>Wer die Dimensionen vor dem Grain festlegt, weiß nicht, worauf sie zeigen; wer die Fakten vor der Frage sammelt, sammelt Spalten ohne Zweck. Notebook 01 geht denselben Weg auf dem Auszug für 2025, <code>db/aufbau/0019_wawi_zu_burgermetrics.sql</code> im Repository <code>github.com/swrobuts/BurgerMetrics</code> führt ihn als Ladelauf in der Datenbank aus.</p>
+  </section>
+
+  <section class="section-block" id="grain">
+    <h2>Der Grain: Was ist eine Zeile</h2>
+    <p>Der Grain einer Tabelle sagt, wofür eine Zeile steht. Für den Umsatz gibt es im operativen Modell zwei Kandidaten, und sie liegen eine Ebene auseinander:</p>
+    <div class="vergleich">
+      <div>
+        <h3>Bestellung</h3>
+        <p><strong>Eine Zeile = eine Bestellung.</strong> <code>wawi.kundenbestellung</code>, im Auswertungsmodell <code>fact_orders</code>. Hier entsteht der Betrag: <code>netto_gesamt</code> ist der Bestellwert nach Rabatt, und der Rabatt wird je Bestellung gewährt, nicht je Position. Hier entstehen auch Bestelldauer und Zufriedenheit.</p>
+        <p>Im Bestand 754.513 Zeilen, im Browser 19.</p>
+      </div>
+      <div>
+        <h3>Position</h3>
+        <p><strong>Eine Zeile = ein Artikel in einer Bestellung.</strong> <code>wawi.bestellposition</code>, im Auswertungsmodell <code>fact_order_items</code>. Hier entsteht die Menge: welcher Artikel, wie oft, zu welchem Einzelpreis. Der Positionsbetrag ist Menge mal Einzelpreis, vor Rabatt.</p>
+        <p>Im Bestand 2.950.082 Zeilen, im Browser 55.</p>
+      </div>
+    </div>
+    <p>Ein Beispiel aus dem Bestand (im Miniaturbestand des Browsers nicht enthalten): Bestellung 457 vom 31.03.2017, BM Europastern, Drive-Through, ist <em>eine</em> Zeile in <code>kundenbestellung</code> mit <code>netto_gesamt</code> 27,04 € — und <em>drei</em> Zeilen in <code>bestellposition</code>:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Artikel</th><th>Menge</th><th>Einzelpreis</th><th>Positionsbetrag</th></tr></thead>
+        <tbody>
+          <tr><td>Bacon King</td><td>2</td><td>7,99 €</td><td>15,98 €</td></tr>
+          <tr><td>Sprite 0.3l</td><td>3</td><td>2,19 €</td><td>6,57 €</td></tr>
+          <tr><td>Classic Burger</td><td>1</td><td>4,49 €</td><td>4,49 €</td></tr>
+          <tr><td><strong>Summe</strong></td><td>6</td><td></td><td><strong>27,04 €</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Die drei Positionsbeträge ergeben hier den Bestellwert, weil diese Bestellung keinen Rabatt hatte. Sobald ein Rabatt gewährt wurde, stimmt das nicht mehr: Im Browser summieren die 55 Positionsbeträge zu 202,48 €, die 19 Bestellwerte nach Rabatt zu 200,85 € — die Differenz von 1,63 € ist der Rabatt, und der steht nur an der Bestellung. Deshalb gilt: Der Umsatz nach Rabatt entsteht auf dem Grain der Bestellung, die Menge auf dem Grain der Position. Jede Kennzahl wird auf dem Grain aggregiert, auf dem sie entsteht — der Abschnitt „Fan Trap“ zeigt, was sonst passiert.</p>
+  </section>
+
+  <section class="section-block" id="dimensionen">
+    <h2>Drei Tabellen werden eine Dimension</h2>
+    <p>Im operativen Modell steht jeder Kategoriename genau einmal: <code>artikel</code> verweist über <code>unterkategorie_id</code> auf <code>artikelunterkategorie</code>, diese über <code>kategorie_id</code> auf <code>artikelkategorie</code>. Das ist die dritte Normalform — wer eine Kategorie umbenennt, ändert eine Zeile. Für die Auswertung ist dieser Weg zu lang: Jede Frage nach Kategorien bräuchte zwei Verbunde, in jedem Werkzeug aufs Neue. Die Dimension nimmt die beiden Verbunde einmal vorweg und legt Kategorie und Unterkategorie neben das Produkt — eine Zeile je Artikel, breit statt tief:</p>
+    <div data-befehl="B01"></div>
+    <p>Die Spaltennamen sind englisch, und das ist Absicht: <code>product_id</code>, <code>product_name</code>, <code>category</code> und <code>subcategory</code> sind die Namen des Schemas <code>burgermetrics</code>. Die Umbenennung markiert die Grenze zwischen dem operativen Modell (deutsche Namen, Kasse und Shop) und dem Auswertungsmodell (englische Namen, Dashboard und Notebooks); an einer Spalte <code>category</code> ist sofort zu erkennen, auf welcher Seite man steht. Die Endung <code>_neu</code> hält Ihre Tabelle von der fertigen <code>burgermetrics.dim_product</code> auseinander, die in der Datenbank dieser Seite schon vorhanden ist — so lässt sich am Ende beides nebeneinander lesen. Denselben Namen verwendet <code>dataset/wawi_zu_analytisch.sql</code> im Repository, das diese Abbildung für alle Tabellen des Miniaturbestands ausführt und am Ende den Gleichheitsbeweis gegen die fertigen Tabellen führt.</p>
+    <div class="concept-box">
+      <h3>Denormalisierung ist hier tragbar</h3>
+      <p>In <code>dim_product_neu</code> steht „Burger“ so oft, wie es Burger gibt — die Redundanz, die die dritte Normalform gerade vermeidet. Sie kostet hier nichts, weil in die Dimension niemand schreibt: Kasse und Shop schreiben nach <code>wawi</code>, und das Auswertungsmodell wird daraus abgeleitet — im Betrieb durch einen geplanten Ladelauf, im Browser durch <code>CREATE TABLE … AS SELECT</code>. Wird eine Kategorie umbenannt, ändert das jemand in <code>artikelkategorie</code>, und der nächste Abzug trägt den neuen Namen in jede Produktzeile. Im operativen Modell wäre dieselbe Redundanz ein Risiko: Dort schreibt jede Bestellung, und zwei Schreibvorgänge könnten zwei Schreibweisen derselben Kategorie hinterlassen. Redundanz kostet Konsistenz nur beim Schreiben.</p>
+    </div>
+    <p>Im Browser hat die Dimension 31 Zeilen in 6 Kategorien und 17 Unterkategorien; im Bestand sind es 57 Artikel. <code>burgermetrics.dim_product</code> führt zusätzlich <code>is_vegetarian</code> und <code>unit_price</code> — nach demselben Muster aus <code>artikel</code> übernommen.</p>
+  </section>
+
+  <section class="section-block" id="fakten">
+    <h2>Die Faktentabelle</h2>
+    <p>Die Faktentabelle trägt den Grain: eine Zeile je Bestellung, also eine Zeile je Zeile in <code>kundenbestellung</code>. Der Schritt verknüpft nichts — er benennt um und gibt jeder Spalte eine Rolle:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Rolle</th><th>Spalten in fact_orders_neu</th><th>Wozu</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Schlüssel</strong></td>
+            <td><code>date</code>, <code>branch_id</code>, <code>customer_id</code></td>
+            <td>zeigen auf die Dimensionen <code>dim_date</code>, <code>dim_branch</code>, <code>dim_customer</code> — darüber wird gefiltert und gruppiert</td>
+          </tr>
+          <tr>
+            <td><strong>Maß</strong></td>
+            <td><code>net_total</code></td>
+            <td>die Kennzahl auf diesem Grain; additiv, darf über jede Dimension summiert werden. Im fertigen Schema stehen daneben <code>gross_total</code>, <code>discount_amount</code>, <code>item_count</code>, <code>order_duration_min</code>, <code>satisfaction_score</code></td>
+          </tr>
+          <tr>
+            <td><strong>Degenerierte Dimension</strong></td>
+            <td><code>order_channel</code></td>
+            <td>ein beschreibendes Merkmal ohne eigene Tabelle: Counter, Drive-Through, App Order — im Bestand dazu Kiosk. Wenige Werte, keine weiteren Attribute; eine eigene Dimensionstabelle hätte nur eine Spalte, deshalb bleibt der Text in der Faktentabelle</td>
+          </tr>
+          <tr>
+            <td><strong>Kennung</strong></td>
+            <td><code>order_id</code></td>
+            <td>die Belegnummer; sie macht jede Zeile eindeutig und verbindet <code>fact_orders</code> mit <code>fact_order_items</code> und <code>fact_reviews</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div data-befehl="B02"></div>
+    <p>Die Kontrollzahlen sind dieselben wie in <code>burgermetrics.fact_orders</code>: 19 Bestellungen, 200,85 €. Die Faktentabelle ist <code>kundenbestellung</code> in anderer Gestalt — jede Spalte hat jetzt eine Rolle, und die Namen sind die des Auswertungsmodells. Die Positionen bekommen ihre eigene Faktentabelle mit ihrem eigenen Grain, <code>fact_order_items</code>; beide teilen sich die Dimensionen. Zwei Faktentabellen an gemeinsamen Dimensionen sind kein Sternschema mehr, sondern ein Galaxy-Schema.</p>
+  </section>
+
+  <section class="section-block" id="sicht">
+    <h2>Die Sicht beantwortet die Frage</h2>
+    <p>Die Sicht ist die gespeicherte Antwort auf die Frage aus dem ersten Abschnitt: je Filiale und Jahr die Zahl der Bestellungen und der Umsatz. Sie hält keine Daten, sondern die Definition der Kennzahl — jeder, der sie liest, bekommt dieselbe Rechnung, und wer die Definition ändert, ändert sie für alle Leser auf einmal (Lab 01, „Sichten als Vertrag“).</p>
+    <div data-befehl="B03"></div>
+    <p>Die Sicht liest hier die operativen Tabellen <code>kundenbestellung</code> und <code>filiale</code>, nicht <code>fact_orders_neu</code> aus dem vorigen Schritt — damit sie für sich allein läuft: Vor jeder Prüfung sät die Seite die Datenbank neu, und eine Tabelle aus einer anderen Übung wäre dann wieder weg. Auf dem Bestand steht dieselbe Sicht über <code>fact_orders</code> und <code>dim_branch</code>; die Rechnung ist dieselbe.</p>
+    <p>Im Browser liefert die Sicht 15 Zeilen — fünf Filialen mit Bestellungen über zehn Jahre, die erste Zeile BM Europastern 2017 mit 2 Bestellungen und 19,84 €. Filiale und Jahr sind der Grain der Antwort: Sie ist gröber als die Faktentabelle (eine Zeile je Bestellung) und feiner als die Frage nach dem Gesamtumsatz.</p>
+    <p>Ob die Rechnung stimmt, zeigt der Abgleich mit dem fertigen Schema. Notebook 01 baut dieselbe Sicht auf dem Auszug für 2025 und vergleicht sie mit <code>burgermetrics.fact_orders</code>: acht Filialen, acht Zeilen, Differenz 0,00 in jeder. Im Browser geht derselbe Abgleich als symmetrische Differenz der Zeilenmengen — beide Richtungen mit <code>EXCEPT</code>, das Ergebnis muss 0 sein:</p>
+    <div class="code-block">SELECT count(*) AS abweichende_zeilen
+FROM ((SELECT * FROM v_umsatz_filiale_jahr
+       EXCEPT
+       SELECT b.branch_name, extract(year FROM o.date)::int, count(*), round(sum(o.net_total), 2)
+       FROM burgermetrics.fact_orders o
+       JOIN burgermetrics.dim_branch b USING (branch_id)
+       GROUP BY 1, 2)
+      UNION ALL
+      (SELECT b.branch_name, extract(year FROM o.date)::int, count(*), round(sum(o.net_total), 2)
+       FROM burgermetrics.fact_orders o
+       JOIN burgermetrics.dim_branch b USING (branch_id)
+       GROUP BY 1, 2
+       EXCEPT
+       SELECT * FROM v_umsatz_filiale_jahr)) t;</div>
+    <p>Ergebnis: <code>0</code>. Dieselbe Probe führt <code>wawi.etl_probe()</code> in der echten Datenbank über alle Faktentabellen — der Abschnitt „Rezensionen“ kommt darauf zurück.</p>
+  </section>
+
+  <section class="section-block" id="fantrap">
+    <h2>Die Fan Trap</h2>
+    <p>Die Fan Trap ist der Fehler, der aus einem Verbund über zwei Grains entsteht. Wer den Umsatz aus <code>fact_orders</code> nimmt, aber <code>fact_order_items</code> dazuverbindet, bekommt jede Bestellung so oft, wie sie Positionen hat — und <code>sum(o.net_total)</code> addiert den Bestellbetrag entsprechend oft. Eine Bestellung mit drei Positionen und 27,04 € steht nach dem Verbund dreimal in der Zwischentabelle und trägt 81,12 € zur Summe bei.</p>
+    <div data-befehl="B04"></div>
+    <p>Im Browser: 649,16 € mit Verbund gegen 200,85 € ohne — Faktor 3,23. Die 55 Positionen verteilen sich auf 19 Bestellungen, im Mittel 2,9 je Bestellung; der Faktor liegt darüber, weil Bestellungen mit vielen Positionen auch die höheren Beträge haben und deshalb häufiger mitgezählt werden. Auf dem Bestand für 2025 rechnet Notebook 01 dasselbe vor: 14.692.551 € gegen 2.994.771 €, Faktor 4,9. Je Filiale sieht der Fehler so aus:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Filiale</th><th>Bestellungen</th><th>Zeilen nach Verbund</th><th>mit Verbund</th><th>ohne Verbund</th></tr></thead>
+        <tbody>
+          <tr><td>BM Europastern</td><td>7</td><td>23</td><td>315,82 €</td><td>84,75 €</td></tr>
+          <tr><td>BM Sanderring</td><td>4</td><td>12</td><td>126,59 €</td><td>38,30 €</td></tr>
+          <tr><td>BM Heuchelhof</td><td>4</td><td>10</td><td>100,19 €</td><td>36,47 €</td></tr>
+          <tr><td>BM Hauptbahnhof</td><td>2</td><td>6</td><td>76,66 €</td><td>26,38 €</td></tr>
+          <tr><td>BM Mainfrankenpark</td><td>2</td><td>4</td><td>29,90 €</td><td>14,95 €</td></tr>
+          <tr><td><strong>Summe</strong></td><td>19</td><td>55</td><td><strong>649,16 €</strong></td><td><strong>200,85 €</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="warn-box">
+      <h3>Die Regel: auf dem Grain aggregieren, auf dem der Betrag entsteht</h3>
+      <p>Der Bestellwert entsteht je Bestellung, also wird er aus <code>fact_orders</code> summiert — ohne Verbund auf die Positionen. Werden Positionen doch gebraucht, etwa für die Menge je Filiale, werden sie <em>zuerst</em> auf den Grain der Bestellung verdichtet (eine Zeile je <code>order_id</code>) und <em>danach</em> verbunden; der Verbund ist dann 1:1, und kein Betrag wird vervielfacht. Beide Wege stehen in der Karte oben. Die Abfrage mit der Fan Trap läuft fehlerfrei; erst die Gegenrechnung zeigt den Fehler.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="rezensionen">
+    <h2>Rezensionen: die dritte Faktentabelle</h2>
+    <p>Seit September 2026 hat die Fallstudie einen dritten Sachverhalt: Rezensionen. Sie bekommen keine neue Datenbank und kein neues Modell, sondern eine dritte Faktentabelle an denselben Dimensionen — das ist der Nutzen des Galaxy-Schemas. <code>burgermetrics.fact_reviews</code> hat den Grain <em>eine Rezension</em> und fünf Fremdschlüssel: <code>date</code> auf <code>dim_date</code>, <code>customer_id</code> auf <code>dim_customer</code>, <code>product_id</code> auf <code>dim_product</code>, <code>branch_id</code> auf <code>dim_branch</code> und <code>order_id</code> auf <code>fact_orders</code>, die Bestellung, aus der die Rezension stammt. Dazu <code>stars</code> (1 bis 5), <code>review_text</code> und <code>source</code>: <code>simulation</code> für den kuratierten Bestand, <code>shop</code> für Rezensionen aus dem Online-Shop. Im Browser liegen 12 Rezensionen, alle mit <code>source = 'simulation'</code>; im Bestand sind es 10.000.</p>
+    <p>Operativ schreibt der Shop die Rezension nach <code>wawi.rezension</code> — über die Funktion <code>wawi.rezension_anlegen()</code>, die Sterne (1 bis 5) und Textlänge (5 bis 500 Zeichen) prüft und Massenanfragen bremst. Von dort führt derselbe Weg ins Auswertungsmodell wie bei den Bestellungen — zunächst in <code>wawi</code>:</p>
+    <div class="kette">
+      <div class="glied hell"><span class="titel">Shop</span><span class="was">Formular im Online-Shop</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel"><code>rezension_anlegen()</code></span><span class="was">Funktion in wawi: prüft und schreibt</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel"><code>rezension</code></span><span class="was">Tabelle in wawi: operativ, deutsche Namen</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel"><code>stg_fact_reviews</code></span><span class="was">Sicht in wawi: Auswertungsvokabular</span></div>
+    </div>
+    <p>und dann in <code>burgermetrics</code>:</p>
+    <div class="kette">
+      <div class="glied betont"><span class="titel"><code>uebernahme_aus_wawi()</code></span><span class="was">Funktion in burgermetrics: der Ladelauf, bewusst aufgerufen</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel"><code>fact_reviews</code></span><span class="was">Tabelle in burgermetrics: eine Zeile je Rezension</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel"><code>v_rezension_produkt</code></span><span class="was">Sicht in burgermetrics: Sterne und Anteil positiv je Produkt</span></div>
+    </div>
+    <p>Die Sicht <code>wawi.stg_fact_reviews</code> ist die Umbenennung aus dem Abschnitt „Fakten“, als Sicht statt als Tabelle: <code>rezension_id</code> wird <code>review_id</code>, <code>sterne</code> wird <code>stars</code>, aus <code>erstellt_am</code> werden <code>date</code> und <code>time</code>. <code>burgermetrics.uebernahme_aus_wawi()</code> übernimmt daraus, was in <code>fact_reviews</code> noch fehlt — und ebenso neue Kalendertage, Bestellungen und Positionen; sie liefert vier Zahlen zurück: <code>neue_tage</code>, <code>neue_bestellungen</code>, <code>neue_positionen</code>, <code>neue_rezensionen</code>. Der Lauf startet nicht von allein. Das Dashboard zeigt den kuratierten Bestand, und jede Übungsstunde im Shop würde seine Zahlen verändern; die Übernahme ist deshalb ein bewusster Aufruf durch den Betreiber, wie ein nächtlicher Ladelauf im Betrieb. Die Rolle <code>studi_daba</code> darf weder <code>rezension_anlegen()</code> noch <code>uebernahme_aus_wawi()</code> aufrufen (Lab 01).</p>
+    <p>Den Nachweis liefert <code>wawi.etl_probe()</code>: die symmetrische Differenz zwischen den <code>stg_</code>-Sichten und den Faktentabellen — dieselbe Probe wie im Abschnitt „Die Sicht“, für <code>fact_orders</code>, <code>fact_order_items</code> und <code>fact_reviews</code>. Sie liefert drei Zeilen mit je zwei Zählern, <code>nur_in_wawi</code> und <code>nur_in_burgermetrics</code>; nach einem vollständigen Lauf stehen dort 0 und 0 in jeder Zeile. Wie die Rezensionen von dort weiter in die Sentiment-Analyse gelangen, zeigt Lab 08.</p>
+  </section>
+
+  <section class="section-block" id="stolper">
+    <h2>Stolpersteine</h2>
+    <p>Drei Meldungen und ein Fehler ohne Meldung. Die Meldungen stehen hier so, wie psql sie ausgibt; die Übungsbox dieser Seite zeigt denselben Text ohne das vorangestellte <code>ERROR:</code> unter der Überschrift „PostgreSQL meldet einen Fehler“.</p>
+    <p><strong>Zweiter Lauf ohne DROP.</strong> Eine Tabelle oder Sicht kann nur einmal angelegt werden:</p>
+    <p><code>ERROR:  relation "dim_product_neu" already exists</code></p>
+    <p>Im Browser passiert das, wenn Sie eine <code>CREATE</code>-Anweisung ein zweites Mal mit „Ausführen“ starten oder im Spielplatz wiederholen — die Tabelle aus dem ersten Lauf ist noch da; auch nach einer Prüfung steht die Musterlösung in der Datenbank. Die Prüfung selbst ist davon unberührt: Vor jeder Prüfung sät die Seite die Datenbank neu, deshalb braucht keine Übung ein <code>DROP</code>. Für „Ausführen“ und den Spielplatz räumt der Knopf „Datenbank zurücksetzen“ auf. In einer eigenen Datenbank — etwa DuckDB aus Lab 02 — steht vor dem <code>CREATE TABLE</code> ein <code>DROP TABLE IF EXISTS dim_product_neu;</code>; bei Sichten kennt PostgreSQL <code>CREATE OR REPLACE VIEW</code>.</p>
+    <p><strong>Spalte ohne Aggregat in einer Gruppierung.</strong> Steht in der Auswahlliste eine Spalte, die weder in <code>GROUP BY</code> genannt noch in eine Aggregatfunktion eingeschlossen ist, lehnt PostgreSQL die Abfrage ab:</p>
+    <p><code>ERROR:  column "o.net_total" must appear in the GROUP BY clause or be used in an aggregate function</code></p>
+    <p>Die Ursache ist fast immer ein vergessenes <code>sum()</code> um den Betrag: <code>SELECT b.branch_name, o.net_total … GROUP BY b.branch_name</code> — PostgreSQL wüsste nicht, welchen der vielen Beträge einer Filiale es zeigen soll. Gemeint war <code>sum(o.net_total)</code>.</p>
+    <p><strong>Dieselbe Übung gegen die echte Datenbank.</strong> Wer <code>CREATE TABLE dim_product_neu AS …</code> mit der Rolle <code>studi_daba</code> ausführt, bekommt:</p>
+    <p><code>ERROR:  cannot execute CREATE TABLE in a read-only transaction</code></p>
+    <p>Die Rolle liest nur (Lab 01). Anlegen dürfen Sie in der Datenbank dieser Seite, in DuckDB (Lab 02) oder in einer eigenen Instanz.</p>
+    <p><strong>Die Fan Trap.</strong> Sie läuft fehlerfrei und ist trotzdem falsch: <code>sum(o.net_total)</code> über einen Verbund auf die Positionen liefert 649,16 € statt 200,85 €, ohne dass PostgreSQL etwas meldet. Der einzige Schutz ist die Gegenrechnung auf dem richtigen Grain — dieselbe Idee wie der Abgleich in <code>etl_probe()</code>: Was in der Sicht steht, muss mit der Quelle übereinstimmen.</p>
+  </section>
+
+  <section class="section-block" id="spielplatz">
+    <h2>Spielplatz</h2>
+    <p>Unten läuft ein vollständiges PostgreSQL im Browser (PGlite, WebAssembly) mit dem Miniaturbestand der Fallstudie: 19 Bestellungen, 55 Positionen und 12 Rezensionen in denselben beiden Schemata und demselben Suchpfad wie die echte Datenbank. Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf „Datenbank zurücksetzen“ stellt den Ausgangsbestand wieder her.</p>
+    <div data-datenbank="postgres"></div>
+    <div class="info-box">
+      <p>Die Übungen legen Tabellen und Sichten in dieser Datenbank an. <code>CREATE TABLE</code> ohne Schemaangabe landet im ersten Schema des Suchpfads, also in <code>wawi</code> — <code>information_schema.tables</code> zeigt es. Vor jeder Prüfung sät die Seite die Datenbank neu; deshalb braucht keine Übung ein <code>DROP</code>, und jede lässt sich für sich allein prüfen.</p>
+    </div>
+    <p>Die Startabfrage zeigt die fünf ältesten Bestellungen in <code>kundenbestellung</code> — den Grain, von dem alles ausgeht. Von hier aus lassen sich die vier Karten dieses Labs der Reihe nach ausführen.</p>
+    <div data-sql-konsole data-start="SELECT * FROM kundenbestellung ORDER BY bestelldatum LIMIT 5;"></div>
+  </section>
+
+  <section class="section-block" id="uebungen">
+    <h2>Übungen</h2>
+    <p>Fünf Übungen: drei Schritte, die aufeinander aufbauen — Dimension, Faktentabelle, Sicht — und doch einzeln prüfbar sind, weil die Seite vor jeder Prüfung neu sät; dann die Fan Trap nachrechnen; zuletzt drei Fragen zu Grain, Denormalisierung und ETL.</p>
+    <div data-uebung="W03-01"></div>
+    <div data-uebung="W03-02"></div>
+    <div data-uebung="W03-03"></div>
+    <div data-uebung="W03-04"></div>
+    <div data-uebung="W03-05"></div>
+    <div data-fortschritt></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2>Zusammenfassung</h2>
+    <ul>
+      <li>Die Frage bestimmt das Modell: Kennzahl (Summe <code>netto_gesamt</code>, nach Rabatt), Auflösung (Filiale und Jahr), Zeitraum (2017 bis 2026). Für „Umsatz je Filiale und Jahr“ braucht es <code>kundenbestellung</code> und <code>filiale</code> — die Positionen nicht.</li>
+      <li>Der Grain sagt, wofür eine Zeile steht: die Bestellung, auf der der Betrag nach Rabatt entsteht (754.513 im Bestand, 19 im Browser), oder die Position, auf der die Menge entsteht (2.950.082 gegen 55). Bestellung 457: eine Zeile mit 27,04 €, drei Positionen.</li>
+      <li>Eine Dimension nimmt die Verbunde des operativen Modells vorweg: <code>dim_product_neu</code> aus <code>artikel</code>, <code>artikelunterkategorie</code> und <code>artikelkategorie</code>, englische Namen als Grenze zum Auswertungsmodell. Die Redundanz ist tragbar, weil in die Dimension niemand schreibt.</li>
+      <li>Die Faktentabelle <code>fact_orders_neu</code> ist <code>kundenbestellung</code> in anderer Gestalt: Schlüssel (<code>branch_id</code>, <code>customer_id</code>, <code>date</code>), Maß (<code>net_total</code>) und die degenerierte Dimension <code>order_channel</code>; 19 Bestellungen, 200,85 € — wie im fertigen Schema.</li>
+      <li>Die Sicht <code>v_umsatz_filiale_jahr</code> beantwortet die Frage in einer Abfrage und lässt sich gegen das fertige Schema abgleichen: im Browser 0 abweichende Zeilen, in Notebook 01 Differenz 0,00 auf acht Filialen.</li>
+      <li>Die Fan Trap: ein Verbund auf die Positionen zählt jeden Bestellbetrag so oft, wie die Bestellung Positionen hat — 649,16 € statt 200,85 € (Faktor 3,23), im Bestand für 2025 14.692.551 € statt 2.994.771 € (Faktor 4,9). Sie läuft ohne Fehlermeldung; die Regel dagegen: auf dem Grain aggregieren, auf dem der Betrag entsteht.</li>
+      <li><code>fact_reviews</code> ist die dritte Faktentabelle an denselben Dimensionen: Shop → <code>rezension_anlegen()</code> → <code>wawi.rezension</code> → <code>stg_fact_reviews</code> → <code>uebernahme_aus_wawi()</code> → <code>fact_reviews</code> → <code>v_rezension_produkt</code>; <code>etl_probe()</code> liefert 0 und 0 je Faktentabelle. Das Modell aus diesem Lab lesen Power BI (Lab 04) und Tableau (Lab 05); Lab 07 und Lab 08 bauen darauf auf.</li>
+    </ul>
+    <div data-lab-nav></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS Business School · Datenbasierte Fallstudien · BM-Lab · Lab 03 · Stand 09/2026</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>

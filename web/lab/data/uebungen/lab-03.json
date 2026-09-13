@@ -1,0 +1,112 @@
+{
+  "befehle": {
+    "B01": {
+      "titel": { "de": "Schritt 1: Drei Tabellen werden dim_product_neu" },
+      "prompt": "SQL",
+      "befehl": "-- Drei Tabellen werden eine: eine Zeile je Artikel\nCREATE TABLE dim_product_neu AS\nSELECT a.artikel_id AS product_id,\n       a.name       AS product_name,\n       k.name       AS category,\n       u.name       AS subcategory\nFROM wawi.artikel a\nJOIN wawi.artikelunterkategorie u USING (unterkategorie_id)\nJOIN wawi.artikelkategorie      k USING (kategorie_id);\n\n-- Kontrollzahlen: 31 Produkte in 6 Kategorien\nSELECT count(*) AS produkte, count(DISTINCT category) AS kategorien\nFROM dim_product_neu;",
+      "teile": [
+        { "was": "CREATE TABLE dim_product_neu AS", "bedeutet": { "de": "Legt die Tabelle aus dem Ergebnis der Abfrage an; Spaltennamen und Typen kommen aus der Auswahlliste. Ohne Schemaangabe landet sie im ersten Schema des Suchpfads, hier wawi. In der echten Datenbank scheitert dieselbe Anweisung mit der Rolle studi_daba: cannot execute CREATE TABLE in a read-only transaction." } },
+        { "was": "a.artikel_id AS product_id", "bedeutet": { "de": "Umbenennung ins englische Vokabular von burgermetrics. Die Werte bleiben; der Name markiert die Grenze zwischen operativem und analytischem Modell." } },
+        { "was": "JOIN … USING (unterkategorie_id)", "bedeutet": { "de": "Verbindet die gleichnamige Spalte beider Tabellen — kürzer als ON a.unterkategorie_id = u.unterkategorie_id, und die Spalte erscheint im Ergebnis nur einmal. Der zweite Verbund führt von der Unterkategorie über kategorie_id zur Kategorie." } },
+        { "was": "k.name AS category, u.name AS subcategory", "bedeutet": { "de": "Beide Stammdatentabellen haben eine Spalte name. Ohne Alias stünden zwei Spalten name in der neuen Tabelle, und CREATE TABLE lehnt das ab: column \"name\" specified more than once." } },
+        { "was": "_neu", "bedeutet": { "de": "Hält Abstand zur fertigen burgermetrics.dim_product, die in der Datenbank dieser Seite schon liegt. Derselbe Name steht in dataset/wawi_zu_analytisch.sql im Repository." } },
+        { "was": "count(DISTINCT category)", "bedeutet": { "de": "Zählt jede Kategorie einmal, obwohl sie in der Dimension so oft steht, wie sie Produkte hat — 6 Kategorien auf 31 Zeilen." } }
+      ],
+      "ausgabe": "produkte | kategorien\n31 | 6"
+    },
+    "B02": {
+      "titel": { "de": "Schritt 2: Die Faktentabelle fact_orders_neu" },
+      "prompt": "SQL",
+      "befehl": "-- Grain: eine Zeile je Bestellung. Nur umbenennen, nichts verknüpfen.\nCREATE TABLE fact_orders_neu AS\nSELECT bestellung_id AS order_id,\n       -- Schlüssel zu den Dimensionen: Zeit, Filiale, Kunde\n       bestelldatum  AS date,\n       filiale_id    AS branch_id,\n       kunde_id      AS customer_id,\n       -- degenerierte Dimension: ein Merkmal ohne eigene Tabelle\n       bestellkanal  AS order_channel,\n       -- Maß: der Bestellwert nach Rabatt\n       netto_gesamt  AS net_total\nFROM wawi.kundenbestellung;\n\n-- Kontrollzahlen: 19 Bestellungen, 200,85 € wie in fact_orders\nSELECT count(*) AS bestellungen, round(sum(net_total), 2) AS umsatz\nFROM fact_orders_neu;",
+      "teile": [
+        { "was": "bestellung_id AS order_id", "bedeutet": { "de": "Die Belegnummer bleibt die Kennung der Zeile: eine Zeile je Bestellung, kein Verbund, keine Gruppierung — der Grain der Faktentabelle ist der Grain von kundenbestellung." } },
+        { "was": "date, branch_id, customer_id", "bedeutet": { "de": "Die Schlüssel zu den Dimensionen dim_date, dim_branch und dim_customer. Über sie wird gefiltert und gruppiert; die Namen sind die des fertigen Schemas." } },
+        { "was": "bestellkanal AS order_channel", "bedeutet": { "de": "Die degenerierte Dimension: Counter, Drive-Through oder App Order, im Bestand dazu Kiosk — wenige Werte ohne weitere Attribute. Eine eigene Tabelle dafür hätte eine Spalte; der Text bleibt deshalb in der Faktentabelle." } },
+        { "was": "netto_gesamt AS net_total", "bedeutet": { "de": "Das Maß: der Bestellwert nach Rabatt, additiv über jede Dimension. Das fertige Schema führt daneben gross_total, discount_amount, item_count, order_duration_min und satisfaction_score — nach demselben Muster umbenannt." } },
+        { "was": "round(sum(net_total), 2)", "bedeutet": { "de": "Die Kontrollzahl: 200,85 €, dieselbe Summe wie SELECT round(sum(net_total), 2) FROM burgermetrics.fact_orders. Stimmt sie, ist der Grain unverändert geblieben." } }
+      ],
+      "ausgabe": "bestellungen | umsatz\n19 | 200.85"
+    },
+    "B03": {
+      "titel": { "de": "Schritt 3: Die Sicht v_umsatz_filiale_jahr" },
+      "prompt": "SQL",
+      "befehl": "-- Eine Sicht hält keine Daten, sondern die Definition der Kennzahl\nCREATE VIEW v_umsatz_filiale_jahr AS\nSELECT f.name                                 AS filiale,\n       extract(year FROM o.bestelldatum)::int AS jahr,\n       count(*)                               AS bestellungen,\n       round(sum(o.netto_gesamt), 2)          AS umsatz\nFROM wawi.kundenbestellung o\nJOIN wawi.filiale f USING (filiale_id)\nGROUP BY 1, 2;\n\n-- Die Antwort: eine Zeile je Filiale und Jahr\nSELECT * FROM v_umsatz_filiale_jahr ORDER BY jahr, filiale;",
+      "teile": [
+        { "was": "CREATE VIEW … AS", "bedeutet": { "de": "Speichert die Abfrage unter einem Namen. Jeder Aufruf rechnet sie neu auf dem aktuellen Bestand; in der echten Datenbank sind die Sichten materialisiert, damit die Rechnung nicht bei jedem Aufruf über 754.513 Bestellungen läuft (Lab 01)." } },
+        { "was": "extract(year FROM o.bestelldatum)::int", "bedeutet": { "de": "Zieht das Jahr aus dem Datum; extract liefert eine Dezimalzahl, ::int macht daraus eine ganze Zahl — 2017, nicht 2017.0." } },
+        { "was": "GROUP BY 1, 2", "bedeutet": { "de": "Gruppiert nach der ersten und zweiten Spalte der Auswahlliste, also nach Filiale und Jahr. Gleichwertig zu GROUP BY f.name, extract(year FROM o.bestelldatum), nur kürzer." } },
+        { "was": "count(*), round(sum(o.netto_gesamt), 2)", "bedeutet": { "de": "Die beiden Kennzahlen auf dem Grain der Antwort: Bestellungen gezählt, Beträge summiert und auf Cent gerundet. Beide stammen aus kundenbestellung — kein Verbund auf die Positionen." } },
+        { "was": "wawi.kundenbestellung, wawi.filiale", "bedeutet": { "de": "Die Sicht liest die operativen Tabellen, damit sie unabhängig von Schritt 2 läuft — vor jeder Prüfung wird neu gesät. Auf dem Bestand steht dieselbe Sicht über fact_orders und dim_branch." } }
+      ],
+      "ausgabe": "filiale | jahr | bestellungen | umsatz\nBM Europastern | 2017 | 2 | 19.84\nBM Europastern | 2018 | 1 | 14.64\nBM Hauptbahnhof | 2018 | 1 | 11.95\nBM Sanderring | 2019 | 2 | 25.02\nBM Europastern | 2020 | 1 | 16.80\nBM Sanderring | 2020 | 1 | 5.28\nBM Europastern | 2021 | 1 | 6.49\nBM Sanderring | 2021 | 1 | 8.00\nBM Europastern | 2022 | 1 | 21.20\nBM Heuchelhof | 2022 | 1 | 2.53\nBM Heuchelhof | 2023 | 2 | 21.90\nBM Mainfrankenpark | 2024 | 2 | 14.95\nBM Europastern | 2025 | 1 | 5.78\nBM Hauptbahnhof | 2025 | 1 | 14.43\nBM Heuchelhof | 2026 | 1 | 12.04"
+    },
+    "B04": {
+      "titel": { "de": "Die Fan Trap: einmal falsch, zweimal richtig" },
+      "prompt": "SQL",
+      "befehl": "-- falsch: der Bestellbetrag wird je Position mitgezählt\nSELECT round(sum(o.net_total), 2) AS umsatz_falsch\nFROM fact_orders o\nJOIN fact_order_items i USING (order_id);\n\n-- richtig, Weg 1: nur aus fact_orders summieren\nSELECT round(sum(net_total), 2) AS umsatz\nFROM fact_orders;\n\n-- richtig, Weg 2: Positionen erst je Bestellung verdichten, dann verbinden\nWITH positionen AS (\n  SELECT order_id, sum(quantity) AS menge\n  FROM fact_order_items\n  GROUP BY order_id)\nSELECT round(sum(o.net_total), 2) AS umsatz, sum(p.menge) AS menge\nFROM fact_orders o\nJOIN positionen p USING (order_id);",
+      "teile": [
+        { "was": "JOIN fact_order_items i USING (order_id)", "bedeutet": { "de": "Eine Bestellung mit drei Positionen wird zu drei Zeilen, und ihr net_total steht dreimal darin; sum() addiert alle drei. 55 Positionen auf 19 Bestellungen ergeben 649,16 € statt 200,85 € — Faktor 3,23." } },
+        { "was": "Faktor 3,23", "bedeutet": { "de": "Liegt über der mittleren Positionszahl je Bestellung (55 geteilt durch 19, also 2,9), weil Bestellungen mit vielen Positionen auch die höheren Beträge haben. Im Bestand für 2025: 14.692.551 € statt 2.994.771 €, Faktor 4,9 (Notebook 01)." } },
+        { "was": "Kein Fehler", "bedeutet": { "de": "PostgreSQL meldet nichts — die Abfrage ist syntaktisch richtig und liefert eine plausible Zahl. Nur die Gegenrechnung auf dem richtigen Grain deckt den Fehler auf." } },
+        { "was": "WITH positionen AS (…)", "bedeutet": { "de": "Ein benannter Zwischenschritt (Common Table Expression): Die Positionen werden zuerst auf den Grain der Bestellung verdichtet, eine Zeile je order_id. Der Verbund danach ist 1:1, kein Betrag wird vervielfacht." } },
+        { "was": "sum(p.menge)", "bedeutet": { "de": "Die Menge kommt aus den Positionen, der Betrag aus der Bestellung — jede Kennzahl von dem Grain, auf dem sie entsteht. 58 ist die Summe der Mengen; 55 ist die Zahl der Positionen." } }
+      ],
+      "ausgabe": "umsatz_falsch\n649.16\n\numsatz\n200.85\n\numsatz | menge\n200.85 | 58"
+    }
+  },
+  "uebungen": [
+    { "id": "W03-01", "typ": "sql",
+      "titel": { "de": "Schritt 1: Aus drei Tabellen wird dim_product_neu" },
+      "aufgabe": { "de": "<p>Legen Sie mit <code>CREATE TABLE dim_product_neu AS SELECT …</code> eine Dimension an: <code>artikel_id</code> als <code>product_id</code>, <code>name</code> als <code>product_name</code>, den Kategorienamen als <code>category</code>, den Unterkategorienamen als <code>subcategory</code> — aus <code>wawi.artikel</code>, <code>wawi.artikelunterkategorie</code> und <code>wawi.artikelkategorie</code>.</p><p>Geprüft wird: <code>SELECT count(*) AS produkte, count(DISTINCT category) AS kategorien FROM dim_product_neu</code>.</p>" },
+      "start": "CREATE TABLE dim_product_neu AS\nSELECT a.artikel_id AS product_id, a.name AS product_name\nFROM wawi.artikel a\n",
+      "loesung": "CREATE TABLE dim_product_neu AS\nSELECT a.artikel_id AS product_id, a.name AS product_name, k.name AS category, u.name AS subcategory\nFROM wawi.artikel a\nJOIN wawi.artikelunterkategorie u USING (unterkategorie_id)\nJOIN wawi.artikelkategorie k USING (kategorie_id)",
+      "kontrolle": "SELECT count(*) AS produkte, count(DISTINCT category) AS kategorien FROM dim_product_neu",
+      "hinweis": { "de": "<p>Zwei Verbunde: <code>artikel → artikelunterkategorie</code> über <code>unterkategorie_id</code>, <code>artikelunterkategorie → artikelkategorie</code> über <code>kategorie_id</code>. Beide Tabellen haben eine Spalte <code>name</code> — mit Alias unterscheiden.</p>" },
+      "rueckmeldung": { "de": "31 Produkte, 6 Kategorien. Im operativen Modell war die Kategorie zwei Verbunde entfernt; in der Dimension steht sie neben dem Produkt. Redundanz kostet hier nichts, weil in dim_product niemand schreibt." } },
+
+    { "id": "W03-02", "typ": "sql",
+      "titel": { "de": "Schritt 2: Die Faktentabelle fact_orders_neu" },
+      "aufgabe": { "de": "<p>Legen Sie <code>fact_orders_neu</code> aus <code>wawi.kundenbestellung</code> an mit den Spalten <code>order_id</code> (aus <code>bestellung_id</code>), <code>date</code> (<code>bestelldatum</code>), <code>branch_id</code> (<code>filiale_id</code>), <code>customer_id</code> (<code>kunde_id</code>), <code>order_channel</code> (<code>bestellkanal</code>) und <code>net_total</code> (<code>netto_gesamt</code>).</p><p>Geprüft wird: <code>SELECT count(*) AS bestellungen, round(sum(net_total), 2) AS umsatz FROM fact_orders_neu</code>.</p>" },
+      "start": "CREATE TABLE fact_orders_neu AS\nSELECT bestellung_id AS order_id\nFROM wawi.kundenbestellung\n",
+      "loesung": "CREATE TABLE fact_orders_neu AS\nSELECT bestellung_id AS order_id, bestelldatum AS date, filiale_id AS branch_id, kunde_id AS customer_id,\n       bestellkanal AS order_channel, netto_gesamt AS net_total\nFROM wawi.kundenbestellung",
+      "kontrolle": "SELECT count(*) AS bestellungen, round(sum(net_total), 2) AS umsatz FROM fact_orders_neu",
+      "hinweis": { "de": "<p>Nur umbenennen, nichts verknüpfen: Der Grain bleibt die Bestellung. Schlüssel (branch_id, customer_id), Maß (net_total) und die degenerierte Dimension order_channel bleiben in der Tabelle.</p>" },
+      "rueckmeldung": { "de": "19 Bestellungen, 200,85 € — dieselben Zahlen wie in burgermetrics.fact_orders. Die Faktentabelle ist kundenbestellung in anderer Gestalt; jede Spalte hat jetzt eine Rolle." } },
+
+    { "id": "W03-03", "typ": "sql",
+      "titel": { "de": "Schritt 3: Die Sicht, die die Frage beantwortet" },
+      "aufgabe": { "de": "<p>Legen Sie die Sicht <code>v_umsatz_filiale_jahr</code> an: je Filiale (<code>f.name</code> als <code>filiale</code>) und Jahr (<code>extract(year FROM bestelldatum)::int</code> als <code>jahr</code>) die Zahl der Bestellungen (<code>bestellungen</code>) und den Umsatz (<code>round(sum(netto_gesamt), 2)</code> als <code>umsatz</code>) — aus <code>wawi.kundenbestellung</code> und <code>wawi.filiale</code>.</p><p>Geprüft wird: <code>SELECT * FROM v_umsatz_filiale_jahr ORDER BY jahr, filiale</code>.</p>" },
+      "start": "CREATE VIEW v_umsatz_filiale_jahr AS\nSELECT f.name AS filiale\nFROM wawi.kundenbestellung o\nJOIN wawi.filiale f USING (filiale_id)\n",
+      "loesung": "CREATE VIEW v_umsatz_filiale_jahr AS\nSELECT f.name AS filiale, extract(year FROM o.bestelldatum)::int AS jahr,\n       count(*) AS bestellungen, round(sum(o.netto_gesamt), 2) AS umsatz\nFROM wawi.kundenbestellung o\nJOIN wawi.filiale f USING (filiale_id)\nGROUP BY 1, 2",
+      "kontrolle": "SELECT * FROM v_umsatz_filiale_jahr ORDER BY jahr, filiale",
+      "hinweis": { "de": "<p><code>GROUP BY 1, 2</code> gruppiert nach den ersten beiden Spalten der Auswahl. <code>::int</code> macht aus dem Jahr eine ganze Zahl.</p>" },
+      "rueckmeldung": { "de": "15 Zeilen: Filiale und Jahr sind der Grain der Antwort. In Notebook 01 liefert dieselbe Sicht auf dem ganzen Bestand acht Zeilen für 2025, zeilengleich mit burgermetrics — Differenz 0,00." } },
+
+    { "id": "W03-04", "typ": "sql",
+      "titel": { "de": "Die Fan Trap nachrechnen" },
+      "aufgabe": { "de": "<p>Berechnen Sie in einer Abfrage zwei Spalten: <code>mit_join</code> = <code>sum(o.net_total)</code> über <code>fact_orders o JOIN fact_order_items i USING (order_id)</code>, und <code>ohne_join</code> = <code>sum(net_total)</code> aus <code>fact_orders</code> allein (als Unterabfrage). Beide auf zwei Stellen gerundet.</p>" },
+      "start": "SELECT round(sum(o.net_total), 2) AS mit_join\nFROM fact_orders o\n",
+      "loesung": "SELECT round(sum(o.net_total), 2) AS mit_join,\n       (SELECT round(sum(net_total), 2) FROM fact_orders) AS ohne_join\nFROM fact_orders o\nJOIN fact_order_items i USING (order_id)",
+      "hinweis": { "de": "<p>Die Unterabfrage <code>(SELECT round(sum(net_total), 2) FROM fact_orders)</code> steht als zweite Spalte in der Auswahlliste.</p>" },
+      "rueckmeldung": { "de": "649,16 € gegen 200,85 € — jede Bestellung wird so oft gezählt, wie sie Positionen hat. Die Abfrage läuft fehlerfrei; erst die zweite Rechnung zeigt den Fehler. Im Bestand: 14.692.551 € gegen 2.994.771 €." } },
+
+    { "id": "W03-05", "typ": "quiz",
+      "titel": { "de": "Grain, Denormalisierung, ETL" },
+      "aufgabe": { "de": "<p>Drei Fragen zum Modell.</p>" },
+      "fragen": [
+        { "frage": { "de": "Welche Kennzahl gehört auf den Grain der Position?" },
+          "optionen": [ { "de": "Die verkaufte Menge je Produkt" }, { "de": "Der Bestellwert nach Rabatt" }, { "de": "Die Bestelldauer" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Mengen entstehen je Position; Bestellwert und Bestelldauer entstehen je Bestellung und gehören nach fact_orders." } },
+        { "frage": { "de": "Warum ist die Redundanz in dim_product tragbar, im operativen Modell aber nicht?" },
+          "optionen": [ { "de": "In der Auswertung schreibt niemand; Änderungen laufen über den nächtlichen Abzug" }, { "de": "Weil Dimensionstabellen klein sind" }, { "de": "Weil PostgreSQL Redundanz automatisch bereinigt" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Redundanz kostet Konsistenz nur beim Schreiben. Die Größe ist kein Argument, und PostgreSQL bereinigt nichts von selbst." } },
+        { "frage": { "de": "Welche Funktion übernimmt neue Shop-Rezensionen aus wawi.rezension nach fact_reviews?" },
+          "optionen": [ { "de": "burgermetrics.uebernahme_aus_wawi()" }, { "de": "wawi.rezension_anlegen()" }, { "de": "wawi.etl_probe()" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "rezension_anlegen() schreibt die Rezension operativ, etl_probe() vergleicht beide Seiten; die Übernahme macht uebernahme_aus_wawi() — bewusst aufgerufen, nicht automatisch." } }
+      ],
+      "rueckmeldung": { "de": "Vier Entscheidungen in fester Reihenfolge — Frage, Grain, Dimensionen, Fakten — und eine Sicht, die den Nachweis liefert. Die Rezensionen laufen denselben Weg wie die Bestellungen." } }
+  ]
+}
