@@ -98,12 +98,13 @@ import matplotlib.pyplot as plt
 
 abb, achse = plt.subplots(figsize=(6, 6))
 achse.scatter(vergleich["lift"], vergleich["lift_q1_2025"])
-achse.plot([0.9, 3.5], [0.9, 3.5], linestyle="--")
+grenze = max(vergleich["lift"].max(), vergleich["lift_q1_2025"].max()) * 1.05
+achse.plot([0.9, grenze], [0.9, grenze], linestyle="--")
 achse.set_xlabel("Lift im ganzen Bestand (v_warenkorb_regeln)")
 achse.set_ylabel("Lift im ersten Quartal 2025 (Apriori)")
-achse.set_title("Ein Quartal reicht: Die Lifts liegen nahe der Diagonale")
-achse.set_xlim(0.9, 3.5)
-achse.set_ylim(0.9, 3.5)
+achse.set_title("Ein Quartal reicht für die meisten Paare; die stärksten liegen im Quartal höher")
+achse.set_xlim(0.9, grenze)
+achse.set_ylim(0.9, grenze)
 plt.show()
 """),
 md("""
