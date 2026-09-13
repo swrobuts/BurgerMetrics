@@ -37,7 +37,6 @@ web/lab/
   assets/bm.js               Laufzeit (aus winf.js): LABS, Saatfolge, Übungsboxen, Regal-Simulator, Fortschritt; nur Deutsch, Schlüssel bm:*
   assets/jsonpruefung.js     Prüfung der JSON-Übungen (unverändert aus WInf-SP)
   assets/regal.js            Aggregation und Zielprüfung des Regal-Simulators (unverändert aus WInf-SP)
-  assets/pruefung.js         Prüflogik der Terminalschritte (unverändert aus WInf-SP übernommen, im BM-Lab ungenutzt)
   assets/pglite/             PostgreSQL als WebAssembly (PGlite), lokal statt vom CDN (rund 19 MB)
   data/wawi_mini.sql         Schema wawi: Kopie aus dataset/ (Kasse, Shop, Rezensionen)
   data/burgermetrics_mini.sql Schema burgermetrics: Kopie aus dataset/ (Galaxy-Schema mit fact_reviews)
