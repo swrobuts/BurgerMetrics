@@ -1,0 +1,36 @@
+// powerbi-measures.dax — fünf Measures für den Bericht zur Fallstudie BurgerMetrics
+// Kopiervorlage zu Lab 04 (Befehlskarte B02). Power BI Desktop, Update August 2026. Stand 09/2026.
+//
+// Jedes Measure wird einzeln angelegt: die Formelzeile in die Formelleiste
+// einfügen; die Kommentarzeilen davor erklären sie.
+// Tabellen- und Spaltennamen sind die des Schemas burgermetrics (Lab 03):
+//   fact_orders  (order_id, date, branch_id, customer_id, net_total, …)
+//   fact_reviews (review_id, date, branch_id, customer_id, product_id, order_id, stars, …)
+//   dim_date     (date, year, month, month_name, …)
+// Ein Measure speichert keinen Wert. Es rechnet bei jeder Abfrage im
+// Filterkontext des Bildes, in dem es steht: Achse, Legende, Filter der Seite.
+
+// Umsatz: Summe des Bestellwerts nach Rabatt, auf dem Grain der Bestellung.
+// Kontrollzahl mit dem Filter dim_date[year] = 2025: 2.994.771,13 €
+Umsatz = SUM(fact_orders[net_total])
+
+// Bestellungen: zählt die Zeilen der Faktentabelle — nicht die Summe der
+// Bestellnummern, die Power BI für die Zahlenspalte order_id vorschlagen würde.
+// Kontrollzahl für 2025: 136.557
+Bestellungen = COUNTROWS(fact_orders)
+
+// Bestellwert: mittlerer Wert je Bestellung. DIVIDE statt „/“ liefert BLANK statt
+// eines Fehlers, wenn der Nenner null ist. Measures dürfen Measures aufrufen;
+// [Umsatz] und [Bestellungen] werden im selben Filterkontext berechnet.
+Bestellwert = DIVIDE([Umsatz], [Bestellungen])
+
+// Ø Sterne: Mittelwert der Sterne aus der dritten Faktentabelle. Über die aktiven
+// Beziehungen zu dim_branch und dim_date je Filiale und Jahr aufteilbar; die
+// Beziehung fact_reviews → fact_orders ist inaktiv und wird nicht gebraucht.
+Ø Sterne = AVERAGE(fact_reviews[stars])
+
+// Umsatz 2025: CALCULATE wertet [Umsatz] in einem veränderten Filterkontext aus.
+// Der Filter auf dim_date[year] ersetzt jeden Filter, der von außen auf dieser
+// Spalte liegt; Filter auf anderen Spalten (Filiale, Monat) bleiben.
+// Ergebnis ohne weitere Filter: 2.994.771,13 €
+Umsatz 2025 = CALCULATE([Umsatz], dim_date[year] = 2025)

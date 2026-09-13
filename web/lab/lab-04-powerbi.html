@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 04 · Power BI · BM-Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body class="lab-page" data-lab="lab-04">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <a class="header-back" href="index.html">← Zur Übersicht</a>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title">Abschnitte</div>
+  <a class="sidebar-link" href="#warum">Was Power BI hier leistet</a>
+  <a class="sidebar-link" href="#begriffe">Die Begriffe</a>
+  <a class="sidebar-link" href="#verbinden">Verbinden</a>
+  <a class="sidebar-link" href="#modell">Das Modell</a>
+  <a class="sidebar-link" href="#dax">Measures in DAX</a>
+  <a class="sidebar-link" href="#bericht">Der Bericht</a>
+  <a class="sidebar-link" href="#stolper">Stolpersteine</a>
+  <a class="sidebar-link" href="#simulator">Simulator</a>
+  <a class="sidebar-link" href="#uebungen">Übungen</a>
+  <a class="sidebar-link" href="#zusammenfassung">Zusammenfassung</a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">04</div>
+  <h1 class="lab-title">Power BI</h1>
+  <p class="lab-intro">Lab 03 hat das Auswertungsmodell der Fallstudie nachgebaut: Faktentabellen an gemeinsamen Dimensionen, Kennzahlen als Sichten. Dieses Lab liest dasselbe Modell mit Power BI Desktop — PostgreSQL anbinden, die Fremdschlüssel als Beziehungen prüfen, Kennzahlen als Measures in DAX definieren und daraus einen Bericht mit Kacheln, Balken und einer Linie bauen. Die Kontrollzahl bleibt dieselbe wie im Dashboard und in den Notebooks: 2.994.771,13 € Umsatz für 2025.</p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Import gegen DirectQuery</span>
+    <span class="lernziel-chip">Beziehung *:1</span>
+    <span class="lernziel-chip">Measure gegen berechnete Spalte</span>
+    <span class="lernziel-chip">Filterkontext · CALCULATE</span>
+    <span class="lernziel-chip">Kachel · Balken · Linie</span>
+  </div>
+  <div data-einordnung></div>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="warum">
+    <h2>Was Power BI hier leistet — und was nicht</h2>
+    <p>Dashboard, Notebooks und die Dash-App der Fallstudie lesen ihre Kennzahlen aus den Sichten <code>v_*</code> des Schemas <code>burgermetrics</code> — jede Kennzahl genau einmal definiert (Lab 01, „Sichten als Vertrag“). Power BI Desktop ist ein weiterer Leser derselben Datenbank. Drei Dinge steuert es bei, die jemand ohne SQL braucht:</p>
+    <ul>
+      <li><strong>ein Modell:</strong> die Tabellen des Galaxy-Schemas aus Lab 03, kopiert in den Speicher und verbunden über Beziehungen, die Power BI aus den Fremdschlüsseln der Datenbank übernimmt;</li>
+      <li><strong>Measures:</strong> Kennzahlen als Formeln in DAX, die bei jeder Abfrage im jeweiligen Filter neu rechnen — <code>Umsatz</code> ist eine Definition, keine gespeicherte Zahl;</li>
+      <li><strong>einen Bericht:</strong> Kacheln, Balken und Linien, die dasselbe Measure nach Filiale oder Monat aufteilen, ohne dass jemand eine Abfrage schreibt.</li>
+    </ul>
+    <p>Was Power BI nicht leistet, ist die Definition der Kennzahl. Die steht in der Sicht: <code>v_kennzahlen_jahr</code> legt fest, was Umsatz ist — die Summe von <code>net_total</code>, dem Bestellwert nach Rabatt (Lab 03) —, und jedes Werkzeug muss dieselbe Zahl liefern. Ein Measure, das anders rechnet als die Sicht, ist keine zweite Meinung, sondern ein Fehler. Die Kontrollzahl dieses Labs ist deshalb dieselbe wie in Lab 01: <strong>2.994.771,13 €</strong> Umsatz für 2025 aus <strong>136.557</strong> Bestellungen.</p>
+    <div class="kette">
+      <div class="glied hell"><span class="titel">Lab 01 · 03</span><span class="was">Datenbank, Sichten, Galaxy-Schema</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Verbinden</span><span class="was">PostgreSQL-Connector, Import</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Modell</span><span class="was">Beziehungen *:1 aus Fremdschlüsseln</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied betont"><span class="titel">DAX</span><span class="was">Measures im Filterkontext</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Bericht</span><span class="was">Kacheln, Balken, Linie</span></div>
+    </div>
+    <p>Die Reihenfolge der Abschnitte ist die Reihenfolge der Arbeit: erst die Verbindung, dann das Modell mit seinen Beziehungen, dann die Measures, zuletzt der Bericht. Wer mit dem Diagramm beginnt, zieht Spalten in ein Bild und überlässt Power BI die Wahl der Aggregation — und für jede Zahlenspalte, auch für eine Bestellnummer, schlägt Power BI die Summe vor. Der Simulator dieses Labs bildet genau diesen Mechanismus nach.</p>
+    <div class="info-box">
+      <p><strong>Werkzeug und Stand.</strong> Power BI Desktop läuft unter Windows; dieses Lab bezieht sich auf das Update August 2026 (Stand 09/2026). Preis und Lizenzbedingungen sind nach Herstellerangabe zu prüfen. Der Bestand der Fallstudie ist synthetisch, und das Konto <code>studi_daba</code> liest nur — was Power BI in das Modell kopiert, sind keine personenbezogenen Daten.</p>
+    </div>
+    <div class="auswahl-hinweis">
+      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Power BI steht in diesem Kurs neben Tableau (Lab 05) und Python (Lab 06): drei Wege zu denselben Sichten, und die Kontrollzahl muss in jedem dieselbe sein.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="begriffe">
+    <h2>Die Begriffe</h2>
+    <p>Vier Begriffe tragen dieses Lab. Sie kommen in der Reihenfolge der Arbeit vor: beim Verbinden, im Modell, in den Measures.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Begriff</th><th>Was es ist</th><th>Wo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Import gegen DirectQuery</strong></td>
+            <td>Import kopiert die gewählten Tabellen in den Speicher von Power BI; Bilder rechnen aus dem Speicher, neue Daten kommen erst mit dem nächsten Aktualisieren. DirectQuery lässt die Daten in PostgreSQL und schickt bei jedem Bild Abfragen an die Datenbank; jede Abfrage, die mehr als 1.000.000 Zeilen liefert, scheitert, und eine automatische Datumshierarchie gibt es nicht. Microsoft empfiehlt Import als Regelfall (Stand 09/2026).</td>
+            <td>Verbinden</td>
+          </tr>
+          <tr>
+            <td><strong>Beziehung</strong></td>
+            <td>Die Verbindung zweier Tabellen über eine Spalte, in der Modellansicht eine Linie. Kardinalität <code>*:1</code>: viele Bestellungen, eine Filiale — die 1-Seite ist die Dimension, ihre Schlüsselspalte ist eindeutig. Filterrichtung einfach: ein Filter auf der Dimension wirkt in der Faktentabelle, nicht umgekehrt. Je Tabellenpaar ist nur eine Beziehung aktiv.</td>
+            <td>Modell</td>
+          </tr>
+          <tr>
+            <td><strong>Measure gegen berechnete Spalte</strong></td>
+            <td>Ein Measure ist eine Formel in DAX, die keinen Wert speichert, sondern bei jeder Abfrage im Filterkontext neu rechnet: <code>Umsatz = SUM(fact_orders[net_total])</code>. Eine berechnete Spalte wird beim Laden je Zeile berechnet und im Modell gespeichert; sie kennt die aktuelle Zeile, aber nicht den Bericht. Kennzahlen sind Measures; berechnete Spalten bilden Kategorien je Zeile.</td>
+            <td>Measures</td>
+          </tr>
+          <tr>
+            <td><strong>Filterkontext</strong></td>
+            <td>Die Menge der Filter, in der ein Measure gerade rechnet: die Achse eines Balkendiagramms, die Legende, ein Filter der Seite. Dasselbe Measure <code>Umsatz</code> liefert im Balken „BM Europastern“ den Umsatz dieser Filiale und in einer Kachel ohne Achsen den Gesamtwert. <code>CALCULATE</code> verändert den Filterkontext aus der Formel heraus: <code>Umsatz 2025</code> setzt das Jahr fest und ersetzt damit jeden Filter, der von außen auf <code>dim_date[year]</code> liegt — Filter auf anderen Spalten bleiben.</td>
+            <td>Measures, Bericht</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="concept-box">
+      <h3>Für den Kurs gilt Import</h3>
+      <p>Die Rolle <code>studi_daba</code> hält höchstens zwanzig gleichzeitige Sitzungen (Lab 01). Ein Bericht im DirectQuery-Modus schickt für jedes Bild Abfragen an <code>supabase.butscher.cloud</code>; ein Hörsaal voller solcher Berichte belegt die zwanzig Sitzungen in Minuten. Import fragt die Datenbank beim Laden und beim Aktualisieren — für einen Bestand, der sich nicht stündlich ändert, reicht das. Die Entscheidung fällt je Tabelle; ein zusammengesetztes Modell könnte Dimensionen importieren und eine Faktentabelle in DirectQuery lassen, braucht in diesem Kurs aber niemand.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="verbinden">
+    <h2>Verbinden</h2>
+    <p>Der Weg zur Datenbank beginnt mit <code>Start → Daten abrufen → PostgreSQL-Datenbank</code>. Der Dialog fragt nach Server und Datenbank: Server <code>supabase.butscher.cloud:5433</code> — der Port steht mit Doppelpunkt hinter dem Servernamen —, Datenbank <code>postgres</code>, Modus Import. Die Warnung zur unverschlüsselten Verbindung bestätigen Sie mit OK; die Verbindung läuft wie in Lab 01 ohne SSL. Im zweiten Schritt folgt die Anmeldung: Authentifizierung <em>Datenbank</em>, Benutzer <code>studi_daba</code>, Kennwort <code>thws</code>. Power BI merkt sich die Anmeldung je Server.</p>
+    <p>Der PostgreSQL-Connector bringt seinen Treiber mit: Npgsql ist seit Dezember 2019 in Power BI Desktop enthalten, seit Oktober 2024 in Version 4.0.17 — eine Installation entfällt (Stand 09/2026). Nach der Anmeldung öffnet sich der Navigator mit den beiden Schemata als Ordnern. Für ein eigenes Modell kreuzen Sie die Tabellen <code>dim_*</code> und <code>fact_*</code> an; wer nur die fertigen Kennzahlen des Dashboards braucht, lädt stattdessen die Sichten <code>v_*</code>. <code>obt_orders</code> bleibt draußen: 41 Spalten, die alles doppelt tragen, was in Fakten und Dimensionen schon steht.</p>
+    <div data-befehl="B01"></div>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Navigator</span><span class="spacer"></span>Power BI Desktop · Update August 2026</div>
+      <div class="shot-body eins">
+        <div class="shot-main">
+          <ul class="baum" style="pointer-events:none">
+            <li>▾ burgermetrics <span class="callout">1</span></li>
+            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_branch <span class="callout">2</span></li>
+            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_customer</li>
+            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_date</li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_employee</li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_payment_method</li>
+            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_product</li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_promotion</li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_supplier</li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_time_slot</li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_weather</li>
+            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_order_items</li>
+            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_orders</li>
+            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_reviews</li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> obt_orders <span class="callout">3</span></li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> v_kennzahlen_jahr &nbsp;… 38 materialisierte Sichten v_* <span class="callout">4</span></li>
+            <li>▸ wawi <span class="callout">5</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Die beiden Schemata der Datenbank erscheinen als Ordner. <code>burgermetrics</code> ist aufgeklappt: 14 Tabellen und die 38 materialisierten Sichten.</span></li>
+      <li><span class="callout">2</span><span>Angekreuzt sind die sieben Tabellen des Modells in diesem Lab: vier Dimensionen (<code>dim_branch</code>, <code>dim_customer</code>, <code>dim_date</code>, <code>dim_product</code>) und drei Faktentabellen (<code>fact_orders</code>, <code>fact_order_items</code>, <code>fact_reviews</code>) — dieselben Tabellen wie in Lab 03.</span></li>
+      <li><span class="callout">3</span><span><code>obt_orders</code> bleibt abgewählt: 41 Spalten, in denen Bestellung, Filiale, Kunde und Kalender bereits verbunden sind. Wer sie zusätzlich lädt, hat jede Kennzahl zweimal im Modell.</span></li>
+      <li><span class="callout">4</span><span>Die 38 materialisierten Sichten stehen daneben. <code>v_kennzahlen_jahr</code> liefert Bestellungen, Umsatz und Bestellwert je Jahr fertig (Lab 01) — der kürzere Weg, wenn kein eigenes Modell gebraucht wird.</span></li>
+      <li><span class="callout">5</span><span><code>wawi</code> bleibt zugeklappt: Das operative Modell mit seinen 16 Tabellen ist nicht die Quelle eines Berichts.</span></li>
+    </ol>
+  </section>
+
+  <section class="section-block" id="modell">
+    <h2>Das Modell: Beziehungen aus Fremdschlüsseln</h2>
+    <p>Ein Galaxy-Schema braucht in Power BI Beziehungen zwischen Fakten und Dimensionen, sonst steht in jeder Zeile eines Bildes der Gesamtwert. Die Option „Beziehungen aus Datenquellen beim ersten Laden importieren“ ist standardmäßig aktiv (Stand 09/2026): Power BI liest die Fremdschlüssel der Datenbank und spiegelt sie als Beziehungen — Kardinalität <code>*:1</code>, Filterrichtung einfach. In <code>burgermetrics</code> sind es 13 Fremdschlüssel, und wer alle 14 Tabellen lädt, bekommt 13 Beziehungen:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Von</th><th>Nach</th><th>Beziehungen</th></tr></thead>
+        <tbody>
+          <tr><td style="white-space:nowrap"><code>fact_orders</code></td><td><code>dim_date</code>, <code>dim_branch</code>, <code>dim_customer</code>, <code>dim_payment_method</code>, <code>dim_promotion</code></td><td>5</td></tr>
+          <tr><td style="white-space:nowrap"><code>fact_order_items</code></td><td><code>fact_orders</code>, <code>dim_product</code></td><td>2</td></tr>
+          <tr><td style="white-space:nowrap"><code>fact_reviews</code></td><td><code>dim_date</code>, <code>dim_product</code>, <code>dim_customer</code>, <code>dim_branch</code>, <code>fact_orders</code></td><td>5</td></tr>
+          <tr><td style="white-space:nowrap"><code>dim_employee</code></td><td><code>dim_branch</code></td><td>1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Von den 13 betreffen zehn die sieben Tabellen aus dem Navigator oben: drei an <code>fact_orders</code>, zwei an <code>fact_order_items</code>, fünf an <code>fact_reviews</code>. An jeder Linie steht <code>*</code> an der Faktentabelle und <code>1</code> an der Dimension; bei <code>fact_order_items → fact_orders</code> und <code>fact_reviews → fact_orders</code> ist die Bestellung die 1-Seite, weil <code>order_id</code> dort eindeutig ist. Der Rest ist Handarbeit an drei Stellen:</p>
+    <div class="karten">
+      <div class="karte">
+        <div class="kopfzeile">Ein Kreis</div>
+        <p><code>fact_reviews</code> hängt an <code>dim_date</code> und an <code>fact_orders</code>, <code>fact_orders</code> wieder an <code>dim_date</code> — zwei Filterpfade vom Datum zu den Rezensionen. Die Beziehung <code>fact_reviews → fact_orders</code> wird inaktiv gesetzt; die direkte zum Datum bleibt aktiv. Das löst auch die Kreise über <code>dim_customer</code> und <code>dim_branch</code>: <code>Ø Sterne</code> je Filiale und Jahr läuft dann über die eigenen Beziehungen der Rezensionen.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Ohne Fremdschlüssel</div>
+        <p><code>dim_weather</code> (eine Zeile je Tag, Schlüssel <code>date</code>) und <code>dim_time_slot</code> (eine Zeile je Stunde, Schlüssel <code>hour</code>) haben in der Datenbank keinen Fremdschlüssel — beim ersten Laden entsteht keine Beziehung. Wer sie braucht, legt sie von Hand an: <code>fact_orders[date] → dim_weather[date]</code> und <code>fact_orders[hour] → dim_time_slot[hour]</code>, beide <code>*:1</code>.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Nicht laden</div>
+        <p><code>obt_orders</code> trägt in 41 Spalten, was Fakten und Dimensionen verbunden ergeben. Im Modell hätte sie keine Beziehung zu den übrigen Tabellen und jede Kennzahl ein zweites Mal — ein Measure <code>Umsatz</code> auf <code>obt_orders</code> und eines auf <code>fact_orders</code> liefern dieselbe Zahl und zwei Definitionen.</p>
+      </div>
+    </div>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Modellansicht</span><span class="spacer"></span>Power BI Desktop · Update August 2026</div>
+      <div class="shot-body eins">
+        <div class="shot-main">
+          <svg viewBox="0 0 660 340" role="img" aria-label="Modellansicht: fact_orders in der Mitte, Beziehungen zu dim_customer, dim_branch und dim_date; fact_order_items und fact_reviews als weitere Faktentabellen" style="width:100%;height:auto;display:block;font-family:var(--mono);font-size:12px">
+            <defs>
+              <style>
+                .mv-box { fill: #fff; stroke: var(--line); stroke-width: 1.2; }
+                .mv-box.fakt { stroke: var(--primary); stroke-width: 2; }
+                .mv-name { fill: var(--ink); font-weight: 700; }
+                .mv-cols { fill: var(--ink-soft); font-size: 9.5px; }
+                .mv-stern { stroke: var(--primary); stroke-width: 2; fill: none; }
+                .mv-linie { stroke: var(--ink-soft); stroke-width: 1.4; fill: none; }
+                .mv-inaktiv { stroke: var(--ink-soft); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+                .mv-kard { fill: var(--ink); font-family: var(--sans); font-size: 10px; font-weight: 700; }
+                .mv-callout { fill: var(--primary); }
+                .mv-callout-text { fill: #fff; font-family: var(--sans); font-size: 10px; font-weight: 800; text-anchor: middle; }
+              </style>
+            </defs>
+            <!-- Linien: Stern um fact_orders -->
+            <line class="mv-stern" x1="330" y1="148" x2="330" y2="64" />
+            <line class="mv-stern" x1="265" y1="148" x2="175" y2="64" />
+            <line class="mv-stern" x1="395" y1="148" x2="485" y2="64" />
+            <!-- Linien: fact_order_items -->
+            <line class="mv-linie" x1="175" y1="276" x2="265" y2="192" />
+            <line class="mv-linie" x1="200" y1="298" x2="245" y2="298" />
+            <!-- Linien: fact_reviews -->
+            <line class="mv-inaktiv" x1="460" y1="170" x2="415" y2="170" />
+            <line class="mv-linie" x1="545" y1="148" x2="545" y2="64" />
+            <line class="mv-linie" x1="480" y1="148" x2="405" y2="64" />
+            <polyline class="mv-linie" points="622,148 622,8 115,8 115,20" />
+            <line class="mv-linie" x1="470" y1="192" x2="405" y2="276" />
+            <!-- Kardinalitäten: * an der Faktentabelle, 1 an der Dimension -->
+            <text class="mv-kard" x="336" y="141">*</text><text class="mv-kard" x="336" y="77">1</text>
+            <text class="mv-kard" x="256" y="140">*</text><text class="mv-kard" x="181" y="79">1</text>
+            <text class="mv-kard" x="398" y="140">*</text><text class="mv-kard" x="470" y="79">1</text>
+            <text class="mv-kard" x="180" y="270">*</text><text class="mv-kard" x="268" y="206">1</text>
+            <text class="mv-kard" x="205" y="294">*</text><text class="mv-kard" x="232" y="294">1</text>
+            <text class="mv-kard" x="450" y="164">*</text><text class="mv-kard" x="419" y="164">1</text>
+            <text class="mv-kard" x="551" y="141">*</text><text class="mv-kard" x="551" y="77">1</text>
+            <text class="mv-kard" x="470" y="140">*</text><text class="mv-kard" x="410" y="79">1</text>
+            <text class="mv-kard" x="627" y="141">*</text><text class="mv-kard" x="121" y="18">1</text>
+            <text class="mv-kard" x="460" y="203">*</text><text class="mv-kard" x="410" y="270">1</text>
+            <!-- Tabellen -->
+            <rect class="mv-box" x="30" y="20" width="170" height="44" rx="5" />
+            <text class="mv-name" x="40" y="38">dim_customer</text>
+            <text class="mv-cols" x="40" y="54">customer_id · loyalty_tier</text>
+            <rect class="mv-box" x="245" y="20" width="170" height="44" rx="5" />
+            <text class="mv-name" x="255" y="38">dim_branch</text>
+            <text class="mv-cols" x="255" y="54">branch_id · branch_name</text>
+            <rect class="mv-box" x="460" y="20" width="170" height="44" rx="5" />
+            <text class="mv-name" x="470" y="38">dim_date</text>
+            <text class="mv-cols" x="470" y="54">date · year · month</text>
+            <rect class="mv-box fakt" x="245" y="148" width="170" height="44" rx="5" />
+            <text class="mv-name" x="255" y="166">fact_orders</text>
+            <text class="mv-cols" x="255" y="182">order_id · date · net_total</text>
+            <rect class="mv-box" x="460" y="148" width="170" height="44" rx="5" />
+            <text class="mv-name" x="470" y="166">fact_reviews</text>
+            <text class="mv-cols" x="470" y="182">review_id · order_id · stars</text>
+            <rect class="mv-box" x="30" y="276" width="170" height="44" rx="5" />
+            <text class="mv-name" x="40" y="294">fact_order_items</text>
+            <text class="mv-cols" x="40" y="310">order_id · product_id</text>
+            <rect class="mv-box" x="245" y="276" width="170" height="44" rx="5" />
+            <text class="mv-name" x="255" y="294">dim_product</text>
+            <text class="mv-cols" x="255" y="310">product_id · category</text>
+            <!-- Ziffern -->
+            <circle class="mv-callout" cx="400" cy="160" r="9" /><text class="mv-callout-text" x="400" y="164">1</text>
+            <circle class="mv-callout" cx="315" cy="106" r="9" /><text class="mv-callout-text" x="315" y="110">2</text>
+            <circle class="mv-callout" cx="437" cy="184" r="9" /><text class="mv-callout-text" x="437" y="188">3</text>
+            <circle class="mv-callout" cx="562" cy="106" r="9" /><text class="mv-callout-text" x="562" y="110">4</text>
+            <circle class="mv-callout" cx="204" cy="246" r="9" /><text class="mv-callout-text" x="204" y="250">5</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span><code>fact_orders</code> in der Mitte, drei Linien zu <code>dim_customer</code>, <code>dim_branch</code> und <code>dim_date</code> — der Stern, den die Prüfung nach dem Laden zeigen muss. Die Beziehungen zu <code>dim_payment_method</code> und <code>dim_promotion</code> entstehen erst, wenn diese Tabellen mitgeladen werden.</span></li>
+      <li><span class="callout">2</span><span>An jeder Linie <code>*</code> an der Faktentabelle und <code>1</code> an der Dimension: viele Bestellungen, eine Filiale. Die Filterrichtung ist einfach — ein Filter auf <code>dim_branch[branch_name]</code> wirkt in <code>fact_orders</code>, nicht umgekehrt.</span></li>
+      <li><span class="callout">3</span><span>Die gestrichelte Linie <code>fact_reviews → fact_orders</code> ist inaktiv. Aktiv wäre sie der zweite Filterpfad vom Datum zu den Rezensionen; <code>fact_reviews</code> trägt sein eigenes Datum und braucht den Umweg über die Bestellung nicht.</span></li>
+      <li><span class="callout">4</span><span>Die direkte Beziehung <code>fact_reviews → dim_date</code> bleibt aktiv; ebenso die zu <code>dim_branch</code>, <code>dim_customer</code> und <code>dim_product</code>. <code>Ø Sterne</code> je Filiale und Jahr rechnet über diese Linien.</span></li>
+      <li><span class="callout">5</span><span><code>fact_order_items</code> hängt mit <code>*:1</code> an <code>fact_orders</code> — die Positionen haben ihren eigenen Grain (Lab 03). Ein Measure auf jeder der beiden Tabellen rechnet richtig; eine zusammengeführte Tabelle nicht (Abschnitt „Stolpersteine“).</span></li>
+    </ol>
+    <p>Prüfung nach dem Laden: Modellansicht öffnen, <code>fact_orders</code> in der Mitte, Linien zu den Dimensionen. Fehlt eine, steht in jeder Zeile des Bildes dieselbe Summe — der Fehler ist sichtbar, bevor er in einen Bericht kommt.</p>
+  </section>
+
+  <section class="section-block" id="dax">
+    <h2>Measures in DAX</h2>
+    <p>Ein Measure speichert keinen Wert. Es ist eine Formel, die bei jeder Abfrage im Filterkontext des Bildes neu rechnet, in dem es steht — dasselbe Measure liefert im Balken „BM Europastern“ den Umsatz dieser Filiale und in einer Kachel den Gesamtwert. Fünf Measures tragen den Bericht dieses Labs; die Vorlage enthält sie mit Erklärung, Befehlskarte B02 zerlegt sie.</p>
+    <div class="vorlagen">
+      <a class="vorlage" href="vorlagen/powerbi-measures.dax" download><span class="symbol">📄</span><span><span class="datei">powerbi-measures.dax</span><br><span class="was">Fünf Measures für den Bericht, je eines pro Block, Erklärung in Kommentarzeilen; Kontrollzahlen für 2025.</span></span></a>
+    </div>
+    <div data-befehl="B02"></div>
+    <div class="vergleich">
+      <div>
+        <h3>Measure</h3>
+        <ul>
+          <li>rechnet bei jeder Abfrage, je Zelle eines Bildes, im Filterkontext</li>
+          <li>speichert nichts; das Modell bleibt so groß wie die Tabellen</li>
+          <li>für alles, was aggregiert: Summen, Anzahlen, Mittelwerte, Quotienten</li>
+          <li>die fünf Measures der Vorlage</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Berechnete Spalte</h3>
+        <ul>
+          <li>rechnet beim Laden, je Zeile, und speichert das Ergebnis</li>
+          <li>kennt die aktuelle Zeile, aber nicht den Filter des Berichts</li>
+          <li>für Kategorien je Zeile, etwa eine Bestellwertklasse aus <code>net_total</code></li>
+          <li>keine in diesem Lab</li>
+        </ul>
+      </div>
+    </div>
+    <div class="concept-box">
+      <h3>Die Kontrollzahl</h3>
+      <p>Legen Sie <code>Umsatz 2025</code> in eine Kachel: 2.994.771,13 €. Dieselbe Zahl liefern <code>v_kennzahlen_jahr</code> (Lab 01), Notebook 01 (<code>01_analytisches_datenmodell.ipynb</code>) und das Dashboard. Weicht sie ab, stimmt etwas am Modell nicht: Eine Beziehung fehlt, oder die Zahl kommt aus einer zusammengeführten Tabelle. <code>Bestellungen</code> mit demselben Filter zeigt 136.557.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="bericht">
+    <h2>Der Bericht</h2>
+    <p>Erst jetzt der Bericht: eine Seite mit vier Kacheln, einem Balkendiagramm und einer Linie. Jedes Bild ist ein Fenster auf die Measures — es wählt die Aufteilung, nicht die Definition.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Bild</th><th>Felder</th><th>Was es zeigt</th></tr></thead>
+        <tbody>
+          <tr><td>Kachel Umsatz</td><td><code>[Umsatz]</code></td><td>eine Zahl ohne Achsen — mit dem Filter <code>dim_date[year] = 2025</code> auf der Seite 2.994.771,13 €</td></tr>
+          <tr><td>Kachel Bestellungen</td><td><code>[Bestellungen]</code></td><td>136.557 für 2025</td></tr>
+          <tr><td>Kachel Bestellwert</td><td><code>[Bestellwert]</code></td><td>der Quotient der beiden Kacheln darüber, im selben Filter</td></tr>
+          <tr><td>Kachel Ø Sterne</td><td><code>[Ø Sterne]</code></td><td>der Mittelwert aus <code>fact_reviews</code>, über die eigene Beziehung zu <code>dim_date</code> gefiltert</td></tr>
+          <tr><td>Balken Umsatz je Filiale</td><td>Achse <code>dim_branch[branch_name]</code>, Wert <code>[Umsatz]</code></td><td>acht verschieden hohe Balken, BM Europastern vorn</td></tr>
+          <tr><td>Linie Umsatz je Monat</td><td>Achse <code>dim_date[month]</code>, Wert <code>[Umsatz]</code></td><td>zwölf Punkte für 2025</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Der Filter auf <code>dim_date[year]</code> gilt für die ganze Seite: Alle sechs Bilder rechnen im selben Filterkontext, und die Balken summieren sich auf die Kachel. Ein Bild, das aus der Reihe fällt, verrät eine fehlende Beziehung — zeigt der Balken in jeder Filiale die Kachel, filtert <code>dim_branch</code> die Fakten nicht.</p>
+    <div class="concept-box">
+      <h3>Zwei Regeln aus dem Deck</h3>
+      <p><strong>Balken beginnen bei null.</strong> Ihre Länge kodiert den Wert; eine Achse, die erst bei einem hohen Betrag beginnt, macht aus einem kleinen Unterschied einen langen Balken. Für Linien gilt das nicht in gleicher Weise: Dort trägt die Steigung die Aussage, und die Achse darf dem Wertebereich folgen.</p>
+      <p><strong>Der Titel ist eine Aussage.</strong> „Umsatz nach branch_name“ beschreibt die Achsen; „BM Europastern erzielt 2025 den höchsten Umsatz“ sagt, was das Bild zeigt. Eine Kachel nennt neben dem Wert den Zeitraum, aus dem er stammt — 2.994.771,13 € sind der Umsatz eines Jahres, nicht der von neun.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="stolper">
+    <h2>Stolpersteine</h2>
+    <p>Fünf Situationen, die in diesem Lab vorkommen können.</p>
+    <div class="karten">
+      <div class="karte">
+        <div class="kopfzeile">Verbindung scheitert an Npgsql</div>
+        <p>Eine Version von Power BI Desktop vor Dezember 2019 meldet beim Verbinden, dass sie keine Verbindung herstellen kann und der Anbieter Npgsql fehlt — der Treiber wurde damals noch nicht mitgeliefert. Abhilfe: Power BI Desktop aktualisieren. Seit Dezember 2019 ist Npgsql enthalten, seit Oktober 2024 in Version 4.0.17; mit dem Update August 2026 (Stand 09/2026) ist nichts zu installieren.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">In jeder Zeile dieselbe Summe</div>
+        <p>Ein Balkendiagramm „Umsatz je Filiale“ zeigt in jeder Filiale denselben Wert, den Gesamtumsatz. Dann fehlt die Beziehung zwischen <code>fact_orders</code> und <code>dim_branch</code>: Die Dimension kann die Fakten nicht filtern. Keine Fehlermeldung — das Bild ist die Meldung. Abhilfe: Modellansicht öffnen, die Linie prüfen oder anlegen (<code>*:1</code>, Filterrichtung einfach).</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Measure auf einer zusammengeführten Tabelle</div>
+        <p>Wer <code>fact_orders</code> und <code>fact_order_items</code> zu einer Tabelle zusammenführt und darauf <code>SUM(net_total)</code> rechnet, hat die Fan Trap aus Lab 03: Jeder Bestellwert zählt so oft, wie die Bestellung Positionen hat — 14,7 statt 3,0 Mio. € für 2025 (14.692.551 € gegen 2.994.771 €). Power BI meldet nichts. Abhilfe: zwei Faktentabellen mit eigener Beziehung, jedes Measure auf dem Grain, auf dem der Betrag entsteht.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">DirectQuery auf fact_order_items</div>
+        <p>Im DirectQuery-Modus scheitert jede Abfrage, die mehr als 1.000.000 Zeilen liefert (Stand 09/2026). Ein Bild auf Positionsebene über <code>fact_order_items</code> tut das: Die Tabelle hat 2.950.082 Zeilen. Eine Aggregation — Positionen je Bestellung, je Filiale — bleibt unter der Grenze. Die Grenze gilt für DirectQuery; die Checkliste lädt die Tabelle per Import.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Zwanzig Sitzungen im Hörsaal</div>
+        <p>Die Rolle <code>studi_daba</code> hält höchstens zwanzig gleichzeitige Sitzungen (Lab 01). Ein DirectQuery-Bericht öffnet für jedes Bild Abfragen; ein Hörsaal voller solcher Berichte belegt die zwanzig Sitzungen in Minuten, und die nächste Anmeldung scheitert mit <code>FATAL:  too many connections for role "studi_daba"</code>. Import fragt die Datenbank nur beim Laden und beim Aktualisieren.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="simulator">
+    <h2>Simulator</h2>
+    <p>Der Simulator unten bildet die Ablagen eines Bildes in Power BI nach: <code>X-axis</code>, <code>Y-axis</code>, <code>Legend</code> und <code>Filters</code>. Drei Dinge unterscheiden ihn vom Werkzeug. Felder werden in den Ablagen ausgewählt statt gezogen. Σ-Felder — die Kennzahlen — bekommen im Chip eine Aggregation, die Sie umstellen können: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>; der Vorschlag ist <code>SUM</code>, wie bei Power BI für jede Zahlenspalte. Und das Diagramm wählen Sie nicht, es folgt aus der Belegung: eine Spalte auf <code>X-axis</code> und eine Kennzahl auf <code>Y-axis</code> ergeben senkrechte Balken, eine geordnete Spalte wie Monat oder Stunde eine Linie, eine Legende Serien, nur Spalten eine Tabelle. Die Übungen sprechen von Spalten und Zeilen — im Simulator sind das <code>X-axis</code> und <code>Y-axis</code>.</p>
+    <p>Die Daten sind 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle — das, was ein Bild nach dem Weg über die Beziehungen sieht. Die Felder:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Feld</th><th>Art</th><th>Werte</th></tr></thead>
+        <tbody>
+          <tr><td>Monat</td><td>Spalte, geordnet</td><td><code>2025-01</code> bis <code>2025-12</code> — auf <code>X-axis</code> entsteht eine Linie</td></tr>
+          <tr><td>Wochentag</td><td>Spalte</td><td>Mo bis So</td></tr>
+          <tr><td>Stunde</td><td>Spalte, geordnet</td><td>6 bis 23</td></tr>
+          <tr><td>Filiale</td><td>Spalte</td><td>die acht Filialen</td></tr>
+          <tr><td>Kanal</td><td>Spalte</td><td>App Order, Counter, Drive-Through, Kiosk</td></tr>
+          <tr><td>Zahlart</td><td>Spalte</td><td>Cash, Credit Card, EC Card, Mobile Payment</td></tr>
+          <tr><td>Loyalty-Stufe</td><td>Spalte</td><td>Bronze, Silver, Gold — <code>None</code> steht für Kunden ohne Stufe</td></tr>
+          <tr><td>Saison</td><td>Spalte</td><td>Spring, Summer, Autumn, Winter</td></tr>
+          <tr><td>Bestell-ID</td><td>Σ Kennzahl</td><td>die Bestellnummer — eine Kennung; <code>SUM</code> darüber ergibt 1.310.137.177, eine Zahl ohne Bedeutung, <code>COUNT</code> zählt 2.000 Bestellungen</td></tr>
+          <tr><td>Umsatz (€)</td><td>Σ Kennzahl</td><td>Bestellwert nach Rabatt; Summe aller 2.000: 43.882,98 €</td></tr>
+          <tr><td>Positionen</td><td>Σ Kennzahl</td><td>Zahl der Positionen je Bestellung, 1 bis 15; Summe 9.145</td></tr>
+          <tr><td>Zufriedenheit</td><td>Σ Kennzahl</td><td>2 bis 5, nur bei 451 bewerteten Bestellungen; <code>AVG</code> ignoriert die Lücken und liefert 3,86</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div data-regal="frei" data-variante="powerbi"></div>
+  </section>
+
+  <section class="section-block" id="uebungen">
+    <h2>Übungen</h2>
+    <p>Fünf Übungen: zwei im Simulator — Umsatz je Filiale als Balken, Bestellungen je Monat als Linie mit <code>COUNT</code> statt <code>SUM</code> —, ein Quiz zu Import, Beziehungen und Measures, eine Zuordnung von DAX-Ausdruck und Zweck und eine Checkliste für den Bericht in Power BI Desktop gegen die Datenbank der Fallstudie.</p>
+    <div data-uebung="W04-01"></div>
+    <div data-uebung="W04-02"></div>
+    <div data-uebung="W04-03"></div>
+    <div data-uebung="W04-04"></div>
+    <div data-uebung="W04-05"></div>
+    <div data-fortschritt></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2>Zusammenfassung</h2>
+    <ul>
+      <li>Power BI ist ein weiterer Leser der Datenbank: ein Modell aus den Tabellen des Galaxy-Schemas (Lab 03), Measures in DAX, ein Bericht. Die Definition der Kennzahl bleibt in der Sicht (Lab 01); die Kontrollzahl ist 2.994.771,13 € Umsatz aus 136.557 Bestellungen für 2025.</li>
+      <li>Import kopiert die Tabellen in den Speicher, DirectQuery fragt bei jedem Bild die Datenbank — Grenze 1.000.000 Zeilen je Abfrageergebnis, Microsoft empfiehlt Import (Stand 09/2026). Für den Kurs gilt Import: Die Rolle hält zwanzig Sitzungen.</li>
+      <li>Verbinden: <code>Start → Daten abrufen → PostgreSQL-Datenbank</code>, Server <code>supabase.butscher.cloud:5433</code>, Datenbank <code>postgres</code>, Authentifizierung Datenbank mit <code>studi_daba</code> / <code>thws</code>; Npgsql ist seit Dezember 2019 enthalten. Im Navigator <code>dim_*</code> und <code>fact_*</code> laden, <code>obt_orders</code> nicht.</li>
+      <li>„Beziehungen aus Datenquellen beim ersten Laden importieren“ ist standardmäßig aktiv und macht aus 13 Fremdschlüsseln 13 Beziehungen, <code>*:1</code> mit einfacher Filterrichtung. Von Hand: <code>fact_reviews → fact_orders</code> inaktiv setzen (die direkte Beziehung zum Datum bleibt aktiv), <code>dim_weather</code> und <code>dim_time_slot</code> ohne Fremdschlüssel selbst verbinden.</li>
+      <li>Fünf Measures — <code>Umsatz</code>, <code>Bestellungen</code>, <code>Bestellwert</code>, <code>Ø Sterne</code>, <code>Umsatz 2025</code> — rechnen im Filterkontext und speichern nichts; <code>CALCULATE</code> ändert den Filterkontext, <code>DIVIDE</code> schützt vor der Division durch null. Berechnete Spalten bilden Kategorien je Zeile.</li>
+      <li>Der Bericht: vier Kacheln, Balken je Filiale, Linie je Monat, ein Filter auf das Jahr für die ganze Seite. Balken beginnen bei null, Titel sind Aussagen.</li>
+      <li>Stolpersteine: eine alte Desktop-Version ohne Npgsql (aktualisieren), dieselbe Summe in jeder Zeile (Beziehung fehlt), ein Measure auf einer zusammengeführten Tabelle (Fan Trap, 14,7 statt 3,0 Mio. €), DirectQuery über <code>fact_order_items</code> (Zeilengrenze), zwanzig Sitzungen im Hörsaal. Lab 05 baut auf denselben Sichten ein Dashboard in Tableau, Lab 06 liest sie mit Python.</li>
+    </ul>
+    <div data-lab-nav></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS Business School · Datenbasierte Fallstudien · BM-Lab · Lab 04 · Stand 09/2026</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>
