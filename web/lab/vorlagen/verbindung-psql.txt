@@ -3,12 +3,19 @@
 
 psql "postgresql://studi_daba:thws@supabase.butscher.cloud:5433/postgres"
 
-# Danach, in der psql-Sitzung:
+# Danach, in der psql-Sitzung, jede Zeile einzeln eingeben:
 
-\dn                     -- alle Schemata auflisten (relevant: wawi, burgermetrics)
-\dt wawi.*              -- Tabellen im Schema wawi auflisten
-\dm burgermetrics.*     -- materialisierte Sichten im Schema burgermetrics auflisten
-\q                      -- Sitzung beenden
+# alle Schemata auflisten (relevant: wawi, burgermetrics)
+\dn
+
+# Tabellen im Schema wawi auflisten
+\dt wawi.*
+
+# materialisierte Sichten im Schema burgermetrics auflisten
+\dm burgermetrics.*
+
+# Sitzung beenden
+\q
 
 # Suchpfad der Rolle: wawi, burgermetrics (fest eingestellt, siehe SHOW search_path;)
 # Die Rolle liest beide Schemata und schreibt nichts.

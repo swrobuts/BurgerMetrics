@@ -36,7 +36,7 @@
 <div class="lab-header">
   <div class="lab-num-big">01</div>
   <h1 class="lab-title">Zugang und Datenbank</h1>
-  <p class="lab-intro">Dieses Lab verbindet Sie mit der Datenbank der Fallstudie BurgerMetrics: einem echten PostgreSQL, erreichbar über ein absichtlich öffentliches, nur lesendes Demo-Konto. Sie lernen die fünf Verbindungsangaben, die beiden Schemata <code>wawi</code> und <code>burgermetrics</code>, die Sichten als Vertrag für Kennzahlen — und, ebenso wichtig, was die Rolle nicht darf und woran Sie das in der Fehlermeldung erkennen.</p>
+  <p class="lab-intro">Dieses Lab verbindet Sie mit der Datenbank der Fallstudie BurgerMetrics: einem echten PostgreSQL, erreichbar über ein absichtlich öffentliches, nur lesendes Demo-Konto. Sie lernen die fünf Verbindungsangaben, die beiden Schemata <code>wawi</code> und <code>burgermetrics</code>, die Sichten als Vertrag für Kennzahlen — und was die Rolle nicht darf und woran Sie das in der Fehlermeldung erkennen.</p>
   <div class="lernziele">
     <span class="lernziel-chip">Demo-Konto</span>
     <span class="lernziel-chip">Suchpfad</span>
@@ -85,7 +85,7 @@
       <table>
         <thead><tr><th>Werkzeug</th><th>Art</th><th>Lizenz / Zugang</th></tr></thead>
         <tbody>
-          <tr><td>psql</td><td>Kommandozeile, Bestandteil von PostgreSQL 17</td><td>Bestandteil von PostgreSQL</td></tr>
+          <tr><td>psql</td><td>Kommandozeile</td><td>Bestandteil von PostgreSQL 17</td></tr>
           <tr><td>DBeaver Community 26.2.0</td><td>grafischer Datenbank-Client</td><td>Apache-2.0</td></tr>
           <tr><td>DataGrip 2026.2</td><td>grafische Entwicklungsumgebung für Datenbanken</td><td>für Studierende kostenlos über das JetBrains Student Pack, jährlich zu erneuern</td></tr>
         </tbody>
@@ -95,12 +95,11 @@
     <div class="auswahl-hinweis">
       <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Alle drei stehen auf derselben Ebene: Sie stellen dieselbe Verbindung zur selben Datenbank her, und jede Übung dieses Labs lässt sich mit jedem der drei lösen.</p>
     </div>
-    <p>Zwei Nachbildungen zeigen, wo die fünf Angaben in DBeaver und DataGrip landen.</p>
+    <p>Zwei Nachbildungen zeigen, wo die fünf Angaben in DBeaver und DataGrip landen. Der Treiber ist in beiden Fällen PostgreSQL, SSL aus (Stand 09/2026).</p>
     <div class="shot">
       <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Connect to a database → PostgreSQL</span><span class="spacer"></span>DBeaver Community 26.2.0</div>
       <div class="shot-body eins">
         <div class="shot-main">
-          <div class="zeile"><span class="tab aktiv">Main</span><span class="tab">Driver properties</span><span class="tab">SSL</span></div>
           <div class="zeile"><span class="beschriftung">Host:</span><span class="feld breit">supabase.butscher.cloud</span><span class="callout">1</span></div>
           <div class="zeile"><span class="beschriftung">Port:</span><span class="feld">5433</span><span class="callout">2</span></div>
           <div class="zeile"><span class="beschriftung">Database:</span><span class="feld breit">postgres</span></div>
@@ -114,8 +113,8 @@
     <ol class="shot-legende">
       <li><span class="callout">1</span><span>Host aus der Tabelle oben. Anders als bei der URI von psql steht jede Angabe in einem eigenen Feld.</span></li>
       <li><span class="callout">2</span><span>Port <code>5433</code> — nicht der PostgreSQL-Standardport <code>5432</code>. Eine Verwechslung hier verhindert die Verbindung.</span></li>
-      <li><span class="callout">3</span><span>Das Kennwort gehört in dieses Feld, nicht in das Host-Feld und nicht in eine gespeicherte URL — sonst steht es später im Klartext in Konfigurationsdateien.</span></li>
-      <li><span class="callout">4</span><span>Erst testen, dann Finish. Ein Fehlschlag hier erspart die Suche nach der Ursache erst mitten in der ersten Abfrage.</span></li>
+      <li><span class="callout">3</span><span>Das Kennwort gehört in dieses Feld. Benutzer und Kennwort stehen hier getrennt — anders als in der URI, in der beide als <code>studi_daba:thws@</code> zusammenstehen.</span></li>
+      <li><span class="callout">4</span><span>Erst testen, dann Finish. Ein Fehlschlag hier ist leichter zu deuten als einer mitten in der ersten Abfrage.</span></li>
     </ol>
     <div class="shot">
       <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Data Sources and Drivers</span><span class="spacer"></span>DataGrip 2026.2</div>
@@ -123,12 +122,10 @@
         <div class="shot-side">
           <h5>Project Data Sources</h5>
           <ul class="baum">
-            <li class="aktiv">🐘 burgermetrics <span class="callout">1</span></li>
+            <li class="aktiv">▪ burgermetrics <span class="callout">1</span></li>
           </ul>
         </div>
         <div class="shot-main">
-          <div class="zeile"><span class="tab aktiv">General</span><span class="tab">Options</span><span class="tab">SSH/SSL</span><span class="tab">Schemas</span><span class="tab">Advanced</span></div>
-          <div class="zeile"><span class="beschriftung">Name:</span><span class="feld breit">burgermetrics</span></div>
           <div class="zeile"><span class="beschriftung">Host:</span><span class="feld">supabase.butscher.cloud</span></div>
           <div class="zeile"><span class="beschriftung">Port:</span><span class="feld">5433</span></div>
           <div class="zeile"><span class="beschriftung">Database:</span><span class="feld">postgres</span></div>
@@ -140,20 +137,20 @@
     </div>
     <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
     <ol class="shot-legende">
-      <li><span class="callout">1</span><span>Jede gespeicherte Verbindung erscheint hier als eigene Datenquelle; das Symbol steht für PostgreSQL.</span></li>
-      <li><span class="callout">2</span><span>Das Kennwort gehört in dieses Feld — nicht in die URL, die DataGrip im selben Reiter führt.</span></li>
-      <li><span class="callout">3</span><span>Erst testen, dann OK. Ein grüner Haken bestätigt Host, Port, Datenbank und Zugangsdaten in einem Schritt.</span></li>
+      <li><span class="callout">1</span><span>Jede gespeicherte Verbindung erscheint hier als eigene Datenquelle — diese unter dem Namen <code>burgermetrics</code>.</span></li>
+      <li><span class="callout">2</span><span>Dieselben fünf Angaben wie in DBeaver; das Kennwort gehört in dieses Feld.</span></li>
+      <li><span class="callout">3</span><span>Erst testen, dann OK. Ein erfolgreicher Test bestätigt Host, Port, Datenbank und Zugangsdaten in einem Schritt.</span></li>
     </ol>
     <p>Zum Nachschlagen: die Verbindungsangaben als Kopiervorlage.</p>
     <div class="vorlagen">
       <a class="vorlage" href="vorlagen/verbindung-psql.txt" download><span class="symbol">📄</span><span><span class="datei">verbindung-psql.txt</span><br><span class="was">Der psql-Aufruf und die drei Metabefehle, kommentiert.</span></span></a>
-      <a class="vorlage" href="vorlagen/verbindung-dbeaver.txt" download><span class="symbol">📄</span><span><span class="datei">verbindung-dbeaver.txt</span><br><span class="was">Die fünf Feldwerte, Treiber PostgreSQL, SSL nicht erzwungen. Stand 09/2026.</span></span></a>
+      <a class="vorlage" href="vorlagen/verbindung-dbeaver.txt" download><span class="symbol">📄</span><span><span class="datei">verbindung-dbeaver.txt</span><br><span class="was">Die fünf Feldwerte, Treiber PostgreSQL, SSL aus. Stand 09/2026.</span></span></a>
     </div>
   </section>
 
   <section class="section-block" id="schemata">
     <h2>Schemata und Suchpfad</h2>
-    <p>Die Datenbank enthält zwei Schemata, die Sie in diesem Kurs wiederholt sehen: <code>wawi</code>, das operative Modell in dritter Normalform, in das Kasse und Online-Shop schreiben, und <code>burgermetrics</code>, das analytische Galaxy-Schema mit 38 materialisierten Sichten (echte Datenbank; im Miniaturbestand dieses Labs sind es sechs gewöhnliche Sichten).</p>
+    <p>Die Datenbank enthält zwei Schemata, die Sie in diesem Kurs wiederholt sehen: <code>wawi</code>, das operative Modell in dritter Normalform, in das Kasse und Online-Shop schreiben, und <code>burgermetrics</code>, das analytische Galaxy-Schema mit 38 materialisierten Sichten in der echten Datenbank. Im Miniaturbestand dieses Labs sind es sechs gewöhnliche Sichten, vier in <code>burgermetrics</code> und zwei in <code>wawi</code>; <code>information_schema.views</code> führt sie auf.</p>
     <p>Beide Schemata liegen im Suchpfad der Rolle, in dieser Reihenfolge:</p>
     <div class="code-block">wawi, burgermetrics</div>
     <p>Ein Name ohne vorangestelltes Schema wird in dieser Reihenfolge gesucht: Kennt <code>wawi</code> den Namen, gewinnt <code>wawi</code> — auch wenn <code>burgermetrics</code> denselben Namen ebenfalls vergeben hat. Genau das passiert bei <code>v_rezension_produkt</code>: Die Sicht existiert in beiden Schemata, mit unterschiedlichen Spalten. Ein Präfix ist deshalb immer dann nötig, wenn ein Name doppelt vorkommt.</p>
@@ -165,7 +162,6 @@
     <h2>Sichten als Vertrag</h2>
     <p>Jede Kennzahl der Fallstudie ist genau einmal definiert — als Sicht. <code>v_kennzahlen_jahr</code> zum Beispiel definiert Bestellungen, Umsatz und durchschnittlichen Bestellwert je Jahr; für 2025 liefert sie in der echten Datenbank einen Umsatz von 2.994.771,13 €. Dashboard, Notebooks und die Dash-App der Fallstudie lesen alle dieselbe Sicht — wer die Definition ändert, ändert sie für jeden Leser auf einmal. Das ist der Sinn einer Semantikschicht: eine Kennzahl, ein Ort, keine abweichenden Nachrechnungen in jedem Werkzeug einzeln.</p>
     <p>In der echten Datenbank sind diese Sichten materialisiert — vorab berechnet und gespeichert, damit ein Lesezugriff nicht bei jedem Aufruf 754.513 Bestellungen neu aggregiert. Im Miniaturbestand dieses Labs genügen dafür gewöhnliche Sichten auf 19 Bestellungen; das Ergebnis der Abfrage ist dasselbe, nur die Ausführung dahinter unterscheidet sich.</p>
-    <p>Die dritte Übung weiter unten liest aus <code>v_kennzahlen_jahr</code> — ohne selbst zu rechnen.</p>
   </section>
 
   <section class="section-block" id="grenzen">
@@ -192,17 +188,16 @@
         <ul>
           <li>INSERT, UPDATE, DELETE, CREATE — jede Transaktion ist grundsätzlich nur lesend</li>
           <li>EXECUTE auf <code>wawi.bestellung_anlegen()</code> und <code>wawi.rezension_anlegen()</code></li>
-          <li>Zugriff auf das Schema <code>public</code></li>
+          <li>eigene Rechte im Schema <code>public</code> — die Rolle hat dort keine, und die Fallstudie führt dort keine Tabellen; <code>SELECT * FROM public.xyz</code> endet deshalb mit <code>relation "public.xyz" does not exist</code>, nicht mit <code>permission denied</code></li>
         </ul>
       </div>
     </div>
-    <p>Die Verständnisfrage weiter unten prüft, ob Sie erlaubt, begrenzt und verboten auseinanderhalten.</p>
   </section>
 
   <section class="section-block" id="stolper">
     <h2>Stolpersteine</h2>
     <p>Vier Ursachen erzeugen die Fehlermeldungen, denen Sie mit dieser Rolle begegnen. Alle Meldungen stehen hier wörtlich — so erscheinen sie auch bei Ihnen.</p>
-    <p><strong>Falsches oder fehlendes Schema.</strong> Ein Name ohne Präfix trifft im Suchpfad zunächst wawi (Abschnitt „Schemata und Suchpfad“) — das ist kein Fehler, nur eine andere Sicht als vielleicht gemeint. Ein Fehler wird daraus erst, wenn eine Tabelle in einem Schema gesucht wird, das die Fallstudie gar nicht führt, etwa <code>public</code>:</p>
+    <p><strong>Falsches oder fehlendes Schema.</strong> Ein Name ohne Präfix trifft im Suchpfad zunächst wawi (Abschnitt „Schemata und Suchpfad“) — das ist kein Fehler, nur eine andere Sicht als vielleicht gemeint. Ein Fehler wird daraus erst, wenn eine Tabelle in einem Schema gesucht wird, in dem die Fallstudie keine Tabellen hat, etwa <code>public</code>:</p>
     <p><code>ERROR:  relation "public.fact_orders" does not exist</code></p>
     <p><strong>Nur lesende Transaktion.</strong> Jede verändernde Anweisung scheitert an derselben Sperre, ob sie eine Zeile einfügt oder eine Tabelle anlegt:</p>
     <p><code>ERROR:  cannot execute INSERT in a read-only transaction</code><br><code>ERROR:  cannot execute CREATE TABLE in a read-only transaction</code></p>
