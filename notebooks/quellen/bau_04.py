@@ -50,17 +50,26 @@ from statsmodels.tsa.seasonal import STL
 import matplotlib.pyplot as plt
 
 zerlegung = STL(tage["umsatz"], period=7, robust=True).fit()
-abb, achsen = plt.subplots(3, 1, figsize=(9, 7), sharex=True)
+abb, achsen = plt.subplots(3, 1, figsize=(9, 7))
 achsen[0].plot(zerlegung.trend)
 achsen[0].set_ylabel("Trend in €")
 achsen[0].set_title("Der Trend trägt das Wachstum, das Wochenmuster wiederholt sich, der Rest ist Rauschen")
 achsen[1].plot(zerlegung.seasonal.iloc[-56:])
 achsen[1].set_ylabel("Wochenmuster in €")
+achsen[1].set_xlim(zerlegung.seasonal.index[-56], zerlegung.seasonal.index[-1])
+achsen[1].set_xlabel("die letzten acht Wochen")
 achsen[2].plot(zerlegung.resid)
 achsen[2].set_ylabel("Rest in €")
 achsen[2].set_xlabel("Tag")
 plt.tight_layout()
 plt.show()
+"""),
+code("""
+# Wie viel Varianz tragen die Komponenten? Anteile an der Varianz des Umsatzes.
+varianz = tage["umsatz"].var()
+pd.DataFrame({"komponente": ["Trend", "Wochenmuster", "Rest"],
+              "varianzanteil_pct": [zerlegung.trend.var() / varianz * 100, zerlegung.seasonal.var() / varianz * 100,
+                                    zerlegung.resid.var() / varianz * 100]}).round(1)
 """),
 md("""
 ### Merkmale und Backtesting
@@ -81,14 +90,14 @@ merkmale = pd.DataFrame({
     "temperatur": tage["temperatur"].ffill().bfill(),
     "niederschlag": tage["niederschlag"].fillna(0),
 }, index=tage.index)
-merkmale = merkmale.join(pd.get_dummies(tage.index.dayofweek, prefix="wt", dtype=int).set_index(tage.index))
-merkmale = merkmale.join(pd.get_dummies(tage.index.month, prefix="monat", dtype=int).set_index(tage.index))
+merkmale = merkmale.join(pd.get_dummies(tage.index.dayofweek, prefix="wt", drop_first=True, dtype=int).set_index(tage.index))
+merkmale = merkmale.join(pd.get_dummies(tage.index.month, prefix="monat", drop_first=True, dtype=int).set_index(tage.index))
 
 TRENNUNG = "2025-04-01"
 lern = merkmale.index < TRENNUNG
 X_lern, X_test = merkmale[lern], merkmale[~lern]
 y_lern, y_test = tage["umsatz"][lern], tage["umsatz"][~lern]
-print(f"Lernen: {zahl(int(lern.sum()))} Tage, Prüfen: {zahl(int((~lern).sum()))} Tage, {merkmale.shape[1]} Merkmale.")
+print(f"Lernen: {zahl(int(lern.sum()))} Tage, Prüfen: {zahl(int((~lern).sum()))} Tage, {zahl(merkmale.shape[1])} Merkmale.")
 """),
 code("""
 from sklearn.linear_model import LinearRegression
@@ -102,7 +111,8 @@ def bewerte(name, modell):
     return {"modell": name,
             "MAE in €": mean_absolute_error(y_test, vorhersage),
             "MAPE in %": mean_absolute_percentage_error(y_test, vorhersage) * 100,
-            "vorhersage": vorhersage}
+            "vorhersage": vorhersage,
+            "objekt": modell}
 
 ergebnisse = [bewerte("Lineare Regression", LinearRegression()),
               bewerte("Gradient Boosting", GradientBoostingRegressor(n_estimators=300, max_depth=3,
@@ -110,7 +120,13 @@ ergebnisse = [bewerte("Lineare Regression", LinearRegression()),
 mittelwert = np.full(len(y_test), y_lern.iloc[-365:].mean())
 ergebnisse.append({"modell": "Mittelwert der letzten 365 Lerntage", "MAE in €": mean_absolute_error(y_test, mittelwert),
                    "MAPE in %": mean_absolute_percentage_error(y_test, mittelwert) * 100, "vorhersage": mittelwert})
-pd.DataFrame([{k: v for k, v in e.items() if k != "vorhersage"} for e in ergebnisse]).round(1)
+pd.DataFrame([{k: v for k, v in e.items() if k not in ("vorhersage", "objekt")} for e in ergebnisse]).round(1)
+"""),
+code("""
+# Welche Merkmale nutzt das Gradient Boosting? Die zehn wichtigsten.
+gb = ergebnisse[1]["objekt"]
+wichtigkeit = pd.Series(gb.feature_importances_, index=merkmale.columns).sort_values(ascending=False)
+wichtigkeit.head(10).round(3).rename("wichtigkeit").to_frame()
 """),
 code("""
 abb, achse = plt.subplots(figsize=(9, 4))
@@ -123,6 +139,14 @@ achse.set_title("Backtesting April 2025 bis März 2026: Beide Modelle treffen da
 achse.set_ylim(0)
 achse.legend()
 plt.show()
+"""),
+code("""
+# Fehler des Gradient Boosting je Tagestyp im Prüfzeitraum
+fehler = pd.DataFrame({"abs_fehler": (y_test - ergebnisse[1]["vorhersage"]).abs()}, index=y_test.index)
+fehler["tagestyp"] = "gewöhnlich"
+fehler.loc[merkmale.loc[y_test.index, "feiertag"] == 1, "tagestyp"] = "Feiertag"
+fehler.loc[merkmale.loc[y_test.index, "ereignis"] == 1, "tagestyp"] = "Ereignis"
+fehler.groupby("tagestyp").agg(tage=("abs_fehler", "size"), mae=("abs_fehler", "mean")).round(1)
 """),
 md("""
 ### Basiseffekt bei Rumpfjahren
@@ -140,10 +164,13 @@ jahre.round(1)
 md("""
 ## Ergebnis
 
-Gradient Boosting schlägt die lineare Regression und beide schlagen den naiven Mittelwert; der
-MAPE bleibt zweistellig, weil einzelne Tage (Ereignisse, Feiertage) weit vom Muster abweichen.
-Der Trend und das Wochenmuster erklären den größten Teil der Varianz — das Wetter wenig, wie
-Notebook 05 zeigt.
+Gradient Boosting schlägt die lineare Regression und beide schlagen den naiven Mittelwert.
+An Feiertagen ist der Fehler des Gradient Boosting mit 196,7 € je Tag am höchsten; an
+Ereignistagen liegt er mit 169,6 € nur wenig über dem Fehler an gewöhnlichen Tagen
+(157,1 €). Trend und Wochenmuster tragen zusammen rund 90 Prozent der Varianz des Umsatzes
+(66,8 plus 23,3 Prozent); in der Merkmalswichtigkeit des Gradient Boosting liegt Temperatur
+bei 4,5 Prozent, Niederschlag erscheint nicht unter den zehn wichtigsten Merkmalen.
+Notebook 05 untersucht den Wettereffekt genauer.
 
 ## Was offen bleibt
 
