@@ -1,0 +1,133 @@
+{
+  "befehle": {
+    "B01": {
+      "titel": { "de": "Klickweg: PostgreSQL in Tableau Desktop anbinden" },
+      "prompt": "🖱",
+      "befehl": "Connect → To a Server → PostgreSQL\n    Server          supabase.butscher.cloud\n    Port            5433\n    Database        postgres\n    Authentication  Username and Password\n    Username        studi_daba\n    Password        thws\n    Require SSL     aus\n    Initial SQL     SET search_path TO burgermetrics, wawi   # wahlweise\n# Fehlt der Treiber: „This connector requires a driver“ —\n# Treiber von der Download-Seite installieren, erneut verbinden.\n# Danach auf der Data-Source-Seite: fact_orders und dim_branch\n# auf die Leinwand, oben rechts Live oder Extract.",
+      "teile": [
+        { "was": "PostgreSQL", "bedeutet": { "de": "Der Connector für PostgreSQL in Tableau Desktop 2026.2. Er bringt keinen Treiber mit: Fehlt er, zeigt der Dialog „This connector requires a driver“ und verweist auf die Download-Seite. Stand 09/2026." } },
+        { "was": "Server · Port 5433", "bedeutet": { "de": "Server und Port in getrennten Feldern. 5433 gehört dazu — 5432 ist der PostgreSQL-Standard und hier falsch (Lab 01)." } },
+        { "was": "Username · Password", "bedeutet": { "de": "Das Demo-Konto aus Lab 01: öffentlich, nur lesend, synthetischer Bestand." } },
+        { "was": "Require SSL", "bedeutet": { "de": "Bleibt aus — die Verbindung läuft wie in Lab 01 ohne SSL." } },
+        { "was": "Initial SQL", "bedeutet": { "de": "Eine Anweisung, die Tableau beim Verbinden ausführt. SET search_path TO burgermetrics, wawi stellt die Sichten v_* ohne Präfix bereit; SET schreibt nichts und läuft in der nur lesenden Transaktion der Rolle — eine schreibende Anweisung an dieser Stelle scheitert (Abschnitt „Stolpersteine“)." } },
+        { "was": "Live oder Extract", "bedeutet": { "de": "Die Entscheidung auf der Data-Source-Seite: Live schickt jede Änderung im Blatt als Abfrage an die Datenbank, Extract kopiert einen Auszug in eine .hyper-Datei und rechnet danach lokal. Für den Kurs: Extract — die Rolle hält zwanzig Sitzungen." } }
+      ]
+    },
+    "B02": {
+      "titel": { "de": "Klickweg: Public Edition mit den CSV-Dateien aus notebooks/export/" },
+      "prompt": "🖱",
+      "befehl": "Connect → To a File\n    notebooks/export/v_umsatz_monat.csv   # 109 Monate, 2017-03 bis 2026-03\n    notebooks/export/v_filiale.csv        # eine Zeile je Filiale\n# Beide Dateien schreibt Notebook 00 (00_zugang_und_daten.ipynb, Lab 02).\n# Die Public Edition erzeugt aus den Dateien ihren Extract;\n# eine Datenbankverbindung kennt sie nicht.",
+      "teile": [
+        { "was": "To a File", "bedeutet": { "de": "Der Weg der Public Edition: Dateien (Excel, Text, statistische Dateien), Google Drive und OData — höchstens 15 Mio. Zeilen je Arbeitsmappe, keine Datenbankverbindung. Stand 09/2026." } },
+        { "was": "v_umsatz_monat.csv", "bedeutet": { "de": "Umsatz und Bestellungen je Monat aus der Sicht v_umsatz_monat — 109 Zeilen. Die zwölf Zeilen für 2025 summieren sich auf 2.994.771,13 €." } },
+        { "was": "v_filiale.csv", "bedeutet": { "de": "Eine Zeile je Filiale mit Bestellungen, Umsatz und der fertigen Spalte umsatz_2025 — deren Summe über die acht Filialen ist wieder 2.994.771,13 €. Ein Jahr als Spalte gibt es in dieser Datei nicht." } },
+        { "was": "Extract", "bedeutet": { "de": "Die Public Edition erzeugt aus den Dateien ihren Extract — ein Stand. Neue Daten kommen mit dem nächsten Export aus Notebook 00 und einem neuen Extract." } }
+      ]
+    },
+    "B03": {
+      "titel": { "de": "Die drei Calculated Fields des Dashboards (Vorlage tableau-berechnete-felder.txt)" },
+      "prompt": "📄",
+      "befehl": "// Bestellwert — Zähler und Nenner aggregiert, je Zelle des Blatts\nSUM([Net Total]) / COUNT([Order Id])\n\n// Ø Sterne — ein Wert je Rezension, deshalb AVG\nAVG([Stars])\n\n// Umsatz je Filiale (FIXED) — Level of Detail:\n// die Ebene steht in der Formel, nicht im Blatt\n{ FIXED [Branch Name] : SUM([Net Total]) }\n\n// Bestellwert auf den CSV-Dateien aus notebooks/export/\n// (Public Edition): je Zeile schon Summen, deshalb SUM durch SUM\nSUM([Umsatz]) / SUM([Bestellungen])",
+      "teile": [
+        { "was": "SUM([Net Total]) / COUNT([Order Id])", "bedeutet": { "de": "Der mittlere Bestellwert: beide Seiten aggregiert, das Verhältnis wird je Zelle des Blatts neu gerechnet — je Filiale, je Monat, gesamt. Für 2025: 21,93 € aus 2.994.771,13 € und 136.557 Bestellungen, dieselbe Kennzahl wie aov in v_kennzahlen_jahr. SUM([Net Total]) / [Order Id] mischt Aggregat und Zeile — der Dialog weist die Formel als ungültig ab." } },
+        { "was": "AVG([Stars])", "bedeutet": { "de": "Der Mittelwert der Sterne aus fact_reviews. AVG statt SUM, weil Sterne ein Wert je Rezension sind — dieselbe Regel wie für die Zufriedenheit im Simulator." } },
+        { "was": "{ FIXED [Branch Name] : … }", "bedeutet": { "de": "Ein Level-of-Detail-Ausdruck: die Summe je Filiale, gleichgültig, welche Dimensionen auf den Regalen liegen. In einem Blatt nach Monat steht neben jedem Monat die Summe seiner Filiale. Ein gewöhnlicher Filter auf dem Blatt ändert den Wert nicht, ein Datenquellenfilter schon." } },
+        { "was": "SUM([Umsatz]) / SUM([Bestellungen])", "bedeutet": { "de": "Dieselbe Kennzahl für die CSV-Dateien der Public Edition: v_umsatz_monat.csv und v_filiale.csv tragen je Zeile schon Summen (umsatz, bestellungen) — deshalb Summe durch Summe, kein COUNT. Tableau schreibt die Spalten als Umsatz und Bestellungen." } },
+        { "was": "// Kommentar", "bedeutet": { "de": "Zeilen mit // sind in Tableau-Formeln Kommentare. Die Vorlage ist so aufgebaut, dass jeder Block mit seinen Kommentarzeilen in den Formelbereich eingefügt werden kann; der Name des Feldes gehört in das Namensfeld des Dialogs." } }
+      ]
+    },
+    "B04": {
+      "titel": { "de": "Zwei Blätter, ein Filter, ein Titel" },
+      "prompt": "🖱",
+      "befehl": "Blatt 1  Umsatz je Monat\n    Columns  MONTH(Date) — stetig, grün\n    Rows     SUM(Net Total)                 → Linie\nBlatt 2  Umsatz je Filiale\n    Rows     Branch Name\n    Columns  SUM(Net Total)                 → waagerechte Balken,\n                                              absteigend sortiert\nDashboard\n    beide Blätter nebeneinander\n    Filter   YEAR(Date) = 2025, gilt für beide Blätter\nTitel      „BM Europastern erzielt 2025 den höchsten Umsatz“\n           — eine Aussage, keine Achsenbeschreibung\nKontrolle  Summe der Balken = Summe der Linie = 2.994.771,13 €",
+      "teile": [
+        { "was": "MONTH(Date) — stetig, grün", "bedeutet": { "de": "Das Datum als stetiges Feld auf Columns ergibt eine Zeitachse und damit eine Linie; ohne Filter 109 Monate von März 2017 bis März 2026, mit dem Jahr 2025 zwölf Punkte." } },
+        { "was": "Rows: Branch Name · Columns: SUM(Net Total)", "bedeutet": { "de": "Dimension auf Rows, Kennzahl auf Columns: waagerechte Balken — acht Filialnamen lesen sich so besser. Absteigend sortiert steht BM Europastern vorn." } },
+        { "was": "Filter auf YEAR(Date) für beide Blätter", "bedeutet": { "de": "Ein Filter im Dashboard, der beide Blätter steuert. Mit 2025 summieren sich die acht Balken auf die zwölf Punkte der Linie: 2.994.771,13 €. Ein Blatt, das aus der Reihe fällt, verrät eine fehlende Verbindung der Tabellen." } },
+        { "was": "Titel als Aussage", "bedeutet": { "de": "„Umsatz nach Branch Name“ beschreibt die Achsen; „BM Europastern erzielt 2025 den höchsten Umsatz“ sagt, was das Bild zeigt — und nennt das Jahr, aus dem die Zahl stammt." } },
+        { "was": "Kontrolle", "bedeutet": { "de": "Dieselbe Zahl wie in v_kennzahlen_jahr (Lab 01), in Power BI (Lab 04), im Dashboard und in den Notebooks. Weicht sie ab, liegt der Fehler im Blatt, nicht in der Sicht." } }
+      ]
+    }
+  },
+  "regal": {
+    "daten": "data/regal-bestellungen.json",
+    "felder": [
+      { "id": "monat", "typ": "dimension", "geordnet": true, "titel": { "de": "Monat" }, "reihenfolge": ["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12"] },
+      { "id": "wochentag", "typ": "dimension", "titel": { "de": "Wochentag" }, "reihenfolge": ["Mo","Di","Mi","Do","Fr","Sa","So"] },
+      { "id": "stunde", "typ": "dimension", "geordnet": true, "titel": { "de": "Stunde" }, "reihenfolge": [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23] },
+      { "id": "filiale", "typ": "dimension", "titel": { "de": "Filiale" } },
+      { "id": "kanal", "typ": "dimension", "titel": { "de": "Kanal" } },
+      { "id": "zahlart", "typ": "dimension", "titel": { "de": "Zahlart" } },
+      { "id": "loyalty", "typ": "dimension", "titel": { "de": "Loyalty-Stufe" } },
+      { "id": "saison", "typ": "dimension", "titel": { "de": "Saison" } },
+      { "id": "order_id", "typ": "kennzahl", "titel": { "de": "Bestell-ID" }, "erklaerung": { "de": "Eine Kennung — Σ darüber ist die klassische Falle. COUNT zählt Bestellungen." } },
+      { "id": "umsatz", "typ": "kennzahl", "titel": { "de": "Umsatz (€)" } },
+      { "id": "positionen", "typ": "kennzahl", "titel": { "de": "Positionen" } },
+      { "id": "zufriedenheit", "typ": "kennzahl", "titel": { "de": "Zufriedenheit" }, "erklaerung": { "de": "Nur bewertete Bestellungen tragen einen Wert; AVG ignoriert die Lücken." } }
+    ]
+  },
+  "spielplaetze": { "frei": { "variante": "tableau", "startBelegung": { "spalten": [], "zeilen": [], "farbe": null, "filter": {} } } },
+  "uebungen": [
+    { "id": "W05-01", "typ": "regal", "variante": "tableau",
+      "titel": { "de": "Umsatz je Monat als Linie" },
+      "aufgabe": { "de": "<p>Legen Sie <strong>Monat</strong> auf Columns und <strong>SUM(Umsatz)</strong> auf Rows. Weil der Monat geordnet ist, entsteht eine Linie.</p>" },
+      "ziel": { "spalten": ["monat"], "zeilen": ["SUM:umsatz"] },
+      "loesungBelegung": { "spalten": ["monat"], "zeilen": [ { "feld": "umsatz", "agg": "SUM" } ], "farbe": null, "filter": {} },
+      "rueckmeldung": { "de": "Eine geordnete Dimension (Monat, Stunde) auf Columns ergibt eine Linie — in Tableau eine stetige Achse. Bei Filialen wäre es ein Balken: dort gibt es keine Reihenfolge." } },
+
+    { "id": "W05-02", "typ": "regal", "variante": "tableau",
+      "titel": { "de": "Zufriedenheit je Filiale im Sommer" },
+      "aufgabe": { "de": "<p>Legen Sie <strong>Filiale</strong> auf Rows und <strong>AVG(Zufriedenheit)</strong> auf Columns — waagerechte Balken — und filtern Sie auf <strong>Saison = Summer</strong>.</p>" },
+      "ziel": { "zeilen": ["filiale"], "spalten": ["AVG:zufriedenheit"], "filter": { "saison": ["Summer"] } },
+      "loesungBelegung": { "spalten": [ { "feld": "zufriedenheit", "agg": "AVG" } ], "zeilen": ["filiale"], "farbe": null, "filter": { "saison": ["Summer"] } },
+      "rueckmeldung": { "de": "AVG statt SUM: Zufriedenheit ist ein Wert je bewerteter Bestellung, keine Summe. Nur 451 der 2.000 Bestellungen tragen eine Bewertung — AVG ignoriert die Lücken, SUM würde sie verschweigen." } },
+
+    { "id": "W05-03", "typ": "quiz",
+      "titel": { "de": "Live, Extract, Public" },
+      "aufgabe": { "de": "<p>Drei Fragen zur Verbindung.</p>" },
+      "fragen": [
+        { "frage": { "de": "Was speichert ein Extract?" },
+          "optionen": [ { "de": "Einen Auszug der Daten als .hyper-Datei, der ohne Datenbank funktioniert" }, { "de": "Nur die Verbindungsdaten" }, { "de": "Das Dashboard als Bild" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Ein Extract ist eine Kopie mit Verfallsdatum: schneller, offline, mit Funktionen, die die Quelle nicht hat — und veraltet ab dem Moment, in dem er geschrieben ist." } },
+        { "frage": { "de": "Wie kommt Tableau Desktop Public Edition an die Daten der Fallstudie?" },
+          "optionen": [ { "de": "Über die CSV-Dateien aus notebooks/export/ — die Public Edition kennt keine Datenbankverbindung" }, { "de": "Über den PostgreSQL-Connector mit studi_daba" }, { "de": "Gar nicht" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Die Public Edition liest Dateien, Google Drive und OData, bis 15 Millionen Zeilen je Arbeitsmappe. Notebook 00 exportiert vier Sichten als CSV und Parquet." } },
+        { "frage": { "de": "Eine Live-Verbindung mit studi_daba meldet „cannot execute CREATE TABLE in a read-only transaction“. Was ist die Ursache?" },
+          "optionen": [ { "de": "Tableau will eine temporäre Tabelle anlegen; die Rolle darf nicht schreiben" }, { "de": "Das Kennwort ist falsch" }, { "de": "Die Datenbank ist voll" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Die Meldung stammt von PostgreSQL: Die Transaktion der Rolle ist nur lesend. Ein Extract oder ein Datenquellenfilter umgeht den Vorgang." } }
+      ],
+      "rueckmeldung": { "de": "Live fragt, Extract kopiert, Public liest Dateien — und die Rolle bleibt in allen drei Fällen nur lesend." } },
+
+    { "id": "W05-04", "typ": "reihenfolge",
+      "titel": { "de": "Vom Connector zum Dashboard" },
+      "aufgabe": { "de": "<p>Bringen Sie die Schritte in die Reihenfolge, in der ein Dashboard entsteht.</p>" },
+      "eintraege": [
+        { "id": "verbinden", "text": { "de": "Connect → PostgreSQL, Server, Port 5433, studi_daba" } },
+        { "id": "extract", "text": { "de": "Extract erzeugen (.hyper) — oder Live behalten" } },
+        { "id": "blatt1", "text": { "de": "Blatt 1: Monat auf Columns, SUM(Net Total) auf Rows" } },
+        { "id": "blatt2", "text": { "de": "Blatt 2: Branch Name auf Rows, SUM(Net Total) auf Columns" } },
+        { "id": "dashboard", "text": { "de": "Dashboard aus beiden Blättern, Filter Jahr als Steuerung" } },
+        { "id": "titel", "text": { "de": "Titel als Aussage formulieren und speichern" } }
+      ],
+      "richtig": ["verbinden", "extract", "blatt1", "blatt2", "dashboard", "titel"],
+      "start": ["titel", "dashboard", "blatt2", "blatt1", "extract", "verbinden"],
+      "rueckmeldung": { "de": "Erst die Datenquelle, dann die Blätter, dann das Dashboard — und der Titel zuletzt, weil er die Antwort nennt, nicht die Frage." } },
+
+    { "id": "W05-05", "typ": "checkliste",
+      "titel": { "de": "Ein Dashboard in Tableau Desktop oder Public Edition" },
+      "aufgabe": { "de": "<p>Mit Tableau Desktop (Connector) oder der Public Edition (CSV aus <code>notebooks/export/</code>). Jeder Schritt endet mit einer Prüfung.</p>" },
+      "schritte": [
+        { "text": { "de": "Datenquelle angebunden: PostgreSQL mit <code>studi_daba</code> (Desktop) oder <code>v_umsatz_monat.csv</code> und <code>v_filiale.csv</code> aus <code>notebooks/export/</code> (Public Edition)." } },
+        { "text": { "de": "Bei Live-Verbindung: Initial SQL <code>SET search_path TO burgermetrics, wawi</code> gesetzt, damit Sichten ohne Präfix gefunden werden." } },
+        { "text": { "de": "Blatt „Umsatz je Monat“: Monat (stetig) auf Columns, SUM(Umsatz) auf Rows — eine Linie über 109 Monate." } },
+        { "text": { "de": "Blatt „Umsatz je Filiale“: Filiale auf Rows, SUM(Umsatz) auf Columns — acht Balken, sortiert absteigend." } },
+        { "text": { "de": "Berechnetes Feld <code>Bestellwert</code> = SUM([Umsatz]) / SUM([Bestellungen]) angelegt (Vorlage <code>tableau-berechnete-felder.txt</code>)." } },
+        { "text": { "de": "Dashboard mit beiden Blättern; Jahr als Filter, der beide Blätter steuert; Titel nennt die Aussage." } },
+        { "text": { "de": "Kontrollzahl: Umsatz 2025 im Dashboard = <code>2.994.771,13 €</code>." } }
+      ],
+      "rueckmeldung": { "de": "Wenn die Kontrollzahl stimmt, liest Tableau dieselbe Sicht wie Power BI und das Dashboard der Fallstudie — das Werkzeug ist austauschbar, die Definition nicht." } }
+  ]
+}
