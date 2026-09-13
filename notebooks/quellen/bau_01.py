@@ -148,7 +148,8 @@ falsch = con.sql(\"\"\"
 \"\"\").fetchone()[0]
 print(f"Umsatz {JAHR} aus fact_orders: {richtig:,.0f} €.".replace(",", "."))
 print(f"Derselbe Umsatz nach einem Join auf die Positionen: {falsch:,.0f} € — das {falsch / richtig:.1f}-Fache.".replace(",", "."))
-print("Der Faktor ist die mittlere Zahl der Positionen je Bestellung: Jede Bestellung wird so oft gezählt.")
+print("Jede Bestellung wird so oft gezählt, wie sie Positionen hat. Große Bestellungen haben viele Positionen und einen hohen Betrag,")
+print("deshalb liegt der Faktor über der mittleren Positionszahl je Bestellung (rund 3,9).")
 """),
 md("""
 Die Regel: Kennzahlen immer auf dem Grain aggregieren, auf dem sie entstehen. Umsatz je
