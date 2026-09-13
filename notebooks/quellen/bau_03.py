@@ -28,7 +28,7 @@ koerbe = lade_sql(\"\"\"
     JOIN dim_product p USING (product_id)
     WHERE o.date >= '2025-01-01' AND o.date < '2025-04-01'\"\"\")
 tabelle = pd.crosstab(koerbe["order_id"], koerbe["product_name"]).astype(bool)
-print(f"{zahl(tabelle.shape[0])} Warenkörbe, {tabelle.shape[1]} Produkte; im Mittel {zahl(tabelle.sum(axis=1).mean(), 2)} verschiedene Produkte je Korb.")
+print(f"{zahl(tabelle.shape[0])} Warenkörbe, {zahl(tabelle.shape[1])} Produkte; im Mittel {zahl(tabelle.sum(axis=1).mean(), 2)} verschiedene Produkte je Korb.")
 tabelle.iloc[:5, :6]
 """),
 md("""
@@ -93,18 +93,25 @@ vergleich = sicht.merge(paare_q1, on="paar", how="left")
 vergleich["support_q1_2025"] = (vergleich["support_q1_2025"] * 100).round(2)
 vergleich[["produkt_a", "produkt_b", "support_pct", "support_q1_2025", "lift", "lift_q1_2025"]].round(2)
 """),
+md("### Die Paare ohne Signal: Lift nahe 1"),
+code("""
+# Die Paare, deren Lift im ganzen Bestand am nächsten bei 1 liegt — B kommt mit A so oft vor wie ohne
+nahe_eins = vergleich.assign(abstand=(vergleich["lift"] - 1).abs()).nsmallest(8, "abstand")
+nahe_eins[["produkt_a", "produkt_b", "support_pct", "lift", "lift_q1_2025"]].round(2)
+"""),
 code("""
 import matplotlib.pyplot as plt
 
 abb, achse = plt.subplots(figsize=(6, 6))
 achse.scatter(vergleich["lift"], vergleich["lift_q1_2025"])
 grenze = max(vergleich["lift"].max(), vergleich["lift_q1_2025"].max()) * 1.05
-achse.plot([0.9, grenze], [0.9, grenze], linestyle="--")
+untergrenze = min(vergleich["lift"].min(), vergleich["lift_q1_2025"].min()) * 0.95
+achse.plot([untergrenze, grenze], [untergrenze, grenze], linestyle="--")
 achse.set_xlabel("Lift im ganzen Bestand (v_warenkorb_regeln)")
 achse.set_ylabel("Lift im ersten Quartal 2025 (Apriori)")
 achse.set_title("Ein Quartal reicht für die meisten Paare; die stärksten liegen im Quartal höher")
-achse.set_xlim(0.9, grenze)
-achse.set_ylim(0.9, grenze)
+achse.set_xlim(untergrenze, grenze)
+achse.set_ylim(untergrenze, grenze)
 plt.show()
 """),
 md("""
@@ -113,9 +120,11 @@ md("""
 Die stärksten Regeln verbinden Chicken Nuggets mit BBQ-Sauce und Burger mit Ketchup Extra, im
 ersten Quartal wie im Gesamtbestand; ihre Lifts liegen deutlich über 1 und fallen im kleineren
 Quartalsdatensatz noch etwas höher aus (11,23 statt 8,97 bei Chicken Nuggets 6pc und
-BBQ-Sauce). Ein Lift nahe 1 — wie bei Veggie Burger und Side Salad (0,93 im Gesamtbestand, 1,01
-im ersten Quartal) — ist dagegen kein Signal: Salat kommt mit diesem Burger praktisch so oft
-vor wie ohne.
+BBQ-Sauce). Ein Lift nahe 1 — wie bei Medium Fries und Bier (1,00) und den sieben weiteren Paaren mit
+dem geringsten Abstand zu 1 — ist dagegen kein Signal: Diese Produkte kommen zusammen praktisch
+so oft vor wie unabhängig voneinander. Im ersten Quartal fehlt für alle acht ein Wert, weil
+`association_rules` nur Regeln mit Lift ab 1 behält und keines der acht das im kleineren
+Datensatz erreicht.
 
 ## Was offen bleibt
 
