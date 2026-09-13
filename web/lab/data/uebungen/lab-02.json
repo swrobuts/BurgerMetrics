@@ -1,0 +1,117 @@
+{
+  "befehle": {
+    "B01": {
+      "titel": { "de": "Klonen mit Git LFS — und prüfen, ob die Daten da sind" },
+      "prompt": "$",
+      "befehl": "# einmal je Rechner: der Filter, der Zeigerdateien gegen Daten tauscht\ngit lfs install\n\n# Repository samt LFS-Dateien holen (15 CSV-Dateien, 315 MB)\ngit clone https://github.com/swrobuts/BurgerMetrics.git\ncd BurgerMetrics\n\n# Prüfung: 51M ist richtig, 133B ist nur eine Zeigerdatei\nls -lh dataset/fact_orders.csv\n\n# nur nötig, wenn die Prüfung 133B zeigt: Daten nachträglich holen\ngit lfs pull",
+      "teile": [
+        { "was": "git lfs install", "bedeutet": { "de": "Richtet den LFS-Filter in Ihrem Git ein — einmal je Rechner, nicht je Repository. Fehlt er beim Klonen, kommen statt der 15 CSV-Dateien 15 Zeigerdateien von je rund 130 Byte." } },
+        { "was": "git clone https://github.com/swrobuts/BurgerMetrics.git", "bedeutet": { "de": "Holt das Repository und, wenn der Filter eingerichtet ist, die LFS-Dateien gleich mit: 15 Dateien, zusammen 315 MB. Jeder Klon zählt auf das Bandbreitenkontingent des Repositorys — 10 GiB je Monat (Stand 09/2026)." } },
+        { "was": "ls -lh dataset/fact_orders.csv", "bedeutet": { "de": "Zeigt die Dateigröße lesbar. 51M heißt: Die Daten liegen vor. 133B heißt: nur die Zeigerdatei — sie beginnt mit version https://git-lfs.github.com/spec/v1. In PowerShell zeigt dir dataset\\fact_orders.csv die Größe in Byte: 53346072 oder 133." } },
+        { "was": "git lfs pull", "bedeutet": { "de": "Tauscht in einem bereits geklonten Repository die Zeigerdateien gegen die Daten. Vorher git lfs install ausführen — sonst fehlt der Filter weiterhin, und der Tausch unterbleibt." } }
+      ]
+    },
+    "B02": {
+      "titel": { "de": "Den ganzen Datensatz als DuckDB-Datei laden" },
+      "prompt": "$",
+      "befehl": "# DuckDB als Python-Paket (Stand 09/2026: 1.5.5, LTS-Reihe 1.4)\npython3 -m pip install duckdb\n\n# aus dem Wurzelverzeichnis des Klons: 14 Tabellen laden, Zeilenzahlen prüfen\npython3 dataset/load_duckdb.py --lokal",
+      "teile": [
+        { "was": "python3 -m pip install duckdb", "bedeutet": { "de": "Installiert das Paket in die Python-Umgebung, die python3 aufruft. In Colab erledigt das die erste Zelle der Notebooks (%pip install)." } },
+        { "was": "dataset/load_duckdb.py --lokal", "bedeutet": { "de": "Legt dataset/burger_metrics.duckdb an — eine vorhandene Datei wird vorher gelöscht — und lädt die 14 Tabellen des Datensatzes mit read_csv_auto. Nach jeder Tabelle vergleicht das Skript die Zeilenzahl mit dem Sollwert aus dataset/README.md und schreibt OK oder ABWEICHUNG." } },
+        { "was": "--klein", "bedeutet": { "de": "Lässt obt_orders weg — spart 176 MB und den größten Teil der Ladezeit. Für dieses Lab reichen Dimensionen und Faktentabellen." } },
+        { "was": "FEHLER: Diese Dateien sind Git-LFS-Verweise, keine Daten:", "bedeutet": { "de": "So bricht das Skript ab, wenn im Klon nur Zeigerdateien liegen. Es nennt die Abhilfe gleich mit: git lfs install && git lfs pull (B01)." } }
+      ],
+      "ausgabe": "Erzeuge lokale Datenbank burger_metrics.duckdb...\n  OK    dim_branch                    8 Zeilen\n  OK    dim_customer             25.000 Zeilen\n  OK    dim_date                  3.377 Zeilen\n  OK    dim_employee                188 Zeilen\n  OK    dim_payment_method            4 Zeilen\n  OK    dim_product                  57 Zeilen\n  OK    dim_promotion                13 Zeilen\n  OK    dim_supplier                  8 Zeilen\n  OK    dim_time_slot                18 Zeilen\n  OK    dim_weather               3.377 Zeilen\n  OK    fact_orders             754.513 Zeilen\n  OK    fact_order_items      2.950.082 Zeilen\n  OK    fact_reviews             10.000 Zeilen\n  OK    obt_orders              754.513 Zeilen\n\nFertig. Datenbank: …/BurgerMetrics/dataset/burger_metrics.duckdb"
+    },
+    "B03": {
+      "titel": { "de": "DuckDB: zwei CSV-Dateien laden und dieselbe Abfrage stellen wie in PostgreSQL" },
+      "prompt": "Python",
+      "befehl": "import duckdb\n\ncon = duckdb.connect(\"burger_metrics.duckdb\")\ncon.sql(\"CREATE OR REPLACE TABLE fact_orders AS SELECT * FROM read_csv('dataset/fact_orders.csv')\")\ncon.sql(\"CREATE OR REPLACE TABLE dim_branch AS SELECT * FROM read_csv('dataset/dim_branch.csv')\")\n\nprint(con.sql(\"\"\"\n    SELECT b.branch_name, count(*) AS bestellungen, round(sum(o.net_total), 2) AS umsatz\n    FROM fact_orders o\n    JOIN dim_branch b USING (branch_id)\n    GROUP BY b.branch_name\n    ORDER BY umsatz DESC\n\"\"\"))\n\ncon.close()",
+      "teile": [
+        { "was": "duckdb.connect(\"burger_metrics.duckdb\")", "bedeutet": { "de": "Öffnet die Datei — oder legt sie an. Eine Datei, kein Server, kein Konto. Sie gehört Ihnen; deshalb sind hier CREATE TABLE und CREATE VIEW erlaubt, die die Rolle studi_daba in PostgreSQL verweigert (Lab 01)." } },
+        { "was": "read_csv('dataset/fact_orders.csv')", "bedeutet": { "de": "Liest die CSV-Datei und erkennt Spaltennamen und Typen selbst: date wird DATE, net_total DOUBLE. Der Pfad gilt vom Wurzelverzeichnis des Klons aus (B01)." } },
+        { "was": "CREATE OR REPLACE TABLE … AS SELECT", "bedeutet": { "de": "Speichert das Ergebnis der Abfrage als Tabelle in der Datei. OR REPLACE ersetzt eine vorhandene Tabelle, damit das Skript ein zweites Mal läuft, statt doppelt anzulegen." } },
+        { "was": "SELECT b.branch_name, count(*) … USING (branch_id)", "bedeutet": { "de": "Die Abfrage aus Übung W02-01. USING, count(*), round() und GROUP BY sind Standard-SQL; sie läuft wortgleich in PostgreSQL. Über den vollständigen Datensatz liefert sie acht Zeilen, im Miniaturbestand des Spielplatzes fünf." } },
+        { "was": "print(con.sql(…))", "bedeutet": { "de": "con.sql() liefert eine Relation; print zeigt sie als Tabelle mit Spaltennamen und Typen. .df() statt print macht daraus einen DataFrame für pandas — so arbeiten die Notebooks." } },
+        { "was": "con.close()", "bedeutet": { "de": "Schließt die Verbindung. Die Datei bleibt liegen und lässt sich mit connect() wieder öffnen — Tabellen inklusive." } }
+      ]
+    },
+    "B04": {
+      "titel": { "de": "Export aus Notebook 00: Parquet und CSV je Sicht" },
+      "prompt": "Python",
+      "befehl": "from pathlib import Path\n\n# lade_sql() stammt aus Notebook 00 (00_zugang_und_daten.ipynb): pd.read_sql gegen die Datenbank\nexport = Path(\"export\")\nexport.mkdir(exist_ok=True)\n\ndef exportiere(sicht):\n    # Liest eine Sicht und schreibt sie als Parquet und CSV in den Ordner export/\n    daten = lade_sql(f\"SELECT * FROM {sicht}\")\n    daten.to_parquet(export / f\"{sicht}.parquet\", index=False)\n    daten.to_csv(export / f\"{sicht}.csv\", index=False)\n    return len(daten)\n\nzeilen = {sicht: exportiere(sicht) for sicht in [\"v_kennzahlen_jahr\", \"v_filiale\", \"v_kanal_jahr\", \"v_umsatz_monat\"]}",
+      "teile": [
+        { "was": "Path(\"export\")", "bedeutet": { "de": "Der Ordner entsteht neben dem Notebook — im Repository also notebooks/export/. exist_ok=True verhindert einen Fehler, wenn er schon vorhanden ist." } },
+        { "was": "to_parquet(…, index=False)", "bedeutet": { "de": "Schreibt den DataFrame spaltenweise mit Typen und Kompression; braucht das Paket pyarrow aus notebooks/requirements.txt. index=False lässt die Zeilennummern von pandas weg." } },
+        { "was": "to_csv(…, index=False)", "bedeutet": { "de": "Dieselben Daten als Text — für Tableau Desktop Public Edition und jedes Werkzeug ohne Parquet-Leser. Datum und Dezimalzahlen werden beim Einlesen wieder geraten." } },
+        { "was": "v_kennzahlen_jahr, v_filiale, v_kanal_jahr, v_umsatz_monat", "bedeutet": { "de": "Vier Sichten der Semantikschicht: 10, 8, 36 und 109 Zeilen. Die großen Tabellen bleiben in der Datenbank — ein Export ist eine Kopie und veraltet ab dem Moment, in dem er geschrieben ist." } }
+      ]
+    }
+  },
+  "uebungen": [
+    { "id": "W02-01", "typ": "sql",
+      "titel": { "de": "Umsatz je Filiale — in DuckDB und PostgreSQL gleich" },
+      "aufgabe": { "de": "<p>Je Filiale (<code>branch_name</code>) die Zahl der Bestellungen und den Umsatz (<code>sum(net_total)</code>, auf zwei Stellen gerundet), absteigend nach Umsatz. Die Abfrage soll wortgleich in DuckDB laufen — also nur Standard-SQL.</p>" },
+      "start": "SELECT b.branch_name\nFROM fact_orders o\nJOIN dim_branch b USING (branch_id)\n",
+      "loesung": "SELECT b.branch_name, count(*) AS bestellungen, round(sum(o.net_total), 2) AS umsatz\nFROM fact_orders o\nJOIN dim_branch b USING (branch_id)\nGROUP BY b.branch_name\nORDER BY umsatz DESC",
+      "sortiert": true,
+      "hinweis": { "de": "<p><code>USING (branch_id)</code> verbindet gleichnamige Spalten; <code>round(sum(…), 2)</code> rundet die Summe. Gruppieren nach <code>b.branch_name</code>.</p>" },
+      "rueckmeldung": { "de": "USING, count(*), round() und GROUP BY sind Standard-SQL — DuckDB und PostgreSQL liefern dieselben fünf Zeilen. Unterschiede beginnen bei Datumsfunktionen und Typnamen." } },
+
+    { "id": "W02-02", "typ": "sql",
+      "titel": { "de": "Menge und Umsatz je Kategorie" },
+      "aufgabe": { "de": "<p>Aus den Positionen: je <code>category</code> die verkaufte Menge (<code>sum(quantity)</code>) und der Positionsumsatz (<code>sum(line_total)</code>, zwei Stellen), absteigend nach Menge, bei Gleichstand nach Kategorie.</p>" },
+      "start": "SELECT p.category\nFROM fact_order_items i\nJOIN dim_product p USING (product_id)\n",
+      "loesung": "SELECT p.category, sum(i.quantity) AS menge, round(sum(i.line_total), 2) AS umsatz\nFROM fact_order_items i\nJOIN dim_product p USING (product_id)\nGROUP BY p.category\nORDER BY menge DESC, p.category",
+      "sortiert": true,
+      "hinweis": { "de": "<p>Mengen entstehen in <code>fact_order_items</code>, die Kategorie steht in <code>dim_product</code>. Zwei Sortierschlüssel: <code>menge DESC, p.category</code>.</p>" },
+      "rueckmeldung": { "de": "Getränke führen bei der Menge, Burger beim Umsatz je Stück — das Positionsniveau ist der richtige Grain für Mengen, nicht die Bestellung." } },
+
+    { "id": "W02-03", "typ": "reihenfolge",
+      "titel": { "de": "Vom Klon zur eigenen DuckDB-Datei" },
+      "aufgabe": { "de": "<p>Bringen Sie die Schritte in die Reihenfolge, in der sie auf einem frischen Rechner nötig sind.</p>" },
+      "eintraege": [
+        { "id": "install", "text": { "de": "git lfs install — einmal je Rechner" } },
+        { "id": "clone", "text": { "de": "git clone https://github.com/swrobuts/BurgerMetrics.git" } },
+        { "id": "pruefen", "text": { "de": "ls -lh dataset/fact_orders.csv — 51M, nicht 133 Byte" } },
+        { "id": "laden", "text": { "de": "python3 dataset/load_duckdb.py --lokal" } },
+        { "id": "abfragen", "text": { "de": "SELECT count(*) FROM fact_orders; — 754513" } }
+      ],
+      "richtig": ["install", "clone", "pruefen", "laden", "abfragen"],
+      "start": ["abfragen", "laden", "clone", "pruefen", "install"],
+      "rueckmeldung": { "de": "Die Prüfung mit ls -lh gehört vor das Laden: Wer Zeigerdateien lädt, bekommt eine leere Datenbank ohne Fehlermeldung." } },
+
+    { "id": "W02-04", "typ": "quiz",
+      "titel": { "de": "LFS, Parquet und Colab" },
+      "aufgabe": { "de": "<p>Drei Fragen zu den Datenwegen.</p>" },
+      "fragen": [
+        { "frage": { "de": "Eine geklonte fact_orders.csv ist 133 Byte groß und beginnt mit „version https://git-lfs.github.com/spec/v1“. Was ist passiert?" },
+          "optionen": [ { "de": "Git LFS war beim Klonen nicht installiert; die Datei ist ein Zeiger" }, { "de": "Die Datei ist auf GitHub gelöscht worden" }, { "de": "Die CSV ist komprimiert und muss entpackt werden" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Ohne LFS-Filter liegt nur der Zeiger auf den Speicher vor. git lfs install, dann git lfs pull holt die Daten nach." } },
+        { "frage": { "de": "Was hat Parquet, was CSV nicht hat?" },
+          "optionen": [ { "de": "Datentypen je Spalte und Kompression" }, { "de": "Lesbarkeit in jedem Texteditor" }, { "de": "Eine Grenze von 1.048.576 Zeilen" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Parquet speichert spaltenweise mit Typen und komprimiert; fact_orders schrumpft von 51 MB auf 10,7 MB. Die Zeilengrenze gehört zu Excel, die Lesbarkeit zu CSV." } },
+        { "frage": { "de": "Warum lesen die Notebooks große Tabellen aus der Datenbank und nicht aus Git LFS?" },
+          "optionen": [ { "de": "Jeder Download zählt auf das LFS-Kontingent des Repositorys (10 GiB je Monat)" }, { "de": "Colab kann keine CSV-Dateien lesen" }, { "de": "Die Datenbank ist immer schneller als eine lokale Datei" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Ein Kurs, der 315 MB je Notebook-Lauf zieht, erschöpft das Kontingent nach rund 30 Läufen. lade_csv() ist deshalb auf Dimensionen beschränkt." } }
+      ],
+      "rueckmeldung": { "de": "Der Weg entscheidet, wer rechnet und wer zahlt: Am Connector rechnet die Datenbank, bei LFS zahlt das Repository die Bandbreite, bei DuckDB rechnet Ihr Rechner." } },
+
+    { "id": "W02-05", "typ": "zuordnen",
+      "titel": { "de": "Welches Ziel, welcher Weg" },
+      "aufgabe": { "de": "<p>Ordnen Sie jedem Ziel den passenden Weg zu den Daten zu.</p>" },
+      "ziele": [ { "id": "connector", "text": { "de": "Connector zur Datenbank (studi_daba)" } }, { "id": "csv", "text": { "de": "CSV-Datei aus dem Export" } }, { "id": "duckdb", "text": { "de": "DuckDB auf den CSV-Dateien" } }, { "id": "parquet", "text": { "de": "Parquet-Datei" } } ],
+      "paare": [
+        { "begriff": { "de": "Power BI Desktop, Import der Sichten" }, "ziel": "connector" },
+        { "begriff": { "de": "Tableau Desktop Public Edition" }, "ziel": "csv" },
+        { "begriff": { "de": "Notebook in Colab, lade_sql()" }, "ziel": "connector" },
+        { "begriff": { "de": "SQL üben ohne Server, eigene Tabellen anlegen" }, "ziel": "duckdb" },
+        { "begriff": { "de": "Abgabe mit erhaltenen Datentypen an ein anderes Team" }, "ziel": "parquet" },
+        { "begriff": { "de": "Tableau Desktop mit Live-Verbindung" }, "ziel": "connector" }
+      ],
+      "rueckmeldung": { "de": "Die Public Edition von Tableau kennt keine Datenbankverbindung — der Export aus Notebook 00 (CSV und Parquet unter notebooks/export/) ist ihr Weg." } }
+  ]
+}
