@@ -27,13 +27,13 @@ sieht der Umsatz real statt nominal aus?
 code("""
 tage = lade_sql(\"\"\"
     SELECT o.date AS tag, sum(o.net_total) AS umsatz, count(*) AS bestellungen,
-           d.year AS jahr, d.day_name AS wochentag, d.is_holiday AS feiertag, d.holiday_name AS feiertagsname,
+           d.year AS jahr, d.month AS monat, d.day_name AS wochentag, d.is_holiday AS feiertag, d.holiday_name AS feiertagsname,
            d.special_event AS ereignis, w.temperature_celsius AS temperatur, w.precipitation_mm AS niederschlag,
            w.condition AS wetterlage
     FROM fact_orders o
     JOIN dim_date d ON d.date = o.date
     LEFT JOIN dim_weather w ON w.date = o.date
-    GROUP BY o.date, d.year, d.day_name, d.is_holiday, d.holiday_name, d.special_event,
+    GROUP BY o.date, d.year, d.month, d.day_name, d.is_holiday, d.holiday_name, d.special_event,
              w.temperature_celsius, w.precipitation_mm, w.condition
     ORDER BY o.date\"\"\")
 tage["tag"] = pd.to_datetime(tage["tag"])
@@ -46,21 +46,29 @@ md("""
 ### Regression auf die eingebauten Merkmale
 
 Eine lineare Regression mit `statsmodels` — die Jahre als Kategorie fangen das Wachstum ab,
-damit Wetter und Kalender nicht den Trend erklären müssen.
+die Monate die Jahreszeit — damit Wetter und Kalender nicht den Trend und die Saison erklären
+müssen. Referenz sind ein Montag ohne Ereignis.
 """),
 code("""
 import statsmodels.formula.api as smf
 
-modell = smf.ols("umsatz ~ temperatur + niederschlag + C(wochentag) + feiertag + C(ereignis) + C(jahr)", data=tage).fit()
+def kurz(name):
+    # Kürzt statsmodels-Bezeichner wie C(ereignis, Treatment(reference='keines'))[T.Kiliani] auf ereignis[Kiliani]
+    return name.split("[T.")[0].split("(")[1].split(",")[0] + "[" + name.split("[T.")[1] if "[T." in name else name
+
+modell = smf.ols("umsatz ~ temperatur + niederschlag + C(wochentag, Treatment(reference='Monday')) + feiertag + C(ereignis, Treatment(reference='keines')) + C(monat) + C(jahr)", data=tage).fit()
 koeffizienten = pd.DataFrame({"koeffizient": modell.params, "p_wert": modell.pvalues}).round(3)
+koeffizienten.index = [kurz(n) for n in koeffizienten.index]
 print(f"R² = {zahl(modell.rsquared, 3)} auf {zahl(int(modell.nobs))} Tagen.")
-koeffizienten.loc[[z for z in koeffizienten.index if not z.startswith("C(jahr)")]]
+koeffizienten.loc[[z for z in koeffizienten.index if not z.startswith("jahr)") and not z.startswith("monat)")]]
 """),
 md("""
-Wochentage und Ereignisse tragen: Kiliani ist in der Regression die Basiskategorie und
-erscheint deshalb nicht als eigene Zeile; ein Tag ohne Ereignis (keines) liegt 1.158,64 €
-darunter. Niederschlag trägt praktisch nicht bei (p = 0,516); Temperatur ist mit 41,64 € je
-Grad statistisch signifikant (p < 0,001) und damit kein kleiner Koeffizient.
+Gegenüber einem Montag ohne Ereignis liegen Freitag (1.155,06 €), Samstag (1.614,88 €),
+Sonntag (953,30 €), Donnerstag (459,60 €) und Mittwoch (221,24 €) signifikant höher
+(p < 0,001); nur der Dienstag unterscheidet sich nicht von Montag (-7,60 €, p = 0,860).
+Kiliani liegt 1.139,77 € über einem Tag ohne Ereignis (p < 0,001). Mit Monat und Jahr in der
+Regression sind weder Temperatur (p = 0,171) noch Niederschlag (p = 0,920) bei p < 0,05
+signifikant — der Effekt aus der ersten Fassung war die Jahreszeit, nicht das Wetter.
 
 ### Externe Quellen holen (oder aus der Datei lesen)
 """),
@@ -165,6 +173,13 @@ r_regen = daten["niederschlag"].corr(daten["niederschlag_mm"])
 print(f"Korrelation Temperatur (dim_weather) mit Tageshöchsttemperatur (Open-Meteo): r = {zahl(r_temp, 3)}")
 print(f"Korrelation Niederschlag (dim_weather) mit gemessenem Niederschlag: r = {zahl(r_regen, 3)}")
 
+def abweichung_vom_monatsmittel(spalte):
+    # Abweichung jedes Tages vom Mittel seines Kalendermonats — der Tageseffekt ohne die Jahreszeit
+    return spalte - spalte.groupby(daten["tag"].dt.month).transform("mean")
+
+r_temp_tag = abweichung_vom_monatsmittel(daten["temperatur"]).corr(abweichung_vom_monatsmittel(daten["tmax"]))
+print(f"Ohne Jahreszeit (Abweichung vom Monatsmittel): r = {zahl(r_temp_tag, 3)}")
+
 abb, achse = plt.subplots(figsize=(9, 4))
 monat = daten.set_index("tag")[["temperatur", "tmax"]].resample("MS").mean()
 achse.plot(monat.index, monat["temperatur"], label="dim_weather (synthetisch)")
@@ -176,28 +191,31 @@ achse.legend()
 plt.show()
 """),
 md("""
-Der Bestand ist synthetisch: Die Temperatur korreliert mit dem gemessenen Tageshöchstwert
-mit r = 0,791, weil beide Reihen demselben Jahresgang folgen. Beim Niederschlag verschwindet
-die Korrelation auf r = 0,009, weil Regen keinem Jahresgang folgt — hier zeigt sich, dass der
-Bestand die Jahreszeit trifft, nicht das Wetter eines einzelnen Tages. Das ist kein Fehler des
-Datensatzes, aber eine Grenze, die man kennen muss, bevor man Wettereffekte interpretiert.
+Der Bestand ist synthetisch: Die Rohkorrelation zwischen Temperatur (dim_weather) und dem
+gemessenen Tageshöchstwert ist mit r = 0,791 hoch, weil beide Reihen demselben Jahresgang
+folgen. Rechnet man die Abweichung vom Mittel des jeweiligen Kalendermonats — also ohne
+Jahreszeit —, verschwindet die Korrelation auf r = -0,054: Der Bestand trifft die Jahreszeit,
+nicht das Wetter eines einzelnen Tages. Niederschlag korreliert schon in der Rohfassung kaum
+(r = 0,009), weil Regen keinem Jahresgang folgt. Das ist kein Fehler des Datensatzes, aber eine
+Grenze, die man kennen muss, bevor man Wettereffekte interpretiert.
 
 ### Regression mit den externen Merkmalen
 """),
 code("""
-modell_extern = smf.ols("umsatz ~ tmax + niederschlag_mm + C(wochentag) + feiertag + ferien + heimspiel + C(ereignis) + C(jahr)",
+modell_extern = smf.ols("umsatz ~ tmax + niederschlag_mm + C(wochentag, Treatment(reference='Monday')) + feiertag + ferien + heimspiel + C(ereignis, Treatment(reference='keines')) + C(monat) + C(jahr)",
                         data=daten).fit()
 print(f"R² eingebaut: {zahl(modell.rsquared, 3)}, R² extern: {zahl(modell_extern.rsquared, 3)}")
 pd.DataFrame({"koeffizient": modell_extern.params, "p_wert": modell_extern.pvalues}).loc[
     ["tmax", "niederschlag_mm", "feiertag", "ferien", "heimspiel"]].round(3)
 """),
 md("""
-Ferien haben keinen messbaren Effekt (p = 0,914) — der Generator kannte die Schulferien
-nicht. Heimspiele dagegen zeigen einen signifikanten Koeffizienten von -273,16 € (p < 0,001);
-ob das ein echter Effekt des Spieltags ist oder mit dem Wochentag zusammenhängt, an dem
-Heimspiele stattfinden, klärt diese Regression allein nicht. Externe Merkmale wirken hier nur,
-wenn die Zielgröße tatsächlich davon abhängt; bei echten Kassendaten wäre der Test derselbe,
-das Ergebnis vermutlich ein anderes.
+Mit Monat und Jahr im Modell ist tmax bei p < 0,05 nicht mehr signifikant (5,20 €,
+p = 0,074), Niederschlag weiterhin ohne Effekt (0,64 €, p = 0,834). Ferien bleiben nicht
+messbar (-31,76 €, p = 0,367). Heimspiele dagegen bleiben signifikant (-251,50 €, p < 0,001) —
+anders als bei der Temperatur verschwindet dieser Effekt nicht, wenn man die Jahreszeit
+herausrechnet; die Ursache klärt diese Regression nicht. Externe Merkmale wirken hier nur, wenn
+die Zielgröße tatsächlich davon abhängt; bei echten Kassendaten wäre der Test derselbe, das
+Ergebnis vermutlich ein anderes.
 
 ### Umsatz real statt nominal
 """),
@@ -211,21 +229,25 @@ jahre.round(1)
 md("""
 ## Ergebnis
 
-Wochentag und Ereignisse erklären den Tagesumsatz am stärksten. Niederschlag hat keinen
-messbaren Effekt; die Temperatur dagegen ist in beiden Regressionen statistisch signifikant
-(p < 0,001) und mit 41,64 € beziehungsweise 37,37 € je Grad kein kleiner Koeffizient — sie
-korreliert mit dem gemessenen Tageshöchstwert aber nur über den gemeinsamen Jahresgang
-(r = 0,791), den Tag selbst kennt der Bestand nicht. Ferien bringen nichts (p = 0,914), der
-Heimspiel-Koeffizient ist dagegen signifikant. Der Verbraucherpreisindex zeigt, dass ein Teil
-des nominalen Wachstums seit 2021 Preissteigerung ist.
+Wochentag und Ereignisse erklären den Tagesumsatz am stärksten: Gegenüber einem Montag ohne
+Ereignis liegen alle Wochentage außer Dienstag signifikant höher, Kiliani liegt 1.139,77 € über
+einem Tag ohne Ereignis. Sobald Monat und Jahr die Saison und den Trend abfangen, ist weder die
+eingebaute noch die gemessene Temperatur bei p < 0,05 signifikant (p = 0,171 beziehungsweise
+p = 0,074) — der scheinbare Wettereffekt aus der ersten Fassung war die Jahreszeit: Die
+Rohkorrelation von Temperatur und gemessenem Tageshöchstwert liegt bei r = 0,791, ohne
+Jahreszeit (Abweichung vom Monatsmittel) bei r = -0,054. Ferien bleiben ohne messbaren Effekt;
+Heimspiele dagegen bleiben mit -251,50 € (p < 0,001) signifikant, auch nach Kontrolle für
+Monat und Jahr — anders als bei der Temperatur ist das kein reiner Saisoneffekt. Der
+Verbraucherpreisindex zeigt, dass ein Teil des nominalen Wachstums seit 2021 Preissteigerung
+ist.
 
 ## Was offen bleibt
 
 Die Kickers-Daten decken die Regionalliga-Saisons ab 2022 nicht ab; wer sie braucht, pflegt
 eine CSV von Hand nach. Der VPI ist ein Jahreswert — für Monatsreihen liefert Destatis
-Monatsindizes über GENESIS-Online (Konto erforderlich). Ob der Heimspiel-Koeffizient einen
-eigenen Effekt misst oder mit dem Wochentag zusammenhängt, an dem Heimspiele stattfinden,
-klärt diese Regression nicht.
+Monatsindizes über GENESIS-Online (Konto erforderlich). Der Heimspiel-Koeffizient bleibt auch
+nach Kontrolle für Monat und Jahr signifikant; ob dahinter ein echter Effekt des Spieltags
+steht oder eine hier nicht erfasste dritte Größe, klärt diese Regression nicht.
 """),
 ]
 
