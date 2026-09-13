@@ -80,7 +80,6 @@
 
   <section class="section-block" id="begriffe">
     <h2>Die Begriffe</h2>
-    <p>Vier Begriffe tragen dieses Lab. Sie kommen in der Reihenfolge der Arbeit vor: beim Verbinden, im Modell, in den Measures.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Begriff</th><th>Was es ist</th><th>Wo</th></tr></thead>
@@ -139,7 +138,7 @@
             <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_orders</li>
             <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_reviews</li>
             <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> obt_orders <span class="callout">3</span></li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> v_kennzahlen_jahr &nbsp;… 38 materialisierte Sichten v_* <span class="callout">4</span></li>
+            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> v_kennzahlen_jahr <span class="callout">4</span></li>
             <li>▸ wawi <span class="callout">5</span></li>
           </ul>
         </div>
@@ -150,7 +149,7 @@
       <li><span class="callout">1</span><span>Die beiden Schemata der Datenbank erscheinen als Ordner. <code>burgermetrics</code> ist aufgeklappt: 14 Tabellen und die 38 materialisierten Sichten.</span></li>
       <li><span class="callout">2</span><span>Angekreuzt sind die sieben Tabellen des Modells in diesem Lab: vier Dimensionen (<code>dim_branch</code>, <code>dim_customer</code>, <code>dim_date</code>, <code>dim_product</code>) und drei Faktentabellen (<code>fact_orders</code>, <code>fact_order_items</code>, <code>fact_reviews</code>) — dieselben Tabellen wie in Lab 03.</span></li>
       <li><span class="callout">3</span><span><code>obt_orders</code> bleibt abgewählt: 41 Spalten, in denen Bestellung, Filiale, Kunde und Kalender bereits verbunden sind. Wer sie zusätzlich lädt, hat jede Kennzahl zweimal im Modell.</span></li>
-      <li><span class="callout">4</span><span>Die 38 materialisierten Sichten stehen daneben. <code>v_kennzahlen_jahr</code> liefert Bestellungen, Umsatz und Bestellwert je Jahr fertig (Lab 01) — der kürzere Weg, wenn kein eigenes Modell gebraucht wird.</span></li>
+      <li><span class="callout">4</span><span>Eine der 38 materialisierten Sichten im selben Ordner. <code>v_kennzahlen_jahr</code> liefert Bestellungen, Umsatz und Bestellwert je Jahr fertig (Lab 01) — der kürzere Weg, wenn kein eigenes Modell gebraucht wird.</span></li>
       <li><span class="callout">5</span><span><code>wawi</code> bleibt zugeklappt: Das operative Modell mit seinen 16 Tabellen ist nicht die Quelle eines Berichts.</span></li>
     </ol>
   </section>
@@ -322,14 +321,13 @@
     <p>Der Filter auf <code>dim_date[year]</code> gilt für die ganze Seite: Alle sechs Bilder rechnen im selben Filterkontext, und die Balken summieren sich auf die Kachel. Ein Bild, das aus der Reihe fällt, verrät eine fehlende Beziehung — zeigt der Balken in jeder Filiale die Kachel, filtert <code>dim_branch</code> die Fakten nicht.</p>
     <div class="concept-box">
       <h3>Zwei Regeln aus dem Deck</h3>
-      <p><strong>Balken beginnen bei null.</strong> Ihre Länge kodiert den Wert; eine Achse, die erst bei einem hohen Betrag beginnt, macht aus einem kleinen Unterschied einen langen Balken. Für Linien gilt das nicht in gleicher Weise: Dort trägt die Steigung die Aussage, und die Achse darf dem Wertebereich folgen.</p>
-      <p><strong>Der Titel ist eine Aussage.</strong> „Umsatz nach branch_name“ beschreibt die Achsen; „BM Europastern erzielt 2025 den höchsten Umsatz“ sagt, was das Bild zeigt. Eine Kachel nennt neben dem Wert den Zeitraum, aus dem er stammt — 2.994.771,13 € sind der Umsatz eines Jahres, nicht der von neun.</p>
+      <p><strong>Balken beginnen bei null.</strong> Ihre Länge kodiert den Wert; eine Achse, die erst bei einem hohen Betrag beginnt, macht aus einem kleinen Unterschied einen langen Balken.</p>
+      <p><strong>Der Titel ist eine Aussage.</strong> „Umsatz nach branch_name“ beschreibt die Achsen; „BM Europastern erzielt 2025 den höchsten Umsatz“ sagt, was das Bild zeigt. Eine Kachel nennt neben dem Wert den Zeitraum, aus dem er stammt — 2.994.771,13 € sind der Umsatz eines Jahres, nicht der aller Jahre.</p>
     </div>
   </section>
 
   <section class="section-block" id="stolper">
     <h2>Stolpersteine</h2>
-    <p>Fünf Situationen, die in diesem Lab vorkommen können.</p>
     <div class="karten">
       <div class="karte">
         <div class="kopfzeile">Verbindung scheitert an Npgsql</div>
@@ -356,7 +354,7 @@
 
   <section class="section-block" id="simulator">
     <h2>Simulator</h2>
-    <p>Der Simulator unten bildet die Ablagen eines Bildes in Power BI nach: <code>X-axis</code>, <code>Y-axis</code>, <code>Legend</code> und <code>Filters</code>. Drei Dinge unterscheiden ihn vom Werkzeug. Felder werden in den Ablagen ausgewählt statt gezogen. Σ-Felder — die Kennzahlen — bekommen im Chip eine Aggregation, die Sie umstellen können: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>; der Vorschlag ist <code>SUM</code>, wie bei Power BI für jede Zahlenspalte. Und das Diagramm wählen Sie nicht, es folgt aus der Belegung: eine Spalte auf <code>X-axis</code> und eine Kennzahl auf <code>Y-axis</code> ergeben senkrechte Balken, eine geordnete Spalte wie Monat oder Stunde eine Linie, eine Legende Serien, nur Spalten eine Tabelle. Die Übungen sprechen von Spalten und Zeilen — im Simulator sind das <code>X-axis</code> und <code>Y-axis</code>.</p>
+    <p>Der Simulator unten bildet die Ablagen eines Bildes in Power BI nach: <code>X-axis</code>, <code>Y-axis</code>, <code>Legend</code> und <code>Filters</code>. Drei Dinge unterscheiden ihn vom Werkzeug. Felder werden in den Ablagen ausgewählt statt gezogen. Σ-Felder — die Kennzahlen — bekommen im Chip eine Aggregation, die Sie umstellen können: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>; der Vorschlag ist <code>SUM</code>, wie bei Power BI für jede Zahlenspalte. Und das Diagramm wählen Sie nicht, es folgt aus der Belegung: eine Spalte auf <code>X-axis</code> und eine Kennzahl auf <code>Y-axis</code> ergeben senkrechte Balken, eine geordnete Spalte wie Monat oder Stunde eine Linie, eine Legende Serien, nur Spalten ohne Kennzahl (oder nur eine Kennzahl) eine Tabelle. Die Übungen sprechen von Spalten und Zeilen — im Simulator sind das <code>X-axis</code> und <code>Y-axis</code>.</p>
     <p>Die Daten sind 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle — das, was ein Bild nach dem Weg über die Beziehungen sieht. Die Felder:</p>
     <div class="table-scroll">
       <table>
