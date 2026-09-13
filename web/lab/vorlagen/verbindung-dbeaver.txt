@@ -1,0 +1,12 @@
+# Verbindungsangaben für DBeaver und andere Werkzeuge mit Formularfeldern
+# Demo-Konto studi_daba, öffentlich und nur lesend. Stand 09/2026.
+
+Treiber:    PostgreSQL
+Host:       supabase.butscher.cloud
+Port:       5433
+Database:   postgres
+Username:   studi_daba
+Password:   thws
+
+# SSL: nicht erzwungen. Das Kontrollkästchen "Use SSL" (DBeaver) bzw.
+# "Use SSL" im Reiter SSH/SSL (DataGrip) bleibt aus.

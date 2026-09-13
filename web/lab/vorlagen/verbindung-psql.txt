@@ -1,0 +1,14 @@
+# Verbindung zur Datenbank der Fallstudie BurgerMetrics per psql
+# Demo-Konto studi_daba, öffentlich und nur lesend. Stand 09/2026.
+
+psql "postgresql://studi_daba:thws@supabase.butscher.cloud:5433/postgres"
+
+# Danach, in der psql-Sitzung:
+
+\dn                     -- alle Schemata auflisten (relevant: wawi, burgermetrics)
+\dt wawi.*              -- Tabellen im Schema wawi auflisten
+\dm burgermetrics.*     -- materialisierte Sichten im Schema burgermetrics auflisten
+\q                      -- Sitzung beenden
+
+# Suchpfad der Rolle: wawi, burgermetrics (fest eingestellt, siehe SHOW search_path;)
+# Die Rolle liest beide Schemata und schreibt nichts.
