@@ -68,6 +68,7 @@ function deutschBefunde (wert, pfad = '') {
     if (o == null || typeof o !== 'object') return
     for (const [k, v] of Object.entries(o)) {
       const q = p ? `${p}.${k}` : k
+      if (k === 'erwartet') continue // Vergleichsdokument einer JSON-Übung: Inhalt, kein Text
       if (TEXTFELDER.has(k)) pruefeText(v, q)
       else if (k === 'optionen' && Array.isArray(v)) v.forEach((x, i) => pruefeText(x, `${q}[${i}]`))
       else if (k === 'en') befunde.push(`${q}: en ist nicht erlaubt`)
@@ -250,8 +251,8 @@ for (const [lab, htmlDatei] of Object.entries(HTML_ZU_LAB).sort()) {
   if (sqlUebungen.length) {
     gut(baender === 1, `${lab}: genau ein data-datenbank="postgres" (gefunden ${baender})`)
     const bandPos = html.indexOf('data-datenbank="postgres"')
-    const erstePos = html.indexOf(`data-uebung="${sqlUebungen[0].id}"`)
-    gut(bandPos >= 0 && erstePos >= 0 && bandPos < erstePos, `${lab}: das Datenbankband steht oberhalb der ersten SQL-Übung`)
+    const positionen = sqlUebungen.map(u => html.indexOf(`data-uebung="${u.id}"`)).filter(i => i >= 0)
+    gut(bandPos >= 0 && positionen.length > 0 && bandPos < Math.min(...positionen), `${lab}: das Datenbankband steht oberhalb der ersten SQL-Übung`)
   } else {
     gut(baender <= 1, `${lab}: höchstens ein Datenbankband (gefunden ${baender})`)
   }
@@ -297,7 +298,9 @@ gut(existsSync(join(WURZEL, 'README.md')), 'README.md vorhanden')
 
 abschnitt('2. SQL-Lösungen in PGlite')
 
-const saatTexte = Object.fromEntries(SAAT.map(([, datei]) => [datei, lies(datei)]))
+const saatTexte = {}
+const saatText = (datei) => (saatTexte[datei] ??= lies(datei))
+const saatVollstaendig = SAAT.every(([, datei]) => existsSync(join(WURZEL, datei)))
 
 /** Neu säen wie saeen() in bm.js: alle eigenen Schemata fallen, dann die Saatfolge. */
 async function neuSaeen (db) {
@@ -307,18 +310,22 @@ async function neuSaeen (db) {
   await db.exec('CREATE SCHEMA public;')
   for (const [vorspann, datei] of SAAT) {
     await db.exec(vorspann)
-    await db.exec(saatTexte[datei])
+    await db.exec(saatText(datei))
   }
   await db.exec('SET search_path TO wawi, burgermetrics')
 }
 
-/** Ergebnisse vergleichen wie die Laufzeit: Werte normiert, Zeilenreihenfolge gleichgültig. */
-const normiert = (r) => r.zeilen.map(z => z.map(v =>
-  v == null ? '\u2400'
-    : v instanceof Date ? v.toISOString().slice(0, 10)
-      : /^-?\d+(\.\d+)?$/.test(String(v)) ? Number(v).toFixed(4)
-        : String(v).trim()).join('')).sort()
-const gleichesErgebnis = (a, b) => a.spalten.length === b.spalten.length && JSON.stringify(normiert(a)) === JSON.stringify(normiert(b))
+/** Ergebnisse vergleichen wie gleich() der Laufzeit: Werte normiert; die Zeilenreihenfolge zählt nur bei `sortiert`. */
+const normiert = (r, sortiert) => {
+  const zeilen = r.zeilen.map(z => z.map(v =>
+    v == null ? '\u2400'
+      : v instanceof Date ? v.toISOString().slice(0, 10)
+        : /^-?\d+(\.\d+)?$/.test(String(v)) ? Number(v).toFixed(4)
+          : String(v).trim()).join(''))
+  return sortiert ? zeilen : zeilen.sort()
+}
+const gleichesErgebnis = (a, b, sortiert = false) =>
+  a.spalten.length === b.spalten.length && JSON.stringify(normiert(a, sortiert)) === JSON.stringify(normiert(b, sortiert))
 
 /** Prüft eine SQL-Übung auf der frisch gesäten Datenbank. Liefert Befunde (leer = in Ordnung). */
 async function pruefeSqlUebung (db, u) {
@@ -348,16 +355,23 @@ async function pruefeSqlUebung (db, u) {
     const s = await lauf(u.start)
     if (!s.fehler) {
       const ist = u.kontrolle ? await lauf(u.kontrolle) : s
-      if (!ist.fehler && gleichesErgebnis(ist.erg, soll)) befunde.push('start liefert schon das Ergebnis der Lösung')
+      if (!ist.fehler && gleichesErgebnis(ist.erg, soll, !!u.sortiert)) befunde.push('start liefert schon das Ergebnis der Lösung')
     }
   }
   return befunde
 }
 
+/** Startet PGlite mit der Saat; scheitert das, ist es ein Befund und kein Absturz. */
+async function datenbankOder (was) {
+  try { return await neueDatenbank() } catch (e) { gut(false, `${was}: PGlite startet mit der Saat`, e.message); return null }
+}
+
+if (!saatVollstaendig) console.log('  übersprungen: Saatdateien fehlen (Befund in Abschnitt 1)')
 for (const [lab, d] of Object.entries(LABS).sort()) {
   const sqlUebungen = (d.uebungen || []).filter(u => u.typ === 'sql')
-  if (!sqlUebungen.length) continue
-  const db = await neueDatenbank()
+  if (!sqlUebungen.length || !saatVollstaendig) continue
+  const db = await datenbankOder(lab)
+  if (!db) continue
   try {
     for (const u of sqlUebungen) {
       const befunde = await pruefeSqlUebung(db, u)
@@ -381,6 +395,8 @@ gut(deutschBefunde({ irgendwo: { en: 'tief' } }).length === 1, 'Deutsch-Pflicht:
 gut(deutschBefunde({ uebungen: [{ id: 'W01-01', typ: 'quiz', titel: { de: 'T' }, aufgabe: { de: '<p>A</p>' },
   fragen: [{ frage: { de: 'F' }, optionen: [{ de: 'a' }, { de: 'b' }], richtig: [0], erklaerung: { de: 'E' } }] }] }).length === 0,
 'Deutsch-Pflicht: ein sauberes Quiz ist ohne Befund')
+gut(deutschBefunde({ uebungen: [{ typ: 'json', titel: { de: 'T' }, erwartet: { titel: 'Rohwert', en: 'Inhalt', text: 'kein Textfeld' } }] }).length === 0,
+  'Deutsch-Pflicht: das Vergleichsdokument erwartet einer JSON-Übung wird nicht als Text geprüft')
 
 // Saatfolge: eine veränderte Kopie wird gemeldet, die eigene Kopie nicht.
 {
@@ -400,8 +416,10 @@ gut(VORLAGENRESTE.test('<link rel="stylesheet" href="assets/winf.css">') && VORL
   'Seiten: Reste der Vorlage werden erkannt')
 
 // SQL-Prüfung auf einer eigenen Datenbank.
-{
-  const db = await neueDatenbank()
+const dbProbe = saatVollstaendig ? await datenbankOder('Zusicherungen') : null
+if (!saatVollstaendig) console.log('  übersprungen: Saatdateien fehlen (Befund in Abschnitt 1)')
+if (dbProbe) {
+  const db = dbProbe
   try {
     const zaehle = async (sql) => Number((await fuehreAus(db, sql)).zeilen[0][0])
     gut(await zaehle('SELECT count(*) FROM fact_orders') === 19 && await zaehle('SELECT count(*) FROM fact_order_items') === 55 &&
@@ -426,7 +444,11 @@ gut(VORLAGENRESTE.test('<link rel="stylesheet" href="assets/winf.css">') && VORL
     b = await pruefeSqlUebung(db, { id: 'T', typ: 'sql', vorher: 'CREATE TABLE t (x int)', start: 'SELECT * FROM t', loesung: 'INSERT INTO t VALUES (1)', kontrolle: 'SELECT * FROM t' })
     gut(b.length === 0, 'SQL: vorher läuft vor Lösung und Start', b.join('; '))
     b = await pruefeSqlUebung(db, { id: 'T', typ: 'sql', start: 'SELECT product_name FROM dim_product', loesung: 'SELECT product_name FROM dim_product ORDER BY product_name DESC' })
-    gut(b.length === 1 && /start liefert schon/.test(b[0]), 'SQL: Zeilenreihenfolge spielt beim Vergleich keine Rolle', b.join('; '))
+    gut(b.length === 1 && /start liefert schon/.test(b[0]), 'SQL: ohne sortiert spielt die Zeilenreihenfolge beim Vergleich keine Rolle', b.join('; '))
+    b = await pruefeSqlUebung(db, { id: 'T', typ: 'sql', sortiert: true, start: 'SELECT product_name FROM dim_product ORDER BY product_name', loesung: 'SELECT product_name FROM dim_product ORDER BY product_name DESC' })
+    gut(b.length === 0, 'SQL: mit sortiert gilt ein Start, der sich nur in der Reihenfolge unterscheidet, als ungelöst', b.join('; '))
+    b = await pruefeSqlUebung(db, { id: 'T', typ: 'sql', sortiert: true, start: 'SELECT product_name FROM dim_product ORDER BY product_name DESC', loesung: 'SELECT product_name FROM dim_product ORDER BY product_name DESC' })
+    gut(b.length === 1 && /start liefert schon/.test(b[0]), 'SQL: mit sortiert wird ein Start in derselben Reihenfolge gemeldet', b.join('; '))
     gut((await fuehreAus(db, "SELECT to_regclass('t')")).zeilen[0][0] === null, 'SQL: das Neusäen räumt selbst angelegte Tabellen weg')
     gut(await zaehle('SELECT count(*) FROM fact_orders') === 19, 'SQL: nach dem Neusäen steht der Bestand wieder')
   } finally { await db.close() }

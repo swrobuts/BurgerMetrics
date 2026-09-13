@@ -353,12 +353,12 @@ async function ladePGlite () {
   }
 }
 
-/** Eine Datenbank je Seite; `gesaet` sagt, ob der Bestand schon geladen ist. */
+/** Eine Datenbank je Seite; `gesaet` sagt, ob der Bestand schon geladen ist, `lauf` hält die laufende Saat. */
 async function holeDb () {
   if (!dbVersprechen) {
     dbVersprechen = (async () => {
       const PGlite = await ladePGlite()
-      return { db: await PGlite.create(), gesaet: false }
+      return { db: await PGlite.create(), gesaet: false, lauf: null }
     })()
   }
   return dbVersprechen
@@ -374,19 +374,29 @@ async function holeSaat (datei) {
   return saatText[datei]
 }
 
-async function saeen (h) {
-  // Alle selbst angelegten Schemata (wawi, burgermetrics, public, …) fallen, damit
-  // eine Prüfung immer auf demselben Ausgangsbestand rechnet.
-  const schemata = await h.db.query(
-    "SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg\\_%' AND nspname <> 'information_schema'")
-  for (const z of schemata.rows) await h.db.exec(`DROP SCHEMA IF EXISTS "${z.nspname}" CASCADE`)
-  await h.db.exec('CREATE SCHEMA public;')
-  for (const [vorspann, datei] of SAAT) {
-    await h.db.exec(vorspann)
-    await h.db.exec(await holeSaat(datei))
-  }
-  await h.db.exec(SUCHPFAD)
-  h.gesaet = true
+/**
+ * Sät die Datenbank neu: Alle selbst angelegten Schemata (wawi, burgermetrics,
+ * public, …) fallen, damit eine Prüfung immer auf demselben Ausgangsbestand
+ * rechnet. Läuft eine Saat schon (etwa die des Datenbankbands), warten alle
+ * Aufrufer auf denselben Lauf - zwei verschränkte DROP SCHEMA … CASCADE
+ * ließen sonst beide scheitern.
+ */
+function saeen (h) {
+  h.lauf ??= (async () => {
+    try {
+      const schemata = await h.db.query(
+        "SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg\\_%' AND nspname <> 'information_schema'")
+      for (const z of schemata.rows) await h.db.exec(`DROP SCHEMA IF EXISTS "${z.nspname}" CASCADE`)
+      await h.db.exec('CREATE SCHEMA public;')
+      for (const [vorspann, datei] of SAAT) {
+        await h.db.exec(vorspann)
+        await h.db.exec(await holeSaat(datei))
+      }
+      await h.db.exec(SUCHPFAD)
+      h.gesaet = true
+    } finally { h.lauf = null }
+  })()
+  return h.lauf
 }
 
 /**

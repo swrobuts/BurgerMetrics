@@ -35,7 +35,7 @@
   --ok-bg:      #F1F8F1;
   --warn:       #B23B1E;
   --warn-bg:    #FDF3F0;
-  --term-bg:    #1C1917;   /* dunkler Grund der Befehlskarten und Konsolen */
+  --term-bg:    #1C1917;   /* dunkler Grund der Befehlskarten */
   --term-fg:    #F5F5F4;
   --term-dim:   #A8A29E;
   --mono: 'SFMono-Regular', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
@@ -195,14 +195,12 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 .header-back:hover { color: var(--primary-d); }
 .header-right { display: flex; align-items: center; gap: 0.5rem; }
 
-.lang-btn, .os-btn {
+.os-btn {
   padding: 0.25rem 0.7rem; font-family: var(--sans); font-weight: 700; font-size: 0.78rem;
   cursor: pointer; border: 1px solid var(--line); border-radius: 8px;
   background: transparent; color: var(--ink);
   min-height: 32px; min-width: 40px;
 }
-.lang-btn.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
-.lang-btn:hover:not(.active) { background: var(--bg-soft); }
 
 /* ---------------------------------------------------------------- Startseite */
 
@@ -256,7 +254,7 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 .hero .btn { border-color: #fff; color: #fff; }
 .hero .btn:hover { background: #fff; color: var(--primary); }
 .hero .btn.solid { background: var(--signal); border-color: var(--signal); color: var(--ink); }
-.hero .btn.solid:hover { background: var(--accent); border-color: var(--accent); color: var(--on-primary); }
+.hero .btn.solid:hover { background: var(--primary-l); border-color: var(--primary-l); color: var(--primary-d); }
 
 .stats-bar { background: #fff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); }
 .stats-grid {
@@ -434,76 +432,6 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 [data-os="cmd"]  .nur-mac, [data-os="cmd"]  .nur-win { display: none; }
 [data-os="mac"]  .nur-windows,
 [data-os="win"]  .nur-unix, [data-os="cmd"] .nur-unix { display: none; }
-
-/* ================================================== Terminalnachbildung
-
-   Kein echter Rechner, sondern ein Modell davon: ein Dateibaum im
-   Arbeitsspeicher, ein Satz nachgebauter Befehle, Ausgaben, die den echten
-   nachempfunden sind. Was hier gelingt, gelingt auch draußen - nur richtet
-   diese Konsole keinen Schaden an.
-   =========================================================================== */
-
-.terminal {
-  border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
-  margin: 1.5rem 0; background: var(--term-bg);
-}
-.terminal-kopf {
-  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-  padding: 0.55rem 0.9rem; background: #2B181E; border-bottom: 1px solid #3E262C;
-  color: var(--term-dim); font-size: 0.78rem;
-}
-.terminal-kopf .ampel { display: inline-flex; gap: 0.32rem; flex: none; }
-.terminal-kopf .ampel i { width: 10px; height: 10px; border-radius: 50%; display: block; }
-.terminal-kopf .ampel i:nth-child(1) { background: #FF5F57; }
-.terminal-kopf .ampel i:nth-child(2) { background: #FEBC2E; }
-.terminal-kopf .ampel i:nth-child(3) { background: #28C840; }
-.terminal-kopf .spacer { flex: 1; }
-.terminal-kopf .shell {
-  font-family: var(--mono); color: var(--term-fg);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.terminal-kopf .btn-mini {
-  border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 5px; background: transparent;
-  color: var(--term-dim); font-family: var(--sans); font-size: 0.72rem; font-weight: 700;
-  padding: 0.16rem 0.5rem; cursor: pointer; min-height: 26px;
-}
-.terminal-kopf .btn-mini:hover { color: var(--term-fg); background: rgba(255, 255, 255, 0.1); }
-
-.terminal-schirm {
-  font-family: var(--mono); font-size: 0.84rem; line-height: 1.5;
-  color: var(--term-fg); padding: 0.85rem 0.95rem;
-  max-height: 24rem; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere;
-}
-.terminal-schirm .eingabe-zeile { color: var(--term-fg); }
-.terminal-schirm .prompt { color: var(--signal); }
-.terminal-schirm .aus { color: var(--term-fg); }
-.terminal-schirm .dim { color: var(--term-dim); }
-.terminal-schirm .fehler { color: #FF9E8A; }
-.terminal-schirm .gut { color: #8BE08F; }
-
-.terminal-eingabe {
-  display: flex; align-items: baseline; gap: 0.5rem;
-  border-top: 1px solid #3E262C; padding: 0.6rem 0.95rem; background: #26151A;
-}
-.terminal-eingabe .prompt { color: var(--signal); font-family: var(--mono); font-size: 0.84rem; flex: none; }
-.terminal-eingabe input {
-  flex: 1; background: transparent; color: var(--term-fg);
-  font-family: var(--mono); font-size: 0.84rem; border: 0; outline: none; padding: 0.15rem 0;
-}
-.terminal-eingabe input::placeholder { color: #7A6068; }
-
-.terminal-auftrag {
-  border-top: 1px solid #3E262C; padding: 0.7rem 0.95rem;
-  background: #26151A; color: var(--term-dim); font-size: 0.82rem;
-}
-.terminal-auftrag ol { margin: 0.4rem 0 0 1.15rem; }
-.terminal-auftrag li { margin-bottom: 0.2rem; }
-.terminal-auftrag li.erledigt { color: #8BE08F; text-decoration: line-through; }
-.terminal-auftrag li.erledigt::marker { color: #8BE08F; }
-/* Die Schritte werden der Reihe nach geprüft; der nächste ist hervorgehoben. */
-.terminal-auftrag li.aktuell { color: var(--term-fg); font-weight: 600; }
-.terminal-auftrag li.aktuell::marker { color: var(--signal); }
-.terminal-auftrag strong { color: var(--term-fg); }
 
 /* ==================================================== Übungsbox (alle Typen) */
 
@@ -782,11 +710,11 @@ tr:nth-child(even) td { background: var(--bg-soft); }
   font-family: var(--mono); font-size: 0.74rem; border: 0; background: transparent; color: inherit; padding: 0; cursor: pointer;
 }
 .regal.tableau .chip select.agg option { color: var(--ink); }
-.chip .weg, .env-zeile .weg {
+.chip .weg {
   border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 0.95rem; line-height: 1;
   padding: 0 0.25rem; opacity: 0.75; min-width: 1.4rem;
 }
-.chip .weg:hover, .env-zeile .weg:hover { opacity: 1; }
+.chip .weg:hover { opacity: 1; }
 .regal-auswahl {
   font-family: var(--sans); font-size: 0.78rem; border: 1px solid var(--line); border-radius: 999px;
   background: #fff; color: var(--ink-soft); padding: 0.2rem 0.5rem; min-height: 28px; max-width: 12rem;
@@ -802,52 +730,6 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 .regal-diagramm .result-table { max-height: 260px; }
 .legende { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.4rem; }
 .legende i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 0.35rem; vertical-align: middle; }
-
-/* ======================================================== Deploy-Simulator */
-
-.deploy {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 8px;
-  overflow: hidden; background: #fff; margin: 1rem 0;
-}
-@media (max-width: 760px) { .deploy { grid-template-columns: 1fr; } }
-.deploy-form { padding: 1rem 1.1rem; border-right: 1px solid var(--line); }
-.deploy-titel { font-weight: 800; font-size: 1.05rem; margin-bottom: 0.7rem; }
-.deploy-untertitel { font-weight: 700; font-size: 0.85rem; margin: 0.9rem 0 0.4rem; }
-.deploy-feld { display: grid; gap: 0.2rem; margin-bottom: 0.65rem; }
-.deploy-feld label { font-size: 0.78rem; font-weight: 700; color: var(--ink-soft); }
-.deploy-feld input, .deploy-feld select, .env-zeile input {
-  font-family: var(--sans); font-size: 0.86rem; padding: 0.4rem 0.55rem; border: 1px solid var(--line);
-  border-radius: 6px; background: #fff; color: var(--ink); min-height: 34px; width: 100%;
-}
-.deploy-feld input.mono, .env-zeile input { font-family: var(--mono); font-size: 0.82rem; }
-.deploy-feld input:focus, .env-zeile input:focus, .deploy-feld select:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
-.deploy-feld input:disabled { background: var(--bg-soft); color: var(--ink-soft); }
-.env-tabelle { display: grid; gap: 0.35rem; margin-bottom: 0.5rem; }
-.env-zeile { display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.35rem; align-items: center; }
-.deploy-repo { background: var(--bg-soft); padding: 1rem 1.1rem; display: flex; flex-direction: column; min-width: 0; }
-.deploy-repo-kopf { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 0.5rem; display: flex; gap: 0.4rem; align-items: center; }
-.deploy-repo-kopf .gh::before { content: ''; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); }
-.dateibaum { list-style: none; margin: 0 0 0.6rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
-.dateibaum .datei {
-  font-family: var(--mono); font-size: 0.78rem; border: 1px solid var(--line); border-radius: 5px;
-  background: #fff; padding: 0.2rem 0.5rem; cursor: pointer; color: var(--ink);
-}
-.dateibaum .datei.aktiv { background: var(--primary); border-color: var(--primary); color: #fff; }
-.dateiinhalt {
-  flex: 1; font-family: var(--mono); font-size: 0.78rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere;
-  background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 0.7rem 0.8rem; margin: 0; min-height: 8rem; max-height: 22rem; overflow: auto;
-}
-.deploy-log {
-  grid-column: 1 / -1; background: var(--term-bg); color: var(--term-fg); font-family: var(--mono); font-size: 0.8rem;
-  line-height: 1.5; padding: 0.8rem 1rem; max-height: 22rem; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere;
-  border-top: 1px solid var(--line);
-}
-.deploy-log .info { color: var(--term-fg); }
-.deploy-log .aus { color: var(--term-dim); }
-.deploy-log .dim { color: var(--term-dim); font-style: italic; }
-.deploy-log .gut { color: #8BE08F; }
-.deploy-log .warn { color: #E8C46A; }
-.deploy-log .fehler { color: #FF9E8A; }
 
 /* ================================================ Oberflächen-Nachbildung
 
@@ -976,6 +858,6 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 [data-lang="en"] [lang="de"] { display: none; }
 
 @media print {
-  .header, .sidebar, .lang-btn, .uebung-aktionen, .terminal-eingabe { display: none; }
+  .header, .sidebar, .uebung-aktionen { display: none; }
   .main-content, .lab-header, .footer { margin-left: 0; }
 }

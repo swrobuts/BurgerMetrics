@@ -11,7 +11,7 @@ Die SQL-Übungen laufen gegen eine **echte PostgreSQL-Datenbank im Browser** (PG
 PostgreSQL 18.3 als WebAssembly): der Miniaturbestand der Fallstudie in den beiden Schemata
 `wawi` (operativ) und `burgermetrics` (analytisch), Suchpfad `wawi, burgermetrics` wie in der
 Datenbank der Fallstudie. Dazu ein **Regal-Simulator** nach dem Vorbild von Power BI und Tableau.
-Alles läuft als statische Seite ohne Build-Schritt, ohne Server und ohne Anmeldung; der
+Alles läuft als statische Seite ohne Build-Schritt, ohne Backend und ohne Anmeldung; der
 Lernfortschritt bleibt im Browser (`localStorage`, Schlüssel `bm:fortschritt:<lab>`).
 
 Die Umgebung ist aus der Lernumgebung WInf-SP abgeleitet (`Vorlesungen/Lernumgebungen/WInf-SP`,
