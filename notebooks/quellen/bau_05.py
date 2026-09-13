@@ -76,7 +76,7 @@ modell = smf.ols("umsatz ~ temperatur + niederschlag + C(wochentag, Treatment(re
 koeffizienten = pd.DataFrame({"koeffizient": modell.params, "p_wert": modell.pvalues}).round({"koeffizient": 2, "p_wert": 3})
 koeffizienten.index = [kurz(n) for n in koeffizienten.index]
 print(f"R² = {zahl(modell.rsquared, 3)} auf {zahl(int(modell.nobs))} Tagen.")
-koeffizienten.loc[[z for z in koeffizienten.index if not z.startswith("jahr)") and not z.startswith("monat)")]]
+koeffizienten.loc[[z for z in koeffizienten.index if not z.startswith("jahr[") and not z.startswith("monat[")]]
 """),
 md("""
 Gegenüber einem Montag ohne Ereignis liegen Freitag (1.155,05 €), Samstag (1.614,88 €),
