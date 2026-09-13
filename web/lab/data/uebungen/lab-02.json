@@ -101,7 +101,7 @@
           "richtig": [0], "mehrfach": false,
           "erklaerung": { "de": "Ein Kurs, der 315 MB je Notebook-Lauf zieht, erschöpft das Kontingent nach rund 30 Läufen. lade_csv() ist deshalb auf Dimensionen beschränkt." } }
       ],
-      "rueckmeldung": { "de": "Der Weg entscheidet, wer rechnet und wer zahlt: Am Connector rechnet die Datenbank, bei LFS zahlt das Repository die Bandbreite, bei DuckDB rechnet Ihr Rechner." } },
+      "rueckmeldung": { "de": "Der Weg entscheidet, wer rechnet und wer zahlt: Am Connector rechnet die Datenbank, bei LFS zahlt der Eigentümer des Repositorys die Bandbreite, bei DuckDB rechnet Ihr Rechner." } },
 
     { "id": "W02-05", "typ": "zuordnen",
       "titel": { "de": "Welches Ziel, welcher Weg" },
