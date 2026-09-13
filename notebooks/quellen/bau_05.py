@@ -208,14 +208,30 @@ print(f"R² eingebaut: {zahl(modell.rsquared, 3)}, R² extern: {zahl(modell_exte
 pd.DataFrame({"koeffizient": modell_extern.params, "p_wert": modell_extern.pvalues}).loc[
     ["tmax", "niederschlag_mm", "feiertag", "ferien", "heimspiel"]].round(3)
 """),
+md("### Gegenprobe: Heimspieltage gegen vergleichbare Tage"),
+code("""
+def abweichung_von_vergleichstagen(daten):
+    # Abstand jedes Tages vom Mittel der Tage mit gleichem Wochentag im selben Monat und Jahr —
+    # ein Vergleich ohne Modellannahmen; Feiertage und Ereignistage bleiben außen vor
+    ohne_sondertage = daten[(daten["feiertag"] == 0) & (daten["ereignis"] == "keines")].copy()
+    zellmittel = ohne_sondertage.groupby(["jahr", "monat", "wochentag"])["umsatz"].transform("mean")
+    ohne_sondertage["abweichung"] = ohne_sondertage["umsatz"] - zellmittel
+    return ohne_sondertage
+
+gegenprobe = abweichung_von_vergleichstagen(daten)
+gegenprobe.groupby("heimspiel").agg(tage=("abweichung", "size"), abweichung_mittel=("abweichung", "mean")).round(1)
+"""),
 md("""
 Mit Monat und Jahr im Modell ist tmax bei p < 0,05 nicht mehr signifikant (5,20 €,
-p = 0,074), Niederschlag weiterhin ohne Effekt (0,64 €, p = 0,834). Ferien bleiben nicht
-messbar (-31,76 €, p = 0,367). Heimspiele dagegen bleiben signifikant (-251,50 €, p < 0,001) —
-anders als bei der Temperatur verschwindet dieser Effekt nicht, wenn man die Jahreszeit
-herausrechnet; die Ursache klärt diese Regression nicht. Externe Merkmale wirken hier nur, wenn
-die Zielgröße tatsächlich davon abhängt; bei echten Kassendaten wäre der Test derselbe, das
-Ergebnis vermutlich ein anderes.
+p = 0,074), Niederschlag weiterhin ohne Effekt (0,64 €, p = 0,834), Ferien bleiben nicht
+messbar (-31,76 €, p = 0,367). Die Regression zeigt für Heimspiele -251,50 € (p < 0,001); die
+Gegenprobe direkt darunter zeigt aber keinen negativen Unterschied: Heimspieltage liegen im
+Schnitt 40,3 € über vergleichbaren Tagen (gleicher Wochentag, Monat und Jahr, ohne Feiertage
+und Ereignistage), sonstige Tage -1,3 €. Der Regressionskoeffizient ist ein Artefakt der
+additiven Monats- und Jahreskontrolle, die das Zusammenspiel von Wachstum und Saison nicht
+abbilden kann — die Kickers-Saisons liegen gehäuft in frühen Jahren und außerhalb des Sommers.
+Ein Heimspieleffekt ist damit nicht belegt, wie es für einen Generator zu erwarten ist, der die
+Spieltermine nicht kannte.
 
 ### Umsatz real statt nominal
 """),
@@ -235,19 +251,20 @@ einem Tag ohne Ereignis. Sobald Monat und Jahr die Saison und den Trend abfangen
 eingebaute noch die gemessene Temperatur bei p < 0,05 signifikant (p = 0,171 beziehungsweise
 p = 0,074) — der scheinbare Wettereffekt aus der ersten Fassung war die Jahreszeit: Die
 Rohkorrelation von Temperatur und gemessenem Tageshöchstwert liegt bei r = 0,791, ohne
-Jahreszeit (Abweichung vom Monatsmittel) bei r = -0,054. Ferien bleiben ohne messbaren Effekt;
-Heimspiele dagegen bleiben mit -251,50 € (p < 0,001) signifikant, auch nach Kontrolle für
-Monat und Jahr — anders als bei der Temperatur ist das kein reiner Saisoneffekt. Der
-Verbraucherpreisindex zeigt, dass ein Teil des nominalen Wachstums seit 2021 Preissteigerung
+Jahreszeit (Abweichung vom Monatsmittel) bei r = -0,054. Ferien bleiben ohne messbaren Effekt; die
+Regression zeigt für Heimspiele -251,50 € (p < 0,001), doch die Gegenprobe an vergleichbaren
+Tagen (gleicher Wochentag, Monat und Jahr) zeigt keinen negativen Unterschied (40,3 € gegenüber
+-1,3 €) — der Koeffizient ist ein Artefakt der additiven Monats- und Jahreskontrolle, kein
+belegter Heimspieleffekt. Der Verbraucherpreisindex zeigt, dass ein Teil des nominalen Wachstums seit 2021 Preissteigerung
 ist.
 
 ## Was offen bleibt
 
 Die Kickers-Daten decken die Regionalliga-Saisons ab 2022 nicht ab; wer sie braucht, pflegt
 eine CSV von Hand nach. Der VPI ist ein Jahreswert — für Monatsreihen liefert Destatis
-Monatsindizes über GENESIS-Online (Konto erforderlich). Der Heimspiel-Koeffizient bleibt auch
-nach Kontrolle für Monat und Jahr signifikant; ob dahinter ein echter Effekt des Spieltags
-steht oder eine hier nicht erfasste dritte Größe, klärt diese Regression nicht.
+Monatsindizes über GENESIS-Online (Konto erforderlich). Ob 81 Heimspieltage ausreichen, um
+einen kleinen echten Effekt sicher von Null zu unterscheiden, bleibt offen; mit mehr
+Spieltagen oder echten Kassendaten wäre die Gegenprobe schärfer.
 """),
 ]
 
