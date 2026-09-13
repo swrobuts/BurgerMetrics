@@ -30,7 +30,8 @@ rezensionen = lade_sql(\"\"\"
     FROM fact_reviews r
     JOIN dim_product p USING (product_id)
     JOIN dim_branch b USING (branch_id)
-    JOIN fact_orders o USING (order_id)\"\"\")
+    JOIN fact_orders o USING (order_id)
+    ORDER BY r.review_id\"\"\")
 print(f"{zahl(len(rezensionen))} Rezensionen.")
 rezensionen["stars"].value_counts().sort_index().rename("anzahl").to_frame().T
 """),
@@ -129,6 +130,8 @@ abschneidet. Das Modell antwortet mit `positive`, `negative` oder `neutral`; `ne
 als Fehler, weil die Texte eine Polarität haben.
 """),
 code("""
+import os
+os.environ.setdefault("HF_HUB_VERBOSITY", "error")
 import warnings
 warnings.filterwarnings("ignore")
 from transformers.utils import logging as hf_logging
@@ -190,13 +193,13 @@ Die Wortliste trifft 71,6 Prozent der Texte; bei 32,7 Prozent enthält der Text 
 einer der beiden Listen, und diese Texte zählen als negativ. TF-IDF mit logistischer Regression
 liegt nahezu bei 100 Prozent — zu gut, um wahr zu sein, weil die Texte simuliert sind und das
 Modell die Bausteine des Generators lernt: Auf derselben Stichprobe von 500 Texten wie beim
-BERT-Vergleich erreicht es über 99 Prozent. BERT, das diese Bausteine nie gesehen hat, kommt je
-nach Stichprobenziehung auf rund 90 bis 96 Prozent — niedriger, aber deutlich höher, als man für
-Texte mit uneindeutiger Sprache erwarten würde, ein Hinweis darauf, dass die generierten
-Rezensionen ihre Polarität sehr eindeutig formulieren. Der Anteil positiver Rezensionen fällt
-mit der Bestelldauer (rund 79 Prozent bis 5 Minuten, 41,7 Prozent über 15 Minuten) und
-unterscheidet sich zwischen den Kanälen (rund 69 Prozent am Counter, rund 83 Prozent bei
-App-Bestellungen) — genau wie die Sterne, aus denen der Generator die Texte gebaut hat.
+BERT-Vergleich erreicht es 100,0 Prozent. BERT, das diese Bausteine nie gesehen hat, kommt auf
+94,2 Prozent — niedriger, aber deutlich höher, als man für Texte mit uneindeutiger Sprache
+erwarten würde, ein Hinweis darauf, dass die generierten Rezensionen ihre Polarität sehr
+eindeutig formulieren. Der Anteil positiver Rezensionen fällt mit der Bestelldauer (78,63
+Prozent bis 5 Minuten, 41,67 Prozent über 15 Minuten) und unterscheidet sich zwischen den
+Kanälen (68,61 Prozent am Counter, 82,70 Prozent bei App-Bestellungen) — genau wie die Sterne,
+aus denen der Generator die Texte gebaut hat.
 
 ## Was offen bleibt
 

@@ -28,7 +28,8 @@ daten = lade_sql(\"\"\"
     FROM fact_orders o
     JOIN dim_date d ON d.date = o.date
     JOIN dim_branch b ON b.branch_id = o.branch_id
-    WHERE o.satisfaction_score IS NOT NULL\"\"\")
+    WHERE o.satisfaction_score IS NOT NULL
+    ORDER BY o.order_id\"\"\")
 
 def klasse(wert):
     # Drei Klassen mit festen Grenzen, damit die Klassen über Notebooks hinweg gleich bleiben
