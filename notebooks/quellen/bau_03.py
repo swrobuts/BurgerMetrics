@@ -95,9 +95,16 @@ vergleich[["produkt_a", "produkt_b", "support_pct", "support_q1_2025", "lift", "
 """),
 md("### Die Paare ohne Signal: Lift nahe 1"),
 code("""
-# Die Paare, deren Lift im ganzen Bestand am nächsten bei 1 liegt — B kommt mit A so oft vor wie ohne
+def support_und_lift_q1(a, b):
+    # Support und Lift eines Paares direkt aus der Korbtabelle des Quartals, ohne Schwellen
+    zusammen = (tabelle[a] & tabelle[b]).mean()
+    return pd.Series({"support_q1_pct": zusammen * 100,
+                      "lift_q1": zusammen / (tabelle[a].mean() * tabelle[b].mean())})
+
 nahe_eins = vergleich.assign(abstand=(vergleich["lift"] - 1).abs()).nsmallest(8, "abstand")
-nahe_eins[["produkt_a", "produkt_b", "support_pct", "support_q1_2025", "lift", "lift_q1_2025"]].round(2)
+q1 = nahe_eins.apply(lambda z: support_und_lift_q1(z["produkt_a"], z["produkt_b"]), axis=1)
+nahe_eins = nahe_eins.join(q1)
+nahe_eins[["produkt_a", "produkt_b", "support_pct", "lift", "support_q1_pct", "lift_q1"]].round(2)
 """),
 code("""
 import matplotlib.pyplot as plt
@@ -122,10 +129,9 @@ ersten Quartal wie im Gesamtbestand; ihre Lifts liegen deutlich über 1 und fall
 Quartalsdatensatz noch etwas höher aus (11,23 statt 8,97 bei Chicken Nuggets 6pc und
 BBQ-Sauce). Ein Lift nahe 1 — wie bei Medium Fries und Bier (1,00) und den sieben weiteren
 Paaren mit dem geringsten Abstand zu 1 — ist dagegen kein Signal: Diese Produkte kommen
-zusammen praktisch so oft vor wie unabhängig voneinander. Im ersten Quartal fehlt für alle acht
-sowohl der Lift- als auch der Support-Wert: `paare` enthält nur Regeln, die zugleich mindestens
-1 % Support und Lift ab 1 erreichen — welche der beiden Schwellen im Einzelfall greift, zeigt
-die Tabelle nicht.
+zusammen praktisch so oft vor wie unabhängig voneinander. Im ersten Quartal erreichen alle acht
+Paare mehr als ein Prozent Support, aber ihr Lift liegt unter 1 (0,87 bis 0,98); deshalb fehlen
+sie in `paare`: `association_rules` behält nur Regeln mit Lift ab 1.
 
 ## Was offen bleibt
 
