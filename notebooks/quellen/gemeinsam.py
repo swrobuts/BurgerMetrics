@@ -29,6 +29,11 @@ def lade_csv(name):
     url = f"https://media.githubusercontent.com/media/swrobuts/BurgerMetrics/main/dataset/{name}.csv"
     return pd.read_csv(url)'''
 
+HILFEN = '''def zahl(wert, nachkommastellen=0):
+    # Zahl deutsch schreiben: Punkt als Tausendertrenner, Komma als Dezimaltrenner
+    text = f"{wert:,.{nachkommastellen}f}"
+    return text.replace(",", "X").replace(".", ",").replace("X", ".")'''
+
 
 def md(text):
     """Eine Markdown-Zelle; führende und schließende Leerzeilen fallen weg."""
@@ -41,7 +46,7 @@ def code(text):
 
 
 def kopf(nummer, titel, dateiname, pakete=PAKETE):
-    """Die drei Kopfzellen: Titel mit Colab-Link, pip-Zelle, Verbindungszelle."""
+    """Die vier Kopfzellen: Titel mit Colab-Link, pip-Zelle, Verbindungszelle, Hilfsfunktion zahl()."""
     colab = f"https://colab.research.google.com/github/{REPO}/blob/main/notebooks/{dateiname}"
     titelzelle = (f"# {nummer} {titel}\n\n"
                   f"[![In Colab öffnen](https://colab.research.google.com/assets/colab-badge.svg)]({colab})\n\n"
@@ -50,7 +55,7 @@ def kopf(nummer, titel, dateiname, pakete=PAKETE):
                   "nichts in diesem Notebook schreibt in die Datenbank.")
     pipzelle = (f"# In Colab einmal ausführen; lokal genügt notebooks/requirements.txt\n"
                 f"%pip install -q {pakete}")
-    return [md(titelzelle), code(pipzelle), code(VERBINDUNG)]
+    return [md(titelzelle), code(pipzelle), code(VERBINDUNG), code(HILFEN)]
 
 
 def schreiben(dateiname, zellen):

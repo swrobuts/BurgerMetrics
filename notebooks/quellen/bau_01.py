@@ -146,8 +146,8 @@ falsch = con.sql(\"\"\"
     FROM fact_orders o
     JOIN fact_order_items i USING (order_id)
 \"\"\").fetchone()[0]
-print(f"Umsatz {JAHR} aus fact_orders: {richtig:,.0f} €.".replace(",", "."))
-print(f"Derselbe Umsatz nach einem Join auf die Positionen: {falsch:,.0f} € — das {falsch / richtig:.1f}-Fache.".replace(",", "."))
+print(f"Umsatz {JAHR} aus fact_orders: {zahl(richtig)} €.")
+print(f"Derselbe Umsatz nach einem Join auf die Positionen: {zahl(falsch)} € — das {zahl(falsch / richtig, 1)}-Fache.")
 print("Jede Bestellung wird so oft gezählt, wie sie Positionen hat. Große Bestellungen haben viele Positionen und einen hohen Betrag,")
 print("deshalb liegt der Faktor über der mittleren Positionszahl je Bestellung (rund 3,9).")
 """),
