@@ -40,6 +40,7 @@ def klasse(wert):
 
 daten["klasse"] = daten["zufriedenheit"].apply(klasse)
 daten["wochenende"] = daten["wochenende"].astype(int)
+print(f'Wer immer „mittel" sagt, trifft {zahl(daten["klasse"].value_counts(normalize=True).iloc[0] * 100, 1)} Prozent der Bestellungen.')
 daten["klasse"].value_counts().rename("bestellungen").to_frame()
 """),
 md("### Merkmale vorbereiten"),
@@ -74,7 +75,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 wald = RandomForestClassifier(n_estimators=200, max_depth=8, n_jobs=-1, random_state=2026).fit(X_lern, y_lern)
 vorhersage = wald.predict(X_test)
 print(f"Trefferquote des Random Forest: {zahl(wald.score(X_test, y_test) * 100, 1)} Prozent.")
-print(classification_report(y_test, vorhersage, digits=3))
+print(classification_report(y_test, vorhersage, digits=3, zero_division=0))
 pd.DataFrame(confusion_matrix(y_test, vorhersage, labels=wald.classes_),
              index=[f"ist {k}" for k in wald.classes_], columns=[f"vorhergesagt {k}" for k in wald.classes_])
 """),
@@ -106,11 +107,11 @@ Merkmalswichtigkeit, mit Abstand vor der Uhrzeit (24 Prozent); alle übrigen Mer
 einzeln darunter.
 
 Die Trefferquote bleibt trotzdem schwach und ist für beide Modelle mit 50,6 Prozent praktisch
-gleich — kaum mehr, als durchgehend „mittel" vorherzusagen, die größte der drei Klassen. Der
-Klassifikationsbericht des Random Forest zeigt, woran das liegt: „mittel" erreicht einen Recall
-von 98 Prozent, weil das Modell diese Klasse ganz überwiegend vorhersagt, „niedrig" nur 3
-Prozent, „hoch" wird kein einziges Mal vorhergesagt. Schwer sind damit nicht die mittleren,
-sondern die beiden äußeren Urteile.
+gleich — kaum mehr als die 50,4 Prozent, die „mittel" (die größte der drei Klassen) allein
+erreicht. Der Klassifikationsbericht des Random Forest zeigt, woran das liegt: „mittel"
+erreicht einen Recall von 98 Prozent, weil das Modell diese Klasse ganz überwiegend vorhersagt,
+„niedrig" nur 3 Prozent, „hoch" wird kein einziges Mal vorhergesagt. Schwer sind damit nicht die
+mittleren, sondern die beiden äußeren Urteile.
 
 ## Was offen bleibt
 
