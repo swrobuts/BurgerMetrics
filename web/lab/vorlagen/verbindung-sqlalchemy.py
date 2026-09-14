@@ -1,8 +1,8 @@
 # verbindung-sqlalchemy.py — dieselbe Verbindung für ein lokales Skript
 #
 # Die Verbindungszeichenkette kommt aus der Umgebungsvariablen DATABASE_URL, wie in
-# dash/app.py. Für ein eigenes Konto steht sie in einer Datei .env im aktuellen Ordner
-# (dort, wo Sie python3 aufrufen), ohne Anführungszeichen:
+# dash/app.py. Für ein eigenes Konto steht sie in einer Datei .env im Ordner des Skripts
+# (neben dieser Datei, unabhängig davon, von wo Sie python3 aufrufen), ohne Anführungszeichen:
 #     DATABASE_URL=postgresql+psycopg2://BENUTZER:KENNWORT@supabase.butscher.cloud:5433/postgres
 # Die Datei .env steht in .gitignore und kommt nie ins Repository.
 # Fehlt die Variable, nimmt das Skript das Demo-Konto studi_daba (öffentlich, nur lesend);
@@ -21,9 +21,9 @@ from sqlalchemy import create_engine
 DEMO_KONTO = "postgresql+psycopg2://studi_daba:thws@supabase.butscher.cloud:5433/postgres"
 
 
-def lade_env(pfad=".env"):
-    # Liest NAME=WERT-Zeilen aus der .env-Datei in die Umgebung; schon gesetzte Variablen bleiben
-    datei = Path(pfad)
+def lade_env():
+    # Liest NAME=WERT-Zeilen aus der .env-Datei neben dem Skript in die Umgebung; schon gesetzte Variablen bleiben
+    datei = Path(__file__).with_name(".env")
     if not datei.exists():
         return
     for zeile in datei.read_text(encoding="utf-8").splitlines():

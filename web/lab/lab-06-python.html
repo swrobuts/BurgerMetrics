@@ -35,7 +35,7 @@
 <div class="lab-header">
   <div class="lab-num-big">06</div>
   <h1 class="lab-title">Python und Colab</h1>
-  <p class="lab-intro">Die neun Notebooks der Fallstudie lesen dieselbe Datenbank wie Power BI (Lab 04) und Tableau (Lab 05) — mit pandas und SQLAlchemy über das Demo-Konto aus Lab 01, in Google Colab oder lokal. Dieses Lab zeigt, was ein Notebook lauffähig macht: die Runtime und ihr Zustand, die Kopfzellen mit pip, Verbindung und <code>zahl()</code>, <code>read_sql</code> als Weg, auf dem die Datenbank rechnet und Python zeigt, die Dash-App in der letzten Zelle — und wo eigene Zugangsdaten liegen, wenn nicht im Repository.</p>
+  <p class="lab-intro">Die neun Notebooks der Fallstudie lesen dieselbe Datenbank wie Power BI (Lab 04) und Tableau (Lab 05) — mit pandas und SQLAlchemy über das Demo-Konto aus Lab 01, in Google Colab oder lokal. Dieses Lab zeigt, was ein Notebook lauffähig macht: die Runtime und ihr Zustand, die Kopfzellen mit pip, Verbindung und <code>zahl()</code>, <code>read_sql</code> als Weg, auf dem die Datenbank rechnet und Python zeigt, die Dash-App in der letzten Codezelle — und wo eigene Zugangsdaten liegen, wenn nicht im Repository.</p>
   <div class="lernziele">
     <span class="lernziel-chip">Runtime · Sitzung</span>
     <span class="lernziel-chip">Verbindungszelle</span>
@@ -51,7 +51,7 @@
   <section class="section-block" id="warum">
     <h2>Von oben nach unten</h2>
     <p>Ein Notebook hält Code, Ausgaben und erklärenden Text in einer Datei (<code>.ipynb</code>) und wird zellenweise ausgeführt. Als Lehrmaterial taugt es nur, wenn es nach einem Neustart der Runtime von oben nach unten fehlerfrei durchläuft und dieselben Ausgaben liefert: Wer es öffnet, hat keine Variablen aus einer früheren Sitzung, sondern nur das, was die Zellen in ihrer Reihenfolge erzeugen. Eine gespeicherte Ausgabe belegt nicht, dass die Zelle darüber noch läuft.</p>
-    <p>Die neun Notebooks der Fallstudie — <code>notebooks/00_zugang_und_daten.ipynb</code> bis <code>08_sentiment_rezensionen.ipynb</code> — sind so gebaut, und <code>notebooks/pruefe_notebooks.sh</code> prüft es: Das Skript führt jedes Notebook mit <code>jupyter nbconvert --execute</code> gegen die Datenbank aus und speichert die Ausgaben in der Datei; läuft eines nicht durch, bricht es ab. Danach sucht <code>quellen/pruefe_ausgaben.py</code> in jedem Notebook nach Fehlerausgaben. Die Ausgaben, die dieses Lab zitiert, stammen aus diesem Lauf vom 13.09.2026.</p>
+    <p>Die neun Notebooks der Fallstudie — <code>notebooks/00_zugang_und_daten.ipynb</code> bis <code>08_sentiment_rezensionen.ipynb</code> — sind so gebaut, und <code>notebooks/pruefe_notebooks.sh</code> prüft es: Das Skript führt jedes Notebook mit <code>jupyter nbconvert --execute</code> gegen die Datenbank aus und speichert die Ausgaben in der Datei; läuft eines nicht durch, bricht es ab. Danach sucht <code>quellen/pruefe_ausgaben.py</code> in jedem Notebook nach Fehlerausgaben. Die Notebook-Ausgaben, die dieses Lab zitiert, stammen aus dem gespeicherten Lauf des Notebooks.</p>
     <div class="kette">
       <div class="glied hell"><span class="titel">Titelzelle</span><span class="was">Nummer, Titel, Link „In Colab öffnen“</span></div>
       <span class="pfeil">→</span>
@@ -90,7 +90,7 @@
     </div>
     <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
     <ol class="shot-legende">
-      <li><span class="callout">1</span><span>Die pip-Zelle: in Colab einmal je Sitzung, lokal durch <code>notebooks/requirements.txt</code> ersetzt. Die Paketliste ist in allen neun Notebooks dieselbe.</span></li>
+      <li><span class="callout">1</span><span>Die pip-Zelle: in Colab einmal je Sitzung, lokal durch <code>notebooks/requirements.txt</code> ersetzt. Die Paketliste ist in acht Notebooks dieselbe; Notebook 08 ergänzt <code>transformers torch</code>.</span></li>
       <li><span class="callout">2</span><span>Die Meldung nach der Installation. Runtime neu starten, dann die Zellen wieder von oben ausführen.</span></li>
       <li><span class="callout">3</span><span>Die Verbindungszeichenkette mit dem Demo-Konto — die fünf Angaben aus Lab 01 in einer Zeile.</span></li>
       <li><span class="callout">4</span><span><code>lade_sql()</code> und <code>lade_csv()</code>: die beiden Ladehelfer, je Notebook definiert (B01).</span></li>
@@ -100,7 +100,7 @@
 
   <section class="section-block" id="verbindung">
     <h2>Die Verbindungszelle</h2>
-    <p>Die zweite Codezelle ist in allen neun Notebooks dieselbe. Sie besteht aus vier Teilen: zwei Importen, der Verbindungszeichenkette mit der Engine und den beiden Ladehelfern <code>lade_sql()</code> und <code>lade_csv()</code>. Quelle ist <code>notebooks/quellen/gemeinsam.py</code>; die Kopiervorlage enthält die Zelle mit Kopfkommentar und Verbindungsprobe.</p>
+    <p>Die zweite Codezelle ist in allen neun Notebooks zeichengleich (<code>VERBINDUNG</code> in <code>gemeinsam.py</code>) — anders als die pip-Zelle, die Notebook 08 um <code>transformers torch</code> erweitert. Sie besteht aus vier Teilen: zwei Importen, der Verbindungszeichenkette mit der Engine und den beiden Ladehelfern <code>lade_sql()</code> und <code>lade_csv()</code>. Quelle ist <code>notebooks/quellen/gemeinsam.py</code>; die Kopiervorlage enthält die Zelle mit Kopfkommentar und Verbindungsprobe.</p>
     <div data-befehl="B01"></div>
     <div class="vorlagen">
       <a class="vorlage" href="vorlagen/notebook-verbindungszelle.py" download><span class="symbol">📄</span><span><span class="datei">notebook-verbindungszelle.py</span><br><span class="was">Die Verbindungszelle aus B01 mit Kopfkommentar und der Verbindungsprobe aus Notebook 00 — zum Einfügen in eine Colab-Zelle.</span></span></a>
@@ -131,7 +131,7 @@ zahl(136557)          # 136.557</div>
 
   <section class="section-block" id="pandas">
     <h2>pandas: die Datenbank rechnet, Python zeigt</h2>
-    <p><code>read_sql</code> liefert einen DataFrame: eine Tabelle im Arbeitsspeicher der Runtime, Spaltennamen und Typen aus der Datenbank — bei <code>v_kennzahlen_jahr</code> sind <code>jahr</code> und <code>bestellungen</code> <code>int64</code>, <code>umsatz</code> ist <code>float64</code>. Was in ihr steht, hat PostgreSQL berechnet: die Aggregation über 754.513 Bestellungen, gespeichert als materialisierte Sicht (Lab 01). Eine Sicht mit zehn Zeilen kommt in Millisekunden. Die 2.950.082 Positionen holt dagegen niemand nach Colab: <code>SELECT * FROM fact_order_items</code> liefe über die Verbindung gegen die Zeitgrenze der Rolle und füllte den Arbeitsspeicher der Runtime mit Zeilen, die die Datenbank in einer Sicht längst zusammengefasst hat.</p>
+    <p><code>read_sql</code> liefert einen DataFrame: eine Tabelle im Arbeitsspeicher der Runtime, Spaltennamen und Typen aus der Datenbank — bei <code>v_kennzahlen_jahr</code> sind <code>jahr</code> und <code>bestellungen</code> <code>int64</code>, <code>umsatz</code> ist <code>float64</code>. Was in ihr steht, hat PostgreSQL berechnet: die Aggregation über 754.513 Bestellungen, gespeichert als materialisierte Sicht (Lab 01). Eine Sicht mit zehn Zeilen kommt in Millisekunden. Die 2.950.082 Positionen holt dagegen niemand nach Colab: <code>SELECT * FROM fact_order_items</code> kann über die Verbindung gegen die Zeitgrenze von zehn Minuten laufen und füllt den Arbeitsspeicher der Runtime mit Zeilen, die die Datenbank in einer Sicht längst zusammengefasst hat.</p>
     <div data-befehl="B02"></div>
     <div class="table-scroll">
       <table>
@@ -153,7 +153,7 @@ zahl(136557)          # 136.557</div>
     <div class="code-block">python3 -m pip install -r dash/requirements.txt
 python3 dash/app.py            # http://127.0.0.1:8050</div>
     <p>Die App liest die Verbindung aus der Umgebungsvariablen <code>DATABASE_URL</code>; fehlt sie, nimmt sie das Demo-Konto — dasselbe Muster wie die Vorlage <code>verbindung-sqlalchemy.py</code> (B03).</p>
-    <p>In Notebook 00 läuft eine der vier Karten in der letzten Zelle: „Umsatz je Monat“ mit der Filialauswahl, gebaut aus <code>v_umsatz_monat</code>, <code>v_filiale</code> und <code>fact_orders</code>. Die Zelle beginnt mit <code>DASH_STARTEN = False</code>, damit die Abnahme mit <code>pruefe_notebooks.sh</code> ohne offenen Port durchläuft; in Colab auf <code>True</code> gesetzt, startet <code>app.run(jupyter_mode="inline", port=8050)</code> die App unter der Zelle.</p>
+    <p>In Notebook 00 läuft eine der vier Karten in der letzten Codezelle: „Umsatz je Monat“ mit der Filialauswahl, gebaut aus <code>v_umsatz_monat</code>, <code>v_filiale</code> und <code>fact_orders</code>. Die Zelle beginnt mit <code>DASH_STARTEN = False</code>, damit die Abnahme mit <code>pruefe_notebooks.sh</code> ohne offenen Port durchläuft; in Colab auf <code>True</code> gesetzt, startet <code>app.run(jupyter_mode="inline", port=8050)</code> die App unter der Zelle.</p>
     <div class="code-block">DASH_STARTEN = False
 
 from dash import Dash, dcc, html, Input, Output
@@ -219,8 +219,8 @@ Dash-App gebaut; zum Starten DASH_STARTEN = True setzen.</div>
     <h2>Stolpersteine</h2>
     <p>Fünf Situationen, in denen ein Notebook stehen bleibt oder still das Falsche liefert; die Meldungen stehen wörtlich, so erscheinen sie auch bei Ihnen.</p>
     <p><strong>Neue Sitzung, alte Zellen.</strong> Nach der pip-Zelle meldet Colab <code>Note: you may need to restart the kernel to use updated packages.</code> — Runtime neu starten, dann von oben. Wer nach dem Neustart mitten im Notebook weitermacht, sieht in der ersten Analysezelle <code>NameError: name 'lade_sql' is not defined</code>: Die Verbindungszelle ist in dieser Sitzung noch nicht gelaufen, auch wenn die Ausgaben der Zellen davor noch zu sehen sind.</p>
-    <p><strong>Tippfehler im Host.</strong> Ein Buchstabe zu viel im Host, und die erste Abfrage endet mit <code>(psycopg2.OperationalError) could not translate host name "supabase.butscher.cloudd" to address: …</code> (Stand 09/2026, psycopg2 2.9.13; der Teil nach dem Doppelpunkt hängt vom Betriebssystem ab). Ein falscher Port endet ebenfalls mit <code>OperationalError</code>, erst nach Ablauf der Wartezeit. Abhilfe: die Zeichenkette Zeichen für Zeichen mit Lab 01 vergleichen — Host <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Datenbank <code>postgres</code>.</p>
-    <p><strong>Zeitgrenze.</strong> Eine Abfrage, die länger als zehn Minuten rechnet — ein Vollabzug wie <code>SELECT * FROM fact_order_items</code> über die Verbindung —, bricht die Datenbank ab: <code>(psycopg2.errors.QueryCanceled) canceling statement due to statement timeout</code>. Der Weg daran vorbei: in der Datenbank aggregieren; die Sichten <code>v_*</code> tun genau das (Lab 01, Lab 02).</p>
+    <p><strong>Tippfehler im Host.</strong> Ein Buchstabe zu viel im Host, und die erste Abfrage endet mit <code>(psycopg2.OperationalError) could not translate host name "supabase.butscher.cloudd" to address: …</code> (Stand 09/2026, psycopg2 2.9.13; der Teil nach dem Doppelpunkt hängt vom Betriebssystem ab). Ein falscher Port endet ebenfalls mit <code>OperationalError</code>. Abhilfe: die Zeichenkette Zeichen für Zeichen mit Lab 01 vergleichen — Host <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Datenbank <code>postgres</code>.</p>
+    <p><strong>Zeitgrenze.</strong> Eine Abfrage, die länger als zehn Minuten rechnet, bricht die Datenbank ab; ein Vollabzug wie <code>SELECT * FROM fact_order_items</code> über die Verbindung kann gegen diese Grenze laufen. Die Meldung lautet dann <code>(psycopg2.errors.QueryCanceled) canceling statement due to statement timeout</code>. Der Weg daran vorbei: in der Datenbank aggregieren; die Sichten <code>v_*</code> tun genau das (Lab 01, Lab 02).</p>
     <p><strong>Zeigerdatei statt Daten.</strong> <code>pd.read_csv</code> über <code>raw.githubusercontent.com/…/dataset/dim_branch.csv</code> liest die Git-LFS-Zeigerdatei ohne Beanstandung ein — eine Spalte, zwei Zeilen —, und die nächste Zeile scheitert mit <code>KeyError: 'branch_id'</code>. <code>lade_csv()</code> nimmt deshalb <code>media.githubusercontent.com/media/…</code>; Lab 02 zeigt beide Adressen nebeneinander.</p>
     <p><strong>pandas 3 und DuckDB 1.4.</strong> <code>con.register()</code> mit einem DataFrame, dessen Textspalten den neuen Standardtyp <code>str</code> tragen, endet in DuckDB 1.4 mit <code>NotImplementedException: Not implemented Error: Data type 'str' not recognized</code> (Stand 09/2026). Notebook 00 setzt die Textspalten vorher mit <code>fuer_duckdb()</code> auf <code>object</code>: <code>con.register("dim_branch", fuer_duckdb(filialen))</code> — die Funktion steht in Lab 02.</p>
   </section>
