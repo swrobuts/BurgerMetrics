@@ -1,6 +1,8 @@
 // tableau-berechnete-felder.txt — Calculated Fields für das Dashboard zur Fallstudie BurgerMetrics
 // Kopiervorlage zu Lab 05 (Befehlskarte B03). Tableau Desktop 2026.2. Stand 09/2026.
 //
+// Vier Blöcke, je ein Feld: drei für die Datenbank (Blatt aus fact_orders,
+// dim_branch, fact_reviews), einer für die CSV-Dateien der Public Edition.
 // Jedes Feld wird einzeln angelegt: der Name in das Namensfeld des Dialogs, die
 // Formelzeile in den Formelbereich. Zeilen mit // sind in Tableau-Formeln Kommentare;
 // ein Block darf samt seinen Kommentarzeilen eingefügt werden.
@@ -31,10 +33,12 @@ AVG([Stars])
 
 // ---------------------------------------------------------------------------
 // 3) Umsatz je Filiale (FIXED) — Level of Detail: Die Ebene der Aggregation steht in
-//    der Formel, nicht im Blatt. Je Filiale eine Summe, gleichgültig, ob das Blatt
-//    nach Monat, nach Kanal oder gar nicht gruppiert; in einem Blatt nach Monat steht
-//    neben jedem Monat die Summe seiner Filiale. Ein gewöhnlicher Filter auf dem
-//    Blatt ändert diesen Wert nicht, ein Datenquellenfilter schon.
+//    der Formel, nicht im Blatt. Die Summe je Filiale, auch wenn das Blatt zusätzlich
+//    nach Monat oder Kanal gruppiert: In einem Blatt nach Filiale und Monat steht
+//    neben jedem Monat die Summe seiner Filiale. Ohne Branch Name im Blatt fasst
+//    Tableau die Filialsummen wieder zusammen, und es steht der Gesamtwert da.
+//    Ein gewöhnlicher Filter auf dem Blatt ändert diesen Wert nicht, ein
+//    Datenquellenfilter schon.
 // Name: Umsatz je Filiale (FIXED)
 { FIXED [Branch Name] : SUM([Net Total]) }
 
@@ -43,6 +47,8 @@ AVG([Stars])
 //    v_umsatz_monat.csv und v_filiale.csv tragen je Zeile schon Summen — die Spalten
 //    umsatz und bestellungen, in Tableau [Umsatz] und [Bestellungen]. Deshalb Summe
 //    durch Summe, kein COUNT: Eine Zeile ist ein Monat oder eine Filiale, keine Bestellung.
+//    Block 1 und Block 4 definieren beide das Feld Bestellwert — je Datenquelle
+//    eines, nicht beide in einer Arbeitsmappe.
 // Name: Bestellwert
 SUM([Umsatz]) / SUM([Bestellungen])
 

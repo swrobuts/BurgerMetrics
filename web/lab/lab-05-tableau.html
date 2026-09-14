@@ -36,7 +36,7 @@
 <div class="lab-header">
   <div class="lab-num-big">05</div>
   <h1 class="lab-title">Tableau</h1>
-  <p class="lab-intro">Lab 04 hat das Auswertungsmodell der Fallstudie mit Power BI gelesen. Dieses Lab stellt dieselben Fragen — Umsatz je Monat, Umsatz je Filiale — an dieselben Sichten mit Tableau Desktop: PostgreSQL über den Connector anbinden, zwischen Live und Extract wählen, Felder als Dimension oder Measure auf Columns und Rows legen, drei Calculated Fields anlegen und aus zwei Blättern ein Dashboard mit einem Jahresfilter bauen. Die Kontrollzahl bleibt dieselbe wie in Lab 04, im Dashboard und in den Notebooks: 2.994.771,13 € Umsatz für 2025.</p>
+  <p class="lab-intro">Lab 04 hat das Auswertungsmodell der Fallstudie mit Power BI gelesen. Dieses Lab stellt dieselben Fragen — Umsatz je Monat, Umsatz je Filiale — an dieselben Sichten mit Tableau Desktop: PostgreSQL über den Connector anbinden, zwischen Live und Extract wählen, Felder als Dimension oder Measure auf Columns und Rows legen, Calculated Fields anlegen und aus zwei Blättern ein Dashboard mit einem Jahresfilter bauen. Die Kontrollzahl bleibt dieselbe wie in Lab 04, im Dashboard und in den Notebooks: 2.994.771,13 € Umsatz für 2025.</p>
   <div class="lernziele">
     <span class="lernziel-chip">Live gegen Extract</span>
     <span class="lernziel-chip">Dimension · Measure</span>
@@ -96,7 +96,7 @@
           </tr>
           <tr>
             <td><strong>Level of Detail (LOD)</strong></td>
-            <td>Ein Ausdruck, der die Ebene der Aggregation selbst nennt, statt sie vom Blatt zu übernehmen: <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> ist der Umsatz je Filiale — auch in einem Blatt, das nach Monat gruppiert, und auch in einem, das gar nicht gruppiert.</td>
+            <td>Ein Ausdruck, der die Ebene der Aggregation selbst nennt, statt sie vom Blatt zu übernehmen: <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> ist der Umsatz je Filiale, auch wenn das Blatt zusätzlich nach Monat gruppiert; die Formel legt die Ebene fest, das Blatt zeigt sie mit <code>Branch Name</code>.</td>
             <td>Calculated Field (Abschnitt „Berechnen“)</td>
           </tr>
         </tbody>
@@ -131,7 +131,7 @@
         <div class="shot-main">
           <div class="zeile" style="pointer-events:none"><span class="beschriftung">Connection</span><span class="spacer"></span><label><input type="radio" aria-hidden="true" tabindex="-1"> Live</label><label><input type="radio" checked aria-hidden="true" tabindex="-1"> Extract</label><span class="callout">3</span></div>
           <div class="leinwand"><span><span class="pill-neutral">fact_orders</span> ——— <span class="pill-neutral">dim_branch</span> <span class="callout">4</span></span></div>
-          <div class="zeile"><span class="beschriftung">Relationship</span><span class="feld">fact_orders.branch_id</span> = <span class="feld">dim_branch.branch_id</span></div>
+          <div class="zeile"><span class="beschriftung">Relationship</span><span class="feld">Branch Id (fact_orders)</span> = <span class="feld">Branch Id (dim_branch)</span></div>
           <table>
             <thead><tr><th># Order Id</th><th>Date</th><th># Branch Id</th><th># Net Total</th><th>Abc Branch Name <span class="callout">5</span></th></tr></thead>
             <tbody>
@@ -149,11 +149,11 @@
       <li><span class="callout">1</span><span>Die Verbindung: Server und Datenbank aus dem Dialog. Die Rolle <code>studi_daba</code> liest beide Schemata; für dieses Dashboard braucht es nur <code>burgermetrics</code>.</span></li>
       <li><span class="callout">2</span><span>Die beiden Tabellen des Dashboards: <code>fact_orders</code> trägt Datum und Bestellwert, <code>dim_branch</code> den Filialnamen — Faktentabelle und Dimension aus Lab 03.</span></li>
       <li><span class="callout">3</span><span>Live oder Extract. Live schickt jede Änderung im Blatt als Abfrage an die Datenbank; Extract zieht einen Auszug in eine <code>.hyper</code>-Datei und rechnet danach lokal. Für den Kurs ist Extract die Wahl: Die Rolle hält zwanzig Sitzungen, und der Extract ist zugleich die Abhilfe, die der Stolperstein zur nur lesenden Transaktion nennt.</span></li>
-      <li><span class="callout">4</span><span>Die Verbindung der beiden Tabellen über <code>branch_id</code>. Sie ist die Voraussetzung dafür, dass <code>Branch Name</code> den Umsatz aufteilt — ohne sie steht in jeder Filiale die Gesamtsumme.</span></li>
+      <li><span class="callout">4</span><span>Die Verbindung der beiden Tabellen über <code>Branch Id</code> — die Spalte <code>branch_id</code> beider Tabellen. Sie ist die Voraussetzung dafür, dass <code>Branch Name</code> den Umsatz aufteilt — ohne sie steht in jeder Filiale die Gesamtsumme.</span></li>
       <li><span class="callout">5</span><span>Die Vorschau mit den Typsymbolen: <code>#</code> ist Zahl, <code>Abc</code> ist Text. Tableau schreibt <code>order_id</code> als <code>Order Id</code> und <code>net_total</code> als <code>Net Total</code> — so heißen die Felder in den Formeln des Abschnitts „Berechnen“.</span></li>
     </ol>
     <p>Die Entscheidung Live oder Extract fällt auf dieser Seite. Live ist für einen Hörsaal die ungünstigere Wahl: Jede Änderung im Blatt löst eine Abfrage aus, und die Rolle hält zwanzig Sitzungen. Ein Extract fragt die Datenbank einmal, schreibt den Auszug als <code>.hyper</code>-Datei und rechnet danach ohne Verbindung — <code>fact_orders</code> mit 754.513 Zeilen und die 38 Sichten <code>v_*</code> belasten die Datenbank dann einmal statt bei jedem Ziehen. Neue Daten kommen erst mit dem nächsten Extract.</p>
-    <p>Die <strong>Tableau Desktop Public Edition</strong> kennt unter To a Server keine Datenbank: Sie liest Dateien (Excel, Text, statistische Dateien), Google Drive und OData, höchstens 15 Mio. Zeilen je Arbeitsmappe (Stand 09/2026). Ihr Weg zu den Daten der Fallstudie führt über den Export aus Notebook 00 (<code>00_zugang_und_daten.ipynb</code>, Lab 02): vier Sichten als CSV und Parquet unter <code>notebooks/export/</code>. Für das Dashboard dieses Labs genügen <code>v_umsatz_monat.csv</code> — 109 Monate von März 2017 bis März 2026 — und <code>v_filiale.csv</code> mit acht Filialen; die Public Edition erzeugt aus den Dateien ihren Extract. Die Studentenlizenz für Tableau Desktop und Tableau Prep ist seit 01.02.2025 eingestellt (Stand 09/2026); wer keine Lizenz für Tableau Desktop hat, arbeitet mit der Public Edition und den CSV-Dateien.</p>
+    <p>Die <strong>Tableau Desktop Public Edition</strong> kennt keine Datenbank: Sie liest Dateien (Excel, Text, statistische Dateien), Google Drive und OData, höchstens 15 Mio. Zeilen je Arbeitsmappe (Stand 09/2026). Ihr Weg zu den Daten der Fallstudie führt über den Export aus Notebook 00 (<code>00_zugang_und_daten.ipynb</code>, Lab 02): vier Sichten als CSV und Parquet unter <code>notebooks/export/</code>. Für das Dashboard dieses Labs genügen <code>v_umsatz_monat.csv</code> — 109 Monate von März 2017 bis März 2026 — und <code>v_filiale.csv</code> mit acht Filialen; die Public Edition erzeugt aus den Dateien ihren Extract. Die Studentenlizenz für Tableau Desktop und Tableau Prep ist seit 01.02.2025 eingestellt (Stand 09/2026); wer keine Lizenz für Tableau Desktop hat, arbeitet mit der Public Edition und den CSV-Dateien.</p>
     <div data-befehl="B02"></div>
   </section>
 
@@ -206,9 +206,9 @@
 
   <section class="section-block" id="berechnen">
     <h2>Berechnen</h2>
-    <p>Was die Sicht nicht fertig liefert, rechnet Tableau als <strong>Calculated Field</strong> — mit derselben Vorsicht wie bei den Measures in Lab 04: Die Definition der Kennzahl bleibt in der Sicht, das Feld bildet sie nach und erfindet sie nicht neu. Drei Felder tragen das Dashboard dieses Labs; die Vorlage enthält sie mit Erklärung, Befehlskarte B03 zerlegt sie.</p>
+    <p>Was die Sicht nicht fertig liefert, rechnet Tableau als <strong>Calculated Field</strong> — mit derselben Vorsicht wie bei den Measures in Lab 04: Die Definition der Kennzahl bleibt in der Sicht, das Feld bildet sie nach und erfindet sie nicht neu.</p>
     <div class="vorlagen">
-      <a class="vorlage" href="vorlagen/tableau-berechnete-felder.txt" download><span class="symbol">📄</span><span><span class="datei">tableau-berechnete-felder.txt</span><br><span class="was">Drei Calculated Fields für das Dashboard, je eines pro Block, Erklärung in Kommentarzeilen; dazu die Fassung für die CSV-Dateien und das Initial SQL.</span></span></a>
+      <a class="vorlage" href="vorlagen/tableau-berechnete-felder.txt" download><span class="symbol">📄</span><span><span class="datei">tableau-berechnete-felder.txt</span><br><span class="was">Vier Calculated Fields, je eines pro Block, Erklärung in Kommentarzeilen: drei für die Datenbank, eines für die CSV-Dateien der Public Edition; dazu das Initial SQL.</span></span></a>
     </div>
     <div data-befehl="B03"></div>
     <div class="karten">
@@ -222,7 +222,7 @@
       </div>
       <div class="karte">
         <div class="kopfzeile">Umsatz je Filiale — FIXED</div>
-        <p><code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> nennt die Ebene selbst: je Filiale eine Summe, gleichgültig, ob das Blatt nach Monat, nach Kanal oder gar nicht gruppiert. So lässt sich jeder Monat an der Summe seiner Filiale messen. Ein gewöhnlicher Filter auf dem Blatt ändert den FIXED-Wert nicht; ein Datenquellenfilter schon.</p>
+        <p><code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> nennt die Ebene selbst: die Summe je Filiale, auch wenn das Blatt zusätzlich nach Monat oder Kanal gruppiert. In einem Blatt nach Filiale und Monat steht neben jedem Monat die Summe seiner Filiale. Die Filialsummen zeigt das Blatt nur, wenn <code>Branch Name</code> darin liegt — ohne die Filiale im Blatt fasst Tableau die FIXED-Werte wieder zusammen, und es steht der Gesamtwert da. Ein gewöhnlicher Filter auf dem Blatt ändert den FIXED-Wert nicht; ein Datenquellenfilter schon.</p>
       </div>
     </div>
     <p>Für eine Live-Verbindung bietet der Verbindungsdialog das Feld „Initial SQL“: eine Anweisung, die Tableau beim Verbinden ausführt. Der Suchpfad der Rolle lautet <code>wawi, burgermetrics</code> (Lab 01); die Anweisung stellt <code>burgermetrics</code> nach vorn, damit eigene Abfragen in Tableau die Sichten <code>v_*</code> ohne Präfix finden — bei <code>v_rezension_produkt</code>, die in beiden Schemata existiert, gewinnt dann <code>burgermetrics</code>:</p>
@@ -245,7 +245,7 @@
       </table>
     </div>
     <div data-befehl="B04"></div>
-    <p>In der Public Edition entstehen dieselben Blätter aus den CSV-Dateien: Blatt 1 aus <code>v_umsatz_monat.csv</code> mit <code>Monat</code> auf Columns und <code>SUM(Umsatz)</code> auf Rows, Blatt 2 aus <code>v_filiale.csv</code> mit <code>Branch Name</code> auf Rows und <code>SUM(Umsatz 2025)</code> auf Columns. <code>v_filiale.csv</code> trägt kein Jahr, sondern die fertige Spalte <code>umsatz_2025</code>; der Jahresfilter wirkt dort auf Blatt 1, und die Kontrollzahl stimmt in beiden Blättern: 2.994.771,13 €.</p>
+    <p>In der Public Edition entstehen dieselben Blätter aus den CSV-Dateien: Blatt 1 aus <code>v_umsatz_monat.csv</code> mit <code>Monat</code> auf Columns und <code>SUM(Umsatz)</code> auf Rows, Blatt 2 aus <code>v_filiale.csv</code> mit <code>Branch Name</code> auf Rows und <code>SUM(Umsatz 2025)</code> auf Columns. Prüfen Sie, ob Tableau <code>Monat</code> als Datum liest (Kalendersymbol statt <code>Abc</code>): Als Text ergibt Monat weder eine stetige Achse noch einen Jahresfilter — dann den Datentyp des Feldes auf Datum ändern. <code>v_filiale.csv</code> trägt kein Jahr, sondern die fertige Spalte <code>umsatz_2025</code>; der Jahresfilter wirkt dort auf Blatt 1, und die Kontrollzahl stimmt in beiden Blättern: 2.994.771,13 €.</p>
     <div class="concept-box">
       <h3>Zwei Regeln aus dem Deck</h3>
       <p><strong>Balken beginnen bei null.</strong> Ihre Länge kodiert den Wert; eine Achse, die erst bei einem hohen Betrag beginnt, macht aus einem kleinen Unterschied einen langen Balken.</p>
@@ -282,7 +282,7 @@
   <section class="section-block" id="simulator">
     <h2>Simulator</h2>
     <p>Der Simulator unten trägt die Beschriftung von Tableau: links das <code>Data</code> pane mit Dimensionen als <strong>blauen</strong> Pillen (<code>Abc</code>, ein Kalendersymbol für die geordneten Felder Monat und Stunde) und Kennzahlen als <strong>grünen</strong> (<code>#</code>); rechts die Regale <code>Columns</code>, <code>Rows</code>, <code>Color</code> und <code>Filters</code> — <code>Color</code> vertritt die Marks card. Drei Dinge unterscheiden ihn vom Werkzeug. Felder werden in den Regalen ausgewählt statt gezogen. Kennzahlen kommen mit <code>SUM</code> auf das Regal und tragen im Chip die Aggregation, die Sie umstellen: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>. Und das Diagramm folgt der Regel aus dem Abschnitt „Das Regal“: Dimension auf Columns und Kennzahl auf Rows ergeben senkrechte Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie, <code>Color</code> Serien oder Stapel; nur Dimensionen, eine Kennzahl ohne Dimension oder Dimension und Kennzahl auf demselben Regal ergeben im Simulator eine Tabelle.</p>
-    <p>Die Daten sind dieselben wie in Lab 04: 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle. Die Felder, die die Übungen brauchen:</p>
+    <p>Die Daten: 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle, wie in Lab 04.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Feld</th><th>Art</th><th>Werte</th></tr></thead>
@@ -317,7 +317,7 @@
       <li>Dimensionen gruppieren, Measures werden aggregiert; blau heißt diskret (Köpfe), grün heißt stetig (Achse) — nicht Dimension oder Measure. Eine Kennzahl kommt mit ihrer Aggregation auf das Regal: <code>SUM(Net Total)</code>, <code>AVG(Stars)</code>, <code>COUNT(Order Id)</code>.</li>
       <li>Verbinden: <code>Connect → To a Server → PostgreSQL</code> mit Server <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Database <code>postgres</code>, <code>studi_daba</code> / <code>thws</code>, „Require SSL“ aus; der Connector braucht einen Treiber, Tableau verweist auf den Download. Tableau Desktop 2026.2 vom 27.08.2026, Stand 09/2026.</li>
       <li>Live schickt jede Änderung als Abfrage an die Datenbank, Extract kopiert einen Auszug in eine <code>.hyper</code>-Datei — schneller, offline, mit Funktionen, die die Quelle nicht hat, und ein Stand. Die Public Edition kennt keine Datenbank: Dateien, Google Drive, OData, 15 Mio. Zeilen je Arbeitsmappe; ihr Weg sind die CSV-Dateien aus <code>notebooks/export/</code>. Die Studentenlizenz ist seit 01.02.2025 eingestellt.</li>
-      <li>Die Regel des Regals: Dimension auf Columns und Measure auf Rows ergeben Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie; ohne Kennzahl entsteht eine Tabelle. Drei Calculated Fields — <code>Bestellwert</code>, <code>Ø Sterne</code>, <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> — bilden Sichten nach, ohne sie neu zu definieren; <code>SET search_path TO burgermetrics, wawi</code> als Initial SQL stellt die Sichten ohne Präfix bereit.</li>
+      <li>Die Regel des Regals: Dimension auf Columns und Measure auf Rows ergeben Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie; ohne Kennzahl entsteht eine Tabelle. Die Calculated Fields <code>Bestellwert</code>, <code>Ø Sterne</code> und <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> bilden Sichten nach, ohne sie neu zu definieren; <code>SET search_path TO burgermetrics, wawi</code> als Initial SQL stellt die Sichten ohne Präfix bereit.</li>
       <li>Das Dashboard: zwei Blätter — Linie je Monat, Balken je Filiale —, ein Filter auf das Jahr für beide, ein Titel als Aussage; Balken beginnen bei null.</li>
       <li>Stolpersteine: <code>cannot execute CREATE TABLE in a read-only transaction</code> bei einer Live-Verbindung (Extract oder Datenquellenfilter), dieselbe Summe in jeder Filiale (Verbindung über <code>branch_id</code> fehlt), Tabelle statt Balken (Kennzahl fehlt), <code>SUM(Order Id)</code> (zählen, nicht summieren), zwanzig Sitzungen im Hörsaal. Lab 06 liest dieselben Sichten mit Python.</li>
     </ul>

@@ -3,7 +3,7 @@
     "B01": {
       "titel": { "de": "Klickweg: PostgreSQL in Tableau Desktop anbinden" },
       "prompt": "🖱",
-      "befehl": "Connect → To a Server → PostgreSQL\n    Server          supabase.butscher.cloud\n    Port            5433\n    Database        postgres\n    Authentication  Username and Password\n    Username        studi_daba\n    Password        thws\n    Require SSL     aus\n    Initial SQL     SET search_path TO burgermetrics, wawi   # wahlweise\n# Fehlt der Treiber: „This connector requires a driver“ —\n# Treiber von der Download-Seite installieren, erneut verbinden.\n# Danach auf der Data-Source-Seite: fact_orders und dim_branch\n# auf die Leinwand, oben rechts Live oder Extract.",
+      "befehl": "Connect → To a Server → PostgreSQL\n    Server          supabase.butscher.cloud\n    Port            5433\n    Database        postgres\n    Username        studi_daba\n    Password        thws\n    Require SSL     aus\n    Initial SQL     SET search_path TO burgermetrics, wawi   # wahlweise\n# Fehlt der Treiber: „This connector requires a driver“ —\n# Treiber von der Download-Seite installieren, erneut verbinden.\n# Danach auf der Data-Source-Seite: fact_orders und dim_branch\n# auf die Leinwand, oben rechts Live oder Extract.",
       "teile": [
         { "was": "PostgreSQL", "bedeutet": { "de": "Der Connector für PostgreSQL in Tableau Desktop 2026.2. Er bringt keinen Treiber mit: Fehlt er, zeigt der Dialog „This connector requires a driver“ und verweist auf die Download-Seite. Stand 09/2026." } },
         { "was": "Server · Port 5433", "bedeutet": { "de": "Server und Port in getrennten Feldern. 5433 gehört dazu — 5432 ist der PostgreSQL-Standard und hier falsch (Lab 01)." } },
@@ -16,22 +16,22 @@
     "B02": {
       "titel": { "de": "Klickweg: Public Edition mit den CSV-Dateien aus notebooks/export/" },
       "prompt": "🖱",
-      "befehl": "Connect → To a File\n    notebooks/export/v_umsatz_monat.csv   # 109 Monate, 2017-03 bis 2026-03\n    notebooks/export/v_filiale.csv        # eine Zeile je Filiale\n# Beide Dateien schreibt Notebook 00 (00_zugang_und_daten.ipynb, Lab 02).\n# Die Public Edition erzeugt aus den Dateien ihren Extract;\n# eine Datenbankverbindung kennt sie nicht.",
+      "befehl": "Connect → v_umsatz_monat.csv    # 109 Monate, 2017-03 bis 2026-03\nConnect → v_filiale.csv         # eine Zeile je Filiale\n# Beide Dateien liegen unter notebooks/export/, geschrieben von\n# Notebook 00 (00_zugang_und_daten.ipynb, Lab 02).\n# Die Public Edition erzeugt aus den Dateien ihren Extract;\n# eine Datenbankverbindung kennt sie nicht.",
       "teile": [
-        { "was": "To a File", "bedeutet": { "de": "Der Weg der Public Edition: Dateien (Excel, Text, statistische Dateien), Google Drive und OData — höchstens 15 Mio. Zeilen je Arbeitsmappe, keine Datenbankverbindung. Stand 09/2026." } },
+        { "was": "Dateien", "bedeutet": { "de": "Der Weg der Public Edition: Dateien (Excel, Text, statistische Dateien), Google Drive und OData — höchstens 15 Mio. Zeilen je Arbeitsmappe, keine Datenbankverbindung. Stand 09/2026." } },
         { "was": "v_umsatz_monat.csv", "bedeutet": { "de": "Umsatz und Bestellungen je Monat aus der Sicht v_umsatz_monat — 109 Zeilen. Die zwölf Zeilen für 2025 summieren sich auf 2.994.771,13 €." } },
         { "was": "v_filiale.csv", "bedeutet": { "de": "Eine Zeile je Filiale mit Bestellungen, Umsatz und der fertigen Spalte umsatz_2025 — deren Summe über die acht Filialen ist wieder 2.994.771,13 €. Ein Jahr als Spalte gibt es in dieser Datei nicht." } },
         { "was": "Extract", "bedeutet": { "de": "Die Public Edition erzeugt aus den Dateien ihren Extract — ein Stand. Neue Daten kommen mit dem nächsten Export aus Notebook 00 und einem neuen Extract." } }
       ]
     },
     "B03": {
-      "titel": { "de": "Die drei Calculated Fields des Dashboards (Vorlage tableau-berechnete-felder.txt)" },
+      "titel": { "de": "Die vier Calculated Fields des Dashboards (Vorlage tableau-berechnete-felder.txt)" },
       "prompt": "📄",
       "befehl": "// Bestellwert — Zähler und Nenner aggregiert, je Zelle des Blatts\nSUM([Net Total]) / COUNT([Order Id])\n\n// Ø Sterne — ein Wert je Rezension, deshalb AVG\nAVG([Stars])\n\n// Umsatz je Filiale (FIXED) — Level of Detail:\n// die Ebene steht in der Formel, nicht im Blatt\n{ FIXED [Branch Name] : SUM([Net Total]) }\n\n// Bestellwert auf den CSV-Dateien aus notebooks/export/\n// (Public Edition): je Zeile schon Summen, deshalb SUM durch SUM\nSUM([Umsatz]) / SUM([Bestellungen])",
       "teile": [
         { "was": "SUM([Net Total]) / COUNT([Order Id])", "bedeutet": { "de": "Der mittlere Bestellwert: beide Seiten aggregiert, das Verhältnis wird je Zelle des Blatts neu gerechnet — je Filiale, je Monat, gesamt. Für 2025: 21,93 € aus 2.994.771,13 € und 136.557 Bestellungen, dieselbe Kennzahl wie aov in v_kennzahlen_jahr. SUM([Net Total]) / [Order Id] mischt Aggregat und Zeile — der Dialog weist die Formel als ungültig ab." } },
         { "was": "AVG([Stars])", "bedeutet": { "de": "Der Mittelwert der Sterne aus fact_reviews. AVG statt SUM, weil Sterne ein Wert je Rezension sind — dieselbe Regel wie für die Zufriedenheit im Simulator." } },
-        { "was": "{ FIXED [Branch Name] : … }", "bedeutet": { "de": "Ein Level-of-Detail-Ausdruck: die Summe je Filiale, gleichgültig, welche Dimensionen auf den Regalen liegen. In einem Blatt nach Monat steht neben jedem Monat die Summe seiner Filiale. Ein gewöhnlicher Filter auf dem Blatt ändert den Wert nicht, ein Datenquellenfilter schon." } },
+        { "was": "{ FIXED [Branch Name] : … }", "bedeutet": { "de": "Ein Level-of-Detail-Ausdruck: die Summe je Filiale, auch wenn das Blatt zusätzlich nach Monat oder Kanal gruppiert. In einem Blatt nach Filiale und Monat steht neben jedem Monat die Summe seiner Filiale; ohne Branch Name im Blatt fasst Tableau die Filialsummen wieder zusammen. Ein gewöhnlicher Filter auf dem Blatt ändert den Wert nicht, ein Datenquellenfilter schon." } },
         { "was": "SUM([Umsatz]) / SUM([Bestellungen])", "bedeutet": { "de": "Dieselbe Kennzahl für die CSV-Dateien der Public Edition: v_umsatz_monat.csv und v_filiale.csv tragen je Zeile schon Summen (umsatz, bestellungen) — deshalb Summe durch Summe, kein COUNT. Tableau schreibt die Spalten als Umsatz und Bestellungen." } },
         { "was": "// Kommentar", "bedeutet": { "de": "Zeilen mit // sind in Tableau-Formeln Kommentare. Die Vorlage ist so aufgebaut, dass jeder Block mit seinen Kommentarzeilen in den Formelbereich eingefügt werden kann; der Name des Feldes gehört in das Namensfeld des Dialogs." } }
       ]
