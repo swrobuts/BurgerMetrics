@@ -5,7 +5,7 @@
         "de": "Ein Aufruf: hole_wetter() aus Notebook 05"
       },
       "prompt": "Python",
-      "befehl": "def hole_wetter():\n    # Open-Meteo Archive: Tageswerte fuer Wuerzburg ueber den ganzen Zeitraum, ohne Schluessel\n    antwort = requests.get(\"https://archive-api.open-meteo.com/v1/archive\", timeout=60, params={\n        \"latitude\": 49.79, \"longitude\": 9.95, \"start_date\": \"2017-03-15\", \"end_date\": \"2026-03-31\",\n        \"daily\": \"temperature_2m_max,temperature_2m_min,precipitation_sum\", \"timezone\": \"Europe/Berlin\"})\n    antwort.raise_for_status()\n    d = antwort.json()[\"daily\"]\n    return pd.DataFrame({\"tag\": d[\"time\"], \"tmax\": d[\"temperature_2m_max\"],\n                         \"tmin\": d[\"temperature_2m_min\"], \"niederschlag_mm\": d[\"precipitation_sum\"]})",
+      "befehl": "def hole_wetter():\n    # Open-Meteo Archive: Tageswerte für Würzburg über den ganzen Zeitraum, ohne Schlüssel\n    antwort = requests.get(\"https://archive-api.open-meteo.com/v1/archive\", timeout=60, params={\n        \"latitude\": 49.79, \"longitude\": 9.95, \"start_date\": \"2017-03-15\", \"end_date\": \"2026-03-31\",\n        \"daily\": \"temperature_2m_max,temperature_2m_min,precipitation_sum\", \"timezone\": \"Europe/Berlin\"})\n    antwort.raise_for_status()\n    d = antwort.json()[\"daily\"]\n    return pd.DataFrame({\"tag\": d[\"time\"], \"tmax\": d[\"temperature_2m_max\"],\n                         \"tmin\": d[\"temperature_2m_min\"], \"niederschlag_mm\": d[\"precipitation_sum\"]})",
       "teile": [
         {
           "was": "params={ \"latitude\": 49.79, \"longitude\": 9.95, … }",
@@ -16,13 +16,13 @@
         {
           "was": "timeout=60",
           "bedeutet": {
-            "de": "Bricht nach 60 Sekunden ohne Antwort ab, statt unbegrenzt zu warten. Für den vollen Zeitraum der Fallstudie (3.304 Tage) braucht die Antwort einige Sekunden."
+            "de": "Bricht nach 60 Sekunden ohne Antwort ab, statt unbegrenzt zu warten."
           }
         },
         {
           "was": "antwort.raise_for_status()",
           "bedeutet": {
-            "de": "Wirft eine Ausnahme bei einem HTTP-Fehlerstatus (4xx/5xx), statt stillschweigend mit einer Fehlerantwort weiterzurechnen — dasselbe Muster wie bei den anderen vier externen Quellen."
+            "de": "Wirft eine Ausnahme bei einem HTTP-Fehlerstatus (4xx/5xx), statt stillschweigend mit einer Fehlerantwort weiterzurechnen — dasselbe Muster wie bei den beiden anderen Abrufen in Notebook 05."
           }
         },
         {
@@ -120,7 +120,7 @@
         "de": "<p><code>USING (date)</code> verbindet über die gleichnamige Spalte. Externe Quellen hängen genauso: eine Tabelle mit einer Datumsspalte, ein Join darüber.</p>"
       },
       "rueckmeldung": {
-        "de": "Die Saison steht in dim_date, das Wetter in dim_weather, Feiertage und Heimspiele in den CSV-Dateien — alle über das Datum. Wer das Datum als Text lädt, bekommt keinen Treffer: erst in date wandeln."
+        "de": "Die Saison steht in dim_date, das Wetter in dim_weather, Feiertage und Heimspiele in den CSV-Dateien — alle über das Datum. Wer das Datum als Text lädt, bekommt von PostgreSQL einen Typfehler — erst in date wandeln."
       }
     },
     {
@@ -169,7 +169,7 @@
         },
         {
           "text": {
-            "de": "In der Datenbank: <code>SELECT * FROM wawi.v_rezension_letzte ORDER BY erstellt_am DESC LIMIT 3;</code> zeigt die Rezension mit <code>quelle = 'shop'</code>."
+            "de": "In der Datenbank: <code>SELECT * FROM wawi.v_rezension_letzte ORDER BY erstellt_am DESC LIMIT 3;</code> zeigt die Rezension (die Sicht führt nur Rezensionen aus dem Shop)."
           }
         },
         {

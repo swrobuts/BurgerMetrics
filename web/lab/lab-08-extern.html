@@ -35,7 +35,7 @@
 <div class="lab-header">
   <div class="lab-num-big">08</div>
   <h1 class="lab-title">Externe Daten und Sentiment</h1>
-  <p class="lab-intro">Lab 03 hat das Datenmodell mit <code>dim_date</code> gebaut, Lab 07 hat sechs Notebooks vom Kalender und den eingebauten Merkmalen der Fallstudie aus befragt. Zwei weitere Notebooks gehen darüber hinaus: Notebook 05 (<code>05_wetter_und_ereignisse.ipynb</code>) holt gemessenes Wetter, Schulferien, Heimspiele und den Verbraucherpreisindex von vier verschiedenen Anbietern und verknüpft sie über das Datum; Notebook 08 (<code>08_sentiment_rezensionen.ipynb</code>) liest aus dem Text von 10.000 Rezensionen, ob sie positiv oder negativ sind. Dieses letzte Lab zeigt den Aufruf einer externen Schnittstelle, ihre Lizenzpflicht und den Weg, den eine selbst geschriebene Rezension durch Shop und Datenbank nimmt.</p>
+  <p class="lab-intro">Lab 03 hat das Datenmodell mit <code>dim_date</code> gebaut, Lab 07 hat sechs Notebooks vom Kalender und den eingebauten Merkmalen der Fallstudie aus befragt — darunter Notebook 05 (<code>05_wetter_und_ereignisse.ipynb</code>), aber nur mit dessen eingebauten Merkmalen; hier kommt sein externer Teil dazu, der gemessenes Wetter, Schulferien, Heimspiele und den Verbraucherpreisindex von vier verschiedenen Anbietern über das Datum verknüpft. Notebook 08 (<code>08_sentiment_rezensionen.ipynb</code>) liest aus dem Text von 10.000 Rezensionen, ob sie positiv oder negativ sind. Dieses letzte Lab zeigt den Aufruf einer externen Schnittstelle, ihre Lizenzpflicht und den Weg, den eine selbst geschriebene Rezension durch Shop und Datenbank nimmt.</p>
   <div class="lernziele">
     <span class="lernziel-chip">Datum als Fremdschlüssel</span>
     <span class="lernziel-chip">Open-Meteo Archive API</span>
@@ -51,7 +51,7 @@
   <section class="section-block" id="datum">
     <h2>Das Datum als Schlüssel</h2>
     <p>Jede externe Quelle in diesem Lab kommt über dieselbe Spalte in die Fallstudie: ein Datum. <code>dim_date</code> trägt 3.377 Tage, vom 01.01.2017 bis zum 31.03.2026 — eine durchgehende Kalenderdimension, unabhängig davon, ob an einem Tag überhaupt bestellt wurde. Die Bestellungen selbst laufen vom 15.03.2017 bis zum 31.03.2026, ohne Lücke: 3.304 Tage (Notebook 05). Nach genau diesem Zeitraum gefragt, liefert Open-Meteo ebenfalls 3.304 Werte je Feld — die externe Quelle deckt exakt den Zeitraum ab, den die Fallstudie braucht, nicht mehr und nicht weniger. Wer <code>dim_date</code> mit einer externen Quelle verknüpft, sieht deshalb häufiger Zeilen ohne Treffer als umgekehrt: Die Dimension ist breiter als jede einzelne Quelle.</p>
-    <p>Fünf Quellen liefern die externen Merkmale von Notebook 05: Open-Meteo (gemessenes Wetter), das Paket <code>holidays</code> (bayerische Feiertage), die OpenHolidays API (Schulferien), OpenLigaDB (Heimspiele der Würzburger Kickers) und Destatis (Verbraucherpreisindex). Vier davon legt das Notebook einmal als CSV-Datei unter <code>notebooks/daten_extern/</code> ab; <code>holidays</code> braucht keine Datei, weil das Paket Feiertage direkt berechnet.</p>
+    <p>Fünf Quellen liefern die externen Merkmale von Notebook 05: Open-Meteo (gemessenes Wetter), das Paket <code>holidays</code> (bayerische Feiertage), die OpenHolidays API (Schulferien), OpenLigaDB (Heimspiele der Würzburger Kickers) und Destatis (Verbraucherpreisindex). Drei davon schreibt das Notebook selbst einmal als CSV-Datei unter <code>notebooks/daten_extern/</code>, sobald es sie abgerufen hat; die vierte (<code>vpi_jahr.csv</code>) ist kuratiert und wird nur gelesen, nie automatisch abgerufen. <code>holidays</code> braucht keine Datei, weil das Paket Feiertage direkt berechnet.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Quelle</th><th>Datei unter notebooks/daten_extern/</th><th>Wie geholt</th></tr></thead>
@@ -64,9 +64,9 @@
         </tbody>
       </table>
     </div>
-    <p>Die vier CSV-Dateien liegen ohne Git LFS im Repository (anders als der Bestand unter <code>dataset/</code>, Lab 02). Fehlt der Ordner lokal — etwa in Colab, wo nur das Notebook selbst vorliegt —, liest das Notebook dieselben Dateien über <code>raw.githubusercontent.com</code> nach, bevor es die eigentliche Schnittstelle aufruft; erst wenn auch das scheitert, ruft die Funktion <code>hole_oder_lies()</code> den Anbieter. Eine schon abgerufene Antwort wird also dreifach wiederverwendet: lokale Datei, GitHub-Fallback, Anbieter als letzter Weg.</p>
+    <p>Die vier CSV-Dateien liegen ohne Git LFS im Repository (anders als der Bestand unter <code>dataset/</code>, Lab 02). <code>hole_oder_lies()</code> holt eine Quelle dreistufig: zuerst die lokale Datei unter <code>notebooks/daten_extern/</code>; fehlt sie — etwa in Colab, wo nur das Notebook selbst vorliegt —, die Fassung von <code>raw.githubusercontent.com</code>; erst wenn auch das scheitert, den Anbieter selbst.</p>
     <div class="tip-box">
-      <p>Die Regel hinter jedem dieser Joins ist immer dieselbe: Ein Datum ist nur dann ein Schlüssel, wenn beide Seiten denselben Spaltentyp tragen. Ein aus einer CSV-Datei geladenes Datum landet ohne ausdrückliche Umwandlung als Text, nicht als <code>date</code> — und ein Text-Join gegen eine <code>date</code>-Spalte wie <code>dim_date.date</code> trifft dann nichts, ohne dass PostgreSQL das als Fehler meldet (Abschnitt „Stolpersteine“).</p>
+      <p>Die Regel hinter jedem dieser Joins ist immer dieselbe: Ein Datum ist nur dann ein Schlüssel, wenn beide Seiten denselben Spaltentyp tragen. Ein aus einer CSV-Datei geladenes Datum landet ohne ausdrückliche Umwandlung als Text, nicht als <code>date</code> — und ein Join zwischen einer Text-Spalte und einer <code>date</code>-Spalte wie <code>dim_date.date</code> scheitert dann mit einem Typfehler, nicht mit einem stillen Nichttreffer (Abschnitt „Stolpersteine“).</p>
     </div>
   </section>
 
@@ -94,7 +94,7 @@
     </div>
     <p class="shot-hinweis">Nachbildung der Antwort, Stand 09/2026 — Feldnamen wie in der echten Antwort, auf drei Tage gekürzt.</p>
     <ol class="shot-legende">
-      <li><span class="callout">1</span><span><code>latitude</code>/<code>longitude</code> in der Antwort sind der tatsächliche Gitterpunkt der Reanalyse — nicht zwingend exakt die angefragten 49,79/9,95.</span></li>
+      <li><span class="callout">1</span><span>Die Antwort nennt Ort und Zeitzone außen, die Werte stehen unter <code>daily</code>.</span></li>
       <li><span class="callout">2</span><span>Die angefragte Zeitzone kommt in der Antwort zurück; ohne den Parameter liefert die Schnittstelle Tagesgrenzen in UTC (Abschnitt „Stolpersteine“).</span></li>
       <li><span class="callout">3</span><span><code>daily</code>: für jedes angefragte Feld eine eigene Liste, alle gleich lang. <code>time[i]</code> und <code>temperature_2m_max[i]</code> gehören zum selben Tag <code>i</code> — genau das prüft W08-01.</span></li>
     </ol>
@@ -115,7 +115,7 @@
           <tr><td>OpenHolidays API</td><td>ODbL-1.0</td><td>Nennung; abgeleitete Datenbanken unter derselben Lizenz weitergeben</td></tr>
           <tr><td>OpenLigaDB</td><td>ODbL</td><td>Nennung; abgeleitete Datenbanken unter derselben Lizenz weitergeben</td></tr>
           <tr><td>Destatis (Verbraucherpreisindex)</td><td>Datenlizenz Deutschland – Namensnennung – Version 2.0 (DL-DE-BY-2.0)</td><td>Zitierweise „Datenquelle: Statistisches Bundesamt (Destatis), Genesis-Online, Abrufdatum; Datenlizenz by-2-0“; bei Bearbeitung zusätzlich „eigene Berechnung/eigene Darstellung“</td></tr>
-          <tr><td>Paket <code>holidays</code></td><td>MIT</td><td>Copyright-Hinweis im Quelltext der Bibliothek; keine Pflicht für die berechneten Feiertage selbst</td></tr>
+          <tr><td>Paket <code>holidays</code></td><td>MIT</td><td>MIT-Lizenz der Bibliothek</td></tr>
         </tbody>
       </table>
     </div>
@@ -142,7 +142,7 @@
     </div>
     <p><code>wawi.rezension_anlegen(artikel_id, sterne, inhalt, filiale_id, sitzung)</code> prüft, bevor sie schreibt: <code>sterne</code> zwischen 1 und 5, <code>inhalt</code> zwischen 5 und 500 Zeichen — gezählt wie PostgreSQLs <code>char_length()</code>, nicht wie JavaScripts <code>.length</code> —, Artikel und, falls angegeben, Filiale müssen existieren. Erfolgreich meldet der Shop wörtlich <code>Gespeichert als wawi.rezension #…</code> mit der neuen Nummer.</p>
     <p>Zwei Bremsen schützen den öffentlichen Schreibweg: höchstens 20 Rezensionen je Sitzung in zehn Minuten, insgesamt höchstens 600 Shop-Rezensionen je Stunde über alle Sitzungen. Beide lösen dieselbe Fehlerklasse aus (SQLSTATE 53400, „insufficient resources“), die PostgREST auf HTTP 503 abbildet; der Shop reicht die Datenbankmeldung unverändert weiter, ohne eigene Wiederholung und ohne „Retry-After“. Bei der Sitzungsbremse lautet sie wörtlich <code>rezension_anlegen: HTTP 503 — zu viele Rezensionen in kurzer Zeit — bitte kurz warten</code>.</p>
-    <p>Eine geschriebene Rezension steht sofort in <code>wawi.rezension</code> und verändert sofort den Durchschnitt am Produkt — <code>wawi.v_rezension_produkt</code> rechnet live. In <code>burgermetrics.fact_reviews</code>, dem Auswertungsmodell aus Lab 03, erscheint sie erst, wenn der Betreiber <code>uebernahme_aus_wawi()</code> ausführt. Übungsrezensionen räumt ausschließlich der Betreiber mit <code>uebungsrezensionen_loeschen()</code> weg; die Funktion ist SECURITY DEFINER und ohne Ausführungsrecht für das Demo-Konto. Auch <code>rezension_anlegen()</code> selbst kann die Demo-Rolle <code>studi_daba</code> nicht direkt per SQL aufrufen (kein EXECUTE-Recht, Nachtrag 15.09.2026 zu ihren Rechten): Nur der Shop schreibt, über eine eigene Rolle — Studierende schreiben immer über das Formular, nie über SQL.</p>
+    <p>Eine geschriebene Rezension steht sofort in <code>wawi.rezension</code> und verändert sofort den Durchschnitt am Produkt — <code>wawi.v_rezension_produkt</code> rechnet live. In <code>burgermetrics.fact_reviews</code>, dem Auswertungsmodell aus Lab 03, erscheint sie erst, wenn der Betreiber <code>uebernahme_aus_wawi()</code> ausführt. Übungsrezensionen räumt ausschließlich der Betreiber mit <code>uebungsrezensionen_loeschen()</code> weg; die Funktion ist SECURITY DEFINER und ohne Ausführungsrecht für das Demo-Konto. Auch <code>rezension_anlegen()</code> selbst kann die Demo-Rolle <code>studi_daba</code> nicht direkt per SQL aufrufen — Lab 01 listet das fehlende EXECUTE-Recht auf <code>rezension_anlegen()</code> auf: Nur der Shop schreibt, über eine eigene Rolle — Studierende schreiben immer über das Formular, nie über SQL.</p>
   </section>
 
   <section class="section-block" id="sentiment">
@@ -195,7 +195,7 @@
           <tr><td>OpenHolidays statt ferien-api.de</td><td>Ein zunächst erprobter Anbieter (<code>ferien-api.de</code>) antwortete mit dem HTTP-Status 429</td><td>Notebook 05 nutzt seitdem die OpenHolidays API, in Blöcken von höchstens 1.095 Tagen je Anfrage</td></tr>
           <tr><td>Verzug von rund fünf Tagen</td><td>Eine Anfrage bis zum aktuellen Tag liefert für die letzten Tage keine Werte — ERA5 ist eine Reanalyse, keine Live-Messung</td><td>Für Zeiträume, die einige Tage zurückliegen, wie der Bestand bis 31.03.2026, spielt der Verzug keine Rolle</td></tr>
           <tr><td>Zeitzone</td><td>Ohne den Parameter <code>timezone</code> liefert die Schnittstelle Tagesgrenzen in UTC statt in Europe/Berlin</td><td><code>hole_wetter()</code> setzt <code>timezone: "Europe/Berlin"</code> ausdrücklich, wie B01 zeigt</td></tr>
-          <tr><td>Datum als Text statt als <code>date</code></td><td>Ein Join über das Datum trifft nichts, wenn eine Seite den Wert als Zeichenkette hält statt als <code>date</code></td><td>Ein aus CSV geladenes Datum vor dem Verknüpfen ausdrücklich nach <code>date</code> wandeln</td></tr>
+          <tr><td>Datum als Text statt als <code>date</code></td><td>Ein Join zwischen einer Text-Spalte und einer <code>date</code>-Spalte scheitert mit einem Typfehler — PostgreSQL meldet <code>operator does not exist: text = date</code>, pandas verweigert den <code>merge()</code> mit einer <code>ValueError</code></td><td>Ein aus CSV geladenes Datum vor dem Verknüpfen ausdrücklich wandeln: in SQL nach <code>date</code>, in pandas mit <code>pd.to_datetime()</code> — genau das tut Notebook 05 in Zelle 15 (<code>wetter["tag"] = pd.to_datetime(wetter["tag"])</code>)</td></tr>
           <tr><td>503 nach 20 Rezensionen</td><td>Die Sitzungsbremse aus <code>wawi.rezension_anlegen()</code> lässt die 21. Rezension in zehn Minuten nicht mehr zu</td><td>Der Shop zeigt die Datenbankmeldung unverändert; kurz warten, bis das Zehn-Minuten-Fenster weiterrückt</td></tr>
         </tbody>
       </table>
