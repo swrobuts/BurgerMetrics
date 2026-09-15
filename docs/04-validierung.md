@@ -2,7 +2,7 @@
 
 > Voraussetzung: [ETL-Strecke und Reproduzierbarkeit](03-etl.md)
 
-Der Bericht enthält rund 200 fest eingetragene Zahlen. Keine davon wird zur Laufzeit aus den CSV-Dateien berechnet — sie stehen als Konstanten im JavaScript. Damit stellt sich die Frage, die in jedem Berichtsprojekt gestellt werden muss: **Woher weiß man, dass sie stimmen?**
+Bis August 2026 enthielt der Bericht rund 200 fest eingetragene Zahlen — keine davon zur Laufzeit aus den CSV-Dateien berechnet, alle als Konstanten im JavaScript; dieses Kapitel beschreibt die Prüfstrecke für diesen Stand. Seit August 2026 liest der Bericht die Semantikschicht zur Laufzeit ([Kapitel 5.3](05-anwendungen.md#53-der-bericht), [Entscheidung E5](08-entscheidungen.md#e5)), und die laufende Prüfung übernimmt `web/abgleich.html` ([`db/README.md`, Abschnitt „Prüfung“](../db/README.md#prüfung)). Die Frage, die in jedem Berichtsprojekt gestellt werden muss, bleibt dieselbe: **Woher weiß man, dass die Zahlen stimmen?**
 
 Der Leitsatz aus BINT E05 gilt hier wörtlich: Selbst eine Differenz von wenigen Cent würde auf ein Problem hindeuten.
 
@@ -12,7 +12,7 @@ Der Leitsatz aus BINT E05 gilt hier wörtlich: Selbst eine Differenz von wenigen
 
 | | Prüfgegenstand | Werkzeug | Umfang | Ergebnis |
 |---|---|---|---|---|
-| **A** | `dataset/README.md` — die dokumentierten Muster | `dataset/verify_readme.py` | 79 Angaben | automatisiert, Exit-Code |
+| **A** | `dataset/README.md` — die dokumentierten Muster | `dataset/verify_readme.py` | 91 Angaben | automatisiert, Exit-Code |
 | **B** | `web/dashboard.html` — die Berichtswerte | Prüfberichte in `docs/` | 185 Werte | manuell, dokumentiert |
 
 Die Trennung hat einen Grund: Strecke A prüft Aussagen, die als Text formuliert sind und sich maschinell gegen eine Berechnung halten lassen. Strecke B prüft Werte, die in einer HTML-Datei verstreut sind und deren fachliche Bedeutung erst aus dem Kontext hervorgeht.
@@ -37,7 +37,7 @@ def pruefe(label, berechnet, readme_wert, toleranz=0.005):
 
 Die Toleranz ist je Kennzahl gewählt: `0` für Zählungen (Zeilenzahlen müssen exakt stimmen), `0,005` für gerundete Kennzahlen, größere Werte für Angaben, die im Text ohnehin gerundet stehen.
 
-Aktueller Stand: **79 von 79 Angaben bestätigt.**
+Aktueller Stand: **91 von 91 Angaben bestätigt.**
 
 Der Nutzen liegt weniger im einmaligen Lauf als in der Wiederholbarkeit. Ändert sich der Datenbestand, meldet das Skript jede Dokumentationsstelle, die dadurch falsch wird — statt dass sie jahrelang unbemerkt stehen bleibt.
 
@@ -51,9 +51,9 @@ Der Bericht wurde dreimal vollständig geprüft. Alle drei Berichte sind erhalte
 
 **[12. April 2026](validierung-dashboard-2026-04-12.md)** — 185 geprüfte Werte, systematisch je Registerkarte, mit vorangestelltem Schema-Abgleich. Ergebnis: 167 korrekt, 3 Rundungsdifferenzen, rund 15 mit Korrekturbedarf.
 
-**[26. August 2026](validierung-dashboard-2026-08-26.md)** — Vollprüfung aller 72 Karten und der Management Summary, fünf Korrekturen, Abschluss.
-
 Dass die zweite, gründlichere Prüfung **mehr** Fehler fand, ist kein Widerspruch, sondern der Normalfall: Die erste Runde prüfte die auffälligen Werte, die zweite alle.
+
+**[26. August 2026](validierung-dashboard-2026-08-26.md)** — Vollprüfung aller 72 Karten und der Management Summary, fünf Korrekturen, Abschluss.
 
 ### Der Schema-Abgleich als erster Schritt
 

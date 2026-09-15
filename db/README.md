@@ -297,7 +297,7 @@ geblieben wären:
 
 Seit der Umstellung steht im Quelltext von `web/dashboard.html` **keine
 Nutzdatenzahl mehr**: keine der 88 Datenreihen, kein Kachelwert, kein Text der
-Management Summary. Die Seite lädt beim Aufruf 33 Sichten, baut daraus 91
+Management Summary. Die Seite lädt beim Aufruf 34 Sichten, baut daraus 91
 Reihen und füllt 72 Kacheln und 30 Summary-Karten — in rund drei Sekunden.
 
 | Datei | Aufgabe |
@@ -442,7 +442,7 @@ Man darf darin alles ändern, ohne dass eine Zahl im Dashboard anders wird.
 
 ### Warum die Semantikschicht materialisiert ist
 
-Auf dem Entwicklungsrechner lief alles: 33 Sichten parallel, rund drei
+Auf dem Entwicklungsrechner lief alles: 34 Sichten parallel, rund drei
 Sekunden, kein Fehler. Von GitHub Pages aus fiel dieselbe Seite mit einer
 Zeitgrenze aus (`57014 — canceling statement due to statement timeout`).
 

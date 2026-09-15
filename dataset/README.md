@@ -319,7 +319,7 @@ Import im `psql`-Client (die Dateien sind UTF-8 mit BOM):
 
 ### Miniaturbestand für schnelle Beispiele
 
-`burgermetrics_mini.sql` enthält 19 Bestellungen aus zehn Jahren, 55 Positionen und alle zugehörigen Dimensionszeilen — echte Namen und Beträge aus dem Vollbestand, 13 KB. Einmal kopieren, und jedes SQL-Beispiel dieser Dokumentation läuft, ohne 311 MB CSV zu laden:
+`burgermetrics_mini.sql` enthält 19 Bestellungen aus zehn Jahren, 55 Positionen und alle zugehörigen Dimensionszeilen — echte Namen und Beträge aus dem Vollbestand, 13 KB. Einmal kopieren, und jedes SQL-Beispiel dieser Dokumentation läuft, ohne 315 MB CSV zu laden:
 
 ```bash
 duckdb -c ".read burgermetrics_mini.sql"       # oder in psql / MySQL einfügen

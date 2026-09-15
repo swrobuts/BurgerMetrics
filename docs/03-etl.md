@@ -14,10 +14,10 @@ graph TB
     REV["generate_reviews.py<br/>10.000 Rezensionen · geglättet"]
     STAR["Galaxy-Schema<br/>13 CSV-Dateien · rund 137 MB<br/>3 Fakten + 10 Dimensionen"]
     OBT["One Big Table<br/>obt_orders.csv · 176 MB<br/>754.513 × 41"]
-    VER["verify_readme.py<br/>79 Kennzahlen"]
+    VER["verify_readme.py<br/>91 Kennzahlen"]
     DOC["dataset/README.md<br/>dokumentierte Muster"]
-    DASH["dashboard.html<br/>liest 33 Sichten zur Laufzeit"]
-    VAL["docs/validierung-*.md<br/>sechs Prüfberichte"]
+    DASH["dashboard.html<br/>liest 34 Sichten zur Laufzeit"]
+    VAL["docs/validierung-dashboard-*.md<br/>drei Prüfberichte"]
 
     GEN --> STAR
     REV --> STAR

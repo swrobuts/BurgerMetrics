@@ -16,7 +16,7 @@ BurgerMetrics/
 │                 uebungsblatt.md/.pdf · erp_datenmodell.excalidraw
 ├── db/           aufbau/ · betrieb/ · tests/ · lade_csv.py · materialisieren.py
 │                 skript_ausfuehren.py
-├── notebooks/    00–08 · quellen/ · daten_extern/ · export/ · tests/
+├── notebooks/    00–08 · quellen/ · daten_extern/ · tests/
 ├── dash/         Dash-App (wird ausgeführt)
 ├── mcp/          MCP-Server (Betreiberzugang)
 ├── docs/         diese Dokumentation · sechs Prüfberichte
@@ -47,11 +47,11 @@ graph LR
     style SITE fill:#003E6D,color:#fff
 ```
 
-Der entscheidende Parameter ist `path: 'web'`. Der Ablauf lädt **nur das Web-Verzeichnis** hoch, nicht das gesamte Repository. Seit Phase 6 enthält dieses Artefakt auch `web/lab/` mit der PGlite-Laufzeit (rund 20 MB, davon 19 MB PGlite; kein Build-Schritt).
+Der entscheidende Parameter ist `path: 'web'`. Der Ablauf lädt **nur das Web-Verzeichnis** hoch, nicht das gesamte Repository. Seit September 2026 enthält dieses Artefakt auch `web/lab/` mit der PGlite-Laufzeit (rund 20 MB, davon 19 MB PGlite; kein Build-Schritt).
 
 Das war nicht immer so. Ursprünglich stand dort `path: '.'`, mit zwei Folgen:
 
-**Das Auslieferungspaket umfasste rund 315 MB CSV-Daten**, die von der veröffentlichten Seite nirgends verlinkt werden. Nach der Umstellung sind es rund 530 KB.
+**Das Auslieferungspaket umfasste rund 315 MB CSV-Daten**, die von der veröffentlichten Seite nirgends verlinkt werden. Nach der Umstellung waren es rund 530 KB; seit September 2026 sind es mit `web/lab/` rund 20 MB.
 
 **Die CSV-Dateien wären als Verweisdateien ausgeliefert worden.** `actions/checkout` holt ohne `lfs: true` nur die LFS-Verweise, nicht die Inhalte. Wer eine CSV-Datei von der veröffentlichten Seite geladen hätte, hätte 130 Byte Text statt der Daten erhalten — ein Fehler, der erst beim Öffnen der Datei auffällt.
 
@@ -136,7 +136,7 @@ Die dritte Zeile betrifft eine Eigenheit von Cloud-Synchronisation: Sie kann Dat
 ```bash
 cd dataset
 python generate_obt.py       # OBT neu erzeugen
-python verify_readme.py      # 79 Angaben nachrechnen, Exit-Code prüfen
+python verify_readme.py      # 91 Angaben nachrechnen, Exit-Code prüfen
 ```
 
 ---

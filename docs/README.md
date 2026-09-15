@@ -35,7 +35,7 @@ Wer nur die Daten nutzen möchte, findet die vollständige Feldbeschreibung in [
 | Nettoumsatz | 14.522.378,70 € |
 | Durchschnittlicher Bestellwert | 19,25 € |
 
-Diese Werte sind mit `python dataset/verify_readme.py` nachprüfbar. Das Skript rechnet 79 Angaben der Datensatz-Dokumentation gegen die CSV-Dateien nach und endet mit Exit-Code 1, sobald eine Angabe abweicht.
+Diese Werte sind mit `python dataset/verify_readme.py` nachprüfbar. Das Skript rechnet 91 Angaben der Datensatz-Dokumentation gegen die CSV-Dateien nach und endet mit Exit-Code 1, sobald eine Angabe abweicht.
 
 ## Aufbau des Repositorys
 
@@ -48,7 +48,7 @@ dataset/   15 CSV-Dateien (Git LFS) · generate_obt.py · generate_reviews.py
            uebungsblatt.md/.pdf · erp_datenmodell.excalidraw
 db/        aufbau/ · betrieb/ · tests/ · lade_csv.py · materialisieren.py
            skript_ausfuehren.py
-notebooks/ 00–08 · quellen/ · daten_extern/ · export/ · tests/
+notebooks/ 00–08 · quellen/ · daten_extern/ · tests/
 dash/      Dash-App (wird ausgeführt)
 mcp/       MCP-Server (Betreiberzugang)
 docs/      diese Dokumentation · sechs Prüfberichte
