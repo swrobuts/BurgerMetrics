@@ -4,7 +4,7 @@
 
 **Goal:** Startseite, README und Dokumentation des BM-Repos verweisen auf Rezensionen, Notebooks, Dash und das BM-Lab; die Seiten-Importe tragen den Versionsparameter; letzter PR der Reihe.
 
-**Architecture:** Nur Verknüpfungen und Texte — keine neue Funktion. Vier Tasks: Startseite (`web/index.html` mit vierter Kachel, Tastenkürzel, Satz zu Notebooks/Dash) und Versionsparameter der Modul-Importe; Dokumentation (`README.md`, `db/README.md`, `docs/02`, `05`, `07`, `08`); Kleinigkeiten aus dem Endreview von Phase 6 (`dash/README.md`, `.env.example`, Spec §9.1); Abnahme mit Spec-Absatz und PR.
+**Architecture:** Nur Verknüpfungen und Texte — keine neue Funktion. Fünf Tasks: Startseite (`web/index.html` mit vierter Kachel, Tastenkürzel, Satz zu Notebooks/Dash) und Versionsparameter der Modul-Importe; Dokumentation (`README.md`, `db/README.md`, `docs/02`, `05`, `07`, `08`); Kleinigkeiten aus dem Endreview von Phase 6 (`dash/README.md`, `.env.example`, Spec §9.1); Textprüfung der Labs nach `folientext-pruefen` (Roberts Auftrag vom 15.09.); Abnahme mit Spec-Absatz und PR.
 
 **Tech Stack:** HTML/CSS (Startseite), Markdown, Playwright-MCP für die Sichtprüfung, `node --test web/tests/*.test.mjs` und `python3 web/tests/skripte_pruefen.py` als Regressionsprüfung.
 
@@ -142,6 +142,23 @@ Commit: `docs: Rezensionen, Notebooks, Dash und BM-Lab in README und Dokumentati
 - [ ] **Step 2: `.env.example`** — nach den `PG*`-Zeilen: `# Für dash/app.py (optional; ohne die Variable nutzt die App das Demo-Konto studi_daba):` und `DATABASE_URL=postgresql+psycopg2://BENUTZER:KENNWORT@supabase.butscher.cloud:5433/postgres`.
 - [ ] **Step 3: Spec §9.1** — im Baum unter `tools/verify.mjs, tools/sql.mjs` eine Zeile `tools/gen_daten.py          kopiert die Mini-Skripte, schreibt data/regal-bestellungen.json (Demo-Konto)`; im selben Baum `assets/pruefung.js, jsonpruefung.js, regal.js   unverändert übernommen` → `assets/jsonpruefung.js, regal.js   unverändert übernommen (pruefung.js entfällt, siehe Stand Phase 6)`.
 - [ ] **Step 4: Commit:** `docs: dash/README, .env.example, Spec §9.1 (Endreview Phase 6)`
+
+---
+
+### Task 5: Textprüfung der Labs (Skill folientext-pruefen)
+
+**Files:**
+- Modify: `web/lab/index.html`, `web/lab/lab-01-zugang.html` … `web/lab/lab-08-extern.html`, `web/lab/data/uebungen/lab-01.json` … `lab-08.json` (nur Textknoten bzw. `de`-Felder; keine Struktur-, Klassen- oder Übungsänderungen)
+
+Roberts Auftrag vom 15.09.2026: die Texte der Labs mit dem Skill `folientext-pruefen` überarbeiten. Der Skill ist für Foliendecks geschrieben; seine Entscheidungsregel gilt hier für Seiten: **Ein Satz bleibt, wenn er eine Zahl, einen benannten Mechanismus, einen handelnden Akteur oder eine überprüfbare Behauptung enthält. Er fliegt raus, wenn er nur über den Stoff redet, das Bild nacherzählt oder Wichtigkeit behauptet.** Vier Sorten: Rahmensatz (ersatzlos streichen), Bildbeschreibung (sagen, was in der Abbildung nicht steht), Wichtigkeitsbehauptung (durch die gemeinte Tatsache ersetzen), Metapher und Verneinungsfigur „nicht X, sondern Y“ (die Sache direkt, positiv benennen). Ausnahmen, die stehen bleiben und nur gemeldet werden: Fachbegriffe, Wörter in Quellentiteln und Zitaten (wörtliche Fehlermeldungen), Formulierungen in Übungs- und Diskussionsfragen (`aufgabe`, `fragen`, `optionen`, `schritte`-Texte der Checklisten, `paare`/`ziele`), die persönliche Ansprache an die Studierenden.
+
+- [ ] **Step 1: Einleitungstexte einsammeln** — je Seite den `lab-intro`-Absatz, das `ziel`/die Lernziele, den ersten Absatz jeder `section-block` und auf `index.html` Hero und Kartentexte als Liste `{Seite, Stelle, Text}` extrahieren (Python über die HTML-Dateien, Tags entfernt) und **jeden Eintrag lesen** — nicht nach Mustern filtern.
+- [ ] **Step 2: Zwei Mustersuchen über alle Texte** — die Regex-Listen `floskeln` und `meta` des Skills über alle sichtbaren Textknoten der neun Seiten und alle `de`-Felder der acht JSON-Dateien (`rueckmeldung`, `erklaerung`, `bedeutet`, `hinweis`, `titel`); je Treffer 70 Zeichen davor, 90 danach; jeder Treffer wird ersetzt oder mit Begründung als Ausnahme vermerkt. Zusätzlich die vier Sorten von Hand in den Listen aus Schritt 1 suchen (die schlimmsten Sätze enthalten kein verdächtiges Wort).
+- [ ] **Step 3: Identische Einleitungen** — die acht `lab-intro`-Texte und die Abschnittsanfänge paarweise vergleichen; wortgleiche Sätze auf verschiedenen Seiten bekommen den Satz, der zu ihrem Inhalt gehört (aus dem Seiteninhalt ableiten, nicht erfinden).
+- [ ] **Step 4: Ersetzen** — minimal, Satz für Satz, mit Python-Ersetzung des exakten Satzes (Suchstring ≤ 300 Zeichen), Formatierung, `<code>`, Links, Klassen und IDs unverändert; Ersatz beginnt mit dem handelnden Subjekt oder der Zahl, kein Doppelpunkt-Vorspann; der Ersatz behauptet nur, was auf der Seite, in `fakten.md` des Phase-6-Workspaces (falls noch vorhanden) oder in den Quellen des Repos steht — im Zweifel streichen statt neu behaupten. Übungstexte (Ausnahmen oben) bleiben unverändert; `rueckmeldung`/`erklaerung` sind Erklärtexte und werden geprüft.
+- [ ] **Step 5: Zahlangaben gegenprüfen** — jedes Zahlwort in einem neuen oder geänderten Satz gegen die Elemente der Seite prüfen (Karten, Listenpunkte, Übungen); sonst ohne Zahlwort.
+- [ ] **Step 6: Prüfen** — `node web/lab/tools/verify.mjs 2>/dev/null | tail -1` (782 Zusicherungen, 0 Fehler, unverändert), JSON-Gültigkeit aller acht Dateien, `grep`-Lauf der beiden Regex-Listen ohne Treffer außer den vermerkten Ausnahmen, jede geänderte Seite im Browser geöffnet (keine Konsolenfehler, Abschnitte und Übungsboxen unverändert).
+- [ ] **Step 7: Bericht und Commit** — je geänderter Seite eine Zeile pro Satz: Stelle, gestrichener Satz in Kurzform, Ersatz; danach die Ausnahmen mit Begründung; keine Zusammenfassung der Qualität. Commit `lab: Textprüfung nach folientext-pruefen (Rahmensätze, Wichtigkeit, Verneinungsfiguren)`.
 
 ---
 
