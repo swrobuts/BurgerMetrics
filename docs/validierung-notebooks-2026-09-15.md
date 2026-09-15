@@ -1,5 +1,7 @@
 # Vollständige Notebook-Abnahme am 15. September 2026
 
+Ergänzung: [Praxistest in Colab, mit interaktivem Dash und externem Datenabruf](validierung-colab-dash-2026-09-15.md).
+
 **Alle neun Notebooks bestanden: 105 von 105 Codezellen ausgeführt, keine
 Fehlerausgaben oder fehlenden Pflichtabschnitte.** Die frischen Ausgaben sind
 in den Notebooks gespeichert. Getestet wurde gegen die echte Datenbank mit

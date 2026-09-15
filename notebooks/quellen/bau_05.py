@@ -99,16 +99,17 @@ import requests
 from pathlib import Path
 
 DATEN = Path("daten_extern")
-AKTUALISIEREN = False   # True: Anbieter erneut abrufen und die CSV-Dateien überschreiben
+AKTUALISIEREN = False   # True: API-Quellen neu abrufen; kuratierte Dateien weiterhin lesen
 GITHUB = "https://raw.githubusercontent.com/swrobuts/BurgerMetrics/main/notebooks/daten_extern"
 
 def hole_oder_lies(name, holen=None):
     # Liest daten_extern/<name>.csv, wenn vorhanden; sonst die Fassung aus GitHub (so läuft das
     # Notebook in Colab); erst wenn auch die fehlt, ruft es den Anbieter und speichert die Antwort
     pfad = DATEN / f"{name}.csv"
-    if pfad.exists() and not AKTUALISIEREN:
+    aktualisieren = AKTUALISIEREN and holen is not None
+    if pfad.exists() and not aktualisieren:
         return pd.read_csv(pfad)
-    if not AKTUALISIEREN:
+    if not aktualisieren:
         try:
             return pd.read_csv(f"{GITHUB}/{name}.csv")
         except Exception:
