@@ -169,7 +169,9 @@ identisch sind, weil sie nur einmal definiert sind.
 
 ### Dash-App im Notebook
 
-Die App aus `dash/app.py` lässt sich auch im Notebook starten. Die Zelle unten ist auf
+Die folgende kleine Dash-App zeigt den Monatsumsatz mit Filialfilter. Die eigenständige
+App in `dash/app.py` ergänzt Kennzahlkacheln, Kanalanteile und Produktbewertungen.
+Die Zelle unten ist auf
 `DASH_STARTEN = False` gesetzt, damit die Abnahme ohne offenen Port durchläuft; in Colab auf
 `True` stellen, dann erscheint die App unter der Zelle.
 """),

@@ -7,6 +7,8 @@ brauchen kein Geheimnis.
 Vollständige Abnahme am 15. September 2026: alle neun Notebooks mit 105
 Codezellen erfolgreich ausgeführt, einschließlich des BERT-Vergleichs.
 [Prüfbericht und behobene Fehler](../docs/validierung-notebooks-2026-09-15.md).
+Der ergänzende [Colab- und Dash-Praxistest](../docs/validierung-colab-dash-2026-09-15.md)
+prüft auch die interaktive Oberfläche und die Aktualisierung externer Quellen.
 
 | Notebook | Inhalt |
 |---|---|
@@ -53,4 +55,6 @@ meldet Fehlerausgaben und fehlende Abschnitte.
 OpenHolidays, OpenLigaDB) und den kuratierten Verbraucherpreisindex, ohne Git LFS versioniert
 (eigene `.gitattributes`, sonst lägen in Colab nur LFS-Zeigerdateien vor). Notebook 05 liest
 zuerst diese Dateien, dann dieselben Dateien aus GitHub (`main`) und ruft die Anbieter nur, wenn
-auch das scheitert oder `AKTUALISIEREN = True` gesetzt ist. Quellen und Stand stehen im Notebook.
+auch das scheitert oder `AKTUALISIEREN = True` gesetzt ist. Der kuratierte VPI wird auch bei
+aktivierter Aktualisierung aus der lokalen Datei oder aus GitHub gelesen. Quellen und Stand
+stehen im Notebook.
