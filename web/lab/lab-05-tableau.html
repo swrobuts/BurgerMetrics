@@ -24,7 +24,7 @@
   <a class="sidebar-link" href="#warum">Was Tableau hier leistet</a>
   <a class="sidebar-link" href="#begriffe">Die Begriffe</a>
   <a class="sidebar-link" href="#verbinden">Verbinden</a>
-  <a class="sidebar-link" href="#regal">Das Regal</a>
+  <a class="sidebar-link" href="#regal">Das Shelf</a>
   <a class="sidebar-link" href="#berechnen">Berechnen</a>
   <a class="sidebar-link" href="#dashboard">Das Dashboard</a>
   <a class="sidebar-link" href="#stolper">Stolpersteine</a>
@@ -52,14 +52,14 @@
 
   <section class="section-block" id="warum">
     <h2>Was Tableau hier leistet — und was gleich bleibt</h2>
-    <p>Power BI (Lab 04), das Dashboard, die Notebooks und die Dash-App der Fallstudie lesen ihre Kennzahlen aus den Sichten <code>v_*</code> des Schemas <code>burgermetrics</code> — jede Kennzahl genau einmal definiert (Lab 01, „Sichten als Vertrag“). Tableau Desktop ist ein weiterer Leser derselben Datenbank, mit einer anderen Arbeitsweise: Power BI verlangt erst ein Modell mit Beziehungen und Measures und setzt dann Bilder darauf; in Tableau ziehen Sie ein Feld auf ein Regal, und in demselben Augenblick ist eine Abfrage formuliert und ihr Ergebnis gezeichnet. Das Arbeitsblatt ist die Abfrage.</p>
+    <p>Power BI (Lab 04), das Dashboard, die Notebooks und die Dash-App der Fallstudie lesen ihre Kennzahlen aus den Sichten <code>v_*</code> des Schemas <code>burgermetrics</code> — jede Kennzahl genau einmal definiert (Lab 01, „Sichten als Vertrag“). Tableau Desktop ist ein weiterer Leser derselben Datenbank, mit einer anderen Arbeitsweise: Power BI verlangt erst ein Modell mit Beziehungen und Measures und setzt dann Bilder darauf; in Tableau ziehen Sie ein Feld auf ein Shelf, und in demselben Augenblick ist eine Abfrage formuliert und ihr Ergebnis gezeichnet. Das Arbeitsblatt ist die Abfrage.</p>
     <p>Was gleich bleibt, ist das Ergebnis. Umsatz ist die Summe von <code>net_total</code>, dem Bestellwert nach Rabatt (Lab 03), und <code>v_kennzahlen_jahr</code> liefert dafür <strong>2.994.771,13 €</strong> für 2025 aus <strong>136.557</strong> Bestellungen. Ein Blatt in Tableau, das eine andere Zahl zeigt, ist ein Fehler — eine fehlende Beziehung, ein falsches Aggregat, eine Kennung, die summiert wurde. Die Checkliste dieses Labs endet deshalb mit derselben Kontrollzahl wie die in Lab 04.</p>
     <div class="kette">
       <div class="glied hell"><span class="titel">Lab 01 · 03</span><span class="was">Datenbank, Sichten, Galaxy-Schema</span></div>
       <span class="pfeil">→</span>
       <div class="glied"><span class="titel">Verbinden</span><span class="was">Connector, Live oder Extract</span></div>
       <span class="pfeil">→</span>
-      <div class="glied betont"><span class="titel">Regal</span><span class="was">Columns, Rows, Marks, Filters</span></div>
+      <div class="glied betont"><span class="titel">Shelf</span><span class="was">Columns, Rows, Marks, Filters</span></div>
       <span class="pfeil">→</span>
       <div class="glied"><span class="titel">Berechnen</span><span class="was">Calculated Fields, LOD</span></div>
       <span class="pfeil">→</span>
@@ -86,8 +86,8 @@
           </tr>
           <tr>
             <td><strong>Diskret (blau) · Stetig (grün)</strong></td>
-            <td>Diskret erzeugt Köpfe — eine Überschrift je Wert —, stetig erzeugt eine Achse. Die Farbe der Pille sagt diskret oder stetig, nicht Dimension oder Measure: <code>Branch Name</code> ist blau und ergibt einen Kopf je Filiale, also Balken; <code>MONTH(Date)</code> als stetiges Datum ist grün und ergibt eine Zeitachse, also eine Linie. Eine Kennzahl kommt mit ihrer Aggregation auf das Regal, <code>SUM(Net Total)</code>, grün.</td>
-            <td>Pillenfarbe auf Columns und Rows</td>
+            <td>Diskret erzeugt Köpfe — eine Überschrift je Wert —, stetig erzeugt eine Achse. Die Farbe der Pill sagt diskret oder stetig, nicht Dimension oder Measure: <code>Branch Name</code> ist blau und ergibt einen Kopf je Filiale, also Balken; <code>MONTH(Date)</code> als stetiges Datum ist grün und ergibt eine Zeitachse, also eine Linie. Eine Kennzahl kommt mit ihrer Aggregation auf das Shelf, <code>SUM(Net Total)</code>, grün.</td>
+            <td>Pill-Farbe auf Columns und Rows</td>
           </tr>
           <tr>
             <td><strong>Live · Extract</strong></td>
@@ -103,7 +103,7 @@
       </table>
     </div>
     <div class="tip-box">
-      <p>Zwei Fragen an jede Pille, unabhängig voneinander: Gruppiert sie oder wird sie aggregiert — Dimension oder Measure? Erzeugt sie Köpfe oder eine Achse — diskret (blau) oder stetig (grün)? Ein Datum kann grün sein, eine Kennzahl blau. Der Simulator dieses Labs vereinfacht das: Dimensionen sind dort blau, Kennzahlen grün, und die geordneten Dimensionen Monat und Stunde ergeben die Linie, die in Tableau eine grüne Datumspille ergibt.</p>
+      <p>Zwei Fragen an jede Pill, unabhängig voneinander: Gruppiert sie oder wird sie aggregiert — Dimension oder Measure? Erzeugt sie Köpfe oder eine Achse — diskret (blau) oder stetig (grün)? Ein Datum kann grün sein, eine Kennzahl blau. Der Simulator dieses Labs vereinfacht das: Dimensionen sind dort blau, Kennzahlen grün, und die geordneten Dimensionen Monat und Stunde ergeben die Linie, die in Tableau eine grüne Datums-Pill ergibt.</p>
     </div>
   </section>
 
@@ -158,8 +158,8 @@
   </section>
 
   <section class="section-block" id="regal">
-    <h2>Das Regal</h2>
-    <p>Das Arbeitsblatt hat links das Data pane mit den Feldern als Pillen und in der Mitte die Regale: <code>Columns</code> und <code>Rows</code> bestimmen die Achsen, <code>Filters</code> schränkt die Zeilen ein, die <code>Marks</code> card legt die Markenart fest und kodiert Farbe, Größe und Beschriftung. Ein Feld auf einem Regal ist eine Abfrage: <code>Branch Name</code> auf Columns gruppiert, <code>SUM(Net Total)</code> auf Rows aggregiert — sinngemäß <code>SELECT branch_name, SUM(net_total) … GROUP BY branch_name</code>, gezeichnet als Balken.</p>
+    <h2>Das Shelf</h2>
+    <p>Das Arbeitsblatt hat links das Data pane mit den Feldern als Pills und in der Mitte die Shelves: <code>Columns</code> und <code>Rows</code> bestimmen die Achsen, <code>Filters</code> schränkt die Zeilen ein, die <code>Marks</code> card legt die Markenart fest und kodiert Farbe, Größe und Beschriftung. Ein Feld auf einem Shelf ist eine Abfrage: <code>Branch Name</code> auf Columns gruppiert, <code>SUM(Net Total)</code> auf Rows aggregiert — sinngemäß <code>SELECT branch_name, SUM(net_total) … GROUP BY branch_name</code>, gezeichnet als Balken.</p>
     <div class="shot">
       <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Sheet 1 — Umsatz je Monat</span><span class="spacer"></span>Tableau Desktop 2026.2</div>
       <div class="shot-body">
@@ -191,17 +191,17 @@
     <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
     <ol class="shot-legende">
       <li><span class="callout">1</span><span>Data pane, nach Tabellen gegliedert: Dimensionen über der Trennlinie (blau), Measures darunter (grün). Das Gleichheitszeichen markiert ein Calculated Field.</span></li>
-      <li><span class="callout">2</span><span><code>Order Id</code> steht als Zahl unter den Measures. Auf ein Regal gezogen hieße die Pille <code>SUM(Order Id)</code> — eine Summe von Bestellnummern. Zählen statt summieren, oder das Feld in eine Dimension umwandeln.</span></li>
+      <li><span class="callout">2</span><span><code>Order Id</code> steht als Zahl unter den Measures. Auf ein Shelf gezogen hieße die Pill <code>SUM(Order Id)</code> — eine Summe von Bestellnummern. Zählen statt summieren, oder das Feld in eine Dimension umwandeln.</span></li>
       <li><span class="callout">3</span><span><code>Filters</code> ist leer: Die Linie zeigt alle 109 Monate. Der Filter auf das Jahr kommt im Dashboard und wirkt dort auf beide Blätter.</span></li>
-      <li><span class="callout">4</span><span><code>MONTH(Date)</code> als stetiges Datum, grün: eine durchgehende Zeitachse. Als diskrete Pille (blau) stünden zwölf Köpfe nebeneinander, und die Monate aller Jahre fielen in denselben Kopf.</span></li>
-      <li><span class="callout">5</span><span>Die Kennzahl mit ihrer Aggregation im Namen: <code>SUM(Net Total)</code>. Die Aggregation gehört zur Pille, nicht zum Feld — dasselbe Feld kann auf einem anderen Regal als AVG liegen.</span></li>
+      <li><span class="callout">4</span><span><code>MONTH(Date)</code> als stetiges Datum, grün: eine durchgehende Zeitachse. Als diskrete Pill (blau) stünden zwölf Köpfe nebeneinander, und die Monate aller Jahre fielen in denselben Kopf.</span></li>
+      <li><span class="callout">5</span><span>Die Kennzahl mit ihrer Aggregation im Namen: <code>SUM(Net Total)</code>. Die Aggregation gehört zur Pill, nicht zum Feld — dasselbe Feld kann auf einem anderen Shelf als AVG liegen.</span></li>
       <li><span class="callout">6</span><span>Marks card: Markenart Line, gewählt aus der stetigen Achse; darunter die Kodierungen. <code>Color</code> mit einer Dimension würde die Linie in Serien teilen — im Simulator dieselbe Wirkung.</span></li>
     </ol>
     <div class="concept-box">
       <h3>Die Regel</h3>
-      <p>Dimension auf Columns und Measure auf Rows ergeben senkrechte Balken; Dimension auf Rows und Measure auf Columns ergeben waagerechte — für acht Filialnamen die besser lesbare Form. Eine geordnete Dimension — ein Datum als stetiges Feld, grün — ergibt eine Achse und damit eine Linie: <code>MONTH(Date)</code> auf Columns und <code>SUM(Net Total)</code> auf Rows ist der Umsatz im Zeitverlauf. Fehlt die Kennzahl, entsteht eine Tabelle: Köpfe ohne Achse. Das Diagramm wählen Sie nicht; es folgt aus den Regalen.</p>
+      <p>Dimension auf Columns und Measure auf Rows ergeben senkrechte Balken; Dimension auf Rows und Measure auf Columns ergeben waagerechte — für acht Filialnamen die besser lesbare Form. Eine geordnete Dimension — ein Datum als stetiges Feld, grün — ergibt eine Achse und damit eine Linie: <code>MONTH(Date)</code> auf Columns und <code>SUM(Net Total)</code> auf Rows ist der Umsatz im Zeitverlauf. Fehlt die Kennzahl, entsteht eine Tabelle: Köpfe ohne Achse. Das Diagramm wählen Sie nicht; es folgt aus den Shelves.</p>
     </div>
-    <p>Eine Kennzahl kommt nie ohne Aggregation auf ein Regal: Tableau hängt ihr <code>SUM</code> an, und die Pille heißt <code>SUM(Net Total)</code>. Die Aggregation gehört zur Pille und lässt sich dort umstellen — <code>AVG(Stars)</code> für den Mittelwert der Sterne, <code>COUNT(Order Id)</code> für die Zahl der Bestellungen. Für Kennungen gilt dieselbe Regel wie in Lab 04: zählen, nicht summieren.</p>
+    <p>Eine Kennzahl kommt nie ohne Aggregation auf ein Shelf: Tableau hängt ihr <code>SUM</code> an, und die Pill heißt <code>SUM(Net Total)</code>. Die Aggregation gehört zur Pill und lässt sich dort umstellen — <code>AVG(Stars)</code> für den Mittelwert der Sterne, <code>COUNT(Order Id)</code> für die Zahl der Bestellungen. Für Kennungen gilt dieselbe Regel wie in Lab 04: zählen, nicht summieren.</p>
   </section>
 
   <section class="section-block" id="berechnen">
@@ -235,7 +235,7 @@
     <p>Ein Blatt beantwortet eine Frage; ein Dashboard stellt zwei Antworten nebeneinander und lässt einen Filter auf beide wirken. Das Dashboard dieses Labs besteht aus zwei Blättern, einem Filter und einem Titel:</p>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>Baustein</th><th>Regale</th><th>Ergebnis</th></tr></thead>
+        <thead><tr><th>Baustein</th><th>Shelves</th><th>Ergebnis</th></tr></thead>
         <tbody>
           <tr><td>Blatt 1 „Umsatz je Monat“</td><td><code>MONTH(Date)</code> stetig auf Columns, <code>SUM(Net Total)</code> auf Rows</td><td>eine Linie: ohne Filter 109 Monate von März 2017 bis März 2026, mit dem Jahr 2025 zwölf Punkte</td></tr>
           <tr><td>Blatt 2 „Umsatz je Filiale“</td><td><code>Branch Name</code> auf Rows, <code>SUM(Net Total)</code> auf Columns, absteigend sortiert</td><td>acht waagerechte Balken, BM Europastern vorn</td></tr>
@@ -266,11 +266,11 @@
       </div>
       <div class="karte">
         <div class="kopfzeile">Tabelle statt Balken</div>
-        <p><code>Branch Name</code> liegt auf Rows, und das Blatt zeigt acht Köpfe untereinander mit leeren Zellen — eine Tabelle, kein Diagramm. Es fehlt die Kennzahl: Erst <code>SUM(Net Total)</code> auf Columns macht aus den Köpfen waagerechte Balken. Auch eine Kennzahl, die als diskrete (blaue) Pille neben der Dimension liegt, ergibt Köpfe — Zahlen als Überschriften statt einer Achse. Der Simulator verhält sich gleich: nur Dimensionen ergeben eine Tabelle.</p>
+        <p><code>Branch Name</code> liegt auf Rows, und das Blatt zeigt acht Köpfe untereinander mit leeren Zellen — eine Tabelle, kein Diagramm. Es fehlt die Kennzahl: Erst <code>SUM(Net Total)</code> auf Columns macht aus den Köpfen waagerechte Balken. Auch eine Kennzahl, die als diskrete (blaue) Pill neben der Dimension liegt, ergibt Köpfe — Zahlen als Überschriften statt einer Achse. Der Simulator verhält sich gleich: nur Dimensionen ergeben eine Tabelle.</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">SUM(Order Id)</div>
-        <p><code>Order Id</code> ist eine ganze Zahl und steht deshalb unter den Measures; auf dem Regal heißt die Pille <code>SUM(Order Id)</code> — die Summe der Bestellnummern, eine Zahl ohne Bedeutung. Wer Bestellungen zählen will, stellt die Pille auf COUNT oder macht das Feld zur Dimension. Im Simulator: <code>SUM</code> auf Bestell-ID ergibt 1.310.137.177, <code>COUNT</code> zählt 2.000 Bestellungen.</p>
+        <p><code>Order Id</code> ist eine ganze Zahl und steht deshalb unter den Measures; auf dem Shelf heißt die Pill <code>SUM(Order Id)</code> — die Summe der Bestellnummern, eine Zahl ohne Bedeutung. Wer Bestellungen zählen will, stellt die Pill auf COUNT oder macht das Feld zur Dimension. Im Simulator: <code>SUM</code> auf Bestell-ID ergibt 1.310.137.177, <code>COUNT</code> zählt 2.000 Bestellungen.</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">Zwanzig Sitzungen im Hörsaal</div>
@@ -281,7 +281,7 @@
 
   <section class="section-block" id="simulator">
     <h2>Simulator</h2>
-    <p>Der Simulator unten trägt die Beschriftung von Tableau: links das <code>Data</code> pane mit Dimensionen als <strong>blauen</strong> Pillen (<code>Abc</code>, ein Kalendersymbol für die geordneten Felder Monat und Stunde) und Kennzahlen als <strong>grünen</strong> (<code>#</code>); rechts die Regale <code>Columns</code>, <code>Rows</code>, <code>Color</code> und <code>Filters</code> — <code>Color</code> vertritt die Marks card. Drei Dinge unterscheiden ihn von Tableau Desktop. Felder werden in den Regalen ausgewählt statt gezogen. Kennzahlen kommen mit <code>SUM</code> auf das Regal und tragen im Chip die Aggregation, die Sie umstellen: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>. Und das Diagramm folgt der Regel aus dem Abschnitt „Das Regal“: Dimension auf Columns und Kennzahl auf Rows ergeben senkrechte Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie, <code>Color</code> Serien oder Stapel; nur Dimensionen, eine Kennzahl ohne Dimension oder Dimension und Kennzahl auf demselben Regal ergeben im Simulator eine Tabelle.</p>
+    <p>Der Simulator unten trägt die Beschriftung von Tableau: links das <code>Data</code> pane mit Dimensionen als <strong>blauen</strong> Pills (<code>Abc</code>, ein Kalendersymbol für die geordneten Felder Monat und Stunde) und Kennzahlen als <strong>grünen</strong> (<code>#</code>); rechts die Shelves <code>Columns</code>, <code>Rows</code>, <code>Color</code> und <code>Filters</code> — <code>Color</code> vertritt die Marks card. Drei Dinge unterscheiden ihn von Tableau Desktop. Felder werden in den Shelves ausgewählt statt gezogen. Kennzahlen kommen mit <code>SUM</code> auf das Shelf und tragen im Chip die Aggregation, die Sie umstellen: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>. Und das Diagramm folgt der Regel aus dem Abschnitt „Das Shelf“: Dimension auf Columns und Kennzahl auf Rows ergeben senkrechte Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie, <code>Color</code> Serien oder Stapel; nur Dimensionen, eine Kennzahl ohne Dimension oder Dimension und Kennzahl auf demselben Shelf ergeben im Simulator eine Tabelle.</p>
     <p>Die Daten: 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle, wie in Lab 04.</p>
     <div class="table-scroll">
       <table>
@@ -314,10 +314,10 @@
     <h2>Zusammenfassung</h2>
     <ul>
       <li>Tableau ist ein zweiter Leser derselben Sichten: Das Arbeitsblatt ist die Abfrage, und das Ergebnis muss dasselbe sein wie in Power BI (Lab 04), im Dashboard und in den Notebooks — 2.994.771,13 € Umsatz aus 136.557 Bestellungen für 2025.</li>
-      <li>Dimensionen gruppieren, Measures werden aggregiert; blau heißt diskret (Köpfe), grün heißt stetig (Achse) — nicht Dimension oder Measure. Eine Kennzahl kommt mit ihrer Aggregation auf das Regal: <code>SUM(Net Total)</code>, <code>AVG(Stars)</code>, <code>COUNT(Order Id)</code>.</li>
+      <li>Dimensionen gruppieren, Measures werden aggregiert; blau heißt diskret (Köpfe), grün heißt stetig (Achse) — nicht Dimension oder Measure. Eine Kennzahl kommt mit ihrer Aggregation auf das Shelf: <code>SUM(Net Total)</code>, <code>AVG(Stars)</code>, <code>COUNT(Order Id)</code>.</li>
       <li>Verbinden: <code>Connect → To a Server → PostgreSQL</code> mit Server <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Database <code>postgres</code>, <code>studi_daba</code> / <code>thws</code>, „Require SSL“ aus; der Connector braucht einen Treiber, Tableau verweist auf den Download. Tableau Desktop 2026.2 vom 27.08.2026, Stand 09/2026.</li>
       <li>Live schickt jede Änderung als Abfrage an die Datenbank, Extract kopiert einen Auszug in eine <code>.hyper</code>-Datei — schneller, offline, mit Funktionen, die die Quelle nicht hat, und ein Stand. Die Public Edition kennt keine Datenbank: Dateien, Google Drive, OData, 15 Mio. Zeilen je Arbeitsmappe; ihr Weg sind die CSV-Dateien aus <code>notebooks/export/</code>. Die Studentenlizenz ist seit 01.02.2025 eingestellt.</li>
-      <li>Die Regel des Regals: Dimension auf Columns und Measure auf Rows ergeben Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie; ohne Kennzahl entsteht eine Tabelle. Die Calculated Fields <code>Bestellwert</code>, <code>Ø Sterne</code> und <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> bilden Sichten nach, ohne sie neu zu definieren; <code>SET search_path TO burgermetrics, wawi</code> als Initial SQL stellt die Sichten ohne Präfix bereit.</li>
+      <li>Die Regel des Shelfs: Dimension auf Columns und Measure auf Rows ergeben Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie; ohne Kennzahl entsteht eine Tabelle. Die Calculated Fields <code>Bestellwert</code>, <code>Ø Sterne</code> und <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> bilden Sichten nach, ohne sie neu zu definieren; <code>SET search_path TO burgermetrics, wawi</code> als Initial SQL stellt die Sichten ohne Präfix bereit.</li>
       <li>Das Dashboard: zwei Blätter — Linie je Monat, Balken je Filiale —, ein Filter auf das Jahr für beide, ein Titel als Aussage; Balken beginnen bei null.</li>
       <li>Stolpersteine: <code>cannot execute CREATE TABLE in a read-only transaction</code> in der Standardsitzung, <code>permission denied to create temporary tables in database "postgres"</code> sobald eine Sitzung die Nur-Lese-Voreinstellung abgeschaltet hat (in beiden Fällen: Extract oder Datenquellenfilter als Abhilfe), dieselbe Summe in jeder Filiale (Verbindung über <code>branch_id</code> fehlt), Tabelle statt Balken (Kennzahl fehlt), <code>SUM(Order Id)</code> (zählen, nicht summieren), zwanzig Sitzungen im Hörsaal. Lab 06 liest dieselben Sichten mit Python.</li>
     </ul>

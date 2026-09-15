@@ -130,12 +130,12 @@ export function abweichungen (belegung, ziel) {
     const soll = ziel[regal] || []
     // Reihenfolge auf dem Regal ist gleichgueltig; Menge und Aggregation nicht.
     if (ist.length !== soll.length || !soll.every(s => ist.some(e => sollPasst(e, s)))) {
-      fehler.push({ regal, text: { de: `Regal „${regal === 'spalten' ? 'Spalten' : 'Zeilen'}“ stimmt nicht.`, en: `Shelf “${regal === 'spalten' ? 'columns' : 'rows'}” is not right.` } })
+      fehler.push({ regal, text: { de: `Shelf „${regal === 'spalten' ? 'Spalten' : 'Zeilen'}“ stimmt nicht.`, en: `Shelf “${regal === 'spalten' ? 'columns' : 'rows'}” is not right.` } })
     }
   }
   const farbeIst = belegung.farbe || null
   const farbeSoll = ziel.farbe || null
-  if (farbeIst !== farbeSoll) fehler.push({ regal: 'farbe', text: { de: 'Das Farbregal stimmt nicht.', en: 'The colour shelf is not right.' } })
+  if (farbeIst !== farbeSoll) fehler.push({ regal: 'farbe', text: { de: 'Das Farb-Shelf stimmt nicht.', en: 'The colour shelf is not right.' } })
   if (ziel.filter) {
     for (const [feld, werte] of Object.entries(ziel.filter)) {
       const ist = (belegung.filter || {})[feld] || []
