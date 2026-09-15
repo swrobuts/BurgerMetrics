@@ -36,7 +36,7 @@ web/lab/
   assets/bm.css              Gestalt (aus winf.css, Palette der Spec §2.3: #C2410C, #9A3412, #ED7004, #FDF1E7, #7C2D12)
   assets/bm.js               Laufzeit (aus winf.js): LABS, Saatfolge, Übungsboxen, Shelf-Simulator, Fortschritt; nur Deutsch, Schlüssel bm:*
   assets/jsonpruefung.js     Prüfung der JSON-Übungen (unverändert aus WInf-SP)
-  assets/regal.js            Aggregation und Zielprüfung des Shelf-Simulators (unverändert aus WInf-SP)
+  assets/regal.js            Aggregation und Zielprüfung des Shelf-Simulators (aus WInf-SP; nur die zwei deutschen Prüfmeldungen auf Shelf umgestellt)
   assets/pglite/             PostgreSQL als WebAssembly (PGlite), lokal statt vom CDN (rund 19 MB)
   data/wawi_mini.sql         Schema wawi: Kopie aus dataset/ (Kasse, Shop, Rezensionen)
   data/burgermetrics_mini.sql Schema burgermetrics: Kopie aus dataset/ (Galaxy-Schema mit fact_reviews)
