@@ -55,7 +55,7 @@
     <div class="info-box">
       <p>Das Kennwort dieses Kontos steht offen im Quelltext des Repositorys, in <a href="https://github.com/swrobuts/BurgerMetrics/blob/main/db/aufbau/0020_demo_rolle.sql"><code>db/aufbau/0020_demo_rolle.sql</code></a>. Das ist keine Nachlässigkeit: Das Konto ist eigens für Studierende angelegt, es liest ausschließlich, und der Bestand dahinter ist synthetisch — keine echten Personen, keine echten Bestellungen. Ein Kennwort zu verbergen ergibt nur Sinn, wenn es etwas schützt.</p>
     </div>
-    <p>Was die Rolle nicht darf, darf über dieses Konto niemand: schreiben. Wer INSERT, UPDATE oder CREATE ausprobieren möchte, arbeitet mit DuckDB (Lab 02) — das läuft vollständig auf dem eigenen Rechner — oder richtet eine eigene Instanz ein. In diese Datenbank schreibt aus diesem Lab niemand.</p>
+    <p>Was die Rolle nicht darf, darf über dieses Konto niemand: schreiben. Wer INSERT, UPDATE oder CREATE ausprobieren möchte, arbeitet mit DuckDB (Lab 02) — das läuft vollständig auf dem eigenen Rechner —, in der Datenbank dieser Seite (Abschnitt „Spielplatz“) oder richtet eine eigene Instanz ein. In diese Datenbank schreibt aus diesem Lab niemand.</p>
   </section>
 
   <section class="section-block" id="verbindung">
@@ -200,7 +200,7 @@
     <p><strong>Falsches oder fehlendes Schema.</strong> Ein Name ohne Präfix trifft im Suchpfad zunächst wawi (Abschnitt „Schemata und Suchpfad“) — das ist kein Fehler, nur eine andere Sicht als vielleicht gemeint. Ein Fehler wird daraus erst, wenn ausdrücklich ein Schema genannt wird, auf das die Rolle keine USAGE-Berechtigung hat, etwa <code>public</code>:</p>
     <p><code>ERROR:  permission denied for schema public</code></p>
     <p>Ein unbekannter Name ganz ohne Präfix liefert weiterhin <code>relation "xyz" does not exist</code> — der Suchpfad enthält <code>public</code> nicht.</p>
-    <p><strong>Nur lesende Transaktion.</strong> Jede verändernde Anweisung scheitert an derselben Sperre, ob sie eine Zeile einfügt oder eine Tabelle anlegt:</p>
+    <p><strong>Nur lesende Transaktion.</strong> Jede verändernde Anweisung scheitert an derselben Voreinstellung, ob sie eine Zeile einfügt oder eine Tabelle anlegt:</p>
     <p><code>ERROR:  cannot execute INSERT in a read-only transaction</code><br><code>ERROR:  cannot execute CREATE TABLE in a read-only transaction</code></p>
     <p><strong>Fehlendes Ausführungsrecht.</strong> Die Rolle darf keine der beiden schreibenden Funktionen aufrufen:</p>
     <p><code>ERROR:  permission denied for function bestellung_anlegen</code></p>
@@ -240,7 +240,7 @@
       <li>Sichten sind der Vertrag für Kennzahlen: jede genau einmal definiert, in der echten Datenbank materialisiert, von Dashboard, Notebooks und Dash-App gemeinsam gelesen.</li>
       <li>Die Rolle liest beide Schemata vollständig und schreibt nichts — begrenzt durch Zeit- und Sitzungsgrenzen, nicht durch fehlende Sichtbarkeit.</li>
       <li>Vier Ursachen erklären jede Fehlermeldung dieser Rolle: falsches Präfix, nur lesende Transaktion, fehlendes Ausführungsrecht, Zeit- oder Sitzungsgrenze.</li>
-      <li>Die Verbindung, die Sie hier herstellen, brauchen Sie in Lab 02 und Lab 03 wieder — und erneut in Lab 04, Lab 05 und Lab 06.</li>
+      <li>Die Verbindung, die Sie hier herstellen, brauchen Sie in Lab 02, Lab 04, Lab 05 und Lab 06 wieder.</li>
     </ul>
     <div data-lab-nav></div>
   </section>

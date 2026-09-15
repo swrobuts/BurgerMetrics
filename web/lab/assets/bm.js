@@ -131,6 +131,7 @@ const T = {
   formatieren:  { de: 'Formatieren' },
   jsonUngueltig:{ de: 'Kein gültiges JSON' },
   jsonGueltig:  { de: 'Gültiges JSON – aber noch nicht das verlangte.' },
+  jsonOk:       { de: 'Gültiges JSON.' },
   jsonFormatiert:{ de: 'Formatiert.' },
   hoch:         { de: 'nach oben' },
   runter:       { de: 'nach unten' },
@@ -305,6 +306,11 @@ function baueBefehl (ziel, def) {
   const zeichne = () => {
     const os = mehrere ? (varianten[aktuellesOs()] ? aktuellesOs() : Object.keys(varianten)[0]) : 'alle'
     const v = varianten[os]
+    karte.querySelectorAll('.os-btn').forEach(b => {
+      const an = b.dataset.osBtn === os
+      b.classList.toggle('active', an)
+      b.setAttribute('aria-pressed', String(an))
+    })
     pre.textContent = v.befehl
     promptSpan.textContent = mehrere ? OS_PROMPT[os] : (def.prompt || '$')
     dl.replaceChildren()
@@ -383,6 +389,7 @@ async function holeSaat (datei) {
  */
 function saeen (h) {
   h.lauf ??= (async () => {
+    h.gesaet = false
     try {
       const schemata = await h.db.query(
         "SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg\\_%' AND nspname <> 'information_schema'")
@@ -927,7 +934,7 @@ function baueBox (uebung, ctx) {
 
   const erledigt = () => {
     haken.hidden = false
-    merkeFortschritt(ctx.lab, uebung.id)
+    if (!ctx.frei) merkeFortschritt(ctx.lab, uebung.id)
   }
 
   const meldung = el('div', 'uebung-status')
@@ -1073,7 +1080,7 @@ function baueBox (uebung, ctx) {
       sperren(true); status(meldung, 'note', txt(T.abfrageLaeuft))
       try {
         const h = await holeDb()
-        if (!h.gesaet) await saeen(h)
+        await (h.lauf ?? (h.gesaet ? null : saeen(h)))
         const res = await fuehre(h, sql)
         if (res.fields && res.fields.length) zeigeErgebnis('note', txt(T.ergebnis), res)
         else status(meldung, 'note', txt(T.ausgefuehrt))
@@ -1153,7 +1160,7 @@ function baueBox (uebung, ctx) {
       const r = pruefeJson(text, uebung)
       if (r.meldung) { zeigeSyntaxfehler(r); return }
       if (r.ok) {
-        status(meldung, 'ok', txt(T.richtig), uebung.rueckmeldung ? txt(uebung.rueckmeldung) : null)
+        status(meldung, 'ok', txt(ctx.frei ? T.jsonOk : T.richtig), uebung.rueckmeldung ? txt(uebung.rueckmeldung) : null)
         erledigt()
       } else {
         status(meldung, 'fail', txt(T.jsonGueltig), r.befunde.map(b => '• ' + txt(b.text)).join('\n'))
@@ -1387,7 +1394,7 @@ async function starteLab (labId) {
       titel: { de: 'Freie Abfrage' },
       aufgabe: { de: '<p>Schreiben Sie eine beliebige Abfrage gegen den Miniaturbestand im Browser. Nichts hier wirkt über diesen Browser hinaus.</p>' },
       start: halter.dataset.start || 'SELECT * FROM v_kennzahlen_jahr ORDER BY jahr;'
-    }, { lab: labId, fortschritt: {} })
+    }, { lab: labId, fortschritt: {}, frei: true })
     box.querySelector('.uebung-kopf').remove()
     box.querySelectorAll('.btn-sm.primary').forEach(b => b.remove())
     box.className = 'sql-konsole'
@@ -1401,7 +1408,7 @@ async function starteLab (labId) {
       titel: { de: 'JSON-Werkbank' },
       aufgabe: { de: '<p>Fügen Sie beliebiges JSON ein. „Prüfen“ sagt, ob es gültig ist, „Formatieren“ rückt es ein. Nichts verlässt den Browser.</p>' },
       start: halter.dataset.start || '{ "filiale": "BM Europastern", "bestellungen": 7, "umsatz": 84.75 }'
-    }, { lab: labId, fortschritt: {} })
+    }, { lab: labId, fortschritt: {}, frei: true })
     box.querySelector('.uebung-kopf').remove()
     box.className = 'sql-konsole'
     halter.replaceChildren(box)

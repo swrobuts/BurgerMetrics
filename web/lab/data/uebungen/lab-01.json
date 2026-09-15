@@ -107,6 +107,6 @@
         { "text": { "de": "<code>SELECT jahr, umsatz FROM burgermetrics.v_kennzahlen_jahr WHERE jahr = 2025;</code> liefert <code>2994771.13</code>." } },
         { "text": { "de": "<code>INSERT INTO wawi.rezension (artikel_id, sterne, inhalt, quelle) VALUES (1, 5, 'Probe', 'shop');</code> scheitert mit <code>cannot execute INSERT in a read-only transaction</code> — die Rolle schreibt nicht." } }
       ],
-      "rueckmeldung": { "de": "Wenn der letzte Schritt scheitert, ist alles richtig: Die Rolle liest und schreibt nicht. Die Verbindung brauchen Sie in Lab 04, 05 und 06 wieder." } }
+      "rueckmeldung": { "de": "Wenn der letzte Schritt scheitert, ist alles richtig: Die Rolle liest und schreibt nicht. Die Verbindung brauchen Sie in Lab 02, 04, 05 und 06 wieder." } }
   ]
 }

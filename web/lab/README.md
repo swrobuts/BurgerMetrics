@@ -50,8 +50,8 @@ web/lab/
   README.md                  Diese Datei
 ```
 
-Die Labs 01 bis 08 mit ihren JSON-Dateien und Vorlagen entstehen in den Tasks 3 bis 10 des
-Plans; `assets/bm.js` (`LABS`) nennt sie schon mit Nummer, Datei, Übungszahl und Zeitrahmen.
+Die Übungszahl je Lab steht in `LABS` (`assets/bm.js`); Seite, JSON und Vorlagen eines Labs
+werden gemeinsam gepflegt.
 
 ---
 
