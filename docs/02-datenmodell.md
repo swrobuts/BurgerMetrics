@@ -94,7 +94,7 @@ Nicht übernommen wurden Einkauf, Lagerverwaltung, Preishistorie und Schichtplan
 
 ## 2.3 Das analytische Modell: Galaxy-Schema
 
-Ein Stern-Schema hat definitionsgemäß **eine** Faktentabelle. BurgerMetrics hat drei, die sich Dimensionen teilen — seit September 2026 auch `fact_reviews` (Kapitel 5.5). Diese Form heißt **Galaxy-Schema** oder **Fact Constellation**. Sie ist die naheliegende Erweiterung des Stern-Schemas, sobald ein Sachverhalt auf drei Granularitätsebenen gemessen wird.
+Ein Stern-Schema hat definitionsgemäß **eine** Faktentabelle. BurgerMetrics hat drei, die sich Dimensionen teilen — seit September 2026 auch `fact_reviews` (Kapitel 5.5). Diese Form heißt **Galaxy-Schema** oder **Fact Constellation**. Sie ist die naheliegende Erweiterung des Stern-Schemas, sobald mehrere Sachverhalte oder Granularitätsebenen gemessen werden.
 
 ```mermaid
 graph TB

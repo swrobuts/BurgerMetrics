@@ -1,4 +1,4 @@
-# 7 — Lehrbezug: DABA und BINT
+# 7 — Lehrbezug: DABA, BINT und Datenbasierte Fallstudien
 
 BurgerMetrics ist als **Fallstudie zu DABA Kurseinheit 9** angelegt: „SQL — Analytische Funktionen, OLAP-Datenmodelle und Fallstudie". Dieses Kapitel ordnet die Bestandteile des Projekts den Lerngegenständen zu und benennt, wo das Projekt über die Kurseinheit hinausgeht.
 
@@ -201,8 +201,8 @@ führt in acht Labs an dieselben Werkzeuge heran:
 | 07 | Data Mining |
 | 08 | Externe Daten und Sentiment |
 
-Der Unterschied liegt im Bestand: Die Labs laufen im Browser gegen einen
-Miniaturbestand, die Notebooks gegen die echte Datenbank.
+Der Unterschied liegt im Bestand: Die SQL-Übungen der Labs laufen im Browser gegen einen Miniaturbestand; ihre
+Checklisten und die Notebooks arbeiten mit der echten Datenbank.
 
 ---
 
