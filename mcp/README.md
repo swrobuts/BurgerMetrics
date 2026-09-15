@@ -41,6 +41,12 @@ Die CA über einen vertrauenswürdigen Weg beziehen. Auch ein gesetztes
 `PGSSLMODE=disable` schaltet diese Prüfung nicht ab. Ein Endpunkt ohne
 geeignetes TLS-Zertifikat muss zuerst auf Betreiberseite eingerichtet werden.
 
+Unter Windows ist ein kopierter Unix-Pfad wie `/etc/ssl/cert.pem` ungültig.
+Bei einem öffentlich vertrauenswürdigen Serverzertifikat kann mit einer aktuellen
+libpq-Version stattdessen `PGSSLROOTCERT=system` verwendet werden. Damit bleiben
+Zertifikatskette und Hostname vollständig geprüft; es gilt der Vertrauensspeicher
+des Systems. Für eine private CA weiterhin deren tatsächlichen Dateipfad angeben.
+
 **2 · Umgebung.** Der Server bekommt eine eigene, damit er die
 Arbeitsumgebung nicht anfasst, in der noch anderes läuft:
 

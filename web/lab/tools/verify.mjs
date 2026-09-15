@@ -25,6 +25,8 @@ import { dirname, join } from 'node:path'
 import { pruefeJson } from '../assets/jsonpruefung.js'
 import { abweichungen as regalAbweichungen, ergebnis as regalErgebnis } from '../assets/regal.js'
 import { SAAT, neueDatenbank, fuehreAus } from './sql.mjs'
+import { neuSaeen as saeeDatenbank } from '../assets/datenbank.js'
+import { gleich } from '../assets/sqlpruefung.js'
 
 const WURZEL = join(dirname(fileURLToPath(import.meta.url)), '..')
 const lies = (p) => readFileSync(join(WURZEL, p), 'utf8')
@@ -304,28 +306,13 @@ const saatVollstaendig = SAAT.every(([, datei]) => existsSync(join(WURZEL, datei
 
 /** Neu säen wie saeen() in bm.js: alle eigenen Schemata fallen, dann die Saatfolge. */
 async function neuSaeen (db) {
-  const schemata = await db.query(
-    "SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg\\_%' AND nspname <> 'information_schema'")
-  for (const z of schemata.rows) await db.exec(`DROP SCHEMA IF EXISTS "${z.nspname}" CASCADE`)
-  await db.exec('CREATE SCHEMA public;')
-  for (const [vorspann, datei] of SAAT) {
-    await db.exec(vorspann)
-    await db.exec(saatText(datei))
-  }
-  await db.exec('SET search_path TO wawi, burgermetrics')
+  await saeeDatenbank(db, SAAT, saatText)
 }
 
 /** Ergebnisse vergleichen wie gleich() der Laufzeit: Werte normiert; die Zeilenreihenfolge zählt nur bei `sortiert`. */
-const normiert = (r, sortiert) => {
-  const zeilen = r.zeilen.map(z => z.map(v =>
-    v == null ? '\u2400'
-      : v instanceof Date ? v.toISOString().slice(0, 10)
-        : /^-?\d+(\.\d+)?$/.test(String(v)) ? Number(v).toFixed(4)
-          : String(v).trim()).join(''))
-  return sortiert ? zeilen : zeilen.sort()
-}
+const tabellarisch = r => ({ fields: r.spalten.map(name => ({ name })), rows: r.zeilen })
 const gleichesErgebnis = (a, b, sortiert = false) =>
-  a.spalten.length === b.spalten.length && JSON.stringify(normiert(a, sortiert)) === JSON.stringify(normiert(b, sortiert))
+  gleich(tabellarisch(a), tabellarisch(b), sortiert)
 
 /** Prüft eine SQL-Übung auf der frisch gesäten Datenbank. Liefert Befunde (leer = in Ordnung). */
 async function pruefeSqlUebung (db, u) {

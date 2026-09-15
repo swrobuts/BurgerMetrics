@@ -24,7 +24,7 @@ export const SAAT = [
 ]
 
 export async function neueDatenbank () {
-  const { PGlite } = await import(join(WURZEL, 'assets/pglite/index.js'))
+  const { PGlite } = await import(new URL('../assets/pglite/index.js', import.meta.url))
   const db = await PGlite.create()
   for (const [vorspann, datei] of SAAT) {
     await db.exec(vorspann)

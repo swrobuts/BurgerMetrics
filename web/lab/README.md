@@ -35,6 +35,8 @@ web/lab/
   lab-08-extern.html         Externe Daten und Sentiment         (5)
   assets/bm.css              Gestalt (aus winf.css, Palette der Spec §2.3: #C2410C, #9A3412, #ED7004, #FDF1E7, #7C2D12)
   assets/bm.js               Laufzeit (aus winf.js): LABS, Saatfolge, Übungsboxen, Shelf-Simulator, Fortschritt; nur Deutsch, Schlüssel bm:*
+  assets/datenbank.js        Gemeinsame Saatfunktion und Warteschlange für vollständige SQL-Aufträge
+  assets/sqlpruefung.js      Gemeinsamer Ergebnisvergleich für Browser und Abnahmelauf
   assets/jsonpruefung.js     Prüfung der JSON-Übungen (unverändert aus WInf-SP)
   assets/regal.js            Aggregation und Zielprüfung des Shelf-Simulators (aus WInf-SP; nur die zwei deutschen Prüfmeldungen auf Shelf umgestellt)
   assets/pglite/             PostgreSQL als WebAssembly (PGlite), lokal statt vom CDN (rund 19 MB)
@@ -139,7 +141,8 @@ Repository-Wurzelverzeichnis erneut.
 
 ```bash
 cd web/lab
-node tools/verify.mjs 2>/dev/null
+node tools/verify.mjs
+node --test tools/datenbank.test.mjs
 ```
 
 Der Lauf braucht keinen Browser und prüft: Platzhalter und JSON deckungsgleich, Deutsch-Pflicht,
@@ -154,6 +157,12 @@ Zeilen (oder ihre Kontrolle tut es), und der Starttext löst die Aufgabe nicht s
 sichert ein dritter Abschnitt die Prüfungen selbst ab. Ausgabe: `FEHL …` je Befund, zuletzt
 `n Zusicherungen, m Fehler.`, Exit 1 bei Fehlern. PGlite schreibt unter Node eine Warnung zum
 Modultyp auf stderr; sie ist bedeutungslos.
+
+Die zusätzlichen Regressionstests prüfen Windows-kompatibles Laden von PGlite,
+Zurücksetzen nach Schema-Namen mit Anführungszeichen, versetzte SQL-Prüfungen sowie
+den Ergebnisvergleich. Browser und Abnahmelauf benutzen dafür dieselben Funktionen.
+Eine laufende Prüfung, eine freie Abfrage und ein Reset werden als ganze Aufträge
+nacheinander ausgeführt, damit ihre Zwischenschritte einander nicht verändern.
 
 Eine Musterlösung vor dem Eintrag ins JSON ausprobieren:
 

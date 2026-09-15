@@ -18,6 +18,8 @@
  */
 
 import { pruefeJson } from './jsonpruefung.js'
+import { neuSaeen, warteschlange } from './datenbank.js'
+import { gleich } from './sqlpruefung.js'
 import { AGGREGATE, ergebnis as regalErgebnis, darstellung as regalDarstellung, abweichungen as regalAbweichungen } from './regal.js'
 
 /* ------------------------------------------------------------------ Sprache */
@@ -345,9 +347,9 @@ const SAAT = [
   ['CREATE SCHEMA burgermetrics; SET search_path TO burgermetrics;', 'data/burgermetrics_mini.sql'],
   ['SET search_path TO wawi, burgermetrics;', 'data/bm_sichten.sql']
 ]
-const SUCHPFAD = 'SET search_path TO wawi, burgermetrics'
 
 let dbVersprechen = null
+const datenbankAuftrag = warteschlange()
 const saatText = {}
 
 async function ladePGlite () {
@@ -365,7 +367,7 @@ async function holeDb () {
     dbVersprechen = (async () => {
       const PGlite = await ladePGlite()
       return { db: await PGlite.create(), gesaet: false, lauf: null }
-    })()
+    })().catch(e => { dbVersprechen = null; throw e })
   }
   return dbVersprechen
 }
@@ -391,15 +393,7 @@ function saeen (h) {
   h.lauf ??= (async () => {
     h.gesaet = false
     try {
-      const schemata = await h.db.query(
-        "SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg\\_%' AND nspname <> 'information_schema'")
-      for (const z of schemata.rows) await h.db.exec(`DROP SCHEMA IF EXISTS "${z.nspname}" CASCADE`)
-      await h.db.exec('CREATE SCHEMA public;')
-      for (const [vorspann, datei] of SAAT) {
-        await h.db.exec(vorspann)
-        await h.db.exec(await holeSaat(datei))
-      }
-      await h.db.exec(SUCHPFAD)
+      await neuSaeen(h.db, SAAT, holeSaat)
       h.gesaet = true
     } finally { h.lauf = null }
   })()
@@ -456,19 +450,6 @@ function ergebnisTabelle (res, maxZeilen = 200) {
   return wrap
 }
 
-/** Vergleicht zwei Ergebnisse zeilenweise; Reihenfolge nur, wenn gefordert. */
-function gleich (a, b, sortiert) {
-  const norm = (r) => r.rows.map(z => werteVon(z, r.fields).map(v =>
-    v === null || v === undefined ? '␀'
-      : v instanceof Date ? v.toISOString().slice(0, 10)
-        : typeof v === 'number' ? Number(v).toFixed(4)
-          : /^-?\d+(\.\d+)?$/.test(String(v)) ? Number(v).toFixed(4)
-            : String(v).trim()).join(''))
-  let x = norm(a); let y = norm(b)
-  if (!sortiert) { x = [...x].sort(); y = [...y].sort() }
-  return x.length === y.length && x.every((v, i) => v === y[i])
-}
-
 function baueDbBand (ziel) {
   const band = el('div', 'db-status busy')
   band.append(el('span', 'dot'))
@@ -485,8 +466,10 @@ function baueDbBand (ziel) {
     text.textContent = txt(T.dbLaden)
     btn.disabled = true
     try {
-      const h = await holeDb()
-      await saeen(h)
+      await datenbankAuftrag(async () => {
+        const h = await holeDb()
+        await saeen(h)
+      })
       band.className = 'db-status ready'
       text.textContent = txt(T.dbBereit)
       btn.disabled = false
@@ -494,7 +477,7 @@ function baueDbBand (ziel) {
     } catch (e) {
       band.className = 'db-status failed'
       text.textContent = txt(T.dbFehler) + ' ' + e.message
-    }
+    } finally { btn.disabled = false }
   }
   btn.addEventListener('click', setzen)
   return setzen()
@@ -1079,9 +1062,11 @@ function baueBox (uebung, ctx) {
       if (!sql) { status(meldung, 'note', txt(T.leer)); return }
       sperren(true); status(meldung, 'note', txt(T.abfrageLaeuft))
       try {
-        const h = await holeDb()
-        await (h.lauf ?? (h.gesaet ? null : saeen(h)))
-        const res = await fuehre(h, sql)
+        const res = await datenbankAuftrag(async () => {
+          const h = await holeDb()
+          await (h.lauf ?? (h.gesaet ? null : saeen(h)))
+          return fuehre(h, sql)
+        })
         if (res.fields && res.fields.length) zeigeErgebnis('note', txt(T.ergebnis), res)
         else status(meldung, 'note', txt(T.ausgefuehrt))
       } catch (e) {
@@ -1098,18 +1083,20 @@ function baueBox (uebung, ctx) {
       if (!sql) { status(meldung, 'note', txt(T.leer)); return }
       sperren(true); status(meldung, 'note', txt(T.abfrageLaeuft))
       try {
-        const h = await holeDb()
-        await saeen(h)
-        if (uebung.vorher) await fuehre(h, uebung.vorher)
-        const meins = await fuehre(h, sql)
-        // Bei Anweisungen, die den Bestand ändern, wird das Ergebnis über
-        // eine Kontrollabfrage verglichen - sonst über die Abfrage selbst.
-        const kontrolle = uebung.kontrolle || null
-        const meinsK = kontrolle ? await fuehre(h, kontrolle) : meins
-        await saeen(h)
-        if (uebung.vorher) await fuehre(h, uebung.vorher)
-        await fuehre(h, uebung.loesung)
-        const soll = kontrolle ? await fuehre(h, kontrolle) : await fuehre(h, uebung.loesung)
+        const { meinsK, soll } = await datenbankAuftrag(async () => {
+          const h = await holeDb()
+          await saeen(h)
+          if (uebung.vorher) await fuehre(h, uebung.vorher)
+          const meins = await fuehre(h, sql)
+          // Änderungen werden über eine Kontrollabfrage verglichen.
+          const kontrolle = uebung.kontrolle || null
+          const meinsK = kontrolle ? await fuehre(h, kontrolle) : meins
+          await saeen(h)
+          if (uebung.vorher) await fuehre(h, uebung.vorher)
+          const loesung = await fuehre(h, uebung.loesung)
+          const soll = kontrolle ? await fuehre(h, kontrolle) : loesung
+          return { meinsK, soll }
+        })
         const spaltenGleich = meinsK.fields.length === soll.fields.length
         if (!spaltenGleich) {
           zeigeErgebnis('fail', txt(T.nochNicht), meinsK, txt(T.spaltenFalsch))
