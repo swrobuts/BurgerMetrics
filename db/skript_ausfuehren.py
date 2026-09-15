@@ -34,7 +34,7 @@ def verbinde():
     return psycopg2.connect(
         host=os.environ["PGHOST"], port=os.environ["PGPORT"],
         dbname=os.environ["PGDATABASE"], user=os.environ["PGUSER"],
-        password=os.environ["PGPASSWORD"], connect_timeout=30)
+        password=os.environ["PGPASSWORD"], connect_timeout=30, sslmode="verify-full")
 
 
 def skript_ausfuehren(pfad):

@@ -110,7 +110,9 @@ def test_new_definer_routine_is_not_public(repaired):
     with con.cursor() as cur:
         cur.execute("""CREATE FUNCTION public.bm_readonly_test_future()
             RETURNS integer LANGUAGE sql SECURITY DEFINER AS 'SELECT 1'""")
-        for role, allowed in [("studi_daba", False), ("anon", True), ("authenticated", True)]:
+        # New routines require explicit grants; the hardening script does not
+        # grant future operator routines to every existing application role.
+        for role, allowed in [("studi_daba", False), ("anon", False), ("authenticated", False)]:
             cur.execute("SELECT has_function_privilege(%s, 'public.bm_readonly_test_future()', 'EXECUTE')", (role,))
             assert cur.fetchone()[0] is allowed
 

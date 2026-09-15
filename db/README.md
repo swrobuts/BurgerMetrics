@@ -40,6 +40,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `aufbau/0019_wawi_zu_burgermetrics.sql` | ETL `wawi` → `burgermetrics`: stg-Sichten, `uebernahme_aus_wawi()`, `etl_probe()`, `uebungsbestellungen_loeschen()` |
 | `aufbau/0020_demo_rolle.sql` | Rolle `studi_daba` (Kennwort `thws`): nur lesen, beide Schemata, zehn Minuten je Abfrage — als `supabase_admin` ausführen |
 | `aufbau/0021_rezensionen.sql` | Rezensionen: `wawi.rezension`, `fact_reviews`, Schreibweg `rezension_anlegen()` für den Shop, ETL und Probe erweitert — zweimal ausführen, dazwischen `lade_csv.py --nur fact_reviews` |
+| `aufbau/0022_bestellquote.sql` | atomare Bestellquote für bestehende Installationen; Signatur, Eigentümer und Grants der RPC bleiben erhalten |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 | `skript_ausfuehren.py` | führt ein Aufbauskript als `postgres` in einer Transaktion aus und zeigt die NOTICE-Meldungen |
 | `betrieb/studi_daba_verwaltung.sql` | einmalig als `supabase_admin`: `postgres` darf die Einstellungen von `studi_daba` ändern, danach geht `ALTER ROLE studi_daba SET ...` über den MCP-Server |
@@ -55,6 +56,47 @@ python3 db/materialisieren.py                                    # v_rezension_p
 ```
 
 Die SQL-Dateien sind idempotent: Sie laufen zweimal hintereinander fehlerfrei.
+
+## Sicherheitsupdate: TLS, MCP-Leserolle und Bestellquote
+
+Die Python-Zugänge `lade_csv.py`, `materialisieren.py`, `skript_ausfuehren.py`
+und `mcp/server.py` verlangen `sslmode=verify-full`. Vor ihrem nächsten Einsatz
+muss der DB-/Pooler-Endpunkt ein zu `PGHOST` passendes Zertifikat liefern.
+Die vertrauenswürdig bezogene CA-Datei in `.env` als `PGSSLROOTCERT` eintragen
+(siehe `.env.example`). Ohne passenden Vertrauensanker oder bei einem
+unverschlüsselten Endpunkt bricht die Verbindung ab; `PGSSLMODE=disable`
+überschreibt die Prüfung nicht.
+
+MCP liest mit einer separaten direkten Anmeldung als `studi_daba`. Die
+Einrichtung über `0020_demo_rolle.sql` und die anschließende Härtung über
+`betrieb/studi_daba_lesend.sql` sind Voraussetzung. Bestehende Betreiberzugänge
+bleiben für `ausfuehren()` bestehen. Details: [MCP-Einrichtung](../mcp/README.md).
+Nach dem Update den MCP-Prozess neu starten.
+
+Für eine bestehende Datenbank nach Einrichtung von TLS als bisheriger
+Funktionseigentümer ausführen:
+
+```bash
+python3 db/skript_ausfuehren.py db/aufbau/0022_bestellquote.sql
+```
+
+Die Migration ersetzt ausschließlich den Rumpf der Bestell-RPC und meldet
+PostgREST die Änderung. Neuaufbauten erhalten denselben Schutz bereits in
+`0018`. Ein Git-Pull allein wendet keine SQL-Migration an.
+
+Die Quote beträgt **60 Bestellungen je Sitzung in zehn Minuten** sowie
+**600 Bestellungen insgesamt pro Stunde** für Kasse und Shop. Fehlende
+Sitzungskennungen teilen sich eine Quote; wechselnde Kennungen umgehen die
+Gesamtquote nicht. Historische Bestellungen (`quelle='bestand'`) zählen nicht.
+Die Sitzung darf höchstens 100 Zeichen haben. Zählen und Schreiben werden
+gemeinsam bis zum Transaktionsende gesperrt. Direkte SQL-Aufrufer müssen
+`READ COMMITTED` verwenden und zeitnah committen; PostgREST verwendet diese
+Isolation standardmäßig. Quotenfehler behalten SQLSTATE `53400`.
+
+Die gemeinsame Quote begrenzt Datenwachstum, ist aber keine Authentifizierung:
+Ein öffentlicher Nutzer kann das gemeinsame Kontingent ausschöpfen.
+[Lokale Regressionstests](tests/README.md) prüfen die Umgehungsversuche und
+normale Bestellungen gegen eine wegwerfbare PostgreSQL-Instanz.
 
 ## Direkt auf die Datenbank: die Rolle `studi_daba`
 

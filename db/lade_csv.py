@@ -53,7 +53,7 @@ TABELLEN = [t for t in REIHENFOLGE if not ARGS.nur or t in ARGS.nur]
 
 con = psycopg2.connect(host=os.environ["PGHOST"], port=os.environ["PGPORT"],
                        dbname=os.environ["PGDATABASE"], user=os.environ["PGUSER"],
-                       password=os.environ["PGPASSWORD"])
+                       password=os.environ["PGPASSWORD"], sslmode="verify-full")
 con.autocommit = False
 cur = con.cursor()
 cur.execute("SET search_path TO burgermetrics")

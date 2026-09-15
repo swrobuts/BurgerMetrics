@@ -150,8 +150,8 @@ SET search_path = wawi, pg_temp
 AS $$
 #variable_conflict use_variable
 DECLARE
-  v_jetzt      timestamptz := now();
-  v_lokal      timestamp   := now() AT TIME ZONE 'Europe/Berlin';
+  v_jetzt      timestamptz;
+  v_lokal      timestamp;
   v_id         bigint;
   v_rechnung   bigint;
   v_fehlend    text;
@@ -163,6 +163,16 @@ DECLARE
   v_mwst       numeric(10,2);
   v_kuerzlich  integer;
 BEGIN
+  -- Ein Snapshot von vor dem Warten auf die Quotensperre waere veraltet.
+  -- PostgREST verwendet standardmaessig READ COMMITTED.
+  IF current_setting('transaction_isolation') <> 'read committed' THEN
+    RAISE EXCEPTION 'Bestellungen brauchen READ COMMITTED'
+      USING ERRCODE = '25000';
+  END IF;
+  IF length(sitzung) > 100 THEN
+    RAISE EXCEPTION 'sitzung darf hoechstens 100 Zeichen enthalten'
+      USING ERRCODE = '22023';
+  END IF;
   -- Eingaben pruefen. Jede Meldung nennt, was fehlt — das ist die Antwort,
   -- die der Browser anzeigt.
   IF quelle IS NULL OR quelle NOT IN ('kasse', 'shop') THEN
@@ -205,17 +215,29 @@ BEGIN
     RAISE EXCEPTION 'unbekannte Artikel: %', v_fehlend USING ERRCODE = '23503';
   END IF;
 
-  -- Bremse: Der Bestand ist oeffentlich beschreibbar, und ein Skript kann
-  -- schneller klicken als ein Mensch. 60 Belege je Sitzung und zehn Minuten
-  -- reichen fuer jede Uebung.
-  IF sitzung IS NOT NULL THEN
-    SELECT count(*) INTO v_kuerzlich
-    FROM   kundenbestellung b
-    WHERE  b.sitzung = sitzung AND b.erfasst_am > v_jetzt - interval '10 minutes';
-    IF v_kuerzlich >= 60 THEN
-      RAISE EXCEPTION 'zu viele Bestellungen in kurzer Zeit — bitte kurz warten'
-        USING ERRCODE = '53400';
-    END IF;
+  -- Eine gemeinsame Transaktionssperre serialisiert Zaehlen UND Schreiben.
+  -- Fester Namensraum/Schluessel fuer die Bestellquote, nie vom Client bestimmt.
+  PERFORM pg_advisory_xact_lock(1112362324, 1);
+  v_jetzt := clock_timestamp();
+  v_lokal := v_jetzt AT TIME ZONE 'Europe/Berlin';
+  -- NULL ist eine gemeinsame Sitzung; wechselnde Kennungen unterliegen
+  -- zusaetzlich der Gesamtquote. Historische Importdaten zaehlen nicht mit.
+  SELECT count(*) INTO v_kuerzlich
+  FROM kundenbestellung b
+  WHERE b.quelle IN ('kasse', 'shop')
+    AND b.sitzung IS NOT DISTINCT FROM sitzung
+    AND b.erfasst_am > v_jetzt - interval '10 minutes';
+  IF v_kuerzlich >= 60 THEN
+    RAISE EXCEPTION 'zu viele Bestellungen in kurzer Zeit — bitte kurz warten'
+      USING ERRCODE = '53400';
+  END IF;
+  SELECT count(*) INTO v_kuerzlich
+  FROM kundenbestellung b
+  WHERE b.quelle IN ('kasse', 'shop')
+    AND b.erfasst_am > v_jetzt - interval '1 hour';
+  IF v_kuerzlich >= 600 THEN
+    RAISE EXCEPTION 'Gesamtquote erreicht — bitte spaeter erneut bestellen'
+      USING ERRCODE = '53400';
   END IF;
 
   -- Betraege aus dem Stamm. Gleiche Artikel werden zu einer Position
