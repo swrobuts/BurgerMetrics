@@ -43,6 +43,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 | `skript_ausfuehren.py` | führt ein Aufbauskript als `postgres` in einer Transaktion aus und zeigt die NOTICE-Meldungen |
 | `betrieb/studi_daba_verwaltung.sql` | einmalig als `supabase_admin`: `postgres` darf die Einstellungen von `studi_daba` ändern, danach geht `ALTER ROLE studi_daba SET ...` über den MCP-Server |
+| `betrieb/studi_daba_lesend.sql` | verpflichtend vor Freigabe der Studierendenanmeldung: entfernt effektive Schreibwege einschließlich `PUBLIC`, Funktionen, Sequenzen, TEMP und Zugängen zu anderen Datenbanken; als `supabase_admin` in einer Transaktion ausführen |
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
@@ -75,11 +76,52 @@ psql "host=supabase.butscher.cloud port=5433 dbname=postgres user=studi_daba pas
 Der Suchpfad steht auf `wawi, burgermetrics`, also treffen `SELECT * FROM
 artikel` und `SELECT * FROM fact_orders` ohne Präfix. Die Rolle darf nur
 lesen — kein `INSERT`, kein Aufruf von `bestellung_anlegen()`, keine anderen
-Schemata der Instanz —, jede Transaktion ist nur lesend, und jede Abfrage
+Schemata mit Anwendungsdaten —, und jede Abfrage
 wird nach zehn Minuten abgebrochen; das reicht für einen Vollabzug der Positionstabelle in einen eigenen ETL-Prozess. Legt ein Aufbauskript oder
 `materialisieren.py` neue Sichten an, sind sie durch die Default-Privileges
 automatisch lesbar. Das Kennwort steht bewusst im Skript (`0020`): Der
 Bestand ist synthetisch und über den anon-Schlüssel ohnehin öffentlich lesbar.
+
+**Nur-Lese-Rechte vollständig einrichten:** Nach den Aufbauskripten als
+`supabase_admin` in der Datenbank `postgres` ausführen:
+
+```bash
+psql -U supabase_admin -d postgres -1 -v ON_ERROR_STOP=1 -f db/betrieb/studi_daba_lesend.sql
+```
+
+`default_transaction_read_only=on` ist lediglich eine abschaltbare Voreinstellung.
+Das Betriebsskript entfernt die tatsächlichen Schreibrechte, einschließlich
+Rechten aus `PUBLIC`, schreibenden Sequenzzugriffen, privilegierten Funktionen,
+Large Objects und temporären Tabellen. Der Zugriff auf andere Datenbanken wird
+entzogen. SQL-Systemkataloge bleiben für Datenbankwerkzeuge lesbar.
+
+PostgreSQL kennt kein individuelles `DENY`: Das Skript ersetzt betroffene
+`PUBLIC`-Grants durch ausdrückliche Grants an die anderen bestehenden Rollen
+und prüft vor Abschluss, dass deren effektive Rechte erhalten bleiben.
+Es ändert keine Nutzdaten. Nach erfolgreichem Commit bestehende
+`studi_daba`-Sitzungen neu verbinden; ein entzogenes `CONNECT` beendet keine
+laufende Sitzung. Neue Rollen benötigen anschließend passende eigene Grants.
+Neu angelegte Funktionen erhalten ebenfalls kein automatisches `PUBLIC EXECUTE`
+mehr. Bestehende ausdrückliche Default-Grants bleiben erhalten; zusätzliche
+Aufrufer müssen in der jeweiligen Migration ausdrücklich berechtigt werden.
+Nach Erweiterungsupdates, neuen Datenbanken oder Rechteänderungen erneut prüfen,
+weil ein neues `GRANT ... TO PUBLIC` die Grenze wieder öffnen kann.
+
+Die Rolle darf keine temporären Tabellen erstellen. BI-Werkzeuge, die solche
+Tabellen voraussetzen, verwenden einen Extrakt oder den CSV-Export. Die lokalen
+SQL-Labs mit PGlite/DuckDB sind davon unabhängig. Änderungen eigener
+Sitzungseinstellungen oder des eigenen Kennworts sind PostgreSQL-Eigenschaften;
+die Zusage betrifft Daten und die hier gesperrten Schreibwege.
+
+Integrationstest mit einem separat bereitgestellten Superuser-DSN in
+`BM_READONLY_TEST_DSN`:
+
+```bash
+python -m pytest db/tests/test_studi_daba_lesend.py -q
+```
+
+Er prüft die Migration und alle Negativproben in einer zurückgerollten
+Transaktion. Ohne diese Umgebungsvariable wird der Test übersprungen.
 
 **Einstellungen später ändern:** `ALTER ROLE studi_daba SET ...` darf
 zunächst nur `supabase_admin`, also `docker exec -i supabase-db psql -U

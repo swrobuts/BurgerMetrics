@@ -29,6 +29,10 @@
 -- Objekte: Rolle studi_daba; Grants auf burgermetrics und wawi.
 -- Ruecknahme: siehe Ende der Datei.
 -- Idempotent: ja.
+-- WICHTIG: Dies sind die Projektgrants. Vor Freigabe der Anmeldung danach
+-- betrieb/studi_daba_lesend.sql als supabase_admin in einer Transaktion
+-- ausfuehren. Nur dort werden auch PUBLIC-Rechte der gesamten Instanz
+-- beruecksichtigt (Funktionen, Sequenzen, TEMP und andere Datenbanken).
 
 DO $$
 BEGIN
@@ -49,7 +53,8 @@ END $$;
 -- Minuten decken das ab; die Uebungsabfragen selbst brauchen Sekunden.
 ALTER ROLE studi_daba SET statement_timeout = '10min';
 ALTER ROLE studi_daba SET idle_in_transaction_session_timeout = '5min';
--- Jede Transaktion nur lesend — zweiter Riegel neben den fehlenden Grants.
+-- Komfort-Voreinstellung, keine Zugriffssperre: die Rolle kann sie abschalten.
+-- Die wirksame Sperre sind die ACLs aus betrieb/studi_daba_lesend.sql.
 ALTER ROLE studi_daba SET default_transaction_read_only = on;
 -- Beide Schemata im Suchpfad, das operative zuerst — so trifft
 -- SELECT * FROM artikel und SELECT * FROM fact_orders ohne Praefix.
@@ -60,7 +65,8 @@ GRANT USAGE ON SCHEMA burgermetrics, wawi TO studi_daba;
 GRANT SELECT ON ALL TABLES IN SCHEMA burgermetrics, wawi TO studi_daba;   -- Tabellen, Sichten, materialisierte Sichten
 GRANT SELECT ON ALL SEQUENCES IN SCHEMA burgermetrics, wawi TO studi_daba;
 GRANT EXECUTE ON FUNCTION burgermetrics.kurzname(text) TO studi_daba;
--- Das Supabase-Image gibt PUBLIC Rechte auf public; die Rolle braucht sie nicht.
+-- Entfernt nur direkte Grants. PUBLIC-Rechte kann dieses REVOKE nicht
+-- abziehen; die verpflichtende Betriebskorrektur behandelt sie separat.
 REVOKE ALL ON SCHEMA public FROM studi_daba;
 
 -- Auch kuenftige Tabellen und Sichten, die postgres in den beiden Schemata
