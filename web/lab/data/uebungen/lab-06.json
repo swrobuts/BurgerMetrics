@@ -1,0 +1,117 @@
+{
+  "befehle": {
+    "B01": {
+      "titel": { "de": "Die Verbindungszelle — in jedem Notebook dieselbe (Vorlage notebook-verbindungszelle.py)" },
+      "prompt": "📄",
+      "befehl": "import pandas as pd\nfrom sqlalchemy import create_engine\n\nVERBINDUNG = \"postgresql+psycopg2://studi_daba:thws@supabase.butscher.cloud:5433/postgres\"\nengine = create_engine(VERBINDUNG)\n\ndef lade_sql(sql):\n    # Führt eine Abfrage aus und gibt das Ergebnis als DataFrame zurück\n    return pd.read_sql(sql, engine)\n\ndef lade_csv(name):\n    # Liest eine CSV-Datei des Datensatzes direkt aus GitHub (Git LFS)\n    url = f\"https://media.githubusercontent.com/media/swrobuts/BurgerMetrics/main/dataset/{name}.csv\"\n    return pd.read_csv(url)",
+      "teile": [
+        { "was": "import pandas as pd", "bedeutet": { "de": "pandas hält jedes Abfrageergebnis als DataFrame. Die Zeile steht in jedem Notebook, weil jedes allein laufen muss: Nach einem Neustart der Runtime ist kein Import mehr da." } },
+        { "was": "from sqlalchemy import create_engine", "bedeutet": { "de": "SQLAlchemy stellt die Verbindung her; psycopg2 ist der Treiber dahinter, den die pip-Zelle als psycopg2-binary installiert. Stand 09/2026: pandas 3.0, SQLAlchemy 2.0, psycopg2 2.9." } },
+        { "was": "postgresql+psycopg2://studi_daba:thws@supabase.butscher.cloud:5433/postgres", "bedeutet": { "de": "Treiber, dann die fünf Angaben aus Lab 01: Benutzer, Kennwort, Host, Port 5433, Datenbank. Das Demo-Konto darf hier stehen — es ist öffentlich und liest nur. Für ein eigenes Konto gilt B03." } },
+        { "was": "engine = create_engine(VERBINDUNG)", "bedeutet": { "de": "Legt die Engine an; die Verbindung selbst entsteht bei der ersten Abfrage. Alle folgenden Abfragen des Notebooks laufen über diese eine Engine." } },
+        { "was": "lade_sql(sql)", "bedeutet": { "de": "pd.read_sql(sql, engine) schickt die Abfrage an PostgreSQL und nimmt das Ergebnis als DataFrame entgegen — die Datenbank rechnet, pandas zeigt (B02)." } },
+        { "was": "lade_csv(name)", "bedeutet": { "de": "Liest eine CSV-Datei des Datensatzes aus dem LFS-Speicher über media.githubusercontent.com/media/… — die Roh-Adresse raw.githubusercontent.com lieferte nur die Zeigerdatei (Lab 02). Gedacht für Dimensionen wie dim_branch mit acht Zeilen; jeder Abruf zählt auf das LFS-Kontingent des Repository-Eigentümers." } }
+      ]
+    },
+    "B02": {
+      "titel": { "de": "Die Datenbank rechnet, Python zeigt: v_kennzahlen_jahr als DataFrame" },
+      "prompt": "Python",
+      "befehl": "jahre = lade_sql(\"SELECT jahr, bestellungen, umsatz FROM v_kennzahlen_jahr ORDER BY jahr\")\nprint(jahre.tail(3))\n\n# eine Zeile, in der Datenbank gefiltert; zahl() ist die dritte Kopfzelle\nsql = \"SELECT bestellungen, umsatz FROM v_kennzahlen_jahr WHERE jahr = 2025\"\nzeile = lade_sql(sql).iloc[0]\nprint(f\"Umsatz 2025: {zahl(zeile['umsatz'], 2)} €\")\nprint(f\"Bestellungen 2025: {zahl(zeile['bestellungen'])}\")",
+      "teile": [
+        { "was": "lade_sql(\"SELECT … FROM v_kennzahlen_jahr ORDER BY jahr\")", "bedeutet": { "de": "Zehn Zeilen, eine je Jahr 2017 bis 2026. Die Aggregation über 754.513 Bestellungen hat PostgreSQL erledigt und als materialisierte Sicht gespeichert (Lab 01); das Ergebnis kommt in Millisekunden — gemessen für dieses Lab am 14.09.2026: 85 ms je Abfrage nach dem Verbindungsaufbau." } },
+        { "was": "jahre.tail(3)", "bedeutet": { "de": "Die letzten drei Zeilen des DataFrames: 2024 mit 133.307 Bestellungen und 2.841.074,88 €, 2025 mit 136.557 und 2.994.771,13 €, 2026 mit 31.080 und 698.673,81 € — ein Rumpfjahr, die Daten enden im März 2026. Die Zeilennummern links vergibt pandas." } },
+        { "was": "print(jahre.tail(3))", "bedeutet": { "de": "print zeigt die Tabelle als Text. In Colab genügt jahre.tail(3) als letzte Zeile der Zelle; dann erscheint sie als formatierte Tabelle." } },
+        { "was": "WHERE jahr = 2025 … lade_sql(sql).iloc[0]", "bedeutet": { "de": "Filtern, wo die Daten liegen: Die Datenbank liefert genau eine Zeile, .iloc[0] nimmt sie aus dem DataFrame. Dasselbe Muster liest dash/app.py für die Kennzahlkacheln." } },
+        { "was": "zahl(zeile['umsatz'], 2)", "bedeutet": { "de": "Die Hilfsfunktion aus der dritten Kopfzelle: Punkt als Tausendertrenner, Komma als Dezimaltrenner, hier mit zwei Nachkommastellen. Ohne zweiten Parameter schreibt sie ganze Zahlen: 136.557." } }
+      ],
+      "ausgabe": "   jahr  bestellungen      umsatz\n7  2024        133307  2841074.88\n8  2025        136557  2994771.13\n9  2026         31080   698673.81\nUmsatz 2025: 2.994.771,13 €\nBestellungen 2025: 136.557"
+    },
+    "B03": {
+      "titel": { "de": "Eigene Zugangsdaten: .env, os.environ, .gitignore (Vorlage verbindung-sqlalchemy.py)" },
+      "prompt": "📄",
+      "befehl": "# Datei .env — im Ordner des Skripts, nie im Repository\nDATABASE_URL=postgresql+psycopg2://BENUTZER:KENNWORT@supabase.butscher.cloud:5433/postgres\n\n# Datei .gitignore — eine Zeile; so steht sie im Repository der Fallstudie\n.env\n\n# im Skript (verbindung-sqlalchemy.py): Variable lesen, Ausweichwert Demo-Konto\nVERBINDUNG = os.environ.get(\"DATABASE_URL\", DEMO_KONTO)\n\n# in Colab: Secrets-Panel statt .env\nfrom google.colab import userdata\nVERBINDUNG = userdata.get(\"DATABASE_URL\")",
+      "teile": [
+        { "was": "DATABASE_URL=postgresql+psycopg2://BENUTZER:KENNWORT@…", "bedeutet": { "de": "Eine Zeile NAME=WERT, ohne Anführungszeichen und ohne Leerzeichen um das Gleichheitszeichen. Denselben Namen liest dash/app.py. BENUTZER und KENNWORT stehen nur in dieser Datei — nicht im Notebook, nicht im Skript." } },
+        { "was": ".env in .gitignore", "bedeutet": { "de": "Git übergeht die Datei; sie erscheint in keinem Commit. Der Eintrag muss vor dem ersten Commit da sein: Ein Kennwort, das einmal in der Historie steht, lässt sich nicht zurückholen, nur ändern." } },
+        { "was": "os.environ.get(\"DATABASE_URL\", DEMO_KONTO)", "bedeutet": { "de": "Liest die Umgebungsvariable; fehlt sie, gilt der zweite Wert — das Demo-Konto. So läuft das Skript mit und ohne .env-Datei. Die Vorlage liest die .env-Datei vorher mit der kurzen Funktion lade_env() in die Umgebung." } },
+        { "was": "userdata.get(\"DATABASE_URL\")", "bedeutet": { "de": "Colab: Das Secret liegt im Secrets-Panel des Google-Kontos, nicht in der Datei. Es wandert weder mit einer Kopie des Notebooks noch mit einem Commit nach GitHub." } }
+      ]
+    }
+  },
+  "uebungen": [
+    { "id": "W06-01", "typ": "quiz",
+      "titel": { "de": "Runtime und Reihenfolge" },
+      "aufgabe": { "de": "<p>Drei Fragen zu Colab.</p>" },
+      "fragen": [
+        { "frage": { "de": "Nach „Runtime → Restart“ sind die Variablen, Importe und Funktionen des Notebooks …" },
+          "optionen": [ { "de": "weg — Zellen werden von oben neu ausgeführt" }, { "de": "erhalten, nur die Ausgaben verschwinden" }, { "de": "in Google Drive gespeichert" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Die Runtime ist eine Sitzung; ein Neustart löscht ihren Zustand. Deshalb steht die pip-Zelle oben und die Verbindungszelle direkt darunter: Auf einer neuen Runtime beginnt man wieder oben." } },
+        { "frage": { "de": "Warum steht in jedem Notebook der Fallstudie dieselbe Verbindungszelle?" },
+          "optionen": [ { "de": "Damit jedes Notebook allein und von oben nach unten läuft" }, { "de": "Weil Colab nur eine Verbindung je Notebook erlaubt" }, { "de": "Weil pandas sonst keine Datenbank lesen kann" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Ein Notebook, das eine Zelle aus einem anderen braucht, läuft nirgends reproduzierbar. lade_sql() und lade_csv() sind je Notebook definiert." } },
+        { "frage": { "de": "Was tut lade_sql(\"SELECT … FROM v_kennzahlen_jahr\") in Colab?" },
+          "optionen": [ { "de": "Die Datenbank rechnet, pandas erhält zehn fertige Zeilen als DataFrame" }, { "de": "Colab lädt fact_orders und rechnet selbst" }, { "de": "Die Sicht wird nach Colab kopiert" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "read_sql schickt die Abfrage an PostgreSQL und nimmt das Ergebnis entgegen. Große Tabellen bleiben, wo sie sind." } }
+      ],
+      "rueckmeldung": { "de": "Von oben nach unten, jede Zelle mit Zweck, die Datenbank rechnet — so bleiben die Notebooks in Colab wie lokal lauffähig." } },
+
+    { "id": "W06-02", "typ": "quiz",
+      "titel": { "de": "Zugangsdaten" },
+      "aufgabe": { "de": "<p>Zwei Fragen zu Geheimnissen.</p>" },
+      "fragen": [
+        { "frage": { "de": "Warum darf studi_daba/thws im Notebook stehen?" },
+          "optionen": [ { "de": "Das Konto ist absichtlich öffentlich, nur lesend, der Bestand synthetisch" }, { "de": "Weil GitHub Zugangsdaten automatisch verbirgt" }, { "de": "Weil Colab-Notebooks privat sind" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Die Ausnahme gilt nur für dieses Demo-Konto. Jedes eigene Konto gehört in Colab-Secrets oder eine .env-Datei, die in .gitignore steht." } },
+        { "frage": { "de": "Wo liegt ein eigenes Datenbankkennwort in Colab richtig?" },
+          "optionen": [ { "de": "Im Secrets-Panel, gelesen mit userdata.get()" }, { "de": "In einer Codezelle als Zeichenkette" }, { "de": "Im Dateinamen des Notebooks" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Secrets bleiben beim Konto und wandern nicht mit dem Notebook nach GitHub. Eine Zeichenkette in der Zelle steht nach dem ersten Commit für immer in der Historie." } }
+      ],
+      "rueckmeldung": { "de": "Ein Kennwort im Repository lässt sich nicht zurückholen — nur ändern. Das Demo-Konto ist die eine Ausnahme, und sie ist als solche dokumentiert." } },
+
+    { "id": "W06-03", "typ": "zuordnen",
+      "titel": { "de": "Zelle und Zweck" },
+      "aufgabe": { "de": "<p>Ordnen Sie jede Zelle der Fallstudien-Notebooks ihrem Zweck zu.</p>" },
+      "ziele": [ { "id": "pakete", "text": { "de": "Pakete bereitstellen" } }, { "id": "verbindung", "text": { "de": "Verbindung und Ladehelfer" } }, { "id": "ausgabe", "text": { "de": "deutsche Zahlen in Ausgaben" } }, { "id": "analyse", "text": { "de": "Daten holen und auswerten" } } ],
+      "paare": [
+        { "begriff": { "de": "subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', …])" }, "ziel": "pakete" },
+        { "begriff": { "de": "engine = create_engine(VERBINDUNG)" }, "ziel": "verbindung" },
+        { "begriff": { "de": "def lade_csv(name): … media.githubusercontent.com …" }, "ziel": "verbindung" },
+        { "begriff": { "de": "def zahl(wert, nachkommastellen=0): …" }, "ziel": "ausgabe" },
+        { "begriff": { "de": "jahre = lade_sql(\"SELECT … FROM v_kennzahlen_jahr\")" }, "ziel": "analyse" },
+        { "begriff": { "de": "con.register(\"dim_branch\", fuer_duckdb(filialen))" }, "ziel": "analyse" }
+      ],
+      "rueckmeldung": { "de": "Vier Kopfzellen, dann die Analyse — wer ein Notebook gelesen hat, findet sich in allen neun zurecht." } },
+
+    { "id": "W06-04", "typ": "reihenfolge",
+      "titel": { "de": "Ein Notebook von oben nach unten" },
+      "aufgabe": { "de": "<p>Bringen Sie die Zellen eines Fallstudien-Notebooks in die Reihenfolge, in der sie laufen müssen.</p>" },
+      "eintraege": [
+        { "id": "pip", "text": { "de": "subprocess.check_call([..., 'pip', 'install', ...]) (in Colab wie lokal)" } },
+        { "id": "verbindung", "text": { "de": "VERBINDUNG, create_engine, lade_sql, lade_csv" } },
+        { "id": "zahl", "text": { "de": "def zahl(wert, nachkommastellen=0)" } },
+        { "id": "daten", "text": { "de": "daten = lade_sql(\"SELECT …\")" } },
+        { "id": "ergebnis", "text": { "de": "print(f\"Umsatz 2025: {zahl(umsatz)} €\")" } }
+      ],
+      "richtig": ["pip", "verbindung", "zahl", "daten", "ergebnis"],
+      "start": ["ergebnis", "daten", "zahl", "verbindung", "pip"],
+      "rueckmeldung": { "de": "Pakete vor Importen, Verbindung vor Daten, Helfer vor Ausgaben. Nach einem Neustart der Runtime beginnt man wieder oben." } },
+
+    { "id": "W06-05", "typ": "checkliste",
+      "titel": { "de": "Notebook 00 in Colab ausführen" },
+      "aufgabe": { "de": "<p>Öffnen Sie <code>notebooks/00_zugang_und_daten.ipynb</code> über den Colab-Link im Repository und arbeiten Sie die Liste ab.</p>" },
+      "schritte": [
+        { "text": { "de": "Notebook in Colab geöffnet (Link „In Colab öffnen“ im Kopf oder über <code>colab.research.google.com/github/swrobuts/BurgerMetrics/blob/main/notebooks/00_zugang_und_daten.ipynb</code>)." } },
+        { "text": { "de": "pip-Zelle ausgeführt; die Ausgabe <code>Pakete bereit.</code> erschienen; Runtime vorsorglich neu gestartet, bevor es weitergeht." } },
+        { "text": { "de": "Verbindungszelle ausgeführt — ohne Fehler; danach zeigt die Tabellenübersicht <code>burgermetrics 14</code>, <code>wawi 16</code> Tabellen und <code>38</code> materialisierte Sichten." } },
+        { "text": { "de": "Die DuckDB-Zelle liefert die acht Filialtypen; <code>lade_csv(\"dim_branch\")</code> hat eine echte CSV geladen, keinen LFS-Zeiger." } },
+        { "text": { "de": "Die Export-Zelle hat <code>export/</code> mit vier Sichten als CSV und Parquet gefüllt (163 Zeilen zusammen)." } },
+        { "text": { "de": "<code>DASH_STARTEN = True</code> gesetzt und die Dash-Zelle ausgeführt: Die Karte „Umsatz je Monat“ mit der Filialauswahl erscheint unter der Zelle." } }
+      ],
+      "rueckmeldung": { "de": "Wenn die Dash-Zelle läuft, hat Colab die Datenbank auf Port 5433 erreicht — derselbe Weg, den Power BI und Tableau nehmen." } }
+  ]
+}

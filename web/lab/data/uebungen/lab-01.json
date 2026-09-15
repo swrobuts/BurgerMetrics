@@ -1,0 +1,112 @@
+{
+  "befehle": {
+    "B01": {
+      "titel": { "de": "Mit psql verbinden und die Schemata ansehen" },
+      "prompt": "$",
+      "befehl": "psql \"postgresql://studi_daba:thws@supabase.butscher.cloud:5433/postgres\"\n\n-- danach, in der psql-Sitzung:\n\\dn\n\\dt wawi.*\n\\dm burgermetrics.*\n\\q",
+      "teile": [
+        { "was": "psql \"postgresql://…\"", "bedeutet": { "de": "Ruft psql mit der vollständigen Verbindungszeichenkette auf. Die Anführungszeichen sind hier nicht nötig, schaden aber nicht; nötig werden sie, sobald die URI Parameter trägt (?…=…&…=…), denn ? und & haben in der Shell eine eigene Bedeutung." } },
+        { "was": "\\dn", "bedeutet": { "de": "Listet alle Schemata der Datenbank auf. Für diese Fallstudie zählen wawi und burgermetrics." } },
+        { "was": "\\dt wawi.*", "bedeutet": { "de": "Listet die Basistabellen im Schema wawi — 16 in der echten Datenbank, 15 im Miniaturbestand dieses Labs." } },
+        { "was": "\\dm burgermetrics.*", "bedeutet": { "de": "Listet die materialisierten Sichten im Schema burgermetrics — 38 in der echten Datenbank. Im Miniaturbestand dieses Labs sind es gewöhnliche Sichten, siehe Abschnitt „Sichten als Vertrag“." } },
+        { "was": "\\q", "bedeutet": { "de": "Beendet die psql-Sitzung." } }
+      ]
+    },
+    "B02": {
+      "titel": { "de": "Die Verbindungszeichenkette in ihren Teilen" },
+      "prompt": "🔗",
+      "befehl": "postgresql://studi_daba:thws@supabase.butscher.cloud:5433/postgres",
+      "teile": [
+        { "was": "postgresql://", "bedeutet": { "de": "Kennzeichnet die Zeichenkette als PostgreSQL-Verbindung." } },
+        { "was": "studi_daba:thws@", "bedeutet": { "de": "Benutzername und Kennwort des Demo-Kontos, getrennt durch einen Doppelpunkt, gefolgt von einem @." } },
+        { "was": "supabase.butscher.cloud:5433", "bedeutet": { "de": "Host und Port der Datenbank, getrennt durch einen Doppelpunkt." } },
+        { "was": "/postgres", "bedeutet": { "de": "Der Datenbankname nach dem letzten Schrägstrich. postgres ist hier keine leere Voreinstellung, sondern die tatsächliche Datenbank, in der beide Schemata liegen." } }
+      ]
+    },
+    "B03": {
+      "titel": { "de": "Suchpfad und Präfix" },
+      "prompt": "SQL",
+      "befehl": "SHOW search_path;\n\nSELECT * FROM v_rezension_produkt LIMIT 1;\nSELECT * FROM burgermetrics.v_rezension_produkt LIMIT 1;",
+      "teile": [
+        { "was": "SHOW search_path;", "bedeutet": { "de": "Zeigt den Suchpfad der Sitzung: wawi, burgermetrics. Ein Name ohne Schema wird in dieser Reihenfolge gesucht." } },
+        { "was": "v_rezension_produkt (ohne Präfix)", "bedeutet": { "de": "Trifft die Sicht aus wawi, weil wawi im Suchpfad vorn steht — auch wenn burgermetrics eine Sicht gleichen Namens hat." } },
+        { "was": "burgermetrics.v_rezension_produkt", "bedeutet": { "de": "Das vorangestellte Schema erzwingt die Sicht aus burgermetrics, unabhängig vom Suchpfad." } }
+      ],
+      "ausgabe": "search_path\nwawi, burgermetrics\n\nartikel_id | name | anzahl | sterne_mittel | letzte\n4 | Bacon King | 1 | 4.00 | 2018-05-13\n\nproduct_id | product_name | category | anzahl | sterne_mittel | anteil_positiv_pct\n4 | Bacon King | Burger | 1 | 4.00 | 100.0"
+    }
+  },
+  "uebungen": [
+    { "id": "W01-01", "typ": "sql",
+      "titel": { "de": "Wie viele Tabellen hat jedes Schema?" },
+      "aufgabe": { "de": "<p>Zählen Sie je Schema die Tabellen (<code>table_type = 'BASE TABLE'</code>) in <code>information_schema.tables</code> — nur die Schemata <code>wawi</code> und <code>burgermetrics</code>, sortiert nach Schemaname.</p><p>Erwartet werden zwei Spalten: <code>table_schema</code>, <code>tabellen</code>.</p>" },
+      "start": "SELECT table_schema\nFROM information_schema.tables\n",
+      "loesung": "SELECT table_schema, count(*) AS tabellen\nFROM information_schema.tables\nWHERE table_schema IN ('wawi', 'burgermetrics') AND table_type = 'BASE TABLE'\nGROUP BY table_schema\nORDER BY table_schema",
+      "sortiert": true,
+      "hinweis": { "de": "<p><code>information_schema.tables</code> kennt jede Tabelle und Sicht; <code>table_type</code> unterscheidet <code>BASE TABLE</code> und <code>VIEW</code>. Gruppieren Sie nach <code>table_schema</code>.</p>" },
+      "rueckmeldung": { "de": "Im Browser sind es 15 und 10 Tabellen; in der echten Datenbank 16 und 14, dazu 38 materialisierte Sichten in burgermetrics — die stehen nicht in information_schema.tables, sondern in pg_matviews." } },
+
+    { "id": "W01-02", "typ": "sql",
+      "titel": { "de": "Der Suchpfad entscheidet, welche Sicht Sie bekommen" },
+      "aufgabe": { "de": "<p>Die Startabfrage liest <code>v_rezension_produkt</code> ohne Schema — und trifft die Sicht in <code>wawi</code>. Gefragt ist die Sicht des Auswertungsmodells: je Produkt mit mindestens einer Rezension <code>product_name</code>, <code>category</code>, <code>anzahl</code> und <code>sterne_mittel</code>, sortiert nach <code>sterne_mittel</code> absteigend, dann <code>product_name</code>.</p>" },
+      "start": "SELECT *\nFROM v_rezension_produkt\nLIMIT 5\n",
+      "loesung": "SELECT product_name, category, anzahl, sterne_mittel\nFROM burgermetrics.v_rezension_produkt\nWHERE anzahl > 0\nORDER BY sterne_mittel DESC, product_name",
+      "sortiert": true,
+      "hinweis": { "de": "<p>Schreiben Sie das Schema davor: <code>burgermetrics.v_rezension_produkt</code>. Die Spalte <code>category</code> gibt es nur dort.</p>" },
+      "rueckmeldung": { "de": "Der Suchpfad wawi, burgermetrics löst einen Namen im ersten Schema auf, das ihn kennt. Die Dash-App der Fallstudie qualifiziert deshalb jede Sicht; in Werkzeugen mit Schemabaum wählen Sie das Schema im Navigator." } },
+
+    { "id": "W01-03", "typ": "sql",
+      "titel": { "de": "Die Sicht als Vertrag" },
+      "aufgabe": { "de": "<p>Lesen Sie aus <code>v_kennzahlen_jahr</code> die Spalten <code>jahr</code>, <code>bestellungen</code> und <code>umsatz</code> für die Jahre ab 2024, aufsteigend nach Jahr. Rechnen Sie nichts selbst — die Sicht definiert die Kennzahl.</p>" },
+      "start": "SELECT *\nFROM v_kennzahlen_jahr\n",
+      "loesung": "SELECT jahr, bestellungen, umsatz\nFROM v_kennzahlen_jahr\nWHERE jahr >= 2024\nORDER BY jahr",
+      "sortiert": true,
+      "hinweis": { "de": "<p><code>WHERE jahr >= 2024</code> und <code>ORDER BY jahr</code>; drei Spalten, nicht <code>*</code>.</p>" },
+      "rueckmeldung": { "de": "Dieselbe Sicht liefert dem Dashboard, den Notebooks und der Dash-App ihre Zahlen. Wer die Definition ändert, ändert alle Leser auf einmal — das ist der Sinn der Semantikschicht." } },
+
+    { "id": "W01-04", "typ": "quiz",
+      "titel": { "de": "Was die Rolle darf" },
+      "aufgabe": { "de": "<p>Drei Fragen zur Rolle <code>studi_daba</code>.</p>" },
+      "fragen": [
+        { "frage": { "de": "Welche Anweisung führt die Rolle aus?" },
+          "optionen": [ { "de": "SELECT count(*) FROM wawi.rezension" }, { "de": "INSERT INTO wawi.rezension (…) VALUES (…)" }, { "de": "CREATE TABLE probe (x int)" }, { "de": "SELECT wawi.bestellung_anlegen(…)" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Die Rolle liest beide Schemata. INSERT und CREATE TABLE scheitern an der nur lesenden Transaktion, bestellung_anlegen() ist ihr entzogen (permission denied)." } },
+        { "frage": { "de": "SELECT * FROM v_rezension_produkt ohne Präfix liefert …" },
+          "optionen": [ { "de": "die Sicht aus wawi, weil wawi im Suchpfad vorn steht" }, { "de": "die Sicht aus burgermetrics, weil sie materialisiert ist" }, { "de": "einen Fehler, weil der Name doppelt vorkommt" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "PostgreSQL nimmt das erste Schema im Suchpfad, das den Namen kennt. Ein Fehler entsteht nicht; man bekommt nur andere Spalten als erwartet." } },
+        { "frage": { "de": "Warum stehen die Kennzahlen in materialisierten Sichten?" },
+          "optionen": [ { "de": "Damit jede Kennzahl genau einmal definiert ist und schnell gelesen wird" }, { "de": "Weil die Rolle keine Tabellen lesen darf" }, { "de": "Weil Sichten in PostgreSQL immer materialisiert sind" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Eine Sicht ist die Definition, die Materialisierung macht sie schnell. Tabellen darf die Rolle lesen; gewöhnliche Sichten werden bei jedem Aufruf neu berechnet." } }
+      ],
+      "rueckmeldung": { "de": "Die Rolle ist die Leseöffnung des Bestands. Alles, was sie nicht darf, gehört in Ihre eigene Datenbank." } },
+
+    { "id": "W01-05", "typ": "zuordnen",
+      "titel": { "de": "Meldung und Ursache" },
+      "aufgabe": { "de": "<p>Ordnen Sie jede Meldung der Ursache zu.</p>" },
+      "ziele": [ { "id": "praefix", "text": { "de": "falsches oder fehlendes Schema" } }, { "id": "readonly", "text": { "de": "nur lesende Transaktion der Rolle" } }, { "id": "recht", "text": { "de": "fehlendes Ausführungsrecht" } }, { "id": "grenze", "text": { "de": "Zeit- oder Sitzungsgrenze" } } ],
+      "paare": [
+        { "begriff": { "de": "permission denied for schema public" }, "ziel": "praefix" },
+        { "begriff": { "de": "cannot execute INSERT in a read-only transaction" }, "ziel": "readonly" },
+        { "begriff": { "de": "permission denied for function bestellung_anlegen" }, "ziel": "recht" },
+        { "begriff": { "de": "canceling statement due to statement timeout" }, "ziel": "grenze" },
+        { "begriff": { "de": "cannot execute CREATE TABLE in a read-only transaction" }, "ziel": "readonly" },
+        { "begriff": { "de": "too many connections for role \"studi_daba\"" }, "ziel": "grenze" }
+      ],
+      "rueckmeldung": { "de": "Vier Ursachen, sechs Meldungen. Die read-only-Meldung kommt von einer abschaltbaren Voreinstellung der Rolle, nicht von einer echten Sperre; die wirksame Sperre sind die fehlenden Rechte (ACLs) auf Tabellen, Schemata und Funktionen. Die Grenzen schützen die Instanz vor Versehen." } },
+
+    { "id": "W01-06", "typ": "checkliste",
+      "titel": { "de": "Die echte Verbindung herstellen" },
+      "aufgabe": { "de": "<p>Verbinden Sie ein Werkzeug Ihrer Wahl — psql, DBeaver oder DataGrip — mit der Datenbank der Fallstudie. Diese Liste gilt für alle drei.</p>" },
+      "schritte": [
+        { "text": { "de": "Werkzeug installiert: psql (mit PostgreSQL 17), DBeaver Community 26.2 oder DataGrip 2026.2 (Student Pack)." } },
+        { "text": { "de": "Neue Verbindung mit Host <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Datenbank <code>postgres</code>, Benutzer <code>studi_daba</code>, Kennwort <code>thws</code>; SSL nicht erzwungen. Test Connection meldet Erfolg." } },
+        { "text": { "de": "Im Schemabaum (oder mit <code>\\dn</code>) sind <code>wawi</code> und <code>burgermetrics</code> sichtbar." } },
+        { "text": { "de": "<code>SELECT count(*) FROM burgermetrics.fact_orders;</code> liefert <code>754513</code>." } },
+        { "text": { "de": "<code>SELECT jahr, umsatz FROM burgermetrics.v_kennzahlen_jahr WHERE jahr = 2025;</code> liefert <code>2994771.13</code>." } },
+        { "text": { "de": "<code>INSERT INTO wawi.rezension (artikel_id, sterne, inhalt, quelle) VALUES (1, 5, 'Probe', 'shop');</code> scheitert mit <code>cannot execute INSERT in a read-only transaction</code> — die Rolle schreibt nicht." } }
+      ],
+      "rueckmeldung": { "de": "Wenn der letzte Schritt scheitert, ist alles richtig: Die Rolle liest und schreibt nicht. Die Verbindung brauchen Sie in Lab 02, 04, 05 und 06 wieder." } }
+  ]
+}

@@ -1,0 +1,11 @@
+# Verbindungsangaben für DBeaver und andere Werkzeuge mit Formularfeldern
+# Demo-Konto studi_daba, öffentlich und nur lesend. Stand 09/2026.
+
+Treiber:    PostgreSQL
+Host:       supabase.butscher.cloud
+Port:       5433
+Database:   postgres
+Username:   studi_daba
+Password:   thws
+
+# SSL aus (Stand 09/2026).

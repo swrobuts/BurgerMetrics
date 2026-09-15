@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 05 · Tableau · BM-Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body class="lab-page" data-lab="lab-05">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <a class="header-back" href="index.html">← Zur Übersicht</a>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title">Abschnitte</div>
+  <a class="sidebar-link" href="#warum">Was Tableau hier leistet</a>
+  <a class="sidebar-link" href="#begriffe">Die Begriffe</a>
+  <a class="sidebar-link" href="#verbinden">Verbinden</a>
+  <a class="sidebar-link" href="#regal">Das Regal</a>
+  <a class="sidebar-link" href="#berechnen">Berechnen</a>
+  <a class="sidebar-link" href="#dashboard">Das Dashboard</a>
+  <a class="sidebar-link" href="#stolper">Stolpersteine</a>
+  <a class="sidebar-link" href="#simulator">Simulator</a>
+  <a class="sidebar-link" href="#uebungen">Übungen</a>
+  <a class="sidebar-link" href="#zusammenfassung">Zusammenfassung</a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">05</div>
+  <h1 class="lab-title">Tableau</h1>
+  <p class="lab-intro">Lab 04 hat das Auswertungsmodell der Fallstudie mit Power BI gelesen. Dieses Lab stellt dieselben Fragen — Umsatz je Monat, Umsatz je Filiale — an dieselben Sichten mit Tableau Desktop: PostgreSQL über den Connector anbinden, zwischen Live und Extract wählen, Felder als Dimension oder Measure auf Columns und Rows legen, Calculated Fields anlegen und aus zwei Blättern ein Dashboard mit einem Jahresfilter bauen. Die Kontrollzahl bleibt dieselbe wie in Lab 04, im Dashboard und in den Notebooks: 2.994.771,13 € Umsatz für 2025.</p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Live gegen Extract</span>
+    <span class="lernziel-chip">Dimension · Measure</span>
+    <span class="lernziel-chip">diskret (blau) · stetig (grün)</span>
+    <span class="lernziel-chip">Columns · Rows · Marks · Filters</span>
+    <span class="lernziel-chip">Calculated Field · LOD</span>
+    <span class="lernziel-chip">Dashboard mit Jahresfilter</span>
+  </div>
+  <div data-einordnung></div>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="warum">
+    <h2>Was Tableau hier leistet — und was gleich bleibt</h2>
+    <p>Power BI (Lab 04), das Dashboard, die Notebooks und die Dash-App der Fallstudie lesen ihre Kennzahlen aus den Sichten <code>v_*</code> des Schemas <code>burgermetrics</code> — jede Kennzahl genau einmal definiert (Lab 01, „Sichten als Vertrag“). Tableau Desktop ist ein weiterer Leser derselben Datenbank, mit einer anderen Arbeitsweise: Power BI verlangt erst ein Modell mit Beziehungen und Measures und setzt dann Bilder darauf; in Tableau ziehen Sie ein Feld auf ein Regal, und in demselben Augenblick ist eine Abfrage formuliert und ihr Ergebnis gezeichnet. Das Arbeitsblatt ist die Abfrage.</p>
+    <p>Was gleich bleibt, ist das Ergebnis. Umsatz ist die Summe von <code>net_total</code>, dem Bestellwert nach Rabatt (Lab 03), und <code>v_kennzahlen_jahr</code> liefert dafür <strong>2.994.771,13 €</strong> für 2025 aus <strong>136.557</strong> Bestellungen. Ein Blatt in Tableau, das eine andere Zahl zeigt, ist keine zweite Meinung, sondern ein Fehler — eine fehlende Beziehung, ein falsches Aggregat, eine Kennung, die summiert wurde. Die Checkliste dieses Labs endet deshalb mit derselben Kontrollzahl wie die in Lab 04.</p>
+    <div class="kette">
+      <div class="glied hell"><span class="titel">Lab 01 · 03</span><span class="was">Datenbank, Sichten, Galaxy-Schema</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Verbinden</span><span class="was">Connector, Live oder Extract</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied betont"><span class="titel">Regal</span><span class="was">Columns, Rows, Marks, Filters</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Berechnen</span><span class="was">Calculated Fields, LOD</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Dashboard</span><span class="was">zwei Blätter, ein Filter</span></div>
+    </div>
+    <div class="info-box">
+      <p><strong>Werkzeug und Stand.</strong> Dieses Lab bezieht sich auf Tableau Desktop 2026.2, erschienen am 27.08.2026 (Stand 09/2026). Preis und Lizenzbedingungen sind nach Herstellerangabe zu prüfen; die Studentenlizenz für Tableau Desktop und Tableau Prep ist seit 01.02.2025 eingestellt. Kostenlos ist die Tableau Desktop Public Edition — sie kennt keine Datenbankverbindung, dafür den Weg über die CSV-Dateien aus <code>notebooks/export/</code> (Abschnitt „Verbinden“). Der Bestand der Fallstudie ist synthetisch, und das Konto <code>studi_daba</code> liest nur.</p>
+    </div>
+    <div class="auswahl-hinweis">
+      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Tableau steht in diesem Kurs neben Power BI (Lab 04) und Python (Lab 06): drei Wege zu denselben Sichten, und die Kontrollzahl muss in jedem dieselbe sein.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="begriffe">
+    <h2>Die Begriffe</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Begriff</th><th>Was es ist</th><th>Wo</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Dimension · Measure</strong></td>
+            <td>Dimensionen gruppieren: Branch Name, Date, Order Channel. Measures werden aggregiert: Net Total, Stars. Tableau ordnet Zahlenspalten den Measures zu — auch <code>order_id</code>, eine Kennung, die man zählt und nicht summiert; die Rolle eines Feldes lässt sich ändern. Tableau zeigt Spaltennamen mit Großbuchstaben und Leerzeichen: aus <code>net_total</code> wird <code>Net Total</code>, aus <code>branch_name</code> wird <code>Branch Name</code>.</td>
+            <td>Data pane links im Blatt: Dimensionen über der Trennlinie, Measures darunter</td>
+          </tr>
+          <tr>
+            <td><strong>Diskret (blau) · Stetig (grün)</strong></td>
+            <td>Diskret erzeugt Köpfe — eine Überschrift je Wert —, stetig erzeugt eine Achse. Die Farbe der Pille sagt diskret oder stetig, nicht Dimension oder Measure: <code>Branch Name</code> ist blau und ergibt einen Kopf je Filiale, also Balken; <code>MONTH(Date)</code> als stetiges Datum ist grün und ergibt eine Zeitachse, also eine Linie. Eine Kennzahl kommt mit ihrer Aggregation auf das Regal, <code>SUM(Net Total)</code>, grün.</td>
+            <td>Pillenfarbe auf Columns und Rows</td>
+          </tr>
+          <tr>
+            <td><strong>Live · Extract</strong></td>
+            <td>Live schickt jede Änderung im Blatt als Abfrage an PostgreSQL — aktuell, aber jede Verbindung zählt gegen die zwanzig Sitzungen der Rolle (Lab 01). Extract kopiert einen Auszug in eine <code>.hyper</code>-Datei: schneller, offline, mit Funktionen, die die Quelle nicht hat — und ein Stand, der ab dem Schreiben veraltet. Der Vorgänger <code>.tde</code> ist seit März 2023 abgekündigt (Stand 09/2026).</td>
+            <td>Data-Source-Seite, Schalter Live / Extract</td>
+          </tr>
+          <tr>
+            <td><strong>Level of Detail (LOD)</strong></td>
+            <td>Ein Ausdruck, der die Ebene der Aggregation selbst nennt, statt sie vom Blatt zu übernehmen: <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> ist der Umsatz je Filiale, auch wenn das Blatt zusätzlich nach Monat gruppiert; die Formel legt die Ebene fest, das Blatt zeigt sie mit <code>Branch Name</code>.</td>
+            <td>Calculated Field (Abschnitt „Berechnen“)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tip-box">
+      <p>Zwei Fragen an jede Pille, unabhängig voneinander: Gruppiert sie oder wird sie aggregiert — Dimension oder Measure? Erzeugt sie Köpfe oder eine Achse — diskret (blau) oder stetig (grün)? Ein Datum kann grün sein, eine Kennzahl blau. Der Simulator dieses Labs vereinfacht das: Dimensionen sind dort blau, Kennzahlen grün, und die geordneten Dimensionen Monat und Stunde ergeben die Linie, die in Tableau eine grüne Datumspille ergibt.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="verbinden">
+    <h2>Verbinden</h2>
+    <p>Der Weg zur Datenbank beginnt mit <code>Connect → To a Server → PostgreSQL</code>. Der Dialog fragt nach Server <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Database <code>postgres</code>, Username <code>studi_daba</code> und Password <code>thws</code> — die fünf Angaben aus Lab 01, jede in einem eigenen Feld. „Require SSL“ bleibt aus; die Verbindung läuft wie in Lab 01 ohne SSL. Anders als Power BI bringt Tableau den Treiber für PostgreSQL nicht mit: Fehlt er, zeigt der Dialog „This connector requires a driver“ und verweist auf die Download-Seite; nach der Installation gelingt der zweite Versuch (Stand 09/2026, Tableau Desktop 2026.2).</p>
+    <div data-befehl="B01"></div>
+    <p>Nach der Anmeldung öffnet sich die <strong>Data-Source-Seite</strong>: links die Verbindung mit den Schemata und Tabellen, in der Mitte die Leinwand, oben rechts der Schalter Live oder Extract. Für das Dashboard dieses Labs genügen zwei Tabellen aus <code>burgermetrics</code>: <code>fact_orders</code> mit dem Bestellwert <code>net_total</code> und dem Datum, <code>dim_branch</code> mit dem Filialnamen. Beide kommen auf die Leinwand und müssen über <code>branch_id</code> verbunden sein — die Beziehung, die Power BI aus dem Fremdschlüssel übernommen hat (Lab 04). Fehlt sie, zeigt jedes Blatt in jeder Filiale den Gesamtumsatz (Abschnitt „Stolpersteine“).</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Data Source</span><span class="spacer"></span>Tableau Desktop 2026.2</div>
+      <div class="shot-body">
+        <div class="shot-side">
+          <h5>Connections <span class="callout">1</span></h5>
+          <ul class="baum">
+            <li class="aktiv">supabase.butscher.cloud</li>
+            <li class="ein">postgres</li>
+          </ul>
+          <h5>Table</h5>
+          <ul class="baum">
+            <li>▾ burgermetrics <span class="callout">2</span></li>
+            <li class="ein">dim_branch</li>
+            <li class="ein">fact_orders</li>
+          </ul>
+        </div>
+        <div class="shot-main">
+          <div class="zeile" style="pointer-events:none"><span class="beschriftung">Connection</span><span class="spacer"></span><label><input type="radio" aria-hidden="true" tabindex="-1"> Live</label><label><input type="radio" checked aria-hidden="true" tabindex="-1"> Extract</label><span class="callout">3</span></div>
+          <div class="leinwand"><span><span class="pill-neutral">fact_orders</span> ——— <span class="pill-neutral">dim_branch</span> <span class="callout">4</span></span></div>
+          <div class="zeile"><span class="beschriftung">Relationship</span><span class="feld">Branch Id (fact_orders)</span> = <span class="feld">Branch Id (dim_branch)</span></div>
+          <table>
+            <thead><tr><th># Order Id</th><th>Date</th><th># Branch Id</th><th># Net Total</th><th>Abc Branch Name <span class="callout">5</span></th></tr></thead>
+            <tbody>
+              <tr><td>1954</td><td>2017-05-18</td><td>1</td><td>11.37</td><td>BM Europastern</td></tr>
+              <tr><td>9770</td><td>2017-10-20</td><td>1</td><td>8.47</td><td>BM Europastern</td></tr>
+              <tr><td>33218</td><td>2018-10-11</td><td>2</td><td>11.95</td><td>BM Hauptbahnhof</td></tr>
+            </tbody>
+          </table>
+          <div class="zeile"><span class="tab aktiv">Data Source</span><span class="tab">Sheet 1</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Die Verbindung: Server und Datenbank aus dem Dialog. Die Rolle <code>studi_daba</code> liest beide Schemata; für dieses Dashboard braucht es nur <code>burgermetrics</code>.</span></li>
+      <li><span class="callout">2</span><span>Die beiden Tabellen des Dashboards: <code>fact_orders</code> trägt Datum und Bestellwert, <code>dim_branch</code> den Filialnamen — Faktentabelle und Dimension aus Lab 03.</span></li>
+      <li><span class="callout">3</span><span>Live oder Extract. Live schickt jede Änderung im Blatt als Abfrage an die Datenbank; Extract zieht einen Auszug in eine <code>.hyper</code>-Datei und rechnet danach lokal. Für den Kurs ist Extract die Wahl: Die Rolle hält zwanzig Sitzungen, und der Extract ist zugleich die Abhilfe, die der Stolperstein zur nur lesenden Transaktion nennt.</span></li>
+      <li><span class="callout">4</span><span>Die Verbindung der beiden Tabellen über <code>Branch Id</code> — die Spalte <code>branch_id</code> beider Tabellen. Sie ist die Voraussetzung dafür, dass <code>Branch Name</code> den Umsatz aufteilt — ohne sie steht in jeder Filiale die Gesamtsumme.</span></li>
+      <li><span class="callout">5</span><span>Die Vorschau mit den Typsymbolen: <code>#</code> ist Zahl, <code>Abc</code> ist Text. Tableau schreibt <code>order_id</code> als <code>Order Id</code> und <code>net_total</code> als <code>Net Total</code> — so heißen die Felder in den Formeln des Abschnitts „Berechnen“.</span></li>
+    </ol>
+    <p>Die Entscheidung Live oder Extract fällt auf dieser Seite. Live ist für einen Hörsaal die ungünstigere Wahl: Jede Änderung im Blatt löst eine Abfrage aus, und die Rolle hält zwanzig Sitzungen. Ein Extract fragt die Datenbank einmal, schreibt den Auszug als <code>.hyper</code>-Datei und rechnet danach ohne Verbindung — <code>fact_orders</code> mit 754.513 Zeilen und die 38 Sichten <code>v_*</code> belasten die Datenbank dann einmal statt bei jedem Ziehen. Neue Daten kommen erst mit dem nächsten Extract.</p>
+    <p>Die <strong>Tableau Desktop Public Edition</strong> kennt keine Datenbank: Sie liest Dateien (Excel, Text, statistische Dateien), Google Drive und OData, höchstens 15 Mio. Zeilen je Arbeitsmappe (Stand 09/2026). Ihr Weg zu den Daten der Fallstudie führt über den Export aus Notebook 00 (<code>00_zugang_und_daten.ipynb</code>, Lab 02): vier Sichten als CSV und Parquet unter <code>notebooks/export/</code>. Für das Dashboard dieses Labs genügen <code>v_umsatz_monat.csv</code> — 109 Monate von März 2017 bis März 2026 — und <code>v_filiale.csv</code> mit acht Filialen; die Public Edition erzeugt aus den Dateien ihren Extract. Die Studentenlizenz für Tableau Desktop und Tableau Prep ist seit 01.02.2025 eingestellt (Stand 09/2026); wer keine Lizenz für Tableau Desktop hat, arbeitet mit der Public Edition und den CSV-Dateien.</p>
+    <div data-befehl="B02"></div>
+  </section>
+
+  <section class="section-block" id="regal">
+    <h2>Das Regal</h2>
+    <p>Das Arbeitsblatt hat links das Data pane mit den Feldern als Pillen und in der Mitte die Regale: <code>Columns</code> und <code>Rows</code> bestimmen die Achsen, <code>Filters</code> schränkt die Zeilen ein, die <code>Marks</code> card legt die Markenart fest und kodiert Farbe, Größe und Beschriftung. Ein Feld auf einem Regal ist eine Abfrage: <code>Branch Name</code> auf Columns gruppiert, <code>SUM(Net Total)</code> auf Rows aggregiert — sinngemäß <code>SELECT branch_name, SUM(net_total) … GROUP BY branch_name</code>, gezeichnet als Balken.</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Sheet 1 — Umsatz je Monat</span><span class="spacer"></span>Tableau Desktop 2026.2</div>
+      <div class="shot-body">
+        <div class="shot-side">
+          <h5>Data <span class="callout">1</span></h5>
+          <ul class="baum">
+            <li>dim_branch</li>
+            <li class="ein"><span class="pill-blau">Abc Branch Name</span></li>
+            <li class="ein"><span class="pill-blau">Abc District</span></li>
+            <li>fact_orders</li>
+            <li class="ein"><span class="pill-blau">Date</span></li>
+            <li class="ein"><span class="pill-blau">Abc Order Channel</span></li>
+            <li class="ein">────────</li>
+            <li class="ein"><span class="pill-gruen"># Net Total</span></li>
+            <li class="ein"><span class="pill-gruen"># Order Id</span> <span class="callout">2</span></li>
+            <li class="ein"><span class="pill-gruen">=# Bestellwert</span></li>
+          </ul>
+        </div>
+        <div class="shot-main">
+          <div class="regalzeile"><span class="name">Filters</span><span class="ablage"></span><span class="callout">3</span></div>
+          <div class="regalzeile"><span class="name">Columns</span><span class="ablage"><span class="pill-gruen">MONTH(Date)</span></span><span class="callout">4</span></div>
+          <div class="regalzeile"><span class="name">Rows</span><span class="ablage"><span class="pill-gruen">SUM(Net Total)</span></span><span class="callout">5</span></div>
+          <div class="zeile"><span class="beschriftung">Marks</span><span class="feld">Line</span><span class="knopf">Color</span><span class="knopf">Size</span><span class="knopf">Label</span><span class="knopf">Detail</span><span class="knopf">Tooltip</span><span class="callout">6</span></div>
+          <div class="leinwand">Eine Linie mit 109 Punkten, März 2017 bis März 2026 — Achse SUM(Net Total)</div>
+          <div class="zeile"><span class="tab">Data Source</span><span class="tab aktiv">Sheet 1</span><span class="tab">Sheet 2</span><span class="tab">Dashboard 1</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Data pane, nach Tabellen gegliedert: Dimensionen über der Trennlinie (blau), Measures darunter (grün). Das Gleichheitszeichen markiert ein Calculated Field.</span></li>
+      <li><span class="callout">2</span><span><code>Order Id</code> steht als Zahl unter den Measures. Auf ein Regal gezogen hieße die Pille <code>SUM(Order Id)</code> — eine Summe von Bestellnummern. Zählen statt summieren, oder das Feld in eine Dimension umwandeln.</span></li>
+      <li><span class="callout">3</span><span><code>Filters</code> ist leer: Die Linie zeigt alle 109 Monate. Der Filter auf das Jahr kommt im Dashboard und wirkt dort auf beide Blätter.</span></li>
+      <li><span class="callout">4</span><span><code>MONTH(Date)</code> als stetiges Datum, grün: eine durchgehende Zeitachse. Als diskrete Pille (blau) stünden zwölf Köpfe nebeneinander, und die Monate aller Jahre fielen in denselben Kopf.</span></li>
+      <li><span class="callout">5</span><span>Die Kennzahl mit ihrer Aggregation im Namen: <code>SUM(Net Total)</code>. Die Aggregation gehört zur Pille, nicht zum Feld — dasselbe Feld kann auf einem anderen Regal als AVG liegen.</span></li>
+      <li><span class="callout">6</span><span>Marks card: Markenart Line, gewählt aus der stetigen Achse; darunter die Kodierungen. <code>Color</code> mit einer Dimension würde die Linie in Serien teilen — im Simulator dieselbe Wirkung.</span></li>
+    </ol>
+    <div class="concept-box">
+      <h3>Die Regel</h3>
+      <p>Dimension auf Columns und Measure auf Rows ergeben senkrechte Balken; Dimension auf Rows und Measure auf Columns ergeben waagerechte — für acht Filialnamen die besser lesbare Form. Eine geordnete Dimension — ein Datum als stetiges Feld, grün — ergibt eine Achse und damit eine Linie: <code>MONTH(Date)</code> auf Columns und <code>SUM(Net Total)</code> auf Rows ist der Umsatz im Zeitverlauf. Fehlt die Kennzahl, entsteht eine Tabelle: Köpfe ohne Achse. Das Diagramm wählen Sie nicht; es folgt aus den Regalen.</p>
+    </div>
+    <p>Eine Kennzahl kommt nie ohne Aggregation auf ein Regal: Tableau hängt ihr <code>SUM</code> an, und die Pille heißt <code>SUM(Net Total)</code>. Die Aggregation gehört zur Pille und lässt sich dort umstellen — <code>AVG(Stars)</code> für den Mittelwert der Sterne, <code>COUNT(Order Id)</code> für die Zahl der Bestellungen. Für Kennungen gilt dieselbe Regel wie in Lab 04: zählen, nicht summieren.</p>
+  </section>
+
+  <section class="section-block" id="berechnen">
+    <h2>Berechnen</h2>
+    <p>Was die Sicht nicht fertig liefert, rechnet Tableau als <strong>Calculated Field</strong> — mit derselben Vorsicht wie bei den Measures in Lab 04: Die Definition der Kennzahl bleibt in der Sicht, das Feld bildet sie nach und erfindet sie nicht neu.</p>
+    <div class="vorlagen">
+      <a class="vorlage" href="vorlagen/tableau-berechnete-felder.txt" download><span class="symbol">📄</span><span><span class="datei">tableau-berechnete-felder.txt</span><br><span class="was">Vier Calculated Fields, je eines pro Block, Erklärung in Kommentarzeilen: drei für die Datenbank, eines für die CSV-Dateien der Public Edition; dazu das Initial SQL.</span></span></a>
+    </div>
+    <div data-befehl="B03"></div>
+    <div class="karten">
+      <div class="karte">
+        <div class="kopfzeile">Bestellwert — Aggregat durch Aggregat</div>
+        <p><code>SUM([Net Total]) / COUNT([Order Id])</code>: Zähler und Nenner sind aggregiert, Tableau rechnet das Verhältnis je Zelle des Blatts — je Filiale, je Monat, für 2025 gesamt 21,93 € aus 2.994.771,13 € und 136.557 Bestellungen. Dieselbe Kennzahl heißt in <code>v_kennzahlen_jahr</code> <code>aov</code>. Eine Formel, die Aggregat und Zeile mischt — <code>SUM([Net Total]) / [Order Id]</code> —, weist der Dialog als ungültig ab.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Ø Sterne — AVG statt SUM</div>
+        <p><code>AVG([Stars])</code>: Sterne sind ein Wert je Rezension, keine Summe. Das Feld liest <code>fact_reviews</code>, die dritte Faktentabelle an denselben Dimensionen (Lab 03); je Filiale und Jahr aufgeteilt läuft es über <code>dim_branch</code> und das Datum der Rezension. Im Simulator gilt dasselbe für die Zufriedenheit: AVG, nicht SUM.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Umsatz je Filiale — FIXED</div>
+        <p><code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> nennt die Ebene selbst: die Summe je Filiale, auch wenn das Blatt zusätzlich nach Monat oder Kanal gruppiert. In einem Blatt nach Filiale und Monat steht neben jedem Monat die Summe seiner Filiale. Die Filialsummen zeigt das Blatt nur, wenn <code>Branch Name</code> darin liegt — ohne die Filiale im Blatt fasst Tableau die FIXED-Werte wieder zusammen, und es steht der Gesamtwert da. Ein gewöhnlicher Filter auf dem Blatt ändert den FIXED-Wert nicht; ein Datenquellenfilter schon.</p>
+      </div>
+    </div>
+    <p>Für eine Live-Verbindung bietet der Verbindungsdialog das Feld „Initial SQL“: eine Anweisung, die Tableau beim Verbinden ausführt. Der Suchpfad der Rolle lautet <code>wawi, burgermetrics</code> (Lab 01); die Anweisung stellt <code>burgermetrics</code> nach vorn, damit eigene Abfragen in Tableau die Sichten <code>v_*</code> ohne Präfix finden — bei <code>v_rezension_produkt</code>, die in beiden Schemata existiert, gewinnt dann <code>burgermetrics</code>:</p>
+    <div class="code-block">SET search_path TO burgermetrics, wawi</div>
+    <p><code>SET</code> verändert keine Daten und läuft in der nur lesenden Transaktion der Rolle. Eine schreibende Anweisung an dieser Stelle — etwa eine Hilfstabelle anlegen — scheitert mit der Meldung aus dem Abschnitt „Stolpersteine“.</p>
+  </section>
+
+  <section class="section-block" id="dashboard">
+    <h2>Das Dashboard</h2>
+    <p>Ein Blatt beantwortet eine Frage; ein Dashboard stellt zwei Antworten nebeneinander und lässt einen Filter auf beide wirken. Das Dashboard dieses Labs besteht aus zwei Blättern, einem Filter und einem Titel:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Baustein</th><th>Regale</th><th>Ergebnis</th></tr></thead>
+        <tbody>
+          <tr><td>Blatt 1 „Umsatz je Monat“</td><td><code>MONTH(Date)</code> stetig auf Columns, <code>SUM(Net Total)</code> auf Rows</td><td>eine Linie: ohne Filter 109 Monate von März 2017 bis März 2026, mit dem Jahr 2025 zwölf Punkte</td></tr>
+          <tr><td>Blatt 2 „Umsatz je Filiale“</td><td><code>Branch Name</code> auf Rows, <code>SUM(Net Total)</code> auf Columns, absteigend sortiert</td><td>acht waagerechte Balken, BM Europastern vorn</td></tr>
+          <tr><td>Dashboard</td><td>beide Blätter; ein Filter auf <code>YEAR(Date)</code>, der für beide gilt</td><td>mit 2025: Die Balken summieren sich auf die Linie — 2.994.771,13 €</td></tr>
+          <tr><td>Titel</td><td>eine Aussage, keine Achsenbeschreibung</td><td>„BM Europastern erzielt 2025 den höchsten Umsatz“ statt „Umsatz nach Branch Name“</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div data-befehl="B04"></div>
+    <p>In der Public Edition entstehen dieselben Blätter aus den CSV-Dateien: Blatt 1 aus <code>v_umsatz_monat.csv</code> mit <code>Monat</code> auf Columns und <code>SUM(Umsatz)</code> auf Rows, Blatt 2 aus <code>v_filiale.csv</code> mit <code>Branch Name</code> auf Rows und <code>SUM(Umsatz 2025)</code> auf Columns. Prüfen Sie, ob Tableau <code>Monat</code> als Datum liest (Kalendersymbol statt <code>Abc</code>): Als Text ergibt Monat weder eine stetige Achse noch einen Jahresfilter — dann den Datentyp des Feldes auf Datum ändern. <code>v_filiale.csv</code> trägt kein Jahr, sondern die fertige Spalte <code>umsatz_2025</code>; der Jahresfilter wirkt dort auf Blatt 1, und die Kontrollzahl stimmt in beiden Blättern: 2.994.771,13 €.</p>
+    <div class="concept-box">
+      <h3>Zwei Regeln aus dem Deck</h3>
+      <p><strong>Balken beginnen bei null.</strong> Ihre Länge kodiert den Wert; eine Achse, die erst bei einem hohen Betrag beginnt, macht aus einem kleinen Unterschied einen langen Balken.</p>
+      <p><strong>Der Titel ist eine Aussage.</strong> „Umsatz nach Branch Name“ beschreibt die Achsen; „BM Europastern erzielt 2025 den höchsten Umsatz“ sagt, was das Bild zeigt. Der Filter gehört in den Titel — 2.994.771,13 € sind der Umsatz eines Jahres, nicht der aller Jahre.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="stolper">
+    <h2>Stolpersteine</h2>
+    <div class="karten">
+      <div class="karte">
+        <div class="kopfzeile">Live-Verbindung: nur lesende Transaktion</div>
+        <p>Mit <code>studi_daba</code> kann eine Live-Verbindung an einer von zwei Meldungen scheitern. In der Standardsitzung ist jede Transaktion nur lesend; dann endet jeder Versuch, eine Tabelle anzulegen — auch eine temporäre, wie Tableau sie für manche Filter und beim Erzeugen mancher Extrakte anlegen will —, mit <code>ERROR:  cannot execute CREATE TABLE in a read-only transaction</code>. Schaltet ein Werkzeug die Voreinstellung mit <code>SET TRANSACTION READ WRITE</code> ab, greift die zweite Schranke: Der Rolle fehlt die TEMPORARY-Berechtigung auf der Datenbank, und dieselbe Anweisung endet mit <code>ERROR:  permission denied to create temporary tables in database "postgres"</code>. Abhilfe in beiden Fällen: einen Extract erzeugen und in der <code>.hyper</code>-Datei arbeiten, oder den Filter als Datenquellenfilter setzen. Stand 09/2026; beide Meldungen stammen wörtlich aus PostgreSQL — ob und wo Tableau sie zeigt, hängt von Version und Vorgang ab.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">In jeder Filiale dieselbe Summe</div>
+        <p>Blatt 2 zeigt in jeder Filiale denselben Wert, den Gesamtumsatz. Dann sind <code>fact_orders</code> und <code>dim_branch</code> auf der Data-Source-Seite nicht verbunden: <code>Branch Name</code> kann die Bestellungen nicht aufteilen. Keine Fehlermeldung — das Bild ist die Meldung. Abhilfe: zurück auf die Data-Source-Seite, die Verbindung über <code>branch_id</code> prüfen oder anlegen (Nachbildung im Abschnitt „Verbinden“).</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Tabelle statt Balken</div>
+        <p><code>Branch Name</code> liegt auf Rows, und das Blatt zeigt acht Köpfe untereinander mit leeren Zellen — eine Tabelle, kein Diagramm. Es fehlt die Kennzahl: Erst <code>SUM(Net Total)</code> auf Columns macht aus den Köpfen waagerechte Balken. Auch eine Kennzahl, die als diskrete (blaue) Pille neben der Dimension liegt, ergibt Köpfe — Zahlen als Überschriften statt einer Achse. Der Simulator verhält sich gleich: nur Dimensionen ergeben eine Tabelle.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">SUM(Order Id)</div>
+        <p><code>Order Id</code> ist eine ganze Zahl und steht deshalb unter den Measures; auf dem Regal heißt die Pille <code>SUM(Order Id)</code> — die Summe der Bestellnummern, eine Zahl ohne Bedeutung. Wer Bestellungen zählen will, stellt die Pille auf COUNT oder macht das Feld zur Dimension. Im Simulator: <code>SUM</code> auf Bestell-ID ergibt 1.310.137.177, <code>COUNT</code> zählt 2.000 Bestellungen.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Zwanzig Sitzungen im Hörsaal</div>
+        <p>Jede Änderung in einem Blatt mit Live-Verbindung löst eine Abfrage aus, und die Rolle <code>studi_daba</code> hält höchstens zwanzig gleichzeitige Sitzungen (Lab 01). Ein Hörsaal voller Live-Verbindungen belegt sie in Minuten, und die nächste Anmeldung scheitert mit <code>FATAL:  too many connections for role "studi_daba"</code>. Ein Extract fragt die Datenbank einmal und rechnet danach lokal.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-block" id="simulator">
+    <h2>Simulator</h2>
+    <p>Der Simulator unten trägt die Beschriftung von Tableau: links das <code>Data</code> pane mit Dimensionen als <strong>blauen</strong> Pillen (<code>Abc</code>, ein Kalendersymbol für die geordneten Felder Monat und Stunde) und Kennzahlen als <strong>grünen</strong> (<code>#</code>); rechts die Regale <code>Columns</code>, <code>Rows</code>, <code>Color</code> und <code>Filters</code> — <code>Color</code> vertritt die Marks card. Drei Dinge unterscheiden ihn vom Werkzeug. Felder werden in den Regalen ausgewählt statt gezogen. Kennzahlen kommen mit <code>SUM</code> auf das Regal und tragen im Chip die Aggregation, die Sie umstellen: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>. Und das Diagramm folgt der Regel aus dem Abschnitt „Das Regal“: Dimension auf Columns und Kennzahl auf Rows ergeben senkrechte Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie, <code>Color</code> Serien oder Stapel; nur Dimensionen, eine Kennzahl ohne Dimension oder Dimension und Kennzahl auf demselben Regal ergeben im Simulator eine Tabelle.</p>
+    <p>Die Daten: 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle, wie in Lab 04.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Feld</th><th>Art</th><th>Werte</th></tr></thead>
+        <tbody>
+          <tr><td>Monat</td><td>Dimension, geordnet</td><td><code>2025-01</code> bis <code>2025-12</code> — auf Columns entsteht eine Linie</td></tr>
+          <tr><td>Filiale</td><td>Dimension</td><td>die acht Filialen — auf Rows entstehen waagerechte Balken</td></tr>
+          <tr><td>Saison</td><td>Dimension</td><td>Spring, Summer, Autumn, Winter; Summer sind die Monate Juni bis August mit 580 Bestellungen</td></tr>
+          <tr><td>Bestell-ID</td><td>Kennzahl</td><td>die Bestellnummer — eine Kennung; <code>SUM</code> darüber ergibt 1.310.137.177, <code>COUNT</code> zählt 2.000</td></tr>
+          <tr><td>Umsatz (€)</td><td>Kennzahl</td><td>Bestellwert nach Rabatt; Summe aller 2.000: 43.882,98 €</td></tr>
+          <tr><td>Zufriedenheit</td><td>Kennzahl</td><td>2 bis 5, nur bei 451 bewerteten Bestellungen; <code>AVG</code> ignoriert die Lücken — im Sommer 126 bewertete Bestellungen</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div data-regal="frei" data-variante="tableau"></div>
+  </section>
+
+  <section class="section-block" id="uebungen">
+    <h2>Übungen</h2>
+    <p>Fünf Übungen: zwei im Simulator — Umsatz je Monat als Linie, Zufriedenheit je Filiale im Sommer als waagerechte Balken mit <code>AVG</code> und Filter —, ein Quiz zu Live, Extract und Public Edition, eine Reihenfolge vom Connector zum Dashboard und eine Checkliste für das Dashboard in Tableau Desktop oder der Public Edition.</p>
+    <div data-uebung="W05-01"></div>
+    <div data-uebung="W05-02"></div>
+    <div data-uebung="W05-03"></div>
+    <div data-uebung="W05-04"></div>
+    <div data-uebung="W05-05"></div>
+    <div data-fortschritt></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2>Zusammenfassung</h2>
+    <ul>
+      <li>Tableau ist ein zweiter Leser derselben Sichten: Das Arbeitsblatt ist die Abfrage, und das Ergebnis muss dasselbe sein wie in Power BI (Lab 04), im Dashboard und in den Notebooks — 2.994.771,13 € Umsatz aus 136.557 Bestellungen für 2025.</li>
+      <li>Dimensionen gruppieren, Measures werden aggregiert; blau heißt diskret (Köpfe), grün heißt stetig (Achse) — nicht Dimension oder Measure. Eine Kennzahl kommt mit ihrer Aggregation auf das Regal: <code>SUM(Net Total)</code>, <code>AVG(Stars)</code>, <code>COUNT(Order Id)</code>.</li>
+      <li>Verbinden: <code>Connect → To a Server → PostgreSQL</code> mit Server <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Database <code>postgres</code>, <code>studi_daba</code> / <code>thws</code>, „Require SSL“ aus; der Connector braucht einen Treiber, Tableau verweist auf den Download. Tableau Desktop 2026.2 vom 27.08.2026, Stand 09/2026.</li>
+      <li>Live schickt jede Änderung als Abfrage an die Datenbank, Extract kopiert einen Auszug in eine <code>.hyper</code>-Datei — schneller, offline, mit Funktionen, die die Quelle nicht hat, und ein Stand. Die Public Edition kennt keine Datenbank: Dateien, Google Drive, OData, 15 Mio. Zeilen je Arbeitsmappe; ihr Weg sind die CSV-Dateien aus <code>notebooks/export/</code>. Die Studentenlizenz ist seit 01.02.2025 eingestellt.</li>
+      <li>Die Regel des Regals: Dimension auf Columns und Measure auf Rows ergeben Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie; ohne Kennzahl entsteht eine Tabelle. Die Calculated Fields <code>Bestellwert</code>, <code>Ø Sterne</code> und <code>{ FIXED [Branch Name] : SUM([Net Total]) }</code> bilden Sichten nach, ohne sie neu zu definieren; <code>SET search_path TO burgermetrics, wawi</code> als Initial SQL stellt die Sichten ohne Präfix bereit.</li>
+      <li>Das Dashboard: zwei Blätter — Linie je Monat, Balken je Filiale —, ein Filter auf das Jahr für beide, ein Titel als Aussage; Balken beginnen bei null.</li>
+      <li>Stolpersteine: <code>cannot execute CREATE TABLE in a read-only transaction</code> in der Standardsitzung, <code>permission denied to create temporary tables in database "postgres"</code> sobald eine Sitzung die Nur-Lese-Voreinstellung abgeschaltet hat (in beiden Fällen: Extract oder Datenquellenfilter als Abhilfe), dieselbe Summe in jeder Filiale (Verbindung über <code>branch_id</code> fehlt), Tabelle statt Balken (Kennzahl fehlt), <code>SUM(Order Id)</code> (zählen, nicht summieren), zwanzig Sitzungen im Hörsaal. Lab 06 liest dieselben Sichten mit Python.</li>
+    </ul>
+    <div data-lab-nav></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS Business School · Datenbasierte Fallstudien · BM-Lab · Lab 05 · Stand 09/2026</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>

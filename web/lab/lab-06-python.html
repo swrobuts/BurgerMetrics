@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 06 · Python und Colab · BM-Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body class="lab-page" data-lab="lab-06">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <a class="header-back" href="index.html">← Zur Übersicht</a>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title">Abschnitte</div>
+  <a class="sidebar-link" href="#warum">Von oben nach unten</a>
+  <a class="sidebar-link" href="#runtime">Runtime und pip-Zelle</a>
+  <a class="sidebar-link" href="#verbindung">Die Verbindungszelle</a>
+  <a class="sidebar-link" href="#pandas">pandas: die Datenbank rechnet</a>
+  <a class="sidebar-link" href="#dash">Die Dash-App</a>
+  <a class="sidebar-link" href="#geheim">Zugangsdaten</a>
+  <a class="sidebar-link" href="#stolper">Stolpersteine</a>
+  <a class="sidebar-link" href="#uebungen">Übungen</a>
+  <a class="sidebar-link" href="#zusammenfassung">Zusammenfassung</a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">06</div>
+  <h1 class="lab-title">Python und Colab</h1>
+  <p class="lab-intro">Die neun Notebooks der Fallstudie lesen dieselbe Datenbank wie Power BI (Lab 04) und Tableau (Lab 05) — mit pandas und SQLAlchemy über das Demo-Konto aus Lab 01, in Google Colab oder lokal. Dieses Lab zeigt, was ein Notebook lauffähig macht: die Runtime und ihr Zustand, die Kopfzellen mit pip, Verbindung und <code>zahl()</code>, <code>read_sql</code> als Weg, auf dem die Datenbank rechnet und Python zeigt, die Dash-App in der letzten Codezelle — und wo eigene Zugangsdaten liegen, wenn nicht im Repository.</p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Runtime · Sitzung</span>
+    <span class="lernziel-chip">Verbindungszelle</span>
+    <span class="lernziel-chip">read_sql · DataFrame</span>
+    <span class="lernziel-chip">Dash inline</span>
+    <span class="lernziel-chip">Secrets · .env</span>
+  </div>
+  <div data-einordnung></div>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="warum">
+    <h2>Von oben nach unten</h2>
+    <p>Ein Notebook hält Code, Ausgaben und erklärenden Text in einer Datei (<code>.ipynb</code>) und wird zellenweise ausgeführt. Als Lehrmaterial taugt es nur, wenn es nach einem Neustart der Runtime von oben nach unten fehlerfrei durchläuft und dieselben Ausgaben liefert: Wer es öffnet, hat keine Variablen aus einer früheren Sitzung, sondern nur das, was die Zellen in ihrer Reihenfolge erzeugen. Eine gespeicherte Ausgabe belegt nicht, dass die Zelle darüber noch läuft.</p>
+    <p>Die neun Notebooks der Fallstudie — <code>notebooks/00_zugang_und_daten.ipynb</code> bis <code>08_sentiment_rezensionen.ipynb</code> — sind so gebaut, und <code>notebooks/pruefe_notebooks.sh</code> prüft es: Das Skript führt jedes Notebook mit <code>jupyter nbconvert --execute</code> gegen die Datenbank aus und speichert die Ausgaben in der Datei; läuft eines nicht durch, bricht es ab. Danach sucht <code>quellen/pruefe_ausgaben.py</code> in jedem Notebook nach Fehlerausgaben. Die Notebook-Ausgaben, die dieses Lab zitiert, stammen aus dem gespeicherten Lauf des Notebooks.</p>
+    <div class="kette">
+      <div class="glied hell"><span class="titel">Titelzelle</span><span class="was">Nummer, Titel, Link „In Colab öffnen“</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">pip-Zelle</span><span class="was"><code>subprocess.check_call([...])</code> — in Colab einmal</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied betont"><span class="titel">Verbindungszelle</span><span class="was"><code>VERBINDUNG</code>, <code>create_engine</code>, <code>lade_sql()</code>, <code>lade_csv()</code></span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Hilfsfunktion</span><span class="was"><code>zahl()</code> — deutsche Zahlen</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied hell"><span class="titel">Analyse</span><span class="was">Fragestellung, Daten, Vorgehen, Ergebnis</span></div>
+    </div>
+    <p>Vier Kopfzellen, dann die Analyse — in dieser Reihenfolge in allen neun Notebooks. <code>notebooks/quellen/gemeinsam.py</code> schreibt die Kopfzellen beim Bauen hinein (Bauskripte <code>bau_00.py</code> bis <code>bau_08.py</code>, geschrieben mit <code>nbformat</code>); wer ein Notebook gelesen hat, findet sich in den anderen acht zurecht. Notebook 00 (<code>00_zugang_und_daten.ipynb</code>) ist das Beispiel dieses Labs: Verbindung, Schemata und Sichten, CSV per Git LFS, DuckDB, Export für Power BI und Tableau, Grenzen der Rolle, Dash inline.</p>
+    <div class="concept-box">
+      <h3>Der Prüfsatz</h3>
+      <p>Ein Notebook ist fertig, wenn es nach „Runtime → Restart“ und erneutem Ausführen aller Zellen von oben nach unten dieselben Zahlen zeigt wie zuvor. Für die Notebooks der Fallstudie erledigt das <code>pruefe_notebooks.sh</code> (rund 20 Minuten für alle neun); für ein eigenes Notebook ist es ein Handgriff vor jeder Abgabe.</p>
+    </div>
+    <div class="auswahl-hinweis">
+      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Colab steht hier, weil jedes Notebook der Fallstudie einen Colab-Link im Kopf trägt und dort ohne Installation läuft. Dieselben Dateien laufen lokal in Jupyter (<code>python3 -m pip install -r notebooks/requirements.txt</code>, dann <code>jupyter lab notebooks/</code>) und in jeder anderen Jupyter-Umgebung; das Format <code>.ipynb</code> ist der gemeinsame Nenner, nicht die Plattform.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="runtime">
+    <h2>Runtime und pip-Zelle</h2>
+    <p>In Colab sind Notebook und Runtime zwei Dinge. Das Notebook ist die Datei — hier aus GitHub geöffnet über <code>colab.research.google.com/github/swrobuts/BurgerMetrics/blob/main/notebooks/00_zugang_und_daten.ipynb</code>, den Link „In Colab öffnen“ im Kopf jedes Notebooks. Die Runtime ist die Sitzung auf einem Rechner von Google, in der der Code läuft; sie hält Variablen, Importe und Funktionen im Arbeitsspeicher. „Runtime → Restart“ beendet diese Sitzung: Variablen, Importe und Funktionen sind danach weg, die Datei mit ihren gespeicherten Ausgaben bleibt. Deshalb steht die pip-Zelle oben und die Verbindungszelle direkt darunter — auf einer neuen Runtime beginnt man wieder oben.</p>
+    <p>Die pip-Zelle stellt die Pakete bereit, die die Notebooks über pandas hinaus brauchen: SQLAlchemy und psycopg2 für die Verbindung, DuckDB, scikit-learn, mlxtend, statsmodels, holidays und Dash für die weiteren Notebooks. Die Zelle ruft <code>subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', *pakete])</code> auf — <code>-q</code> lässt die Meldungen der Installation weg — und endet mit <code>print('Pakete bereit.')</code>. Weil die Installation nicht mehr über die <code>%pip</code>-Magic läuft, hängt IPython keine Meldung mehr an; <code>Note: you may need to restart the kernel to use updated packages.</code> kann nicht mehr erscheinen. Ein Neustart der Runtime bleibt trotzdem sinnvoll, damit eine frisch installierte Paketversion in der laufenden Sitzung wirkt. Lokal genügt <code>notebooks/requirements.txt</code>; so steht es im Kommentar der Zelle.</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">00_zugang_und_daten.ipynb</span><span class="spacer"></span>Colab</div>
+      <div class="shot-body eins">
+        <div class="shot-main">
+          <div class="zelle"><span class="nrz">[1]</span># In Colab einmal ausführen; lokal genügt notebooks/requirements.txt<br>import subprocess<br>import sys<br><br>pakete = ['sqlalchemy', 'psycopg2-binary', 'duckdb', 'scikit-learn', 'mlxtend&gt;=0.23.2', 'statsmodels', 'holidays', 'dash']<br>subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', *pakete])<br>print('Pakete bereit.') <span class="callout">1</span></div>
+          <div class="ausgabe">Pakete bereit. <span class="callout">2</span></div>
+          <div class="zelle"><span class="nrz">[2]</span>import pandas as pd<br>from sqlalchemy import create_engine<br><br>VERBINDUNG = "postgresql+psycopg2://studi_daba:thws@supabase.butscher.cloud:5433/postgres" <span class="callout">3</span><br>engine = create_engine(VERBINDUNG)<br><br>def lade_sql(sql):<br>&nbsp;&nbsp;&nbsp;&nbsp;# Führt eine Abfrage aus und gibt das Ergebnis als DataFrame zurück<br>&nbsp;&nbsp;&nbsp;&nbsp;return pd.read_sql(sql, engine)<br><br>def lade_csv(name):<br>&nbsp;&nbsp;&nbsp;&nbsp;# Liest eine CSV-Datei des Datensatzes direkt aus GitHub (Git LFS)<br>&nbsp;&nbsp;&nbsp;&nbsp;url = f"https://media.githubusercontent.com/media/swrobuts/BurgerMetrics/main/dataset/{name}.csv"<br>&nbsp;&nbsp;&nbsp;&nbsp;return pd.read_csv(url) <span class="callout">4</span></div>
+          <div class="zelle"><span class="nrz">[3]</span>def zahl(wert, nachkommastellen=0):<br>&nbsp;&nbsp;&nbsp;&nbsp;# Zahl deutsch schreiben: Punkt als Tausendertrenner, Komma als Dezimaltrenner<br>&nbsp;&nbsp;&nbsp;&nbsp;text = f"{wert:,.{nachkommastellen}f}"<br>&nbsp;&nbsp;&nbsp;&nbsp;return text.replace(",", "X").replace(".", ",").replace("X", ".") <span class="callout">5</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Die pip-Zelle: in Colab einmal je Sitzung, lokal durch <code>notebooks/requirements.txt</code> ersetzt. Die Paketliste ist in acht Notebooks dieselbe; Notebook 08 ergänzt <code>transformers torch</code>.</span></li>
+      <li><span class="callout">2</span><span>Die Ausgabe nach der Installation: <code>Pakete bereit.</code> Ein Hinweis auf einen Neustart erscheint nicht mehr automatisch; nach frisch installierten Paketen ist ein Neustart der Runtime trotzdem sinnvoll, bevor es weitergeht.</span></li>
+      <li><span class="callout">3</span><span>Die Verbindungszeichenkette mit dem Demo-Konto — die fünf Angaben aus Lab 01 in einer Zeile.</span></li>
+      <li><span class="callout">4</span><span><code>lade_sql()</code> und <code>lade_csv()</code>: die beiden Ladehelfer, je Notebook definiert (B01).</span></li>
+      <li><span class="callout">5</span><span><code>zahl()</code>: die dritte Kopfzelle, deutsche Schreibweise für Ausgaben — <code>zahl(2994771.13, 2)</code> ergibt <code>2.994.771,13</code>.</span></li>
+    </ol>
+  </section>
+
+  <section class="section-block" id="verbindung">
+    <h2>Die Verbindungszelle</h2>
+    <p>Die zweite Codezelle ist in allen neun Notebooks zeichengleich (<code>VERBINDUNG</code> in <code>gemeinsam.py</code>) — anders als die pip-Zelle, die Notebook 08 um <code>transformers torch</code> erweitert. Sie besteht aus vier Teilen: zwei Importen, der Verbindungszeichenkette mit der Engine und den beiden Ladehelfern <code>lade_sql()</code> und <code>lade_csv()</code>. Quelle ist <code>notebooks/quellen/gemeinsam.py</code>; die Kopiervorlage enthält die Zelle mit Kopfkommentar und Verbindungsprobe.</p>
+    <div data-befehl="B01"></div>
+    <div class="vorlagen">
+      <a class="vorlage" href="vorlagen/notebook-verbindungszelle.py" download><span class="symbol">📄</span><span><span class="datei">notebook-verbindungszelle.py</span><br><span class="was">Die Verbindungszelle aus B01 mit Kopfkommentar und der Verbindungsprobe aus Notebook 00 — zum Einfügen in eine Colab-Zelle.</span></span></a>
+    </div>
+    <p>Notebook 00 prüft die Verbindung in der Zelle direkt nach den Kopfzellen — Rolle, Suchpfad und der Schalter, der jede Transaktion nur lesend macht:</p>
+    <div class="code-block">lade_sql("SELECT current_user, current_setting('search_path') AS suchpfad, "
+         "current_setting('default_transaction_read_only') AS nur_lesen")
+
+  current_user             suchpfad nur_lesen
+0   studi_daba  wawi, burgermetrics        on</div>
+    <p>Die Grenzen aus Lab 01 gelten über SQLAlchemy genauso wie in psql: zehn Minuten je Abfrage, zwanzig Sitzungen, kein Schreiben — auch wenn eine Sitzung die nur lesende Voreinstellung mit <code>SET TRANSACTION READ WRITE</code> abschaltet. Notebook 00 führt genau das vor: Die Zelle schaltet gezielt in eine schreibbare Transaktion und versucht <code>UPDATE dim_branch SET branch_name = branch_name WHERE false</code> — sie endet mit <code>(psycopg2.errors.InsufficientPrivilege) permission denied for table dim_branch</code>. Nicht die read-only-Voreinstellung, sondern die fehlenden Rechte (ACLs) sind die eigentliche Sperre; die Notebooks verändern den Bestand nicht.</p>
+    <p>Die Tabellenübersicht danach — <code>information_schema.tables</code> für Tabellen und Sichten, <code>pg_matviews</code> für die materialisierten Sichten, die dort nicht stehen — liefert die Zahlen, die die Checkliste W06-05 abfragt:</p>
+    <div class="code-block">          schema         art  anzahl
+0  burgermetrics  BASE TABLE      14
+1           wawi  BASE TABLE      16
+2           wawi        VIEW      10
+Das Schema burgermetrics hat 38 materialisierte Sichten.</div>
+    <h3>Die dritte Kopfzelle: zahl()</h3>
+    <p>Die Ausgaben der Notebooks schreiben Zahlen deutsch. <code>f"{wert:,.2f}"</code> liefert die englische Schreibweise <code>2,994,771.13</code>; drei <code>replace()</code> tauschen Komma und Punkt über den Umweg <code>X</code>, weil ein direkter Tausch das erste Ergebnis gleich wieder überschriebe. Jedes Notebook definiert die Funktion selbst, damit es allein läuft (W06-01).</p>
+    <div class="code-block">def zahl(wert, nachkommastellen=0):
+    # Zahl deutsch schreiben: Punkt als Tausendertrenner, Komma als Dezimaltrenner
+    text = f"{wert:,.{nachkommastellen}f}"
+    return text.replace(",", "X").replace(".", ",").replace("X", ".")
+
+zahl(2994771.13, 2)   # 2.994.771,13
+zahl(136557)          # 136.557</div>
+  </section>
+
+  <section class="section-block" id="pandas">
+    <h2>pandas: die Datenbank rechnet, Python zeigt</h2>
+    <p><code>read_sql</code> liefert einen DataFrame: eine Tabelle im Arbeitsspeicher der Runtime, Spaltennamen und Typen aus der Datenbank — bei <code>v_kennzahlen_jahr</code> sind <code>jahr</code> und <code>bestellungen</code> <code>int64</code>, <code>umsatz</code> ist <code>float64</code>. Was in ihr steht, hat PostgreSQL berechnet: die Aggregation über 754.513 Bestellungen, gespeichert als materialisierte Sicht (Lab 01). Eine Sicht mit zehn Zeilen kommt in Millisekunden. Die 2.950.082 Positionen holt dagegen niemand nach Colab: <code>SELECT * FROM fact_order_items</code> kann über die Verbindung gegen die Zeitgrenze von zehn Minuten laufen und füllt den Arbeitsspeicher der Runtime mit Zeilen, die die Datenbank in einer Sicht längst zusammengefasst hat.</p>
+    <div data-befehl="B02"></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Schritt</th><th>Wo</th><th>Womit</th></tr></thead>
+        <tbody>
+          <tr><td>Filtern und aggregieren</td><td>Datenbank</td><td>Sicht <code>v_*</code>, oder <code>WHERE</code> und <code>GROUP BY</code> in <code>lade_sql()</code></td></tr>
+          <tr><td>Kleine Dimension nachschlagen</td><td>GitHub (Git LFS)</td><td><code>lade_csv("dim_branch")</code> — acht Zeilen, 17 Spalten</td></tr>
+          <tr><td>Zeigen: Tabelle, Diagramm, Text</td><td>Python</td><td><code>tail()</code>, <code>zahl()</code>, matplotlib, plotly</td></tr>
+          <tr><td>Modelle: Segmente, Regeln, Prognosen</td><td>Python, auf dem Ergebnis der Datenbank</td><td>scikit-learn, mlxtend, statsmodels (Lab 07)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notebook 00 zeichnet aus demselben DataFrame ein Balkendiagramm mit matplotlib — <code>achse.bar(kennzahlen["jahr"], kennzahlen["umsatz"] / 1_000_000)</code> — und schreibt den Befund in den Titel: 2017 und 2026 sind Rumpfjahre, der Betrieb begann im März 2017, die Daten enden im März 2026.</p>
+  </section>
+
+  <section class="section-block" id="dash">
+    <h2>Die Dash-App</h2>
+    <p>Dash ist ein Python-Paket, das aus einem Layout und Rückruffunktionen (Callbacks) eine Web-App macht; die Diagramme zeichnet plotly. Die Fallstudie hat eine solche App in <code>dash/app.py</code>: vier Karten aus der Semantikschicht — die Kennzahlkacheln für 2025 (Umsatz, Bestellungen, Ø Bestellwert, Zufriedenheit), Umsatz je Monat mit Filialauswahl, Kanalanteile je Jahr und Ø Sterne je Produkt. Die Kacheln lesen <code>v_kennzahlen_jahr</code> und <code>v_kennzahl_einzeln</code>, die drei anderen Karten <code>v_umsatz_monat</code>, <code>v_kanal_jahr</code> und <code>v_rezension_produkt</code>; die Filialauswahl rechnet den Monatsumsatz aus <code>fact_orders</code>. Dieselben Zahlen wie das Dashboard, weil beide dieselben Definitionen lesen (Lab 01).</p>
+    <div class="code-block">python3 -m pip install -r dash/requirements.txt
+python3 dash/app.py            # http://127.0.0.1:8050</div>
+    <p>Die App liest die Verbindung aus der Umgebungsvariablen <code>DATABASE_URL</code>; fehlt sie, nimmt sie das Demo-Konto — dasselbe Muster wie die Vorlage <code>verbindung-sqlalchemy.py</code> (B03).</p>
+    <p>In Notebook 00 läuft eine der vier Karten in der letzten Codezelle: „Umsatz je Monat“ mit der Filialauswahl, gebaut aus <code>v_umsatz_monat</code>, <code>v_filiale</code> und <code>fact_orders</code>. Die Zelle beginnt mit <code>DASH_STARTEN = False</code>, damit die Abnahme mit <code>pruefe_notebooks.sh</code> ohne offenen Port durchläuft; in Colab auf <code>True</code> gesetzt, startet <code>app.run(jupyter_mode="inline", port=8050)</code> die App unter der Zelle.</p>
+    <div class="code-block">DASH_STARTEN = False
+
+from dash import Dash, dcc, html, Input, Output
+import plotly.express as px
+
+umsatz_monat = lade_sql("SELECT monat, umsatz FROM v_umsatz_monat ORDER BY monat")
+filialliste = lade_sql("SELECT branch_id, branch_name FROM v_filiale ORDER BY branch_id")
+
+def umsatz_je_filiale(branch_id):
+    # Monatsumsatz einer Filiale aus fact_orders; None heißt alle Filialen
+    if branch_id is None:
+        return umsatz_monat
+    return lade_sql(f"""
+        SELECT to_char(date, 'YYYY-MM') AS monat, sum(net_total) AS umsatz
+        FROM fact_orders WHERE branch_id = {int(branch_id)}
+        GROUP BY 1 ORDER BY 1""")
+
+app = Dash(__name__)
+app.layout = html.Div([
+    html.H3("Umsatz je Monat"),
+    dcc.Dropdown(id="filiale", options=[{"label": "Alle Filialen", "value": "alle"}]
+                 + [{"label": z.branch_name, "value": int(z.branch_id)} for z in filialliste.itertuples()],
+                 value="alle", clearable=False),
+    dcc.Graph(id="linie"),
+])
+
+@app.callback(Output("linie", "figure"), Input("filiale", "value"))
+def zeichne(wahl):
+    # Zeichnet die Linie neu, sobald die Filiale wechselt
+    daten = umsatz_je_filiale(None if wahl == "alle" else wahl)
+    return px.line(daten, x="monat", y="umsatz", labels={"monat": "Monat", "umsatz": "Umsatz in €"})
+
+if DASH_STARTEN:
+    app.run(jupyter_mode="inline", port=8050)
+else:
+    print("Dash-App gebaut; zum Starten DASH_STARTEN = True setzen.")
+
+Dash-App gebaut; zum Starten DASH_STARTEN = True setzen.</div>
+    <p>Jeder Wechsel in der Auswahl ruft <code>zeichne()</code> auf; für eine Filiale fragt <code>umsatz_je_filiale()</code> die Datenbank neu, für „Alle Filialen“ nimmt sie den vorab geladenen DataFrame. Wenn die Karte erscheint, hat Colab die Datenbank über Port 5433 erreicht — derselbe Weg, den Power BI (Lab 04) und Tableau (Lab 05) nehmen.</p>
+  </section>
+
+  <section class="section-block" id="geheim">
+    <h2>Zugangsdaten</h2>
+    <p>Zugangsdaten gehören nicht ins Repository. Ein Notebook, das nach GitHub gespeichert wird, nimmt jede Zeichenkette mit — auch in Textzellen und Kommentaren —, und ein Kennwort, das einmal in einem Commit steht, bleibt in der Historie, auch wenn die nächste Fassung es entfernt. Es lässt sich nicht zurückholen, nur ändern.</p>
+    <p>Das Demo-Konto ist die bewusste Ausnahme. <code>studi_daba</code>/<code>thws</code> steht offen in jedem Notebook, in <code>dash/app.py</code> und in <code>db/aufbau/0020_demo_rolle.sql</code>, weil das Konto eigens dafür angelegt ist: öffentlich, nur lesend (<code>default_transaction_read_only = on</code>), auf einen synthetischen Bestand ohne echte Personen und Bestellungen (Lab 01). Ein Kennwort zu verbergen ergibt nur Sinn, wenn es etwas schützt.</p>
+    <div class="karten">
+      <div class="karte">
+        <div class="kopfzeile">In Colab: das Secrets-Panel</div>
+        <p>Ein eigenes Konto — etwa eine eigene Datenbank für die Projektarbeit — kommt in das Secrets-Panel von Colab und wird in der Zelle gelesen: <code>from google.colab import userdata</code>, dann <code>userdata.get("DATABASE_URL")</code>. Das Geheimnis bleibt beim Google-Konto und steht nicht in der Datei; es wandert weder mit einer Kopie des Notebooks noch mit einem Commit.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Lokal: .env und .gitignore</div>
+        <p>Ein lokales Skript liest die Verbindung aus der Umgebungsvariablen <code>DATABASE_URL</code> — wie <code>dash/app.py</code>. Die Variable steht in einer Datei <code>.env</code> im Ordner des Skripts, und <code>.env</code> steht in <code>.gitignore</code>; so hält es das Repository der Fallstudie. Fehlt die Variable, nimmt das Skript das Demo-Konto.</p>
+      </div>
+    </div>
+    <div data-befehl="B03"></div>
+    <div class="vorlagen">
+      <a class="vorlage" href="vorlagen/verbindung-sqlalchemy.py" download><span class="symbol">📄</span><span><span class="datei">verbindung-sqlalchemy.py</span><br><span class="was">Dieselbe Verbindung für ein lokales Skript: liest .env mit lade_env(), nimmt DATABASE_URL aus der Umgebung, sonst das Demo-Konto — läuft mit und ohne .env-Datei.</span></span></a>
+    </div>
+  </section>
+
+  <section class="section-block" id="stolper">
+    <h2>Stolpersteine</h2>
+    <p>Fünf Situationen, in denen ein Notebook stehen bleibt oder still das Falsche liefert; die Meldungen stehen wörtlich, so erscheinen sie auch bei Ihnen.</p>
+    <p><strong>Neue Sitzung, alte Zellen.</strong> Nach einem Neustart der Runtime sind Variablen, Importe und Funktionen weg — auch wenn die pip-Zelle inzwischen ohne Neustart-Hinweis durchläuft (Ausgabe nur <code>Pakete bereit.</code>). Wer nach dem Neustart mitten im Notebook weitermacht, sieht in der ersten Analysezelle <code>NameError: name 'lade_sql' is not defined</code>: Die Verbindungszelle ist in dieser Sitzung noch nicht gelaufen, auch wenn die Ausgaben der Zellen davor noch zu sehen sind.</p>
+    <p><strong>Tippfehler im Host.</strong> Ein Buchstabe zu viel im Host, und die erste Abfrage endet mit <code>(psycopg2.OperationalError) could not translate host name "supabase.butscher.cloudd" to address: …</code> (Stand 09/2026, psycopg2 2.9.13; der Teil nach dem Doppelpunkt hängt vom Betriebssystem ab). Ein falscher Port endet ebenfalls mit <code>OperationalError</code>. Abhilfe: die Zeichenkette Zeichen für Zeichen mit Lab 01 vergleichen — Host <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Datenbank <code>postgres</code>.</p>
+    <p><strong>Zeitgrenze.</strong> Eine Abfrage, die länger als zehn Minuten rechnet, bricht die Datenbank ab; ein Vollabzug wie <code>SELECT * FROM fact_order_items</code> über die Verbindung kann gegen diese Grenze laufen. Die Meldung lautet dann <code>(psycopg2.errors.QueryCanceled) canceling statement due to statement timeout</code>. Der Weg daran vorbei: in der Datenbank aggregieren; die Sichten <code>v_*</code> tun genau das (Lab 01, Lab 02).</p>
+    <p><strong>Zeigerdatei statt Daten.</strong> <code>pd.read_csv</code> über <code>raw.githubusercontent.com/…/dataset/dim_branch.csv</code> liest die Git-LFS-Zeigerdatei ohne Beanstandung ein — eine Spalte, zwei Zeilen —, und die nächste Zeile scheitert mit <code>KeyError: 'branch_id'</code>. <code>lade_csv()</code> nimmt deshalb <code>media.githubusercontent.com/media/…</code>; Lab 02 zeigt beide Adressen nebeneinander.</p>
+    <p><strong>pandas 3 und DuckDB 1.4.</strong> <code>con.register()</code> mit einem DataFrame, dessen Textspalten den neuen Standardtyp <code>str</code> tragen, endet in DuckDB 1.4 mit <code>NotImplementedException: Not implemented Error: Data type 'str' not recognized</code> (Stand 09/2026). Notebook 00 setzt die Textspalten vorher mit <code>fuer_duckdb()</code> auf <code>object</code>: <code>con.register("dim_branch", fuer_duckdb(filialen))</code> — die Funktion steht in Lab 02.</p>
+  </section>
+
+  <section class="section-block" id="uebungen">
+    <h2>Übungen</h2>
+    <p>Fünf Übungen: zwei Fragenblöcke zu Runtime und Zugangsdaten, eine Zuordnung von Zelle zu Zweck, eine Reihenfolge der Kopfzellen und eine Checkliste, die Sie mit Notebook 00 in Colab abarbeiten — dafür brauchen Sie ein zweites Browserfenster und ein Google-Konto.</p>
+    <div data-uebung="W06-01"></div>
+    <div data-uebung="W06-02"></div>
+    <div data-uebung="W06-03"></div>
+    <div data-uebung="W06-04"></div>
+    <div data-uebung="W06-05"></div>
+    <div data-fortschritt></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2>Zusammenfassung</h2>
+    <ul>
+      <li>Ein Notebook ist Lehrmaterial, wenn es nach einem Neustart der Runtime von oben nach unten durchläuft; die neun Notebooks der Fallstudie tun das, und <code>notebooks/pruefe_notebooks.sh</code> prüft es mit <code>jupyter nbconvert --execute</code>.</li>
+      <li>Notebook und Runtime sind zwei Dinge: Die Datei bleibt, die Sitzung mit Variablen, Importen und Funktionen endet mit „Runtime → Restart“. Nach der pip-Zelle (<code>subprocess.check_call([...])</code>, Ausgabe <code>Pakete bereit.</code>) ist ein Neustart nach frisch installierten Paketen weiterhin sinnvoll — nur rät die Zelle nicht mehr ausdrücklich dazu, weil sie nicht mehr über die %pip-Magic läuft.</li>
+      <li>Vier Kopfzellen in jedem Notebook: Titel mit Colab-Link, pip-Zelle, Verbindungszelle (<code>VERBINDUNG</code>, <code>create_engine</code>, <code>lade_sql()</code>, <code>lade_csv()</code>), <code>zahl()</code> — dann die Analyse.</li>
+      <li><code>read_sql</code> liefert DataFrames; die Datenbank rechnet, Python zeigt: <code>v_kennzahlen_jahr</code> kommt mit zehn Zeilen in Millisekunden, 2025 mit 136.557 Bestellungen und 2.994.771,13 €; die 2.950.082 Positionen holt niemand nach Colab.</li>
+      <li>Die Dash-App der Fallstudie (<code>dash/app.py</code>, vier Karten aus den Sichten) läuft lokal unter <code>http://127.0.0.1:8050</code>; Notebook 00 startet die Karte „Umsatz je Monat“ mit <code>DASH_STARTEN = True</code> unter der Zelle.</li>
+      <li>Zugangsdaten nie ins Repository: Das Demo-Konto ist die dokumentierte Ausnahme (öffentlich, nur lesend, synthetisch); eigene Konten liegen in Colab-Secrets (<code>userdata.get()</code>) oder in einer <code>.env</code>-Datei mit <code>DATABASE_URL</code>, die in <code>.gitignore</code> steht.</li>
+      <li>Stolpersteine mit Meldung: <code>NameError</code> nach einem Neustart ohne erneuten Lauf der Verbindungszelle, <code>OperationalError</code> bei einem Tippfehler im Host, <code>canceling statement due to statement timeout</code> nach zehn Minuten, Zeigerdatei statt Daten bei <code>raw.githubusercontent.com</code>, <code>NotImplementedException</code> beim <code>register()</code> von pandas-3-Text in DuckDB 1.4 (<code>fuer_duckdb()</code>). Die Verfahren der Notebooks 02 bis 08 folgen in Lab 07 und Lab 08.</li>
+    </ul>
+    <div data-lab-nav></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS Business School · Datenbasierte Fallstudien · BM-Lab · Lab 06 · Stand 09/2026</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BM-Lab · Lernumgebung zur Fallstudie BurgerMetrics · THWS Business School</title>
+  <meta name="description" content="Lernumgebung zur Fallstudie BurgerMetrics: acht Labs zu Datenbankzugang, Datenbeschaffung, analytischem Datenmodell, Power BI, Tableau, Python und Colab, Data Mining sowie externen Daten – mit einer echten PostgreSQL-Datenbank im Browser, ohne Anmeldung und ohne Installation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <span class="header-back">THWS Business School · Datenbasierte Fallstudien · Fallstudie BurgerMetrics</span>
+  </div>
+  <div class="header-right">
+    <a class="header-back" href="../">← Zur Fallstudie</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Lernumgebung · Fallstudie BurgerMetrics</span>
+    <h1 class="hero-title">BM-Lab</h1>
+    <p class="hero-subtitle">Lernumgebung zur Fallstudie BurgerMetrics · Datenbasierte Fallstudien</p>
+    <p class="hero-desc">Acht Labs führen vom Zugang zur Datenbank über das analytische Datenmodell und die
+      Werkzeuge Power BI, Tableau und Python bis zu Data Mining und externen Daten. Die Labs arbeiten mit derselben
+      Datenbank wie der Online-Shop und das Dashboard der Fallstudie – in den SQL-Übungen als Miniaturbestand mit den
+      Schemata wawi und burgermetrics, direkt im Browser. Alles läuft auf Ihrem Rechner:
+      ohne Anmeldung, ohne Installation, ohne Server.</p>
+    <div class="cta-row">
+      <a class="btn solid" href="lab-01-zugang.html">Lab 01 beginnen</a>
+      <a class="btn" href="../">Zur Fallstudie</a>
+    </div>
+  </div>
+</section>
+
+<main>
+
+<section class="section" id="labs">
+  <div class="section-head">
+    <span class="badge">Die acht Labs</span>
+    <div class="accent-line"></div>
+    <h2>Vom Zugang zur Analyse</h2>
+    <p>Die Labs sind so geordnet, wie eine Analyse entsteht: erst der Zugang zur Datenbank und die Wege zu den Daten,
+      dann das Auswertungsmodell, danach die Werkzeuge, zuletzt die Verfahren. Jedes Lab erklärt zuerst, wozu ein
+      Schritt da ist, führt dann durch die Handgriffe und lässt Sie zuletzt ausprobieren, was Sie gelesen haben. Alle
+      Labs arbeiten mit der Fallstudie BurgerMetrics: acht Filialen in Würzburg, 754.513 Bestellungen von 2017 bis
+      2026, synthetisch erzeugt und ohne Personenbezug.</p>
+  </div>
+  <div class="kette">
+    <div class="glied hell"><span class="titel">01–03</span><span class="was">Zugang, Daten, Modell</span></div>
+    <span class="pfeil">→</span>
+    <div class="glied hell"><span class="titel">04–06</span><span class="was">Werkzeuge: Power BI, Tableau, Python</span></div>
+    <span class="pfeil">→</span>
+    <div class="glied betont"><span class="titel">07–08</span><span class="was">Analyse: Data Mining, externe Daten</span></div>
+  </div>
+  <div data-fortschritt></div>
+  <div class="labs-grid">
+
+    <a class="lab-card" href="lab-01-zugang.html">
+      <div class="lab-num">01</div>
+      <h3>Zugang und Datenbank</h3>
+      <div class="sub">psql · DBeaver · DataGrip · Demo-Konto</div>
+      <div class="desc">Der Einstieg: Verbindung mit dem Demo-Konto, beide Schemata lesen und erleben, was eine Rolle darf und was nicht – bis zur wörtlichen Fehlermeldung.</div>
+      <div class="meta">6 Übungen · 90 Min</div>
+    </a>
+
+    <a class="lab-card" href="lab-02-daten.html">
+      <div class="lab-num">02</div>
+      <h3>Daten beschaffen</h3>
+      <div class="sub">CSV · Git LFS · DuckDB · Parquet</div>
+      <div class="desc">Dieselben Daten auf drei Wegen: als Abfrage gegen die Datenbank, als CSV aus Git LFS und als Parquet über DuckDB – und welcher Weg zu welchem Werkzeug passt.</div>
+      <div class="meta">5 Übungen · 75 Min</div>
+    </a>
+
+    <a class="lab-card" href="lab-03-datenmodell.html">
+      <div class="lab-num">03</div>
+      <h3>Analytisches Datenmodell</h3>
+      <div class="sub">Grain · Dimensionen · Fakten · Fan Trap</div>
+      <div class="desc">Frage, Grain, Dimensionen, Fakten: In vier Schritten entsteht aus dem operativen Modell ein Auswertungsmodell, das die Fan Trap vermeidet.</div>
+      <div class="meta">5 Übungen · 105 Min</div>
+    </a>
+
+    <a class="lab-card" href="lab-04-powerbi.html">
+      <div class="lab-num">04</div>
+      <h3>Power BI</h3>
+      <div class="sub">Power Query · Modell · DAX-Measures</div>
+      <div class="desc">PostgreSQL anbinden, das Modell aus den Fremdschlüsseln prüfen, Umsatz und AOV als Measures schreiben und einen Bericht bauen.</div>
+      <div class="meta">5 Übungen · 105 Min</div>
+    </a>
+
+    <a class="lab-card" href="lab-05-tableau.html">
+      <div class="lab-num">05</div>
+      <h3>Tableau</h3>
+      <div class="sub">Live · Extract · Dimension · Measure</div>
+      <div class="desc">Live oder Extract, Dimension oder Measure, diskret oder stetig – und ein Dashboard, das eine Frage der Fallstudie beantwortet.</div>
+      <div class="meta">5 Übungen · 90 Min</div>
+    </a>
+
+    <a class="lab-card" href="lab-06-python.html">
+      <div class="lab-num">06</div>
+      <h3>Python und Colab</h3>
+      <div class="sub">Notebook · Runtime · pandas · SQLAlchemy</div>
+      <div class="desc">Ein Notebook, das von oben nach unten gegen die Datenbank durchläuft – mit Verbindungszelle, aber ohne Zugangsdaten im Repository.</div>
+      <div class="meta">5 Übungen · 75 Min</div>
+    </a>
+
+    <a class="lab-card" href="lab-07-datamining.html">
+      <div class="lab-num">07</div>
+      <h3>Data Mining</h3>
+      <div class="sub">RFM · K-Means · Warenkorb · Prognose</div>
+      <div class="desc">RFM-Segmente, K-Means, Warenkorbanalyse, Prognose, Ausreißer: zu jeder Frage das Verfahren, die Kennzahl und der Fallstrick.</div>
+      <div class="meta">5 Übungen · 90 Min</div>
+    </a>
+
+    <a class="lab-card" href="lab-08-extern.html">
+      <div class="lab-num">08</div>
+      <h3>Externe Daten und Sentiment</h3>
+      <div class="sub">Open-Meteo · Lizenzen · Rezensionen</div>
+      <div class="desc">Wetter, Feiertage und Rezensionen: externe Quellen über das Datum anbinden, die Lizenz nennen und eine Rezension vom Shop bis zur Sicht verfolgen.</div>
+      <div class="meta">5 Übungen · 90 Min</div>
+    </a>
+
+  </div>
+</section>
+
+<section class="section" id="verweise">
+  <div class="section-head">
+    <span class="badge">Verweise</span>
+    <div class="accent-line"></div>
+    <h2>Die Fallstudie rund um das Lab</h2>
+    <p>Das BM-Lab ist ein Teil der Fallstudie BurgerMetrics. Online-Shop, Dashboard und Notebooks arbeiten auf
+      derselben Datenbank; die Labs verweisen an den passenden Stellen dorthin.</p>
+  </div>
+  <div class="karten">
+    <div class="karte">
+      <div class="kopfzeile">Fallstudie</div>
+      <p><a href="../">Startseite der Fallstudie</a> – Überblick über BurgerMetrics, die Datenbank und die
+        Zugangsdaten des Demo-Kontos.</p>
+    </div>
+    <div class="karte">
+      <div class="kopfzeile">Online-Shop</div>
+      <p><a href="../shop.html">Online-Shop</a> – bestellen und Rezensionen schreiben; Lab 08 verfolgt eine Rezension
+        von hier bis in die Sicht der Datenbank.</p>
+    </div>
+    <div class="karte">
+      <div class="kopfzeile">Dashboard</div>
+      <p><a href="../dashboard.html">Dashboard</a> – die Kennzahlen der Semantikschicht; Lab 03 zeigt, aus welchem
+        Modell sie stammen.</p>
+    </div>
+    <div class="karte">
+      <div class="kopfzeile">Notebooks</div>
+      <p><a href="https://github.com/swrobuts/BurgerMetrics/tree/main/notebooks">Notebooks im Repository</a> – die
+        Verfahren aus Lab 06 bis 08 als ausführbare Notebooks.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section soft" id="wie">
+  <div class="inner">
+    <div class="section-head">
+      <span class="badge dark">Wie das hier funktioniert</span>
+      <div class="accent-line"></div>
+      <h2>Ausprobieren, nicht nachlesen</h2>
+    </div>
+    <div class="labs-grid">
+      <div class="concept-box">
+        <h3>Eine Datenbank, die wirklich rechnet</h3>
+        <p>PostgreSQL läuft als PGlite (WebAssembly) in Ihrem Browser – Stand 09/2026 in Version 18: kein Konto, kein
+          Server, dieselben Datentypen und Fehlermeldungen wie in der Datenbank der Fallstudie. Der Bestand ist ein
+          Miniaturausschnitt – 19 Bestellungen, 55 Positionen, 12 Rezensionen – in den Schemata <code>wawi</code> und
+          <code>burgermetrics</code>. Die Daten bleiben auf Ihrem Rechner.</p>
+      </div>
+      <div class="concept-box">
+        <h3>Ein Regal wie in Power BI und Tableau</h3>
+        <p>Felder auf Regale legen und zusehen, wie daraus ein Diagramm wird: Columns, Rows und Color wie in Tableau,
+          X-axis, Y-axis und Legend wie in Power BI. Der Regal-Simulator bildet den Mechanismus nach, nicht die
+          Oberfläche – was hier klappt, klappt im Werkzeug aus demselben Grund.</p>
+      </div>
+      <div class="concept-box">
+        <h3>Ihr Stand bleibt im Browser</h3>
+        <p>Gelöste Übungen werden lokal vermerkt, damit Sie beim nächsten Besuch sehen, wo Sie stehen. Es gibt keine
+          Anmeldung, keinen Server und keine Auswertung. Der Knopf „Fortschritt zurücksetzen“ in der Fortschrittskarte
+          oben löscht den Vermerk.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS · Datenbasierte Fallstudien · BM-Lab</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>

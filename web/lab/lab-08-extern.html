@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 08 · Externe Daten und Sentiment · BM-Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body class="lab-page" data-lab="lab-08">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <a class="header-back" href="index.html">← Zur Übersicht</a>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title">Abschnitte</div>
+  <a class="sidebar-link" href="#datum">Das Datum als Schlüssel</a>
+  <a class="sidebar-link" href="#openmeteo">Ein Aufruf: Open-Meteo</a>
+  <a class="sidebar-link" href="#lizenz">Lizenzen der fünf Quellen</a>
+  <a class="sidebar-link" href="#rezension">Der Weg einer Rezension</a>
+  <a class="sidebar-link" href="#sentiment">Sentiment der Rezensionen</a>
+  <a class="sidebar-link" href="#stolper">Stolpersteine</a>
+  <a class="sidebar-link" href="#spielplatz">Spielplatz</a>
+  <a class="sidebar-link" href="#uebungen">Übungen</a>
+  <a class="sidebar-link" href="#zusammenfassung">Zusammenfassung</a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">08</div>
+  <h1 class="lab-title">Externe Daten und Sentiment</h1>
+  <p class="lab-intro">Lab 03 hat das Datenmodell mit <code>dim_date</code> gebaut, Lab 07 hat sechs Notebooks vom Kalender und den eingebauten Merkmalen der Fallstudie aus befragt — darunter Notebook 05 (<code>05_wetter_und_ereignisse.ipynb</code>), aber nur mit dessen eingebauten Merkmalen; hier kommt sein externer Teil dazu, der gemessenes Wetter, Schulferien, Heimspiele und den Verbraucherpreisindex von vier verschiedenen Anbietern über das Datum verknüpft. Notebook 08 (<code>08_sentiment_rezensionen.ipynb</code>) liest aus dem Text von 10.000 Rezensionen, ob sie positiv oder negativ sind. Dieses letzte Lab zeigt den Aufruf einer externen Schnittstelle, ihre Lizenzpflicht und den Weg, den eine selbst geschriebene Rezension durch Shop und Datenbank nimmt.</p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Datum als Fremdschlüssel</span>
+    <span class="lernziel-chip">Open-Meteo Archive API</span>
+    <span class="lernziel-chip">CC BY 4.0 · ODbL · DL-DE BY 2.0</span>
+    <span class="lernziel-chip">wawi.rezension_anlegen()</span>
+    <span class="lernziel-chip">TF-IDF · BERT</span>
+  </div>
+  <div data-einordnung></div>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="datum">
+    <h2>Das Datum als Schlüssel</h2>
+    <p>Jede externe Quelle in diesem Lab kommt über dieselbe Spalte in die Fallstudie: ein Datum. <code>dim_date</code> trägt 3.377 Tage, vom 01.01.2017 bis zum 31.03.2026 — eine durchgehende Kalenderdimension, unabhängig davon, ob an einem Tag überhaupt bestellt wurde. Die Bestellungen selbst laufen vom 15.03.2017 bis zum 31.03.2026, ohne Lücke: 3.304 Tage (Notebook 05). Nach genau diesem Zeitraum gefragt, liefert Open-Meteo ebenfalls 3.304 Werte je Feld — die externe Quelle deckt exakt den Zeitraum ab, den die Fallstudie braucht, nicht mehr und nicht weniger. Wer <code>dim_date</code> mit einer externen Quelle verknüpft, sieht deshalb häufiger Zeilen ohne Treffer als umgekehrt: Die Dimension ist breiter als jede einzelne Quelle.</p>
+    <p>Fünf Quellen liefern die externen Merkmale von Notebook 05: Open-Meteo (gemessenes Wetter), das Paket <code>holidays</code> (bayerische Feiertage), die OpenHolidays API (Schulferien), OpenLigaDB (Heimspiele der Würzburger Kickers) und Destatis (Verbraucherpreisindex). Drei davon schreibt das Notebook selbst einmal als CSV-Datei unter <code>notebooks/daten_extern/</code>, sobald es sie abgerufen hat; die vierte (<code>vpi_jahr.csv</code>) ist kuratiert und wird nur gelesen, nie automatisch abgerufen. <code>holidays</code> braucht keine Datei, weil das Paket Feiertage direkt berechnet.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Quelle</th><th>Datei unter notebooks/daten_extern/</th><th>Wie geholt</th></tr></thead>
+        <tbody>
+          <tr><td>Open-Meteo (Wetter)</td><td><code>wetter_open_meteo.csv</code></td><td>Archiv-API, Funktion <code>hole_wetter()</code></td></tr>
+          <tr><td>Paket <code>holidays</code> (Feiertage)</td><td>— (keine Datei)</td><td>direkt berechnet, <code>holidays.country_holidays("DE", subdiv="BY", …)</code></td></tr>
+          <tr><td>OpenHolidays API (Schulferien)</td><td><code>schulferien_bayern.csv</code></td><td>vier Anfragen in Blöcken zu höchstens 1.095 Tagen</td></tr>
+          <tr><td>OpenLigaDB (Kickers-Heimspiele)</td><td><code>kickers_heimspiele.csv</code></td><td>je Saison eine Anfrage an <code>getmatchdata</code></td></tr>
+          <tr><td>Destatis (Verbraucherpreisindex)</td><td><code>vpi_jahr.csv</code></td><td>kuratiert, nicht automatisch abgerufen</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Die vier CSV-Dateien liegen ohne Git LFS im Repository (anders als der Bestand unter <code>dataset/</code>, Lab 02). <code>hole_oder_lies()</code> holt eine Quelle dreistufig: zuerst die lokale Datei unter <code>notebooks/daten_extern/</code>; fehlt sie — etwa in Colab, wo nur das Notebook selbst vorliegt —, die Fassung von <code>raw.githubusercontent.com</code>; erst wenn auch das scheitert, den Anbieter selbst.</p>
+    <div class="tip-box">
+      <p>Die Regel hinter jedem dieser Joins ist immer dieselbe: Ein Datum ist nur dann ein Schlüssel, wenn beide Seiten denselben Spaltentyp tragen. Ein aus einer CSV-Datei geladenes Datum landet ohne ausdrückliche Umwandlung als Text, nicht als <code>date</code> — und ein Join zwischen einer Text-Spalte und einer <code>date</code>-Spalte wie <code>dim_date.date</code> scheitert dann mit einem Typfehler, nicht mit einem stillen Nichttreffer (Abschnitt „Stolpersteine“).</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="openmeteo">
+    <h2>Ein Aufruf: Open-Meteo</h2>
+    <p>Die Open-Meteo Historical Weather API (Archiv-API) beantwortet einen HTTP-GET-Aufruf ohne Schlüssel und ohne Anmeldung. B01 zeigt <code>hole_wetter()</code>, wortgleich aus Notebook 05: ein Aufruf mit Ort, Zeitraum und den drei gewünschten Tageswerten.</p>
+    <div data-befehl="B01"></div>
+    <p>Die Antwort ist ein JSON-Objekt: <code>latitude</code>, <code>longitude</code> und <code>timezone</code> außen, darin <code>daily</code> — selbst ein Objekt aus gleich langen Listen, eine je angefragtem Feld. <code>daily.time[i]</code> und <code>daily.temperature_2m_max[i]</code> gehören zum selben Tag <code>i</code>; dasselbe Muster wie bei jeder Schnittstelle, die mehrere Reihen parallel statt als Liste von Objekten liefert. Die Nachbildung zeigt eine auf drei Tage gekürzte Antwort.</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">archive-api.open-meteo.com/v1/archive</span><span class="spacer"></span>200 OK</div>
+      <div class="shot-body eins">
+        <div class="shot-main">
+          <div class="code">{
+  "latitude": 49.79, "longitude": 9.95, <span class="callout">1</span>
+  "timezone": "Europe/Berlin", <span class="callout">2</span>
+  "daily": { <span class="callout">3</span>
+    "time": ["2025-07-01", "2025-07-02", "2025-07-03"],
+    "temperature_2m_max": [31.2, 33.8, 29.4],
+    "temperature_2m_min": [17.9, 19.1, 18.0],
+    "precipitation_sum": [0.0, 0.0, 3.2]
+  }
+}</div>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Antwort, Stand 09/2026 — Feldnamen wie in der echten Antwort, auf drei Tage gekürzt.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Die Antwort nennt Ort und Zeitzone außen, die Werte stehen unter <code>daily</code>.</span></li>
+      <li><span class="callout">2</span><span>Die angefragte Zeitzone kommt in der Antwort zurück; ohne den Parameter liefert die Schnittstelle Tagesgrenzen in UTC (Abschnitt „Stolpersteine“).</span></li>
+      <li><span class="callout">3</span><span><code>daily</code>: für jedes angefragte Feld eine eigene Liste, alle gleich lang. <code>time[i]</code> und <code>temperature_2m_max[i]</code> gehören zum selben Tag <code>i</code> — genau das prüft W08-01.</span></li>
+    </ol>
+    <p>Die Werte selbst stammen nicht von einer Live-Messstation, sondern aus der Reanalyse ERA5 (Rastergröße rund 0,25°, etwa 25 Kilometer; die feinere ERA5-Land-Reanalyse löst mit 0,1°, rund 11 Kilometer, auf) und liegen mit rund fünf Tagen Verzug vor. Für den Zeitraum der Fallstudie spielt der Verzug keine Rolle, wie der Abschnitt „Das Datum als Schlüssel“ zeigt: Die Antwort liefert exakt 3.304 Werte je Feld. Bei einer Anfrage bis zum aktuellen Tag würden dagegen die letzten Tage fehlen.</p>
+    <div class="vorlagen">
+      <a class="vorlage" href="vorlagen/open-meteo.py" download><span class="symbol">📄</span><span><span class="datei">open-meteo.py</span><br><span class="was">Eigenständige Fassung von <code>hole_wetter()</code> (B01): ruft dieselbe Archiv-API für einen Zeitraum auf und schreibt eine CSV-Datei statt eines DataFrame.</span></span></a>
+    </div>
+  </section>
+
+  <section class="section-block" id="lizenz">
+    <h2>Lizenzen der fünf Quellen</h2>
+    <p>Frei nutzbar heißt nicht anonym nutzbar: Jede der fünf Quellen bindet die Nutzung an eine Bedingung — meist eine Nennung, bei zwei Quellen zusätzlich die Pflicht, eine daraus abgeleitete Datenbank unter derselben Lizenz weiterzugeben. Stand 09/2026:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Quelle</th><th>Lizenz</th><th>Bedingung</th></tr></thead>
+        <tbody>
+          <tr><td>Open-Meteo</td><td>CC BY 4.0</td><td>Nennung, zum Beispiel „Weather data by Open-Meteo.com“; frei bis 10.000 Aufrufe je Tag (zusätzlich 5.000 je Stunde, 600 je Minute)</td></tr>
+          <tr><td>OpenHolidays API</td><td>ODbL-1.0</td><td>Nennung; abgeleitete Datenbanken unter derselben Lizenz weitergeben</td></tr>
+          <tr><td>OpenLigaDB</td><td>ODbL</td><td>Nennung; abgeleitete Datenbanken unter derselben Lizenz weitergeben</td></tr>
+          <tr><td>Destatis (Verbraucherpreisindex)</td><td>Datenlizenz Deutschland – Namensnennung – Version 2.0 (DL-DE-BY-2.0)</td><td>Zitierweise „Datenquelle: Statistisches Bundesamt (Destatis), Genesis-Online, Abrufdatum; Datenlizenz by-2-0“; bei Bearbeitung zusätzlich „eigene Berechnung/eigene Darstellung“</td></tr>
+          <tr><td>Paket <code>holidays</code></td><td>MIT</td><td>MIT-Lizenz der Bibliothek</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-box">
+      <p>ODbL („Open Database License“) ist eine Share-alike-Lizenz für Datenbanken: Wer eine Datenbank unter ODbL verändert oder mit anderen Daten anreichert und das Ergebnis weitergibt, muss die neue Datenbank unter derselben Lizenz zugänglich machen. CC BY 4.0 und DL-DE-BY-2.0 verlangen dagegen nur die Nennung, keine Weitergabepflicht.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="rezension">
+    <h2>Der Weg einer Rezension</h2>
+    <p>Die letzte Quelle dieses Labs kommt nicht von einem Anbieter, sondern von den Studierenden selbst: eine Rezension, im Online-Shop der Fallstudie geschrieben. Der Weg ist derselbe wie bei einer Bestellung (Lab 01) und ebenso vollständig nachvollziehbar.</p>
+    <div class="kette">
+      <div class="glied hell"><span class="titel">Shop</span><span class="was">Knopf „Bewerten“ auf einer Produktkarte</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied betont"><span class="titel">wawi.rezension_anlegen()</span><span class="was">prüft und schreibt</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">wawi.rezension</span><span class="was">quelle = 'shop'</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">v_rezension_letzte / v_rezension_produkt</span><span class="was">sofort sichtbar</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">uebernahme_aus_wawi()</span><span class="was">Betreiber, per ETL</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">fact_reviews</span><span class="was">source = 'shop'</span></div>
+    </div>
+    <p><code>wawi.rezension_anlegen(artikel_id, sterne, inhalt, filiale_id, sitzung)</code> prüft, bevor sie schreibt: <code>sterne</code> zwischen 1 und 5, <code>inhalt</code> zwischen 5 und 500 Zeichen — gezählt wie PostgreSQLs <code>char_length()</code>, nicht wie JavaScripts <code>.length</code> —, Artikel und, falls angegeben, Filiale müssen existieren. Erfolgreich meldet der Shop wörtlich <code>Gespeichert als wawi.rezension #…</code> mit der neuen Nummer.</p>
+    <p>Zwei Bremsen schützen den öffentlichen Schreibweg: höchstens 20 Rezensionen je Sitzung in zehn Minuten, insgesamt höchstens 600 Shop-Rezensionen je Stunde über alle Sitzungen. Beide lösen dieselbe Fehlerklasse aus (SQLSTATE 53400 aus der Klasse 53, „insufficient resources“), die PostgREST auf HTTP 503 abbildet; der Shop reicht die Datenbankmeldung unverändert weiter, ohne eigene Wiederholung und ohne „Retry-After“. Bei der Sitzungsbremse lautet sie wörtlich <code>rezension_anlegen: HTTP 503 — zu viele Rezensionen in kurzer Zeit — bitte kurz warten</code>.</p>
+    <p>Eine geschriebene Rezension steht sofort in <code>wawi.rezension</code> und verändert sofort den Durchschnitt am Produkt — <code>wawi.v_rezension_produkt</code> rechnet live. In <code>burgermetrics.fact_reviews</code>, dem Auswertungsmodell aus Lab 03, erscheint sie erst, wenn der Betreiber <code>uebernahme_aus_wawi()</code> ausführt. Übungsrezensionen räumt ausschließlich der Betreiber mit <code>uebungsrezensionen_loeschen()</code> weg; die Funktion ist SECURITY DEFINER und ohne Ausführungsrecht für das Demo-Konto. Auch <code>rezension_anlegen()</code> selbst kann die Demo-Rolle <code>studi_daba</code> nicht direkt per SQL aufrufen — Lab 01 listet das fehlende EXECUTE-Recht auf <code>rezension_anlegen()</code> auf: Nur der Shop schreibt, über eine eigene Rolle — Studierende schreiben immer über das Formular, nie über SQL.</p>
+  </section>
+
+  <section class="section-block" id="sentiment">
+    <h2>Sentiment der Rezensionen</h2>
+    <p>Notebook 08 prüft, ob sich aus dem Text einer Rezension lesen lässt, ob sie positiv oder negativ ist — mit drei Verfahren auf denselben 10.000 Rezensionen (Sterne 1 bis 5). Polarität: 1–2 Sterne gelten als negativ, 4–5 als positiv; die 1.300 Texte mit drei Sternen bleiben als „unentschieden“ außen vor.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Verfahren</th><th>Trefferquote</th><th>Bemerkung</th></tr></thead>
+        <tbody>
+          <tr><td>Wortliste</td><td>71,6 %</td><td>32,7 % der Texte enthalten kein Wort aus einer der beiden Listen und zählen als negativ</td></tr>
+          <tr><td>TF-IDF + logistische Regression</td><td>100,0 %</td><td>auf derselben Stichprobe von 500 Texten wie beim BERT-Vergleich; zu gut, um wahr zu sein</td></tr>
+          <tr><td>BERT (oliverguhr/german-sentiment-bert)</td><td>94,2 %</td><td>dieselbe Stichprobe von 500 Texten; hat die Bausteine des Generators nie gesehen</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>TF-IDF mit logistischer Regression trifft auf dem eigenen Testsplit (2.175 Texte) 99,9 Prozent und auf der Stichprobe von 500 Texten glatt 100,0 Prozent — für simulierte Texte ein Warnsignal, kein Gütesiegel: Der Generator baut Rezensionen aus festen Satzbausteinen, und ein Modell, das genau diese Bausteine lernt, kennt die Antwort schon vorher. BERT, das nie mit diesem Generator in Berührung kam, kommt auf 94,2 Prozent — niedriger, aber deutlich höher, als man für uneindeutige Sprache erwarten würde, was seinerseits zeigt, wie eindeutig der Generator seine Polarität formuliert.</p>
+    <p>Der Anteil positiver Rezensionen (TF-IDF-Vorhersage über alle 10.000 Texte) hängt an zwei Merkmalen der Bestellung. Nach Bestelldauer:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Bestelldauer</th><th>Rezensionen</th><th>Anteil positiv</th></tr></thead>
+        <tbody>
+          <tr><td>bis 5 min</td><td>6.753</td><td>78,63 %</td></tr>
+          <tr><td>6–10 min</td><td>2.696</td><td>69,18 %</td></tr>
+          <tr><td>11–15 min</td><td>539</td><td>59,55 %</td></tr>
+          <tr><td>über 15 min</td><td>12</td><td>41,67 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>und nach Kanal:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Kanal</th><th>Rezensionen</th><th>Anteil positiv</th></tr></thead>
+        <tbody>
+          <tr><td>App Order</td><td>3.219</td><td>82,70 %</td></tr>
+          <tr><td>Kiosk</td><td>1.626</td><td>74,66 %</td></tr>
+          <tr><td>Drive-Through</td><td>1.568</td><td>74,23 %</td></tr>
+          <tr><td>Counter</td><td>3.587</td><td>68,61 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Beide Reihen folgen den Sternen, aus denen der Generator die Texte gebaut hat — kein unabhängiger Befund, sondern dieselbe Information zweimal gemessen. Was fehlt: echte Rezensionen aus dem Shop (<code>source = 'shop'</code>). Erst mit ihnen lässt sich prüfen, ob Wortliste, TF-IDF und BERT auch an Text bestehen, den kein Generator geschrieben hat.</p>
+  </section>
+
+  <section class="section-block" id="stolper">
+    <h2>Stolpersteine</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Stolperstein</th><th>Was passiert</th><th>Regel oder Abhilfe</th></tr></thead>
+        <tbody>
+          <tr><td>OpenHolidays statt ferien-api.de</td><td>Ein zunächst erprobter Anbieter (<code>ferien-api.de</code>) antwortete mit dem HTTP-Status 429</td><td>Notebook 05 nutzt seitdem die OpenHolidays API, in Blöcken von höchstens 1.095 Tagen je Anfrage</td></tr>
+          <tr><td>Verzug von rund fünf Tagen</td><td>Eine Anfrage bis zum aktuellen Tag liefert für die letzten Tage keine Werte — ERA5 ist eine Reanalyse, keine Live-Messung</td><td>Für Zeiträume, die einige Tage zurückliegen, wie der Bestand bis 31.03.2026, spielt der Verzug keine Rolle</td></tr>
+          <tr><td>Zeitzone</td><td>Ohne den Parameter <code>timezone</code> liefert die Schnittstelle Tagesgrenzen in UTC statt in Europe/Berlin</td><td><code>hole_wetter()</code> setzt <code>timezone: "Europe/Berlin"</code> ausdrücklich, wie B01 zeigt</td></tr>
+          <tr><td>Datum als Text statt als <code>date</code></td><td>Ein Join zwischen einer Text-Spalte und einer <code>date</code>-Spalte scheitert mit einem Typfehler — PostgreSQL meldet <code>operator does not exist: text = date</code>, pandas verweigert den <code>merge()</code> mit einer <code>ValueError</code></td><td>Ein aus CSV geladenes Datum vor dem Verknüpfen ausdrücklich wandeln: in SQL nach <code>date</code>, in pandas mit <code>pd.to_datetime()</code> — genau das tut Notebook 05 in Zelle 15 (<code>wetter["tag"] = pd.to_datetime(wetter["tag"])</code>)</td></tr>
+          <tr><td>503 nach 20 Rezensionen</td><td>Die Sitzungsbremse aus <code>wawi.rezension_anlegen()</code> lässt die 21. Rezension in zehn Minuten nicht mehr zu</td><td>Der Shop zeigt die Datenbankmeldung unverändert; kurz warten, bis das Zehn-Minuten-Fenster weiterrückt</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section-block" id="spielplatz">
+    <h2>Spielplatz</h2>
+    <p>Unten läuft dieselbe Browser-Datenbank wie in den anderen Labs (PGlite, WebAssembly): 19 Bestellungen, 55 Positionen und 12 Rezensionen in den Schemata <code>wawi</code> und <code>burgermetrics</code>, alle mit <code>quelle</code> beziehungsweise <code>source</code> gleich <code>'simulation'</code>. Die Startabfrage zeigt die Rezensionen des Miniaturbestands, neueste zuerst. Die Browser-Fassung der Sicht filtert nicht auf den Shop — sonst wäre sie hier leer.</p>
+    <div data-datenbank="postgres"></div>
+    <div class="info-box">
+      <p>Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf „Datenbank zurücksetzen“ stellt den Ausgangsbestand wieder her.</p>
+    </div>
+    <div data-json-konsole data-start='{ "latitude": 49.79, "longitude": 9.95, "timezone": "Europe/Berlin", "daily": { "time": ["2025-07-01", "2025-07-02", "2025-07-03"], "temperature_2m_max": [31.2, 33.8, 29.4], "temperature_2m_min": [17.9, 19.1, 18.0], "precipitation_sum": [0.0, 0.0, 3.2] } }'></div>
+    <div data-sql-konsole data-start="SELECT * FROM v_rezension_letzte ORDER BY erstellt_am DESC;"></div>
+  </section>
+
+  <section class="section-block" id="uebungen">
+    <h2>Übungen</h2>
+    <p>Fünf Übungen: eine kaputte Open-Meteo-Antwort reparieren, zwei SQL-Abfragen über das Datum und über die Rezensionssicht, eine Checkliste für den Weg durch den echten Shop und ein Quiz zu Lizenz, Verzug und Sentiment.</p>
+    <div data-uebung="W08-01"></div>
+    <div data-uebung="W08-02"></div>
+    <div data-uebung="W08-03"></div>
+    <div data-uebung="W08-04"></div>
+    <div data-uebung="W08-05"></div>
+    <div data-fortschritt></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2>Zusammenfassung</h2>
+    <ul>
+      <li>Jede externe Quelle hängt über ein Datum an der Fallstudie: <code>dim_date</code> trägt 3.377 Tage, die Bestellungen und die Open-Meteo-Antwort für denselben Zeitraum je 3.304 — ein Datum ist nur dann ein Schlüssel, wenn beide Seiten denselben Spaltentyp (<code>date</code>, nicht Text) tragen.</li>
+      <li>Open-Meteo liefert Tageswerte ohne Schlüssel als JSON mit parallelen Listen unter <code>daily</code>; die Werte stammen aus der Reanalyse ERA5 (0,25°, rund 25 km) mit etwa fünf Tagen Verzug. Die Vorlage <code>open-meteo.py</code> ruft denselben Endpunkt auf und schreibt eine CSV-Datei.</li>
+      <li>Fünf Quellen, fünf Lizenzen: Open-Meteo CC BY 4.0, OpenHolidays API und OpenLigaDB ODbL — mit Weitergabepflicht für abgeleitete Datenbanken —, Destatis DL-DE-BY-2.0 mit vorgeschriebener Zitierweise, das Paket <code>holidays</code> MIT. Stand 09/2026.</li>
+      <li>Eine Rezension nimmt im Shop denselben Weg wie eine Bestellung: <code>wawi.rezension_anlegen()</code> prüft Sterne, Textlänge, Artikel und Filiale, bremst bei 20 je Sitzung in zehn Minuten und 600 je Stunde (HTTP 503 ohne Sonderbehandlung) und schreibt nach <code>wawi.rezension</code>; erst <code>uebernahme_aus_wawi()</code> — Sache des Betreibers — trägt sie in <code>fact_reviews</code> ein.</li>
+      <li>Notebook 08 trifft mit einer Wortliste 71,6 Prozent, mit TF-IDF nahezu 100 Prozent — ein Warnsignal bei simulierten Texten — und mit einem vortrainierten BERT-Modell 94,2 Prozent; der Anteil positiver Rezensionen fällt mit der Bestelldauer und unterscheidet sich zwischen den Kanälen. Was fehlt, sind echte Rezensionen aus dem Shop.</li>
+    </ul>
+    <p>Damit endet das BM-Lab: acht Labs vom Zugang über das analytische Datenmodell, Power BI, Tableau und Python bis zu Data Mining und externen Daten. Wer tiefer einsteigen möchte, findet Kennzahlen und Grafiken im Deck „Analyse“ und den vollständigen Rechenweg in den Notebooks 00 bis 08 im Repository <code>github.com/swrobuts/BurgerMetrics</code>.</p>
+    <div data-lab-nav></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS Business School · Datenbasierte Fallstudien · BM-Lab · Lab 08 · Stand 09/2026</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>

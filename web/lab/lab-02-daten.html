@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 02 · Daten beschaffen · BM-Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body class="lab-page" data-lab="lab-02">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <a class="header-back" href="index.html">← Zur Übersicht</a>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title">Abschnitte</div>
+  <a class="sidebar-link" href="#wege">Drei Wege</a>
+  <a class="sidebar-link" href="#lfs">Git LFS</a>
+  <a class="sidebar-link" href="#duckdb">DuckDB</a>
+  <a class="sidebar-link" href="#formate">Exportformate</a>
+  <a class="sidebar-link" href="#werkzeuge">Was in welches Werkzeug</a>
+  <a class="sidebar-link" href="#stolper">Stolpersteine</a>
+  <a class="sidebar-link" href="#spielplatz">Spielplatz</a>
+  <a class="sidebar-link" href="#uebungen">Übungen</a>
+  <a class="sidebar-link" href="#zusammenfassung">Zusammenfassung</a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">02</div>
+  <h1 class="lab-title">Daten beschaffen</h1>
+  <p class="lab-intro">In Lab 01 haben Sie die Verbindung zur Datenbank der Fallstudie hergestellt. Dieses Lab zeigt die drei Wege, auf denen dieselben Daten zu Ihnen kommen — als Abfrage über den Connector, als CSV-Dateien aus Git LFS und als lokale DuckDB-Datei — und für welches Werkzeug welcher Weg der richtige ist. Dazu die Exportformate CSV, Parquet, Excel und <code>.hyper</code> sowie die Stolpersteine: ein Klon ohne LFS, ein Notebook in Colab, das Zeigerdateien liest, und ein Vollabzug, der in die Zeitgrenze der Rolle läuft.</p>
+  <div class="lernziele">
+    <span class="lernziel-chip">Datenbank · CSV · DuckDB</span>
+    <span class="lernziel-chip">Git LFS</span>
+    <span class="lernziel-chip">read_csv</span>
+    <span class="lernziel-chip">CSV · Parquet · .hyper</span>
+    <span class="lernziel-chip">Werkzeug und Weg</span>
+  </div>
+  <div data-einordnung></div>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="wege">
+    <h2>Drei Wege zu denselben Daten</h2>
+    <p>Die Datenbank der Fallstudie, die CSV-Dateien im Repository <code>github.com/swrobuts/BurgerMetrics</code> und eine DuckDB-Datei auf Ihrem Rechner enthalten denselben Bestand: 754.513 Bestellungen, 2.950.082 Positionen, 10.000 Rezensionen. Der Unterschied liegt nicht in den Daten, sondern darin, wer rechnet, wer die Grenzen setzt und was der Weg kostet.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Weg</th><th>Wer rechnet</th><th>Grenzen</th><th>Wofür</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Datenbank am Connector</strong><br>Host <code>supabase.butscher.cloud</code>, Port <code>5433</code>, Rolle <code>studi_daba</code> (Lab 01)</td>
+            <td>die Datenbank; die 38 materialisierten Sichten in <code>burgermetrics</code> liefern fertige Kennzahlen</td>
+            <td>10 Minuten je Abfrage, 20 Sitzungen, nur lesend</td>
+            <td>der Regelfall: Power BI, Tableau Desktop, die Notebooks</td>
+          </tr>
+          <tr>
+            <td><strong>CSV aus Git LFS</strong><br>15 Dateien, 315 MB je Klon</td>
+            <td>Ihr Rechner, mit dem Werkzeug, das die Datei liest</td>
+            <td>jeder Klon zählt auf das Bandbreitenkontingent des Repository-Eigentümers: 10 GiB je Monat (Stand 09/2026)</td>
+            <td>der vollständige Bestand auf dem eigenen Rechner; die Grundlage für DuckDB</td>
+          </tr>
+          <tr>
+            <td><strong>DuckDB lokal</strong><br>eine Datei, kein Server</td>
+            <td>Ihr Rechner; die Datei gehört Ihnen</td>
+            <td>keine Grenzen der Rolle: <code>CREATE TABLE</code> und <code>CREATE VIEW</code> sind erlaubt</td>
+            <td>SQL üben ohne Server, eigene Tabellen und Sichten, das analytische Modell aus Notebook 01 (<code>01_analytisches_datenmodell.ipynb</code>)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="concept-box">
+      <h3>Wer rechnet, entscheidet über den Weg</h3>
+      <p>Am Connector rechnet die Datenbank: Eine Sicht mit zehn Zeilen ist schnell da, und die 2.950.082 Positionen holt niemand vollständig in ein Notebook. Bei den CSV-Dateien und in DuckDB rechnet Ihr Rechner — dafür dürfen Sie dort anlegen, was die Rolle <code>studi_daba</code> verweigert. Und jeder Klon aus Git LFS belastet das Kontingent des Repository-Eigentümers; deshalb bleibt für Colab der Connector der Weg.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="lfs">
+    <h2>Git LFS: Zeigerdatei oder Daten</h2>
+    <p>Git speichert jede Version einer Datei vollständig. Für die 15 CSV-Dateien des Datensatzes — zusammen 315 MB, allein <code>obt_orders.csv</code> 176 MB — bliebe jede Änderung für immer in der Historie. Git LFS (Large File Storage) legt deshalb im Repository nur eine kleine Zeigerdatei ab und die Daten in einem eigenen Speicher; die Regel dafür steht in <code>.gitattributes</code>: <code>*.csv filter=lfs diff=lfs merge=lfs -text</code>.</p>
+    <p>Die Zeigerdatei zu <code>fact_orders.csv</code> hat drei Zeilen und 133 Byte:</p>
+    <div class="code-block">version https://git-lfs.github.com/spec/v1
+oid sha256:deef61177fc57b004e792f5e72c400b5fb2658c665af107930253e8a25060e8d
+size 53346072</div>
+    <p>Die letzte Zeile nennt die Größe der eigentlichen Datei: 53.346.072 Byte, in <code>ls -lh</code> als <code>51M</code> angezeigt. Wer das Repository ohne eingerichtetes Git LFS klont, bekommt für jede CSV-Datei genau diese drei Zeilen statt der Daten — und keine Fehlermeldung. Die Prüfung gehört deshalb zum Klonen dazu. Voraussetzung: die Erweiterung git-lfs ist installiert (Prüfung: <code>git lfs version</code>).</p>
+    <div data-befehl="B01"></div>
+    <p>So sieht die Prüfung in beiden Fällen aus: mit Daten und mit Zeigerdatei.</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Terminal — BurgerMetrics</span><span class="spacer"></span>zsh</div>
+      <div class="shot-body eins">
+        <div class="shot-main">
+          <div class="code">% ls -lh dataset/fact_orders.csv
+-rw-r--r--  1 …  51M … dataset/fact_orders.csv <span class="callout">1</span>
+% head -2 dataset/fact_orders.csv
+order_id,date,time,hour,branch_id,customer_id,payment_id,promo_id,order_channel,item_count,distinct_items,gross_total,discount_amount,net_total,order_duration_min,satisfaction_score
+1,2017-03-15,17:23,17,1,8320,2,1,Counter,5,3,10.35,1.55,8.8,6,</div>
+          <div class="code">% ls -lh dataset/fact_orders.csv
+-rw-r--r--  1 …  133B … dataset/fact_orders.csv <span class="callout">2</span>
+% head -3 dataset/fact_orders.csv
+version https://git-lfs.github.com/spec/v1
+oid sha256:deef61177fc57b004e792f5e72c400b5fb2658c665af107930253e8a25060e8d
+size 53346072
+% git lfs install
+Git LFS initialized.
+% git lfs pull <span class="callout">3</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span><code>51M</code>: Die Daten liegen vor; <code>head -2</code> zeigt die Kopfzeile und die erste Bestellung vom 15.03.2017. Besitzer und Datum in der Zeile hängen vom Rechner ab und sind hier ausgelassen.</span></li>
+      <li><span class="callout">2</span><span><code>133B</code>: nur die Zeigerdatei — drei Zeilen Text mit Prüfsumme (<code>oid</code>) und der Größe der eigentlichen Datei. So sieht jede der 15 CSV-Dateien aus, wenn LFS beim Klonen fehlte.</span></li>
+      <li><span class="callout">3</span><span>Abhilfe in zwei Schritten: erst <code>git lfs install</code>, dann <code>git lfs pull</code>. Danach zeigt <code>ls -lh</code> wieder <code>51M</code>.</span></li>
+    </ol>
+    <div class="warn-box">
+      <h3>Das Kontingent: 10 GiB je Monat</h3>
+      <p>GitHub rechnet jeden Download aus dem LFS-Speicher auf das Kontingent des Repository-Eigentümers an — auch bei Forks und Klonen: 10 GiB Bandbreite je Monat (Stand 09/2026). Ein Klon zieht 315 MB; das Kontingent reicht damit für rund 30 Klone im Monat. Für einen Kurs mit vielen Teilnehmenden gibt diese Grenze den Weg vor: Die Notebooks lesen große Tabellen aus der Datenbank, <code>lade_csv()</code> ist auf Dimensionen beschränkt, und wer den ganzen Bestand lokal will, klont einmal und arbeitet danach in DuckDB.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="duckdb">
+    <h2>DuckDB: SQL auf CSV-Dateien, ohne Server</h2>
+    <p>DuckDB ist eine Datenbank als Python-Paket: <code>pip install duckdb</code>, und SQL läuft direkt auf CSV- und Parquet-Dateien oder auf DataFrames — ohne Server, ohne Port, ohne Konto. Die Datenbank ist eine Datei, hier <code>burger_metrics.duckdb</code>, und sie gehört Ihnen: <code>CREATE TABLE</code> und <code>CREATE VIEW</code>, die die Rolle <code>studi_daba</code> in Lab 01 verweigert, sind hier erlaubt. Stand 09/2026: Version 1.5.5 vom 22.07.2026, daneben die LTS-Reihe 1.4, die die Notebooks der Fallstudie nutzen — für dieses Lab macht das keinen Unterschied.</p>
+    <p>Zwei Wege zur Datei: das Ladeskript des Repositorys für den ganzen Datensatz, oder wenige Zeilen Python für die Tabellen, die Sie gerade brauchen.</p>
+    <h3>Weg 1: das Ladeskript</h3>
+    <p><code>dataset/load_duckdb.py</code> liegt im Repository. Es lädt alle 14 Tabellen in eine Datei und prüft jede Zeilenzahl gegen den Sollwert — ein unvollständiger Ladelauf fällt so sofort auf und nicht erst in der Übung.</p>
+    <div data-befehl="B02"></div>
+    <h3>Weg 2: read_csv</h3>
+    <p>Für zwei Tabellen braucht es kein Skript. <code>read_csv</code> liest eine CSV-Datei mit erkannten Typen, <code>CREATE TABLE … AS</code> speichert das Ergebnis in der Datei, und die Abfrage darauf ist dieselbe wie gegen PostgreSQL — solange sie bei Standard-SQL bleibt.</p>
+    <div data-befehl="B03"></div>
+    <div class="vorlagen">
+      <a class="vorlage" href="vorlagen/duckdb-laden.py" download><span class="symbol">📄</span><span><span class="datei">duckdb-laden.py</span><br><span class="was">Das Skript aus B03, kommentiert: connect, zwei read_csv-Tabellen, die Abfrage aus W02-01, close.</span></span></a>
+    </div>
+    <div class="info-box">
+      <p>Zum Maßstab: Für das Foliendeck der Vorlesung („Vom Datenmodell zur Entscheidung“) wurden die 13 CSV-Dateien des Kernbestands, 311,4 MB, mit DuckDB 1.5.5 geladen — Median aus sieben Läufen: Laden aus CSV 2,3 s, Datenbankdatei danach 54,5 MB, die Abfrage „Umsatz je Filiale und Jahr“ über zwei Verknüpfungen 3,9 ms. Die Datei ist kleiner als die CSV-Dateien, weil DuckDB spaltenweise und komprimiert speichert.</p>
+    </div>
+    <div class="auswahl-hinweis">
+      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. DuckDB steht hier, weil das Ladeskript und die Notebooks des Repositorys es verwenden. Wer die CSV-Dateien auf dem eigenen Rechner ohne SQL auswerten will, liest sie mit pandas (<code>pd.read_csv</code>) — derselben Bibliothek, mit der die Notebooks arbeiten (pandas 3.0, Stand 09/2026).</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="formate">
+    <h2>Exportformate: CSV, Parquet, Excel, .hyper</h2>
+    <p>Ein Export ist eine Kopie und veraltet ab dem Moment, in dem er geschrieben ist. Wo er trotzdem nötig ist — Tableau Desktop Public Edition, eine Abgabe an ein anderes Team, ein Rechner ohne Datenbankverbindung —, entscheidet das Ziel über das Format.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Format</th><th>Was es kann</th><th>Was es nicht kann</th><th>In der Fallstudie</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>CSV</strong></td>
+            <td>Text, in jedem Werkzeug und jedem Editor lesbar</td>
+            <td>keine Typen: Datum und Dezimalzahl werden beim Einlesen geraten; die Kodierung muss der Leser kennen — die Dateien des Datensatzes sind UTF-8 mit BOM</td>
+            <td><code>fact_orders.csv</code> 51 MB; der Weg in Tableau Desktop Public Edition und in Excel</td>
+          </tr>
+          <tr>
+            <td><strong>Parquet</strong></td>
+            <td>Spaltenformat mit Typen je Spalte und Kompression; pandas (<code>to_parquet</code>, <code>read_parquet</code>) und DuckDB lesen es direkt</td>
+            <td>nicht im Editor lesbar; bei sehr kleinen Tabellen größer als CSV, weil das Format Kopfdaten mitschreibt — <code>v_filiale</code> mit 8 Zeilen: 1.620 Byte als CSV, 12.583 Byte als Parquet</td>
+            <td><code>fact_orders</code> als Parquet 10,7 MB statt 51 MB</td>
+          </tr>
+          <tr>
+            <td><strong>Excel</strong></td>
+            <td>bequem zum Ansehen und Weitergeben</td>
+            <td>1.048.576 Zeilen je Blatt</td>
+            <td><code>fact_orders</code> (754.513 Zeilen) passt, <code>fact_order_items</code> (2.950.082) nicht</td>
+          </tr>
+          <tr>
+            <td><strong>.hyper</strong></td>
+            <td>Tableaus Extract-Format: ein gespeicherter Auszug — schneller, offline; entsteht in Tableau aus einer Live-Verbindung oder aus Dateien</td>
+            <td>nur Tableau liest es; der Vorgänger <code>.tde</code> ist seit März 2023 abgekündigt (Stand 09/2026)</td>
+            <td>Lab 05: Live gegen Extract</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notebook 00 (<code>00_zugang_und_daten.ipynb</code>) exportiert vier Sichten in beide Formate nach <code>notebooks/export/</code> — mit <code>to_parquet</code> und <code>to_csv</code> aus pandas:</p>
+    <div data-befehl="B04"></div>
+  </section>
+
+  <section class="section-block" id="werkzeuge">
+    <h2>Was in welches Werkzeug</h2>
+    <p>Die Tabelle fasst zusammen, welcher Weg zu welchem Ziel führt; die Werkzeuge selbst kommen in Lab 04 (Power BI), Lab 05 (Tableau) und Lab 06 (Python und Colab) an die Reihe. Stand 09/2026.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Ziel</th><th>Weg</th><th>Warum</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Power BI Desktop (Update August 2026)</td>
+            <td>Connector zur Datenbank, Modus Import</td>
+            <td>Der PostgreSQL-Connector bringt den Treiber mit (Npgsql, enthalten seit 12/2019, Version 4.0.17 seit 10/2024). Import ist der Regelfall; DirectQuery scheitert an jeder Abfrage mit mehr als 1.000.000 Zeilen im Ergebnis.</td>
+          </tr>
+          <tr>
+            <td>Tableau Desktop 2026.2</td>
+            <td>Connector zur Datenbank, Live oder Extract (<code>.hyper</code>)</td>
+            <td>Der PostgreSQL-Connector braucht einen Treiber. Live schickt jede Abfrage an die Datenbank, Extract kopiert einen Auszug in eine <code>.hyper</code>-Datei.</td>
+          </tr>
+          <tr>
+            <td>Tableau Desktop Public Edition</td>
+            <td>CSV aus dem Export von Notebook 00</td>
+            <td>Die Public Edition kennt keine Datenbankverbindung — nur Dateien, Google Drive und OData, höchstens 15 Mio. Zeilen je Arbeitsmappe. Die Studentenlizenz für Tableau Desktop ist seit 01.02.2025 eingestellt.</td>
+          </tr>
+          <tr>
+            <td>Notebook in Colab</td>
+            <td><code>lade_sql()</code> über den Connector; <code>lade_csv()</code> nur für Dimensionen</td>
+            <td>Die Datenbank rechnet, das Notebook bekommt das Ergebnis. Jeder Abruf aus Git LFS zählt auf das Kontingent des Repository-Eigentümers.</td>
+          </tr>
+          <tr>
+            <td>Lokal ohne Server: SQL üben, eigene Tabellen anlegen</td>
+            <td>DuckDB auf dem Klon</td>
+            <td>Die Datei gehört Ihnen; die Rolle <code>studi_daba</code> erlaubt kein <code>CREATE TABLE</code>.</td>
+          </tr>
+          <tr>
+            <td>Abgabe an ein anderes Team, Typen erhalten</td>
+            <td>Parquet</td>
+            <td>Typen je Spalte und Kompression; pandas und DuckDB lesen die Datei direkt.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section-block" id="stolper">
+    <h2>Stolpersteine</h2>
+    <p>Vier Situationen, in denen der Weg zu den Daten scheitert oder still das Falsche liefert.</p>
+    <p><strong>Zeigerdatei statt Daten.</strong> Ein Klon ohne Git LFS enthält 15 Zeigerdateien und meldet nichts. Erst das Ladeskript bricht ab, mit der Abhilfe in derselben Meldung:</p>
+    <p><code>FEHLER: Diese Dateien sind Git-LFS-Verweise, keine Daten:</code><br><code>Abhilfe:  git lfs install &amp;&amp; git lfs pull</code></p>
+    <p>Wer eine Zeigerdatei stattdessen selbst mit <code>read_csv</code> oder <code>pd.read_csv</code> liest, bekommt eine Tabelle mit einer Spalte und zwei Zeilen — und keine Fehlermeldung, bis die erste Abfrage eine Spalte wie <code>branch_id</code> sucht.</p>
+    <p><strong>Colab liest Zeigerdateien.</strong> Die Roh-Adresse <code>raw.githubusercontent.com/swrobuts/BurgerMetrics/main/dataset/dim_branch.csv</code> liefert die Zeigerdatei, nicht die Daten. <code>pd.read_csv</code> liest sie ohne Beanstandung ein: eine Spalte namens <code>version https://git-lfs.github.com/spec/v1</code>, zwei Zeilen. Die nächste Zeile, die eine Spalte erwartet, scheitert mit <code>KeyError: 'branch_id'</code>. Die Notebooks nehmen deshalb <code>media.githubusercontent.com/media/swrobuts/BurgerMetrics/main/dataset/…</code> — diese Adresse liefert die Daten aus dem LFS-Speicher und zählt auf das Kontingent. Aus demselben Grund liegt <code>notebooks/daten_extern/</code> ohne LFS im Repository.</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Notebook — dim_branch.csv aus GitHub</span><span class="spacer"></span>Colab</div>
+      <div class="shot-body eins">
+        <div class="shot-main">
+          <div class="zelle"><span class="nrz">[1]:</span>roh = "https://raw.githubusercontent.com/swrobuts/BurgerMetrics/main/dataset/"<br>pd.read_csv(roh + "dim_branch.csv") <span class="callout">1</span></div>
+          <div class="ausgabe">          version https://git-lfs.github.com/spec/v1
+0  oid sha256:5100b7dd97a3c59cdafc041c308e39e5e44...
+1                                          size 1195</div>
+          <div class="zelle"><span class="nrz">[2]:</span>media = "https://media.githubusercontent.com/media/swrobuts/BurgerMetrics/main/dataset/"<br>pd.read_csv(media + "dim_branch.csv").shape <span class="callout">2</span></div>
+          <div class="ausgabe">(8, 17)</div>
+        </div>
+      </div>
+    </div>
+    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Die Roh-Adresse: pandas nimmt die erste Zeile der Zeigerdatei als Spaltenname und die beiden anderen als Werte. Kein Fehler, keine Filiale.</span></li>
+      <li><span class="callout">2</span><span>Die Media-Adresse, wie in <code>lade_csv()</code>: acht Filialen, 17 Spalten — die Daten aus dem LFS-Speicher.</span></li>
+    </ol>
+    <p><strong>pandas 3 und DuckDB 1.4.</strong> pandas 3.0 speichert Text im neuen Standardtyp <code>str</code>. DuckDB 1.4 kennt diesen Typ beim Registrieren eines DataFrames noch nicht (Stand 09/2026):</p>
+    <p><code>NotImplementedException: Not implemented Error: Data type 'str' not recognized</code></p>
+    <p>Die Notebooks 00 und 01 setzen die Textspalten vor <code>con.register()</code> auf <code>object</code> — mit der Hilfsfunktion <code>fuer_duckdb()</code>:</p>
+    <div class="code-block">def fuer_duckdb(daten):
+    # DuckDB 1.4 kennt pandas' neuen Standard-Stringtyp "str" (ab pandas 3) noch nicht
+    spalten = {s: object for s in daten.columns if daten[s].dtype == "str"}
+    return daten.astype(spalten) if spalten else daten
+
+con.register("dim_branch", fuer_duckdb(lade_csv("dim_branch")))</div>
+    <p><strong>Zeitgrenze bei Vollabzügen.</strong> Die Rolle <code>studi_daba</code> darf je Abfrage zehn Minuten rechnen (Lab 01). Ein Vollabzug wie <code>SELECT * FROM fact_order_items</code> — 2.950.082 Zeilen — läuft über die Verbindung in ein Notebook gegen diese Grenze; bricht die Datenbank ab, lautet die Meldung:</p>
+    <p><code>ERROR:  canceling statement due to statement timeout</code></p>
+    <p>Der Weg daran vorbei: in der Datenbank aggregieren — die Sichten <code>v_*</code> tun genau das — oder der ganze Bestand per DuckDB auf dem eigenen Klon.</p>
+  </section>
+
+  <section class="section-block" id="spielplatz">
+    <h2>Spielplatz</h2>
+    <p>Unten läuft ein vollständiges PostgreSQL im Browser (PGlite, WebAssembly) mit dem Miniaturbestand der Fallstudie: 19 Bestellungen, 55 Positionen und 12 Rezensionen in denselben beiden Schemata und demselben Suchpfad wie die echte Datenbank. Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf <code>Datenbank zurücksetzen</code> stellt den Ausgangsbestand wieder her.</p>
+    <div data-datenbank="postgres"></div>
+    <p>Die Startabfrage zählt Bestellungen je Filiale — dieselbe Abfrage, die B03 in DuckDB über die CSV-Dateien stellt. Hier liefert sie fünf Zeilen, weil im Miniaturbestand fünf Filialen Bestellungen haben; über den vollständigen Datensatz sind es acht. Der SQL-Text bleibt derselbe.</p>
+    <div data-sql-konsole data-start="SELECT b.branch_name, count(*) FROM fact_orders o JOIN dim_branch b USING (branch_id) GROUP BY 1 ORDER BY 2 DESC;"></div>
+  </section>
+
+  <section class="section-block" id="uebungen">
+    <h2>Übungen</h2>
+    <p>Fünf Übungen: zwei SQL-Aufgaben, deren Lösung wortgleich in DuckDB läuft, eine Reihenfolge vom Klon zur eigenen DuckDB-Datei, drei Fragen zu LFS, Parquet und Colab und eine Zuordnung von Ziel zu Weg.</p>
+    <div data-uebung="W02-01"></div>
+    <div data-uebung="W02-02"></div>
+    <div data-uebung="W02-03"></div>
+    <div data-uebung="W02-04"></div>
+    <div data-uebung="W02-05"></div>
+    <div data-fortschritt></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2>Zusammenfassung</h2>
+    <ul>
+      <li>Drei Wege, ein Bestand: Am Connector rechnet die Datenbank und liefert über 38 Sichten fertige Kennzahlen; die CSV-Dateien aus Git LFS bringen 315 MB in 15 Dateien auf Ihren Rechner; DuckDB fragt sie dort mit SQL ab — in einer Datei, die Ihnen gehört.</li>
+      <li>Git LFS: <code>git lfs install</code> vor dem Klonen, dann <code>ls -lh dataset/fact_orders.csv</code> — <code>51M</code> ist richtig, <code>133B</code> ist eine Zeigerdatei, die mit <code>version https://git-lfs.github.com/spec/v1</code> beginnt; Abhilfe <code>git lfs pull</code>. Das Kontingent von 10 GiB je Monat reicht für rund 30 Klone (Stand 09/2026).</li>
+      <li>DuckDB (1.5.5, LTS-Reihe 1.4; Stand 09/2026): <code>load_duckdb.py --lokal</code> lädt 14 Tabellen und prüft die Zeilenzahlen; <code>read_csv</code> und <code>CREATE TABLE … AS</code> holen einzelne Tabellen. Eine Abfrage in Standard-SQL läuft wortgleich in DuckDB und PostgreSQL.</li>
+      <li>Formate: CSV liest jedes Werkzeug, trägt aber keine Typen; Parquet hält Typen und komprimiert (<code>fact_orders</code>: 10,7 MB statt 51 MB); Excel endet bei 1.048.576 Zeilen je Blatt; <code>.hyper</code> ist Tableaus Extract.</li>
+      <li>Werkzeug und Weg: Power BI und Tableau Desktop über den Connector, Tableau Desktop Public Edition über CSV aus <code>notebooks/export/</code>, Colab über <code>lade_sql()</code>, lokal ohne Server über DuckDB.</li>
+      <li>Stolpersteine: Zeigerdatei statt Daten (<code>raw.githubusercontent.com</code> statt <code>media.githubusercontent.com/media/…</code>), der pandas-3-Typ <code>str</code> beim <code>register()</code> in DuckDB 1.4 (<code>fuer_duckdb()</code>), und <code>statement_timeout</code> bei Vollabzügen.</li>
+      <li>Was Sie hier gewählt haben, brauchen Sie in Lab 04 und Lab 05 (Connector) und in Lab 06 (Notebooks) wieder.</li>
+    </ul>
+    <div data-lab-nav></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS Business School · Datenbasierte Fallstudien · BM-Lab · Lab 02 · Stand 09/2026</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>

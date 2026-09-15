@@ -1,0 +1,109 @@
+{
+  "befehle": {
+    "B01": {
+      "titel": { "de": "Klickweg: PostgreSQL anbinden und die Tabellen wählen" },
+      "prompt": "🖱",
+      "befehl": "Start → Daten abrufen → PostgreSQL-Datenbank\n    Server       supabase.butscher.cloud:5433\n    Datenbank    postgres\n    Modus        Import\n    Warnung zur unverschlüsselten Verbindung → OK\n\nAuthentifizierung: Datenbank\n    Benutzer     studi_daba\n    Kennwort     thws\n\nNavigator → Ordner burgermetrics\n    [x] dim_branch   [x] dim_customer   [x] dim_date   [x] dim_product\n    [x] fact_orders  [x] fact_order_items   [x] fact_reviews\n    [ ] obt_orders\n# danach laden; obt_orders bleibt draußen",
+      "teile": [
+        { "was": "PostgreSQL-Datenbank", "bedeutet": { "de": "Der Connector für PostgreSQL. Sein Treiber Npgsql ist seit Dezember 2019 in Power BI Desktop enthalten, seit Oktober 2024 in Version 4.0.17 — eine Installation entfällt. Stand 09/2026." } },
+        { "was": "supabase.butscher.cloud:5433", "bedeutet": { "de": "Server und Port in einem Feld, getrennt durch einen Doppelpunkt. Der Port 5433 gehört dazu — 5432 ist der PostgreSQL-Standard und hier falsch (Lab 01)." } },
+        { "was": "Import", "bedeutet": { "de": "Kopiert die gewählten Tabellen in den Speicher von Power BI. DirectQuery würde bei jedem Bild Abfragen an die Datenbank schicken — mit zwanzig Sitzungen der Rolle im Hörsaal keine Wahl (Abschnitt „Stolpersteine“)." } },
+        { "was": "Warnung zur unverschlüsselten Verbindung", "bedeutet": { "de": "Die Verbindung läuft ohne SSL, wie in Lab 01. Power BI weist darauf hin; OK bestätigt. Der Bestand ist synthetisch, und das Konto liest nur." } },
+        { "was": "Authentifizierung: Datenbank", "bedeutet": { "de": "Benutzer und Kennwort des Demo-Kontos wie in Lab 01. Power BI merkt sich die Anmeldung je Server." } },
+        { "was": "Ordner burgermetrics", "bedeutet": { "de": "Beide Schemata erscheinen im Navigator als Ordner. Für ein eigenes Modell dim_* und fact_* ankreuzen, für fertige Kennzahlen die Sichten v_*; obt_orders bleibt draußen — 41 Spalten, die alles doppelt tragen." } }
+      ]
+    },
+    "B02": {
+      "titel": { "de": "Die fünf Measures des Berichts (Vorlage powerbi-measures.dax)" },
+      "prompt": "DAX",
+      "befehl": "Umsatz = SUM(fact_orders[net_total])\nBestellungen = COUNTROWS(fact_orders)\nBestellwert = DIVIDE([Umsatz], [Bestellungen])\nØ Sterne = AVERAGE(fact_reviews[stars])\nUmsatz 2025 = CALCULATE([Umsatz], dim_date[year] = 2025)",
+      "teile": [
+        { "was": "SUM(fact_orders[net_total])", "bedeutet": { "de": "Summiert genau eine Spalte im aktuellen Filterkontext: den Bestellwert nach Rabatt, auf dem Grain der Bestellung (Lab 03). Kontrollzahl mit dem Filter Jahr 2025: 2.994.771,13 €." } },
+        { "was": "COUNTROWS(fact_orders)", "bedeutet": { "de": "Zählt die Zeilen der Faktentabelle im Filterkontext. Das ist die Antwort auf „wie viele Bestellungen“ — nicht die Summe der Bestellnummern, die Power BI für die Zahlenspalte order_id vorschlagen würde. Für 2025: 136.557." } },
+        { "was": "DIVIDE([Umsatz], [Bestellungen])", "bedeutet": { "de": "Der mittlere Bestellwert. DIVIDE statt „/“ liefert BLANK statt eines Fehlers, wenn der Nenner null ist — etwa eine Filiale ohne Bestellungen im gewählten Monat. Measures dürfen Measures aufrufen; beide werden im selben Filterkontext berechnet." } },
+        { "was": "AVERAGE(fact_reviews[stars])", "bedeutet": { "de": "Der Mittelwert der Sterne aus der dritten Faktentabelle. Über die aktiven Beziehungen zu dim_branch und dim_date lässt er sich je Filiale und Jahr aufteilen — ohne den Umweg über fact_orders, weil diese Beziehung inaktiv ist." } },
+        { "was": "CALCULATE([Umsatz], dim_date[year] = 2025)", "bedeutet": { "de": "Wertet [Umsatz] in einem veränderten Filterkontext aus: Der Filter auf dim_date[year] ersetzt jeden Filter, der von außen auf dieser Spalte liegt; Filter auf anderen Spalten wie Filiale oder Monat bleiben. Die Beziehung fact_orders[date] → dim_date[date] trägt den Filter in die Fakten. Ergebnis ohne weitere Filter: 2.994.771,13 €." } }
+      ]
+    }
+  },
+  "regal": {
+    "daten": "data/regal-bestellungen.json",
+    "felder": [
+      { "id": "monat", "typ": "dimension", "geordnet": true, "titel": { "de": "Monat" }, "reihenfolge": ["2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12"] },
+      { "id": "wochentag", "typ": "dimension", "titel": { "de": "Wochentag" }, "reihenfolge": ["Mo","Di","Mi","Do","Fr","Sa","So"] },
+      { "id": "stunde", "typ": "dimension", "geordnet": true, "titel": { "de": "Stunde" }, "reihenfolge": [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23] },
+      { "id": "filiale", "typ": "dimension", "titel": { "de": "Filiale" } },
+      { "id": "kanal", "typ": "dimension", "titel": { "de": "Kanal" } },
+      { "id": "zahlart", "typ": "dimension", "titel": { "de": "Zahlart" } },
+      { "id": "loyalty", "typ": "dimension", "titel": { "de": "Loyalty-Stufe" } },
+      { "id": "saison", "typ": "dimension", "titel": { "de": "Saison" } },
+      { "id": "order_id", "typ": "kennzahl", "titel": { "de": "Bestell-ID" }, "erklaerung": { "de": "Eine Kennung — Σ darüber ist die klassische Falle. COUNT zählt Bestellungen." } },
+      { "id": "umsatz", "typ": "kennzahl", "titel": { "de": "Umsatz (€)" } },
+      { "id": "positionen", "typ": "kennzahl", "titel": { "de": "Positionen" } },
+      { "id": "zufriedenheit", "typ": "kennzahl", "titel": { "de": "Zufriedenheit" }, "erklaerung": { "de": "Nur bewertete Bestellungen tragen einen Wert; AVG ignoriert die Lücken." } }
+    ]
+  },
+  "spielplaetze": { "frei": { "variante": "powerbi", "startBelegung": { "spalten": [], "zeilen": [], "farbe": null, "filter": {} } } },
+  "uebungen": [
+    { "id": "W04-01", "typ": "regal", "variante": "powerbi",
+      "titel": { "de": "Umsatz je Filiale als Balken" },
+      "aufgabe": { "de": "<p>Legen Sie <strong>Filiale</strong> auf die Spalten (<code>X-axis</code>) und die <strong>Summe des Umsatzes</strong> auf die Zeilen (<code>Y-axis</code>). Es entsteht ein senkrechtes Balkendiagramm mit acht Balken.</p>" },
+      "ziel": { "spalten": ["filiale"], "zeilen": ["SUM:umsatz"] },
+      "loesungBelegung": { "spalten": ["filiale"], "zeilen": [ { "feld": "umsatz", "agg": "SUM" } ], "farbe": null, "filter": {} },
+      "rueckmeldung": { "de": "Dimension auf Spalten, Kennzahl auf Zeilen — die Grundform jedes Vergleichs. Der Nullpunkt bleibt sichtbar, weil Länge den Wert kodiert." } },
+
+    { "id": "W04-02", "typ": "regal", "variante": "powerbi",
+      "titel": { "de": "Bestellungen je Monat — zählen, nicht summieren" },
+      "aufgabe": { "de": "<p>Legen Sie <strong>Monat</strong> auf die Spalten (<code>X-axis</code>) und die <strong>Bestell-ID</strong> auf die Zeilen (<code>Y-axis</code>) — aber mit <strong>COUNT</strong>, nicht mit SUM. Eine Kennung wird gezählt, nicht addiert. Es entsteht eine Linie über zwölf Monate.</p>" },
+      "ziel": { "spalten": ["monat"], "zeilen": ["COUNT:order_id"] },
+      "loesungBelegung": { "spalten": ["monat"], "zeilen": [ { "feld": "order_id", "agg": "COUNT" } ], "farbe": null, "filter": {} },
+      "rueckmeldung": { "de": "Power BI schlägt für jede Zahlenspalte die Summe vor — auch für Kennungen. Die Summe der Bestellnummern ist eine Zahl ohne Bedeutung; COUNTROWS(fact_orders) ist das richtige Measure." } },
+
+    { "id": "W04-03", "typ": "quiz",
+      "titel": { "de": "Import, Beziehungen, Measures" },
+      "aufgabe": { "de": "<p>Drei Fragen zum Modell in Power BI.</p>" },
+      "fragen": [
+        { "frage": { "de": "Warum gilt für den Kurs Import statt DirectQuery?" },
+          "optionen": [ { "de": "Import rechnet aus dem Speicher; DirectQuery schickt je Bild Abfragen an die Datenbank, die nur zwanzig Sitzungen der Rolle hält" }, { "de": "DirectQuery kann keine PostgreSQL-Datenbank lesen" }, { "de": "Import ist die einzige Möglichkeit, Beziehungen anzulegen" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Beide Modi lesen PostgreSQL und beide kennen Beziehungen. Der Unterschied ist, wo gerechnet wird — und ein Hörsaal mit DirectQuery-Berichten belegt die zwanzig Sitzungen in Minuten." } },
+        { "frage": { "de": "Nach dem Laden steht in einem Balkendiagramm „Umsatz je Filiale“ in jeder Filiale derselbe Wert. Was fehlt?" },
+          "optionen": [ { "de": "Die Beziehung zwischen fact_orders und dim_branch" }, { "de": "Ein Filter auf das Jahr 2025" }, { "de": "Die Materialisierung der Sicht" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Ohne Beziehung kann die Dimension die Fakten nicht filtern; jede Zeile zeigt die Gesamtsumme. Das ist das Bild, an dem man eine fehlende Beziehung erkennt." } },
+        { "frage": { "de": "Welche Angaben werden beim ersten Laden zu Beziehungen?" },
+          "optionen": [ { "de": "Die Fremdschlüssel der Datenbank — 13 in burgermetrics" }, { "de": "Alle Spalten mit gleichem Namen, auch ohne Fremdschlüssel" }, { "de": "Nur die Beziehungen, die man von Hand anlegt" } ],
+          "richtig": [0], "mehrfach": false,
+          "erklaerung": { "de": "Die Option „Beziehungen aus Datenquellen beim ersten Laden importieren“ spiegelt die Fremdschlüssel. dim_weather und dim_time_slot haben keinen und brauchen Handarbeit." } }
+      ],
+      "rueckmeldung": { "de": "Import, Beziehungen aus Fremdschlüsseln, Measures statt Spalten — drei Entscheidungen, die den Bericht tragen." } },
+
+    { "id": "W04-04", "typ": "zuordnen",
+      "titel": { "de": "DAX-Ausdruck und Zweck" },
+      "aufgabe": { "de": "<p>Ordnen Sie jeden Ausdruck seinem Zweck zu.</p>" },
+      "ziele": [ { "id": "summe", "text": { "de": "Summe einer Spalte" } }, { "id": "zaehlen", "text": { "de": "Zeilen zählen" } }, { "id": "teilen", "text": { "de": "Quotient ohne Fehler bei null" } }, { "id": "mittel", "text": { "de": "Mittelwert einer Spalte" } }, { "id": "filter", "text": { "de": "Measure unter geändertem Filter" } } ],
+      "paare": [
+        { "begriff": { "de": "SUM(fact_orders[net_total])" }, "ziel": "summe" },
+        { "begriff": { "de": "COUNTROWS(fact_orders)" }, "ziel": "zaehlen" },
+        { "begriff": { "de": "DIVIDE([Umsatz], [Bestellungen])" }, "ziel": "teilen" },
+        { "begriff": { "de": "AVERAGE(fact_reviews[stars])" }, "ziel": "mittel" },
+        { "begriff": { "de": "CALCULATE([Umsatz], dim_date[year] = 2025)" }, "ziel": "filter" },
+        { "begriff": { "de": "COUNT(fact_reviews[review_id])" }, "ziel": "zaehlen" }
+      ],
+      "rueckmeldung": { "de": "DIVIDE statt „/“ verhindert den Fehler bei null Bestellungen; CALCULATE ändert den Filterkontext — das Werkzeug hinter jeder Kennzahl „für 2025“." } },
+
+    { "id": "W04-05", "typ": "checkliste",
+      "titel": { "de": "Der Bericht in Power BI Desktop" },
+      "aufgabe": { "de": "<p>In Power BI Desktop (Windows; Update August 2026 oder neuer) gegen die Datenbank der Fallstudie. Jeder Schritt endet mit einer Prüfung.</p>" },
+      "schritte": [
+        { "text": { "de": "Start → Daten abrufen → PostgreSQL-Datenbank; Server <code>supabase.butscher.cloud:5433</code>, Datenbank <code>postgres</code>, Modus Import; Warnung zur unverschlüsselten Verbindung mit OK bestätigt." } },
+        { "text": { "de": "Authentifizierung Datenbank mit <code>studi_daba</code> / <code>thws</code>; der Navigator zeigt die Ordner <code>burgermetrics</code> und <code>wawi</code>." } },
+        { "text": { "de": "Aus <code>burgermetrics</code> geladen: <code>dim_branch</code>, <code>dim_date</code>, <code>dim_product</code>, <code>dim_customer</code>, <code>fact_orders</code>, <code>fact_order_items</code>, <code>fact_reviews</code> — <code>obt_orders</code> nicht." } },
+        { "text": { "de": "Modellansicht: <code>fact_orders</code> hat Linien zu <code>dim_branch</code>, <code>dim_date</code>, <code>dim_customer</code>; zwischen <code>fact_reviews</code> und <code>fact_orders</code>/<code>dim_date</code> ist eine Beziehung gestrichelt (inaktiv) — die direkte zum Datum bleibt aktiv." } },
+        { "text": { "de": "Measures angelegt: <code>Umsatz</code>, <code>Bestellungen</code>, <code>Bestellwert</code>, <code>Ø Sterne</code> (Vorlage <code>powerbi-measures.dax</code>)." } },
+        { "text": { "de": "Kachel mit <code>Umsatz</code> und Filter <code>dim_date[year] = 2025</code> zeigt <code>2.994.771,13 €</code>; Kachel <code>Bestellungen</code> zeigt <code>136.557</code>." } },
+        { "text": { "de": "Balkendiagramm Umsatz je <code>branch_name</code>: acht verschieden hohe Balken, BM Europastern vorn — keine gleichen Werte in jeder Zeile." } }
+      ],
+      "rueckmeldung": { "de": "Der letzte Schritt ist die Probe auf die Beziehungen. Stimmen 2.994.771,13 € und 136.557, liest der Bericht dieselben Zahlen wie das Dashboard und die Notebooks." } }
+  ]
+}
