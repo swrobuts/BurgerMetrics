@@ -139,7 +139,7 @@ const T = {
   feldHinzu:    { de: 'Feld hinzufügen …' },
   entfernen:    { de: 'entfernen' },
   filterWerte:  { de: 'Werte' },
-  keineDaten:   { de: 'Legen Sie ein Feld auf ein Regal.' },
+  keineDaten:   { de: 'Legen Sie ein Feld auf ein Shelf.' },
   typ: {
     quiz:        { de: 'Verständnis' },
     zuordnen:    { de: 'Zuordnen' },
@@ -147,7 +147,7 @@ const T = {
     sql:         { de: 'SQL schreiben' },
     json:        { de: 'JSON schreiben' },
     reihenfolge: { de: 'In Reihenfolge bringen' },
-    regal:       { de: 'Am Regal' }
+    regal:       { de: 'Auf dem Shelf' }
   }
 }
 
@@ -893,7 +893,7 @@ function baueRegal (ziel, opt) {
       const fehler = regalAbweichungen(belegung, opt.ziel).map(f => ({
         ...f,
         text: f.regal === 'spalten' || f.regal === 'zeilen' || f.regal === 'farbe'
-          ? { de: `Regal „${V[f.regal]}“ stimmt nicht.` }
+          ? { de: `${opt.variante === 'powerbi' ? 'Field Well' : 'Shelf'} „${V[f.regal]}“ stimmt nicht.` }
           : f.text
       }))
       opt.beiPruefung(fehler)

@@ -105,8 +105,8 @@ führen vom Zugang zur Datenbank über die Daten und das analytische
 Datenmodell zu Power BI, Tableau und Python bis zu Data Mining und externen
 Daten. Die SQL-Übungen laufen gegen eine echte PostgreSQL-Datenbank im
 Browser (PGlite) mit einem Miniaturbestand in beiden Schemata `wawi` und
-`burgermetrics`, dazu ein Regal-Simulator nach dem Vorbild von Power BI und
-Tableau. Aufbau und Abnahmelauf stehen in [`web/lab/README.md`](web/lab/README.md).
+`burgermetrics`, dazu ein Shelf-Simulator nach dem Vorbild von Power BI
+(Field Wells) und Tableau (Shelves). Aufbau und Abnahmelauf stehen in [`web/lab/README.md`](web/lab/README.md).
 
 ---
 

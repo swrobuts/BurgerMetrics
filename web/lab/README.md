@@ -10,7 +10,7 @@ externen Daten – **41 Übungen** in sieben Formen, jede mit sofortiger Rückme
 Die SQL-Übungen laufen gegen eine **echte PostgreSQL-Datenbank im Browser** (PGlite 0.5.5,
 PostgreSQL 18.3 als WebAssembly): der Miniaturbestand der Fallstudie in den beiden Schemata
 `wawi` (operativ) und `burgermetrics` (analytisch), Suchpfad `wawi, burgermetrics` wie in der
-Datenbank der Fallstudie. Dazu ein **Regal-Simulator** nach dem Vorbild von Power BI und Tableau.
+Datenbank der Fallstudie. Dazu ein **Shelf-Simulator** nach dem Vorbild von Power BI (Field Wells) und Tableau (Shelves).
 Alles läuft als statische Seite ohne Build-Schritt, ohne Backend und ohne Anmeldung; der
 Lernfortschritt bleibt im Browser (`localStorage`, Schlüssel `bm:fortschritt:<lab>`).
 
@@ -34,19 +34,19 @@ web/lab/
   lab-07-datamining.html     Data Mining                         (5)
   lab-08-extern.html         Externe Daten und Sentiment         (5)
   assets/bm.css              Gestalt (aus winf.css, Palette der Spec §2.3: #C2410C, #9A3412, #ED7004, #FDF1E7, #7C2D12)
-  assets/bm.js               Laufzeit (aus winf.js): LABS, Saatfolge, Übungsboxen, Regal-Simulator, Fortschritt; nur Deutsch, Schlüssel bm:*
+  assets/bm.js               Laufzeit (aus winf.js): LABS, Saatfolge, Übungsboxen, Shelf-Simulator, Fortschritt; nur Deutsch, Schlüssel bm:*
   assets/jsonpruefung.js     Prüfung der JSON-Übungen (unverändert aus WInf-SP)
-  assets/regal.js            Aggregation und Zielprüfung des Regal-Simulators (unverändert aus WInf-SP)
+  assets/regal.js            Aggregation und Zielprüfung des Shelf-Simulators (unverändert aus WInf-SP)
   assets/pglite/             PostgreSQL als WebAssembly (PGlite), lokal statt vom CDN (rund 19 MB)
   data/wawi_mini.sql         Schema wawi: Kopie aus dataset/ (Kasse, Shop, Rezensionen)
   data/burgermetrics_mini.sql Schema burgermetrics: Kopie aus dataset/ (Galaxy-Schema mit fact_reviews)
   data/bm_sichten.sql        Sechs Sichten der Semantikschicht auf dem Miniaturbestand
-  data/regal-bestellungen.json  2.000 Bestellungen 2025 aus obt_orders als flache Tabelle für den Regal-Simulator
+  data/regal-bestellungen.json  2.000 Bestellungen 2025 aus obt_orders als flache Tabelle für den Shelf-Simulator
   data/uebungen/lab-0N.json  Befehlskarten, Übungen, Spielplätze je Lab
   vorlagen/                  Kopiervorlagen: Verbindungszeilen, Measures, Calculated Fields, Notebook-Zelle
   tools/verify.mjs           Abnahmelauf ohne Browser (siehe unten)
   tools/sql.mjs              SQL gegen die Browser-Datenbank auf der Kommandozeile ausprobieren
-  tools/gen_daten.py         Erzeugt data/: Kopien der Mini-Skripte und die Regal-Daten (Demo-Konto)
+  tools/gen_daten.py         Erzeugt data/: Kopien der Mini-Skripte und die Shelf-Daten (Demo-Konto)
   README.md                  Diese Datei
 ```
 
@@ -102,13 +102,13 @@ unter `vorlagen/`; nichts anderes wird angefasst (nicht `bm.js`, nicht `bm.css`,
 | `<div data-datenbank="postgres"></div>` | Datenbankband und Start der Datenbank – **genau einmal je Seite mit SQL-Übungen, oberhalb der ersten SQL-Übung** |
 | `<div data-sql-konsole data-start="SELECT …"></div>` | freie SQL-Konsole (ohne Prüfknopf, ohne Fortschritt) |
 | `<div data-json-konsole data-start='{ … }'></div>` | freie JSON-Werkbank (prüfen, formatieren) |
-| `<div data-regal="name" data-variante="tableau\|powerbi"></div>` | freier Regal-Simulator aus `spielplaetze.name` |
+| `<div data-regal="name" data-variante="tableau\|powerbi"></div>` | freier Shelf-Simulator aus `spielplaetze.name` |
 | `<div data-einordnung>`, `<div data-fortschritt>`, `<div data-lab-nav>` | Einordnung aus `LABS`, Fortschritt, Vor/Zurück |
 
 SQL-Übungen werden am **Ergebnis** geprüft (Zeilenmenge), nicht am Text; bei verändernden
 Anweisungen (`CREATE TABLE`, `INSERT`) vergleicht eine `kontrolle`-Abfrage. Vor jeder Prüfung
 sät die Laufzeit die Datenbank neu, damit auch `CREATE TABLE`-Übungen wiederholbar sind. Der
-Regal-Simulator liest Felder und Daten aus `regal.felder` und `regal.daten` des Lab-JSON
+Shelf-Simulator liest Felder und Daten aus `regal.felder` und `regal.daten` des Lab-JSON
 (Daten: `data/regal-bestellungen.json`).
 
 ---
@@ -128,7 +128,7 @@ Kontrollzahlen des Miniaturbestands: **19 Bestellungen**, **55 Positionen**, Ums
 Positionen verknüpft und dann summiert) ergibt **649,16 €**, Faktor 3,23.
 
 `data/` wird nicht von Hand fortgeschrieben: `tools/gen_daten.py` kopiert die Mini-Skripte aus
-`dataset/` (die einzige Quelle der Wahrheit) und zieht die Regal-Daten mit dem Demo-Konto aus
+`dataset/` (die einzige Quelle der Wahrheit) und zieht die Shelf-Daten mit dem Demo-Konto aus
 `burgermetrics.obt_orders`; nur `data/bm_sichten.sql` (sechs Sichten) ist eine gepflegte Datei.
 Ändert sich `dataset/`, läuft `python3 web/lab/tools/gen_daten.py` aus dem
 Repository-Wurzelverzeichnis erneut.
@@ -144,7 +144,7 @@ node tools/verify.mjs 2>/dev/null
 
 Der Lauf braucht keinen Browser und prüft: Platzhalter und JSON deckungsgleich, Deutsch-Pflicht,
 Übungszahlen wie in `LABS`, Antwortindizes, Zuordnungsziele, JSON-Lösungen bestehen ihre Regeln
-(und die Starttexte nicht), Reihenfolge-Start ungleich Lösung, Regal-Lösung erfüllt das Ziel,
+(und die Starttexte nicht), Reihenfolge-Start ungleich Lösung, Shelf-Lösung erfüllt das Ziel,
 Befehlskarten vollständig, verlinkte Dateien vorhanden, Seitenbausteine (`data-lab`, große
 Nummer, Seitennavigation, Einordnung, Fortschritt, Navigation), genau ein Datenbankband je Seite
 mit SQL-Übungen, keine Terminal-, Deploy- oder SQLite-Reste, keine Reste der Vorlage, die
