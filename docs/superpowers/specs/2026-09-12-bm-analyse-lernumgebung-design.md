@@ -381,13 +381,14 @@ web/lab/
   lab-08-extern.html         Externe Daten und Sentiment
   assets/bm.css              aus winf.css, Palette Abschnitt 2.3, Kopfkommentar angepasst
   assets/bm.js               aus winf.js: LABS, localStorage-Schlüssel bm:*, nur Deutsch — Sprachumschalter entfernt, Texte nur als de (HTML: <span lang="de">, JSON: {"de": …}); die Laufzeit muss de zeigen, wenn en fehlt
-  assets/pruefung.js, jsonpruefung.js, regal.js   unverändert übernommen
+  assets/jsonpruefung.js, regal.js   unverändert übernommen (pruefung.js entfällt, siehe Stand Phase 6)
   assets/pglite/             übernommen (PostgreSQL im Browser)
   data/burgermetrics_mini.sql, data/wawi_mini.sql   Kopien aus dem BM-Repo, mit Rezensionen
   data/regal-bestellungen.json   2.000 Zeilen Stichprobe aus obt_orders: monat, wochentag, stunde, filiale, kanal, kategorie, zahlart, umsatz, positionen, zufriedenheit
   data/uebungen/lab-0N.json  Befehlskarten, Übungen, Spielplätze je Lab
   vorlagen/                  Kopiervorlagen: Verbindungszeilen, Measures, Calculated Fields, Notebook-Zelle
   tools/verify.mjs, tools/sql.mjs   aus WInf-SP; Zweisprachigkeitsprüfung durch Deutsch-Prüfung ersetzt; von keiner Seite referenziert
+  tools/gen_daten.py          kopiert die Mini-Skripte, schreibt data/regal-bestellungen.json (Demo-Konto)
   README.md                  Aufbau, Konventionen, Abnahmelauf (Autorenhinweise)
 ```
 
