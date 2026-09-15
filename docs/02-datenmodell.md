@@ -94,7 +94,7 @@ Nicht übernommen wurden Einkauf, Lagerverwaltung, Preishistorie und Schichtplan
 
 ## 2.3 Das analytische Modell: Galaxy-Schema
 
-Ein Stern-Schema hat definitionsgemäß **eine** Faktentabelle. BurgerMetrics hat zwei, die sich Dimensionen teilen. Diese Form heißt **Galaxy-Schema** oder **Fact Constellation**. Sie ist die naheliegende Erweiterung des Stern-Schemas, sobald ein Sachverhalt auf zwei Granularitätsebenen gemessen wird.
+Ein Stern-Schema hat definitionsgemäß **eine** Faktentabelle. BurgerMetrics hat drei, die sich Dimensionen teilen — seit September 2026 auch `fact_reviews` (Kapitel 5.5). Diese Form heißt **Galaxy-Schema** oder **Fact Constellation**. Sie ist die naheliegende Erweiterung des Stern-Schemas, sobald ein Sachverhalt auf zwei Granularitätsebenen gemessen wird.
 
 ```mermaid
 graph TB
@@ -106,6 +106,7 @@ graph TB
 
     ORDERS[fact_orders<br/>754.513 Zeilen<br/><b>Grain: eine Bestellung</b>]
     ITEMS[fact_order_items<br/>2.950.082 Zeilen<br/><b>Grain: eine Position</b>]
+    REVIEWS[fact_reviews<br/>10.000 Zeilen<br/><b>Grain: eine Rezension</b>]
 
     subgraph DIMS_B [" "]
         CUSTOMER[dim_customer<br/>25.000 Zeilen]
@@ -123,6 +124,11 @@ graph TB
     PROMO --> ORDERS
     ORDERS -->|order_id| ITEMS
     PRODUCT --> ITEMS
+    DATE --> REVIEWS
+    CUSTOMER --> REVIEWS
+    BRANCH --> REVIEWS
+    PRODUCT --> REVIEWS
+    ORDERS -->|order_id| REVIEWS
 
     EMP[dim_employee<br/>188 Zeilen<br/><i>nur an dim_branch</i>]
     SLOT[dim_time_slot<br/>18 Zeilen<br/><i>anschließbar, nicht verknüpft</i>]
@@ -133,6 +139,7 @@ graph TB
 
     style ORDERS fill:#003E6D,color:#fff
     style ITEMS fill:#003E6D,color:#fff
+    style REVIEWS fill:#003E6D,color:#fff
     style SUPP fill:#fff,stroke:#A8321E,stroke-width:2px
     style EMP fill:#fff,stroke:#9DA8AE,stroke-dasharray: 4 3
     style SLOT fill:#fff,stroke:#9DA8AE,stroke-dasharray: 4 3
@@ -142,7 +149,7 @@ graph TB
 
 | | Faktentabelle | Dimensionstabelle |
 |---|---|---|
-| Inhalt | messbare Kennzahlen: `net_total`, `quantity`, `line_total`, `discount_amount` | beschreibende Attribute: `branch_name`, `category`, `loyalty_tier`, `season` |
+| Inhalt | messbare Kennzahlen: `net_total`, `quantity`, `line_total`, `discount_amount`, `stars` | beschreibende Attribute: `branch_name`, `category`, `loyalty_tier`, `season` |
 | Schlüssel | Fremdschlüssel auf alle angeschlossenen Dimensionen | eigener Schlüssel als Primärschlüssel |
 | Größe | viele Zeilen, wenige Spalten — hier liegt das Datenvolumen | wenige Zeilen, viele Spalten — bewusst breit |
 | Aufgabe | die feinste erfasste Ebene | liefert die Achsen zum Filtern und Gruppieren |

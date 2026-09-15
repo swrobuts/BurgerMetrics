@@ -424,7 +424,9 @@ Die Funktion prüft Filiale, Zahlart, Kanal, Artikel und
 Mengen, fasst doppelte Artikel zusammen und lehnt mehr als sechzig Belege je
 Sitzung und zehn Minuten ab. `rezension_anlegen()` prüft Artikel, Sterne und
 Textlänge und bremst bei 20 Rezensionen je Sitzung und zehn Minuten sowie
-600 je Stunde insgesamt. Ein öffentlich beschreibbarer Bestand ohne diese
+600 je Stunde insgesamt. Greift die Bremse, meldet die Datenbank
+`ERRCODE 53400`; PostgREST gibt das als HTTP 503 weiter, und der Shop zeigt
+die Meldung der Datenbank. Ein öffentlich beschreibbarer Bestand ohne diese
 Bremse wäre eine Einladung.
 
 Beide Seiten sind ES-Module und benutzen dieselbe `datenquelle.js` wie das

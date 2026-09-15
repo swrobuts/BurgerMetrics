@@ -165,7 +165,48 @@ Ergänzende Aufgaben mit Bezug zu diesem Dokument:
 
 ---
 
-## 7.7 Anmerkung zur Terminologie
+## 7.7 Datenbasierte Fallstudien: Notebooks, Dash und BM-Lab
+
+Das Modul **Datenbasierte Fallstudien** der THWS Business School nutzt
+denselben Bestand mit dem Demo-Konto `studi_daba`. Neun ausgeführte
+Notebooks decken diese Lerngegenstände ab:
+
+| Notebook | Lerngegenstand |
+|---|---|
+| 00 | Zugang und Daten |
+| 01 | analytisches Datenmodell |
+| 02 | RFM/K-Means |
+| 03 | Warenkorb/Apriori |
+| 04 | Prognose |
+| 05 | Wetter und Ereignisse |
+| 06 | Zufriedenheit/Klassifikation |
+| 07 | Ausreißer |
+| 08 | Sentiment |
+
+Die Dash-App `dash/app.py` steht daneben als Beispiel einer eigenständigen
+Anwendung auf der Semantikschicht: vier Karten mit denselben Zahlen wie das
+Dashboard.
+
+Die Lernumgebung **BM-Lab** (<https://swrobuts.github.io/BurgerMetrics/lab/>)
+führt in acht Labs an dieselben Werkzeuge heran:
+
+| Lab | Inhalt |
+|---|---|
+| 01 | Zugang |
+| 02 | Daten |
+| 03 | Datenmodell |
+| 04 | Power BI |
+| 05 | Tableau |
+| 06 | Python und Colab |
+| 07 | Data Mining |
+| 08 | Externe Daten und Sentiment |
+
+Der Unterschied liegt im Bestand: Die Labs laufen im Browser gegen einen
+Miniaturbestand, die Notebooks gegen die echte Datenbank.
+
+---
+
+## 7.8 Anmerkung zur Terminologie
 
 Dieses Dokument verwendet die DABA-Terminologie: **Stern-Schema**, Faktentabelle, Dimensionstabelle, Kennzahlen, Attribute, Surrogatschlüssel, Granularität.
 

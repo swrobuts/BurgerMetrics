@@ -44,7 +44,8 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 | `db/` | der Aufbau der Datenbank: Schema, Fakten, Semantikschicht, Sicherheit — als nummerierte SQL-Dateien in der Reihenfolge, in der sie laufen |
 | `notebooks/` | neun ausgeführte Notebooks, vom Zugang mit dem Demo-Konto bis zur Sentiment-Analyse; `notebooks/README.md` |
 | `dash/` | Dash-App mit vier Karten aus der Semantikschicht; `dash/README.md` |
-| `web/` | Online-Shop, Kassensystem und BI-Dashboard |
+| `web/` | Online-Shop, Kassensystem, BI-Dashboard und unter `web/lab/` die Lernumgebung BM-Lab |
+| `web/lab/` | Lernumgebung BM-Lab: acht Labs mit 41 Übungen im Browser, PostgreSQL per PGlite; `web/lab/README.md` |
 | `docs/` | die ausführliche Dokumentation zu Modell, Kennzahlen und Betrieb |
 | `mcp/` | ein MCP-Server über beide Schemata für den Betreiber — Claude Desktop oder Claude Code als Fenster auf die Datenbank |
 
@@ -85,6 +86,28 @@ Schema anlegen, CSVs laden, Sichten bauen, materialisieren. Sie brauchen eine
 eigene PostgreSQL-Instanz und tragen deren Adresse in
 `web/js/konfiguration.js` ein.
 
+### Notebooks und Dash
+
+Neun ausgeführte Notebooks (`notebooks/00` bis `08`) behandeln Zugang und
+Daten, das analytische Datenmodell, RFM und Kundensegmente, Warenkorb,
+Nachfrageprognose, Wetter und Ereignisse, Zufriedenheit, Ausreißer und
+Sentiment. Jedes läuft mit dem Demo-Konto `studi_daba` lokal oder in Google
+Colab (`notebooks/README.md`). Große Tabellen liest jedes Notebook aus der
+Datenbank; `lade_csv()` dient nur den Dimensionen, um das Bandbreitenbudget
+von Git LFS zu schonen. Die Dash-App `dash/app.py` zeigt vier Karten aus der
+Semantikschicht — dieselben Zahlen wie das Dashboard (`dash/README.md`).
+
+### Lernumgebung
+
+Die Lernumgebung **BM-Lab** steht unter
+<https://swrobuts.github.io/BurgerMetrics/lab/>. Acht Labs mit 41 Übungen
+führen vom Zugang zur Datenbank über die Daten und das analytische
+Datenmodell zu Power BI, Tableau und Python bis zu Data Mining und externen
+Daten. Die SQL-Übungen laufen gegen eine echte PostgreSQL-Datenbank im
+Browser (PGlite) mit einem Miniaturbestand in beiden Schemata `wawi` und
+`burgermetrics`, dazu ein Regal-Simulator nach dem Vorbild von Power BI und
+Tableau. Aufbau und Abnahmelauf stehen in [`web/lab/README.md`](web/lab/README.md).
+
 ---
 
 ## Die Kette
@@ -95,8 +118,8 @@ nachvollziehbar:
 1. **Fachlichkeit** — sechs Sätze über das Geschäft
 2. **ER-Modell** — Entitäten, Beziehungen, Kardinalitäten
 3. **Normalisierung** — bis zur dritten Normalform, `dataset/wawi_mini.sql`; im Betrieb das Schema `wawi`, `db/aufbau/0016`
-4. **Anwendungen** — Shop und Kasse lesen und schreiben in denselben operativen Kern, `web/`
-5. **Auswertungsmodell** — Galaxy-Schema mit zwei Faktentabellen, `db/aufbau/`; der ETL-Schritt von `wawi` dorthin ist `db/aufbau/0019`
+4. **Anwendungen** — Shop und Kasse lesen und schreiben in denselben operativen Kern, `web/`; seit `0021` nimmt der Shop auch Rezensionen entgegen (`wawi.rezension`)
+5. **Auswertungsmodell** — Galaxy-Schema mit drei Faktentabellen (`fact_orders`, `fact_order_items`, `fact_reviews`), `db/aufbau/`; der ETL-Schritt von `wawi` dorthin ist `db/aufbau/0019`, erweitert um Rezensionen in `0021`
 6. **Kennzahlen** — die Semantikschicht als SQL-Sichten
 7. **Dashboard** — `web/dashboard.html`
 
