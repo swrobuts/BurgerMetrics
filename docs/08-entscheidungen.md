@@ -158,9 +158,9 @@ Der gemeinsame Nenner: In allen vier Fällen lief etwas **erfolgreich durch** un
 |---|---|
 | Echte Texte sammeln | Kein Bestand vorhanden, dazu ein Datenschutzproblem |
 | Reine Zufallstexte | Kein Zusammenhang zur Zufriedenheit, für eine Sentiment-Analyse ungeeignet |
-| Generator mit Bausteinen, Texte anschließend geglättet | Sterne hängen an der Bestellung, die Sprache liest sich natürlich |
+| Generator mit Bausteinen, Texte anschließend geglättet | Sterne hängen an der Bestellung, die Texte sind sprachlich geglättet |
 
-**Gewählt:** Generator `dataset/generate_reviews.py`, Sterne aus Zufriedenheit und Bestelldauer der Bestellung; die Texte wurden anschließend in Claude Code sprachlich geglättet. Der Ladeweg führt wie bei den übrigen Fakten über `dataset/fact_reviews.csv` (Git LFS) mit `source = 'simulation'`. Besuchertexte aus dem Shop erscheinen auf keiner Seite; nur Aggregate sind öffentlich. Die Übernahme nach `fact_reviews` bleibt wie bei Bestellungen ein bewusster manueller Aufruf.
+**Gewählt:** Generator `dataset/generate_reviews.py`, Sterne aus Zufriedenheit und Bestelldauer der Bestellung; die Texte wurden anschließend in Claude Code sprachlich geglättet. Der Ladeweg führt wie bei den übrigen Fakten über `dataset/fact_reviews.csv` (Git LFS) mit `source = 'simulation'`. Öffentlich sichtbar sind nur Aggregate (`v_rezension_produkt`) und die drei jüngsten Simulationstexte je Artikel (`v_kundenstimmen`); ein Besuchertext aus dem Shop erscheint auf keiner Seite. Die Übernahme nach `fact_reviews` bleibt wie bei Bestellungen ein bewusster manueller Aufruf.
 
 **Preis:** Synthetische Texte, an denen ein Sentiment-Modell zu gut abschneidet (Notebook 08: TF-IDF 100 %), und ein zweiter Schreibweg neben `bestellung_anlegen()`, der ebenfalls eine Bremse braucht. Die Rechte dazu sind in [`docs/validierung-nur-lesezugang-2026-09-15.md`](validierung-nur-lesezugang-2026-09-15.md) geprüft.
 
