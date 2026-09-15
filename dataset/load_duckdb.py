@@ -144,40 +144,44 @@ def main():
         ort = f"MotherDuck / {DB_NAME}"
     else:
         pfad = Path(args.ausgabe) if args.ausgabe else BASE / f"{DB_NAME}.duckdb"
-        if pfad.exists():
-            pfad.unlink()
-        print(f"Erzeuge lokale Datenbank {pfad.name}...")
+        print(f"Lade lokale Datenbank {pfad.name}...")
         con = duckdb.connect(str(pfad))
         ort = str(pfad)
 
-    # Die CSV-Dateien sind UTF-8 mit BOM. DuckDB entfernt die Byte-Order-Mark
-    # beim Einlesen nicht selbst, sie landete sonst im ersten Spaltennamen.
-    for name, datei in tabellen:
-        quelle = str((BASE / datei).resolve()).replace("'", "''")
-        con.execute(f"""
-            CREATE OR REPLACE TABLE {name} AS
-            SELECT * FROM read_csv_auto('{quelle}', header = true, sample_size = -1)
-        """)
-        n = con.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
-        erwartet = SOLL.get(name)
-        status = "OK  " if erwartet is None or n == erwartet else "ABWEICHUNG"
-        print(f"  {status}  {name:<20} {n:>10,} Zeilen".replace(",", "."))
-        if erwartet is not None and n != erwartet:
-            print(f"        erwartet: {erwartet:,}".replace(",", "."))
+    # Alle Tabellen bilden einen Import. Bei falschem Umfang oder einem
+    # Lesefehler bleiben der vorherige Bestand und eigene Übungstabellen erhalten.
+    # Das gilt lokal ebenso wie in einer bestehenden MotherDuck-Datenbank.
+    try:
+        con.execute("BEGIN TRANSACTION")
+        for name, datei in tabellen:
+            quelle = str((BASE / datei).resolve()).replace("'", "''")
+            con.execute(f"""
+                CREATE OR REPLACE TABLE {name} AS
+                SELECT * FROM read_csv_auto('{quelle}', header = true, sample_size = -1)
+            """)
+            n = con.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+            erwartet = SOLL.get(name)
+            if erwartet is not None and n != erwartet:
+                raise ValueError(f"{name}: {n} Zeilen statt der erwarteten {erwartet}")
+            print(f"  OK    {name:<20} {n:>10,} Zeilen".replace(",", "."))
 
-    # Erste Spalte auf BOM-Reste prüfen — ein stiller Klassiker beim CSV-Import.
-    spalten = con.execute("SELECT * FROM dim_branch LIMIT 0").description
-    if spalten and spalten[0][0].startswith("﻿"):
-        print("\nWARNUNG: Der erste Spaltenname enthält eine Byte-Order-Mark.")
-        print("         Abfragen auf diese Spalte schlagen sonst fehl.")
+        # Ein Import mit einem unansprechbaren Schlüssel ist ebenfalls fehlerhaft.
+        spalten = con.execute("SELECT * FROM dim_branch LIMIT 0").description
+        if spalten and spalten[0][0].startswith("\ufeff"):
+            raise ValueError("Der erste Spaltenname enthält eine Byte-Order-Mark")
+        con.execute("COMMIT")
+    except Exception as fehler:
+        con.execute("ROLLBACK")
+        sys.exit(f"FEHLER: Import zurückgerollt — {fehler}")
+    finally:
+        con.close()
 
     print(f"\nFertig. Datenbank: {ort}")
     print("\nErster Test:")
-    print("  USE burger_metrics;")
+    if args.motherduck:
+        print("  USE burger_metrics;")
     print("  SELECT COUNT(*) FROM fact_orders;        -- erwartet: 754.513")
     print("  SELECT ROUND(SUM(net_total), 2) FROM fact_orders;  -- erwartet: 14.522.378,70")
-
-    con.close()
 
 
 if __name__ == "__main__":

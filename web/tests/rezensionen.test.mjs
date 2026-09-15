@@ -66,3 +66,10 @@ test('normalisiereText, pruefeEingabe und zaehlerText zählen wie die Datenbank 
   assert.deepEqual(pruefeEingabe({ sterne: 3, inhalt: 'abcde' + ' '.repeat(600) + 'fghij' }), []);
   assert.equal(zaehlerText('a          b'), '3 / 500');
 });
+
+test('Emoji zählen wie PostgreSQL als ein Zeichen statt zwei UTF-16-Einheiten', () => {
+  assert.equal(zaehlerText('🍔'.repeat(5)), '5 / 500');
+  assert.deepEqual(pruefeEingabe({ sterne: 4, inhalt: '🍔🍔🍔' }), ['Der Text braucht mindestens 5 Zeichen.']);
+  assert.deepEqual(pruefeEingabe({ sterne: 4, inhalt: '🍔'.repeat(500) }), []);
+  assert.deepEqual(pruefeEingabe({ sterne: 4, inhalt: '🍔'.repeat(501) }), ['Der Text darf höchstens 500 Zeichen haben.']);
+});

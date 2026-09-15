@@ -140,15 +140,24 @@ md("""
 
 Die Rolle kann nicht schreiben. Der Versuch endet mit einer Fehlermeldung der Datenbank —
 und genau so soll es sein: Die Übungen verändern den Bestand nicht.
+Die Probe fordert ausdrücklich eine schreibbare Transaktion an, damit sie die tatsächlichen
+Berechtigungen prüft. `WHERE false` verhindert auch bei einer falschen Rechtevergabe jede
+Zeilenänderung; in diesem Fall meldet das Notebook einen Fehler.
 """),
 code("""
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 
 try:
     with engine.connect() as verbindung:
-        verbindung.execute(text("UPDATE dim_branch SET branch_name = 'Test' WHERE branch_id = 1"))
-except Exception as fehler:
+        verbindung.execute(text("SET TRANSACTION READ WRITE"))
+        verbindung.execute(text("UPDATE dim_branch SET branch_name = branch_name WHERE false"))
+except DBAPIError as fehler:
+    if getattr(fehler.orig, "pgcode", None) != "42501":
+        raise  # Verbindungs- und SQL-Fehler sind kein Nachweis fehlender Schreibrechte.
     print("Die Datenbank lehnt ab:", str(fehler).splitlines()[0])
+else:
+    raise AssertionError("studi_daba besitzt unerwartet Schreibrechte auf dim_branch")
 """),
 md("""
 ## Ergebnis
