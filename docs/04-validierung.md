@@ -45,11 +45,13 @@ Der Nutzen liegt weniger im einmaligen Lauf als in der Wiederholbarkeit. Ändert
 
 ## 4.3 Strecke B: Prüfung des Berichts
 
-Der Bericht wurde zweimal vollständig geprüft. Beide Berichte sind erhalten, weil ihre Abfolge zeigt, wie Validierung tatsächlich abläuft.
+Der Bericht wurde dreimal vollständig geprüft. Alle drei Berichte sind erhalten, weil ihre Abfolge zeigt, wie Validierung tatsächlich abläuft.
 
 **[10. April 2026](validierung-dashboard-2026-04-10.md)** — 42 geprüfte Werte. Ergebnis: 35 korrekt, 7 fehlerhaft. Die Fehler häuften sich in den Übersichtskacheln, während Jahrestabelle und Filial-Scorecard vollständig stimmten.
 
 **[12. April 2026](validierung-dashboard-2026-04-12.md)** — 185 geprüfte Werte, systematisch je Registerkarte, mit vorangestelltem Schema-Abgleich. Ergebnis: 167 korrekt, 3 Rundungsdifferenzen, rund 15 mit Korrekturbedarf.
+
+**[26. August 2026](validierung-dashboard-2026-08-26.md)** — Vollprüfung aller 72 Karten und der Management Summary, fünf Korrekturen, Abschluss.
 
 Dass die zweite, gründlichere Prüfung **mehr** Fehler fand, ist kein Widerspruch, sondern der Normalfall: Die erste Runde prüfte die auffälligen Werte, die zweite alle.
 
@@ -66,6 +68,14 @@ Der zweite Bericht beginnt nicht mit Zahlen, sondern mit einem Abgleich der Wert
 | `gender` | Male 48,5 %, Female 47,8 %, Non-Binary 3,8 % | Der Bericht behauptete 55 % männlich. |
 
 Die Lehre daraus: **Wertebereiche prüfen, bevor man Kennzahlen prüft.** Ein Wert kann rechnerisch korrekt aus einer falschen Grundgesamtheit stammen.
+
+### Prüfungen vom 15. September 2026
+
+Am 15. September 2026 kamen drei weitere Prüfungen hinzu, die andere Teile des Projekts als die Dashboard-Werte betreffen:
+
+- **[Notebooks](validierung-notebooks-2026-09-15.md)** — alle neun Notebooks ausgeführt.
+- **[Nur-Lesezugang](validierung-nur-lesezugang-2026-09-15.md)** — die Rechte der Rolle `studi_daba` geprüft.
+- **[Repository](validierung-repo-2026-09-15.md)** — der Bestand des Repositorys geprüft.
 
 ---
 

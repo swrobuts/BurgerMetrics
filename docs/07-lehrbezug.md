@@ -10,7 +10,7 @@ Die verbindliche Kursdatenwelt in BINT ist Superstore. BurgerMetrics tritt nicht
 
 | Lerngegenstand aus KE09 | Anknüpfung im Projekt |
 |---|---|
-| **OLTP und OLAP: ein Datenbestand, zwei Zwecke** | Das operative ERP-Modell (26 Tabellen) und das analytische Modell (12 Tabellen) liegen beide vor — [Kapitel 2.1 und 2.3](02-datenmodell.md) |
+| **OLTP und OLAP: ein Datenbestand, zwei Zwecke** | Das operative ERP-Modell (26 Tabellen) und das analytische Modell (14 Tabellen: zehn Dimensionen, drei Fakten, eine One Big Table) liegen beide vor — [Kapitel 2.1 und 2.3](02-datenmodell.md) |
 | **Normalisierung und Denormalisierung im DWH** | Die Zusammenführung von `artikel` + `artikelkategorie` + `artikelunterkategorie` zu `dim_product` ist in [Kapitel 2.2](02-datenmodell.md#22-der-übergang-denormalisierung-mit-absicht) mit Vorher/Nachher-SQL belegt |
 | **Stern-Schema: eine Faktentabelle, viele Dimensionen** | Ausgangspunkt; das Projekt zeigt zusätzlich, was bei **zwei** Faktentabellen passiert (Abschnitt 7.2) |
 | **Faktentabelle vs. Dimensionstabelle** | Kennzahlen/Attribute-Gegenüberstellung in [Kapitel 2.3](02-datenmodell.md#kennzahlen-und-attribute) |

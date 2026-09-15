@@ -18,7 +18,7 @@
 
 ### Galaxy-Schema (Fact Constellation)
 
-Das Modell hat **zwei Faktentabellen auf unterschiedlicher Granularität**, die sich Dimensionen teilen. Dieser Aufbau heißt Galaxy-Schema oder Fact Constellation — nicht Star Schema. Ein Star Schema hat definitionsgemäß genau eine Faktentabelle.
+Das Modell hat **zwei Verkaufs-Faktentabellen auf unterschiedlicher Granularität**, die sich Dimensionen teilen, und seit September 2026 eine dritte, `fact_reviews` (unten). Dieser Aufbau heißt Galaxy-Schema oder Fact Constellation — nicht Star Schema. Ein Star Schema hat definitionsgemäß genau eine Faktentabelle.
 
 ```
    dim_date ─────┐                    ┌───── dim_payment_method

@@ -28,6 +28,7 @@ Wer nur die Daten nutzen möchte, findet die vollständige Feldbeschreibung in [
 | Zeitraum | 15.03.2017 – 31.03.2026 |
 | Bestellungen | 754.513 |
 | Bestellpositionen | 2.950.082 |
+| Rezensionen | 10.000 |
 | Kunden | 25.000 |
 | Produkte | 57 |
 | Filialen | 8 |
@@ -39,20 +40,30 @@ Diese Werte sind mit `python dataset/verify_readme.py` nachprüfbar. Das Skript 
 ## Aufbau des Repositorys
 
 ```
-web/       index.html · pos.html · shop.html · dashboard.html
-dataset/   13 CSV-Dateien (Git LFS) · generate_obt.py · verify_readme.py
-           README.md · uebungsblatt.md · uebungsblatt.pdf
-           erp_datenmodell.excalidraw
-docs/      diese Dokumentation
+web/       index.html · pos.html · shop.html · dashboard.html · abgleich.html
+           js/ · tests/ · lab/
+dataset/   15 CSV-Dateien (Git LFS) · generate_obt.py · generate_reviews.py
+           load_duckdb.py · verify_readme.py · wawi_mini.sql
+           burgermetrics_mini.sql · wawi_zu_analytisch.sql · README.md
+           uebungsblatt.md/.pdf · erp_datenmodell.excalidraw
+db/        aufbau/ · betrieb/ · tests/ · lade_csv.py · materialisieren.py
+           skript_ausfuehren.py
+notebooks/ 00–08 · quellen/ · daten_extern/ · export/ · tests/
+dash/      Dash-App (wird ausgeführt)
+mcp/       MCP-Server (Betreiberzugang)
+docs/      diese Dokumentation · sechs Prüfberichte
 ```
 
 ## Prüfberichte
 
-Die Dashboard-Kennzahlen wurden zweimal vollständig gegen die Quelldaten geprüft. Beide Berichte sind erhalten, weil ihre Abfolge selbst dokumentiert, wie Validierung in der Praxis abläuft:
+Der Bericht und weitere Teile des Projekts wurden bislang sechsmal geprüft. Alle sechs Berichte sind erhalten, weil ihre Abfolge selbst dokumentiert, wie Validierung in der Praxis abläuft:
 
 - [Validierungsbericht vom 10.04.2026](validierung-dashboard-2026-04-10.md) — 42 geprüfte Werte, erste Durchsicht
 - [Validierungsbericht vom 12.04.2026](validierung-dashboard-2026-04-12.md) — 185 geprüfte Werte, systematisch je Registerkarte
 - [Validierungsbericht vom 26.08.2026](validierung-dashboard-2026-08-26.md) — Vollprüfung aller 72 Karten und der Management Summary, fünf Korrekturen, Abschluss
+- [Notebook-Abnahme vom 15.09.2026](validierung-notebooks-2026-09-15.md) — alle neun Notebooks ausgeführt
+- [Nur-Lese-Zugang, Abnahme vom 15.09.2026](validierung-nur-lesezugang-2026-09-15.md) — Rechte der Rolle `studi_daba`
+- [Repository-Prüfung vom 15.09.2026](validierung-repo-2026-09-15.md) — Prüfung des Bestands
 
 ## Sprachliche Konventionen
 
