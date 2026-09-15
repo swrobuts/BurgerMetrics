@@ -60,7 +60,7 @@
       { "id": "zahlart", "typ": "dimension", "titel": { "de": "Zahlart" } },
       { "id": "loyalty", "typ": "dimension", "titel": { "de": "Loyalty-Stufe" } },
       { "id": "saison", "typ": "dimension", "titel": { "de": "Saison" } },
-      { "id": "order_id", "typ": "kennzahl", "titel": { "de": "Bestell-ID" }, "erklaerung": { "de": "Eine Kennung — Σ darüber ist die klassische Falle. COUNT zählt Bestellungen." } },
+      { "id": "order_id", "typ": "kennzahl", "titel": { "de": "Bestell-ID" }, "erklaerung": { "de": "Eine Kennung — Σ darüber ergibt die Summe der Bestellnummern, eine Zahl ohne Bedeutung. COUNT zählt Bestellungen." } },
       { "id": "umsatz", "typ": "kennzahl", "titel": { "de": "Umsatz (€)" } },
       { "id": "positionen", "typ": "kennzahl", "titel": { "de": "Positionen" } },
       { "id": "zufriedenheit", "typ": "kennzahl", "titel": { "de": "Zufriedenheit" }, "erklaerung": { "de": "Nur bewertete Bestellungen tragen einen Wert; AVG ignoriert die Lücken." } }
@@ -89,7 +89,7 @@
         { "frage": { "de": "Was speichert ein Extract?" },
           "optionen": [ { "de": "Einen Auszug der Daten als .hyper-Datei, der ohne Datenbank funktioniert" }, { "de": "Nur die Verbindungsdaten" }, { "de": "Das Dashboard als Bild" } ],
           "richtig": [0], "mehrfach": false,
-          "erklaerung": { "de": "Ein Extract ist eine Kopie mit Verfallsdatum: schneller, offline, mit Funktionen, die die Quelle nicht hat — und veraltet ab dem Moment, in dem er geschrieben ist." } },
+          "erklaerung": { "de": "Ein Extract ist eine Kopie: schneller, offline, mit Funktionen, die die Quelle nicht hat — und veraltet ab dem Moment, in dem er geschrieben ist." } },
         { "frage": { "de": "Wie kommt Tableau Desktop Public Edition an die Daten der Fallstudie?" },
           "optionen": [ { "de": "Über die CSV-Dateien aus notebooks/export/ — die Public Edition kennt keine Datenbankverbindung" }, { "de": "Über den PostgreSQL-Connector mit studi_daba" }, { "de": "Gar nicht" } ],
           "richtig": [0], "mehrfach": false,

@@ -16,7 +16,7 @@ Die Kapitel bauen aufeinander auf und folgen der Reihenfolge, in der das Projekt
 | 4 | [Validierung](04-validierung.md) | Woher weiß man, dass die Zahlen stimmen? |
 | 5 | [Anwendungsarchitektur](05-anwendungen.md) | Wie sind POS, Shop und Dashboard aufgebaut, und wie hängen sie zusammen? |
 | 6 | [Betrieb und Auslieferung](06-betrieb.md) | Wie ist das Repository organisiert, und wie kommt die Anwendung ins Netz? |
-| 7 | [Lehrbezug DABA und BINT](07-lehrbezug.md) | An welchen Stellen knüpft welche Kurseinheit an? |
+| 7 | [Lehrbezug DABA, BINT und Datenbasierte Fallstudien](07-lehrbezug.md) | An welchen Stellen knüpft welche Kurseinheit an? |
 | 8 | [Entscheidungsjournal](08-entscheidungen.md) | Welche Alternativen gab es an den Weggabelungen, und warum fiel die Wahl so aus? |
 
 Wer nur die Daten nutzen möchte, findet die vollständige Feldbeschreibung in [`../dataset/README.md`](../dataset/README.md).

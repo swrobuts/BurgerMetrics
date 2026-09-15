@@ -50,7 +50,7 @@
 
   <section class="section-block" id="datum">
     <h2>Das Datum als Schlüssel</h2>
-    <p>Jede externe Quelle in diesem Lab kommt über dieselbe Spalte in die Fallstudie: ein Datum. <code>dim_date</code> trägt 3.377 Tage, vom 01.01.2017 bis zum 31.03.2026 — eine durchgehende Kalenderdimension, unabhängig davon, ob an einem Tag überhaupt bestellt wurde. Die Bestellungen selbst laufen vom 15.03.2017 bis zum 31.03.2026, ohne Lücke: 3.304 Tage (Notebook 05). Nach genau diesem Zeitraum gefragt, liefert Open-Meteo ebenfalls 3.304 Werte je Feld — die externe Quelle deckt exakt den Zeitraum ab, den die Fallstudie braucht, nicht mehr und nicht weniger. Wer <code>dim_date</code> mit einer externen Quelle verknüpft, sieht deshalb häufiger Zeilen ohne Treffer als umgekehrt: Die Dimension ist breiter als jede einzelne Quelle.</p>
+    <p>Jede externe Quelle in diesem Lab kommt über dieselbe Spalte in die Fallstudie: ein Datum. <code>dim_date</code> trägt 3.377 Tage, vom 01.01.2017 bis zum 31.03.2026 — eine durchgehende Kalenderdimension, unabhängig davon, ob an einem Tag überhaupt bestellt wurde. Die Bestellungen selbst laufen vom 15.03.2017 bis zum 31.03.2026, ohne Lücke: 3.304 Tage (Notebook 05). Nach genau diesem Zeitraum gefragt, liefert Open-Meteo ebenfalls 3.304 Werte je Feld — die externe Quelle deckt exakt den Zeitraum ab, den die Fallstudie braucht. Wer <code>dim_date</code> mit einer externen Quelle verknüpft, sieht deshalb häufiger Zeilen ohne Treffer als umgekehrt: Die Dimension ist breiter als jede einzelne Quelle.</p>
     <p>Fünf Quellen liefern die externen Merkmale von Notebook 05: Open-Meteo (gemessenes Wetter), das Paket <code>holidays</code> (bayerische Feiertage), die OpenHolidays API (Schulferien), OpenLigaDB (Heimspiele der Würzburger Kickers) und Destatis (Verbraucherpreisindex). Drei davon schreibt das Notebook selbst einmal als CSV-Datei unter <code>notebooks/daten_extern/</code>, sobald es sie abgerufen hat; die vierte (<code>vpi_jahr.csv</code>) ist kuratiert und wird nur gelesen, nie automatisch abgerufen. <code>holidays</code> braucht keine Datei, weil das Paket Feiertage direkt berechnet.</p>
     <div class="table-scroll">
       <table>
@@ -66,7 +66,7 @@
     </div>
     <p>Die vier CSV-Dateien liegen ohne Git LFS im Repository (anders als der Bestand unter <code>dataset/</code>, Lab 02). <code>hole_oder_lies()</code> holt eine Quelle dreistufig: zuerst die lokale Datei unter <code>notebooks/daten_extern/</code>; fehlt sie — etwa in Colab, wo nur das Notebook selbst vorliegt —, die Fassung von <code>raw.githubusercontent.com</code>; erst wenn auch das scheitert, den Anbieter selbst.</p>
     <div class="tip-box">
-      <p>Die Regel hinter jedem dieser Joins ist immer dieselbe: Ein Datum ist nur dann ein Schlüssel, wenn beide Seiten denselben Spaltentyp tragen. Ein aus einer CSV-Datei geladenes Datum landet ohne ausdrückliche Umwandlung als Text, nicht als <code>date</code> — und ein Join zwischen einer Text-Spalte und einer <code>date</code>-Spalte wie <code>dim_date.date</code> scheitert dann mit einem Typfehler, nicht mit einem stillen Nichttreffer (Abschnitt „Stolpersteine“).</p>
+      <p>Ein Datum ist nur dann ein Schlüssel, wenn beide Seiten denselben Spaltentyp tragen. Ein aus einer CSV-Datei geladenes Datum landet ohne ausdrückliche Umwandlung als Text, nicht als <code>date</code> — und ein Join zwischen einer Text-Spalte und einer <code>date</code>-Spalte wie <code>dim_date.date</code> scheitert dann mit einem Typfehler, nicht mit einem stillen Nichttreffer (Abschnitt „Stolpersteine“).</p>
     </div>
   </section>
 
@@ -74,7 +74,7 @@
     <h2>Ein Aufruf: Open-Meteo</h2>
     <p>Die Open-Meteo Historical Weather API (Archiv-API) beantwortet einen HTTP-GET-Aufruf ohne Schlüssel und ohne Anmeldung. B01 zeigt <code>hole_wetter()</code>, wortgleich aus Notebook 05: ein Aufruf mit Ort, Zeitraum und den drei gewünschten Tageswerten.</p>
     <div data-befehl="B01"></div>
-    <p>Die Antwort ist ein JSON-Objekt: <code>latitude</code>, <code>longitude</code> und <code>timezone</code> außen, darin <code>daily</code> — selbst ein Objekt aus gleich langen Listen, eine je angefragtem Feld. <code>daily.time[i]</code> und <code>daily.temperature_2m_max[i]</code> gehören zum selben Tag <code>i</code>; dasselbe Muster wie bei jeder Schnittstelle, die mehrere Reihen parallel statt als Liste von Objekten liefert. Die Nachbildung zeigt eine auf drei Tage gekürzte Antwort.</p>
+    <p>Die Antwort ist ein JSON-Objekt: <code>latitude</code>, <code>longitude</code> und <code>timezone</code> außen, darin <code>daily</code> — selbst ein Objekt aus gleich langen Listen, eine je angefragtem Feld. <code>daily.time[i]</code> und <code>daily.temperature_2m_max[i]</code> gehören zum selben Tag <code>i</code>; dasselbe Muster wie bei jeder Schnittstelle, die mehrere Reihen parallel statt als Liste von Objekten liefert.</p>
     <div class="shot">
       <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">archive-api.open-meteo.com/v1/archive</span><span class="spacer"></span>200 OK</div>
       <div class="shot-body eins">
@@ -126,7 +126,7 @@
 
   <section class="section-block" id="rezension">
     <h2>Der Weg einer Rezension</h2>
-    <p>Die letzte Quelle dieses Labs kommt nicht von einem Anbieter, sondern von den Studierenden selbst: eine Rezension, im Online-Shop der Fallstudie geschrieben. Der Weg ist derselbe wie bei einer Bestellung (Lab 01) und ebenso vollständig nachvollziehbar.</p>
+    <p>Die letzte Quelle dieses Labs sind die Studierenden selbst: eine Rezension, im Online-Shop der Fallstudie geschrieben. Der Weg ist derselbe wie bei einer Bestellung (Lab 01) und ebenso vollständig nachvollziehbar.</p>
     <div class="kette">
       <div class="glied hell"><span class="titel">Shop</span><span class="was">Knopf „Bewerten“ auf einer Produktkarte</span></div>
       <span class="pfeil">→</span>
@@ -158,7 +158,7 @@
         </tbody>
       </table>
     </div>
-    <p>TF-IDF mit logistischer Regression trifft auf dem eigenen Testsplit (2.175 Texte) 99,9 Prozent und auf der Stichprobe von 500 Texten glatt 100,0 Prozent — für simulierte Texte ein Warnsignal, kein Gütesiegel: Der Generator baut Rezensionen aus festen Satzbausteinen, und ein Modell, das genau diese Bausteine lernt, kennt die Antwort schon vorher. BERT, das nie mit diesem Generator in Berührung kam, kommt auf 94,2 Prozent — niedriger, aber deutlich höher, als man für uneindeutige Sprache erwarten würde, was seinerseits zeigt, wie eindeutig der Generator seine Polarität formuliert.</p>
+    <p>TF-IDF mit logistischer Regression trifft auf dem eigenen Testsplit (2.175 Texte) 99,9 Prozent und auf der Stichprobe von 500 Texten glatt 100,0 Prozent — für simulierte Texte ein Warnsignal: Der Generator baut Rezensionen aus festen Satzbausteinen, und ein Modell, das genau diese Bausteine lernt, kennt die Antwort schon vorher. BERT, das nie mit diesem Generator in Berührung kam, kommt auf 94,2 Prozent — niedriger, aber deutlich höher, als man für uneindeutige Sprache erwarten würde, was seinerseits zeigt, wie eindeutig der Generator seine Polarität formuliert.</p>
     <p>Der Anteil positiver Rezensionen (TF-IDF-Vorhersage über alle 10.000 Texte) hängt an zwei Merkmalen der Bestellung. Nach Bestelldauer:</p>
     <div class="table-scroll">
       <table>
@@ -233,7 +233,7 @@
       <li>Eine Rezension nimmt im Shop denselben Weg wie eine Bestellung: <code>wawi.rezension_anlegen()</code> prüft Sterne, Textlänge, Artikel und Filiale, bremst bei 20 je Sitzung in zehn Minuten und 600 je Stunde (HTTP 503 ohne Sonderbehandlung) und schreibt nach <code>wawi.rezension</code>; erst <code>uebernahme_aus_wawi()</code> — Sache des Betreibers — trägt sie in <code>fact_reviews</code> ein.</li>
       <li>Notebook 08 trifft mit einer Wortliste 71,6 Prozent, mit TF-IDF nahezu 100 Prozent — ein Warnsignal bei simulierten Texten — und mit einem vortrainierten BERT-Modell 94,2 Prozent; der Anteil positiver Rezensionen fällt mit der Bestelldauer und unterscheidet sich zwischen den Kanälen. Was fehlt, sind echte Rezensionen aus dem Shop.</li>
     </ul>
-    <p>Damit endet das BM-Lab: acht Labs vom Zugang über das analytische Datenmodell, Power BI, Tableau und Python bis zu Data Mining und externen Daten. Wer tiefer einsteigen möchte, findet Kennzahlen und Grafiken im Deck „Analyse“ und den vollständigen Rechenweg in den Notebooks 00 bis 08 im Repository <code>github.com/swrobuts/BurgerMetrics</code>.</p>
+    <p>Wer tiefer einsteigen möchte, findet Kennzahlen und Grafiken im Deck „Analyse“ und den vollständigen Rechenweg in den Notebooks 00 bis 08 im Repository <code>github.com/swrobuts/BurgerMetrics</code>.</p>
     <div data-lab-nav></div>
   </section>
 

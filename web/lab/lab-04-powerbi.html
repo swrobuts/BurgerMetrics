@@ -57,7 +57,7 @@
       <li><strong>Measures:</strong> Kennzahlen als Formeln in DAX, die bei jeder Abfrage im jeweiligen Filter neu rechnen — <code>Umsatz</code> ist eine Definition, keine gespeicherte Zahl;</li>
       <li><strong>einen Bericht:</strong> Kacheln, Balken und Linien, die dasselbe Measure nach Filiale oder Monat aufteilen, ohne dass jemand eine Abfrage schreibt.</li>
     </ul>
-    <p>Was Power BI nicht leistet, ist die Definition der Kennzahl. Die steht in der Sicht: <code>v_kennzahlen_jahr</code> legt fest, was Umsatz ist — die Summe von <code>net_total</code>, dem Bestellwert nach Rabatt (Lab 03) —, und jedes Werkzeug muss dieselbe Zahl liefern. Ein Measure, das anders rechnet als die Sicht, ist keine zweite Meinung, sondern ein Fehler. Die Kontrollzahl dieses Labs ist deshalb dieselbe wie in Lab 01: <strong>2.994.771,13 €</strong> Umsatz für 2025 aus <strong>136.557</strong> Bestellungen.</p>
+    <p>Was Power BI nicht leistet, ist die Definition der Kennzahl. Die steht in der Sicht: <code>v_kennzahlen_jahr</code> legt fest, was Umsatz ist — die Summe von <code>net_total</code>, dem Bestellwert nach Rabatt (Lab 03) —, und jedes Werkzeug muss dieselbe Zahl liefern. Ein Measure, das anders rechnet als die Sicht, ist ein Fehler. Die Kontrollzahl dieses Labs ist deshalb dieselbe wie in Lab 01: <strong>2.994.771,13 €</strong> Umsatz für 2025 aus <strong>136.557</strong> Bestellungen.</p>
     <div class="kette">
       <div class="glied hell"><span class="titel">Lab 01 · 03</span><span class="was">Datenbank, Sichten, Galaxy-Schema</span></div>
       <span class="pfeil">→</span>
@@ -74,7 +74,7 @@
       <p><strong>Werkzeug und Stand.</strong> Power BI Desktop läuft unter Windows; dieses Lab bezieht sich auf das Update August 2026 (Stand 09/2026). Preis und Lizenzbedingungen sind nach Herstellerangabe zu prüfen. Der Bestand der Fallstudie ist synthetisch, und das Konto <code>studi_daba</code> liest nur — was Power BI in das Modell kopiert, sind keine personenbezogenen Daten.</p>
     </div>
     <div class="auswahl-hinweis">
-      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Power BI steht in diesem Kurs neben Tableau (Lab 05) und Python (Lab 06): drei Wege zu denselben Sichten, und die Kontrollzahl muss in jedem dieselbe sein.</p>
+      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Power BI steht neben Tableau (Lab 05) und Python (Lab 06): drei Wege zu denselben Sichten, und die Kontrollzahl muss in jedem dieselbe sein.</p>
     </div>
   </section>
 
@@ -109,7 +109,7 @@
     </div>
     <div class="concept-box">
       <h3>Für den Kurs gilt Import</h3>
-      <p>Die Rolle <code>studi_daba</code> hält höchstens zwanzig gleichzeitige Sitzungen (Lab 01). Ein Bericht im DirectQuery-Modus schickt für jedes Bild Abfragen an <code>supabase.butscher.cloud</code>; ein Hörsaal voller solcher Berichte belegt die zwanzig Sitzungen in Minuten. Import fragt die Datenbank beim Laden und beim Aktualisieren — für einen Bestand, der sich nicht stündlich ändert, reicht das. Die Entscheidung fällt je Tabelle; ein zusammengesetztes Modell könnte Dimensionen importieren und eine Faktentabelle in DirectQuery lassen, braucht in diesem Kurs aber niemand.</p>
+      <p>Die Rolle <code>studi_daba</code> hält höchstens zwanzig gleichzeitige Sitzungen (Lab 01). Ein Bericht im DirectQuery-Modus schickt für jedes Bild Abfragen an <code>supabase.butscher.cloud</code>; ein Hörsaal voller solcher Berichte belegt die zwanzig Sitzungen in Minuten. Import fragt die Datenbank beim Laden und beim Aktualisieren — für einen Bestand, der sich nicht stündlich ändert, reicht das. Die Entscheidung fällt je Tabelle; ein zusammengesetztes Modell könnte Dimensionen importieren und eine Faktentabelle in DirectQuery lassen, braucht für die Fallstudie aber niemand.</p>
     </div>
   </section>
 
@@ -304,7 +304,7 @@
 
   <section class="section-block" id="bericht">
     <h2>Der Bericht</h2>
-    <p>Erst jetzt der Bericht: eine Seite mit vier Kacheln, einem Balkendiagramm und einer Linie. Jedes Bild ist ein Fenster auf die Measures — es wählt die Aufteilung, nicht die Definition.</p>
+    <p>Der Bericht ist eine Seite mit vier Kacheln, einem Balkendiagramm und einer Linie. Jedes Bild wählt die Aufteilung eines Measures nach Filiale oder Monat; die Definition der Kennzahl bleibt in der Sicht.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Bild</th><th>Felder</th><th>Was es zeigt</th></tr></thead>
@@ -335,7 +335,7 @@
       </div>
       <div class="karte">
         <div class="kopfzeile">In jeder Zeile dieselbe Summe</div>
-        <p>Ein Balkendiagramm „Umsatz je Filiale“ zeigt in jeder Filiale denselben Wert, den Gesamtumsatz. Dann fehlt die Beziehung zwischen <code>fact_orders</code> und <code>dim_branch</code>: Die Dimension kann die Fakten nicht filtern. Keine Fehlermeldung — das Bild ist die Meldung. Abhilfe: Modellansicht öffnen, die Linie prüfen oder anlegen (<code>*:1</code>, Filterrichtung einfach).</p>
+        <p>Ein Balkendiagramm „Umsatz je Filiale“ zeigt in jeder Filiale denselben Wert, den Gesamtumsatz. Dann fehlt die Beziehung zwischen <code>fact_orders</code> und <code>dim_branch</code>: Die Dimension kann die Fakten nicht filtern. Power BI meldet nichts; der Fehler ist nur im Bild zu sehen. Abhilfe: Modellansicht öffnen, die Linie prüfen oder anlegen (<code>*:1</code>, Filterrichtung einfach).</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">Measure auf einer zusammengeführten Tabelle</div>
@@ -354,7 +354,7 @@
 
   <section class="section-block" id="simulator">
     <h2>Simulator</h2>
-    <p>Der Simulator unten bildet die Ablagen eines Bildes in Power BI nach: <code>X-axis</code>, <code>Y-axis</code>, <code>Legend</code> und <code>Filters</code>. Drei Dinge unterscheiden ihn vom Werkzeug. Felder werden in den Ablagen ausgewählt statt gezogen. Σ-Felder — die Kennzahlen — bekommen im Chip eine Aggregation, die Sie umstellen können: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>; der Vorschlag ist <code>SUM</code>, wie bei Power BI für jede Zahlenspalte. Und das Diagramm wählen Sie nicht, es folgt aus der Belegung: eine Spalte auf <code>X-axis</code> und eine Kennzahl auf <code>Y-axis</code> ergeben senkrechte Balken, eine geordnete Spalte wie Monat oder Stunde eine Linie, eine Legende Serien, nur Spalten ohne Kennzahl (oder nur eine Kennzahl) eine Tabelle. Die Übungen sprechen von Spalten und Zeilen — im Simulator sind das <code>X-axis</code> und <code>Y-axis</code>.</p>
+    <p>Der Simulator unten bildet die Ablagen eines Bildes in Power BI nach: <code>X-axis</code>, <code>Y-axis</code>, <code>Legend</code> und <code>Filters</code>. Drei Dinge unterscheiden ihn von Power BI Desktop. Felder werden in den Ablagen ausgewählt statt gezogen. Σ-Felder — die Kennzahlen — bekommen im Chip eine Aggregation, die Sie umstellen können: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>; der Vorschlag ist <code>SUM</code>, wie bei Power BI für jede Zahlenspalte. Und das Diagramm wählen Sie nicht, es folgt aus der Belegung: eine Spalte auf <code>X-axis</code> und eine Kennzahl auf <code>Y-axis</code> ergeben senkrechte Balken, eine geordnete Spalte wie Monat oder Stunde eine Linie, eine Legende Serien, nur Spalten ohne Kennzahl (oder nur eine Kennzahl) eine Tabelle. Die Übungen sprechen von Spalten und Zeilen — im Simulator sind das <code>X-axis</code> und <code>Y-axis</code>.</p>
     <p>Die Daten sind 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle — das, was ein Bild nach dem Weg über die Beziehungen sieht. Die Felder:</p>
     <div class="table-scroll">
       <table>

@@ -50,7 +50,7 @@
 
   <section class="section-block" id="wege">
     <h2>Drei Wege zu denselben Daten</h2>
-    <p>Die Datenbank der Fallstudie, die CSV-Dateien im Repository <code>github.com/swrobuts/BurgerMetrics</code> und eine DuckDB-Datei auf Ihrem Rechner enthalten denselben Bestand: 754.513 Bestellungen, 2.950.082 Positionen, 10.000 Rezensionen. Der Unterschied liegt nicht in den Daten, sondern darin, wer rechnet, wer die Grenzen setzt und was der Weg kostet.</p>
+    <p>Die Datenbank der Fallstudie, die CSV-Dateien im Repository <code>github.com/swrobuts/BurgerMetrics</code> und eine DuckDB-Datei auf Ihrem Rechner enthalten denselben Bestand: 754.513 Bestellungen, 2.950.082 Positionen, 10.000 Rezensionen. Die drei Wege unterscheiden sich darin, wer rechnet, wer die Grenzen setzt und was der Weg kostet.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Weg</th><th>Wer rechnet</th><th>Grenzen</th><th>Wofür</th></tr></thead>
@@ -91,7 +91,6 @@ oid sha256:deef61177fc57b004e792f5e72c400b5fb2658c665af107930253e8a25060e8d
 size 53346072</div>
     <p>Die letzte Zeile nennt die Größe der eigentlichen Datei: 53.346.072 Byte, in <code>ls -lh</code> als <code>51M</code> angezeigt. Wer das Repository ohne eingerichtetes Git LFS klont, bekommt für jede CSV-Datei genau diese drei Zeilen statt der Daten — und keine Fehlermeldung. Die Prüfung gehört deshalb zum Klonen dazu. Voraussetzung: die Erweiterung git-lfs ist installiert (Prüfung: <code>git lfs version</code>).</p>
     <div data-befehl="B01"></div>
-    <p>So sieht die Prüfung in beiden Fällen aus: mit Daten und mit Zeigerdatei.</p>
     <div class="shot">
       <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Terminal — BurgerMetrics</span><span class="spacer"></span>zsh</div>
       <div class="shot-body eins">
@@ -186,10 +185,10 @@ Git LFS initialized.
 
   <section class="section-block" id="werkzeuge">
     <h2>Was in welches Werkzeug</h2>
-    <p>Die Tabelle fasst zusammen, welcher Weg zu welchem Ziel führt; die Werkzeuge selbst kommen in Lab 04 (Power BI), Lab 05 (Tableau) und Lab 06 (Python und Colab) an die Reihe. Stand 09/2026.</p>
+    <p>Die Werkzeuge kommen in Lab 04 (Power BI), Lab 05 (Tableau) und Lab 06 (Python und Colab) an die Reihe.</p>
     <div class="table-scroll">
       <table>
-        <thead><tr><th>Ziel</th><th>Weg</th><th>Warum</th></tr></thead>
+        <thead><tr><th>Ziel (Stand 09/2026)</th><th>Weg</th><th>Warum</th></tr></thead>
         <tbody>
           <tr>
             <td>Power BI Desktop (Update August 2026)</td>
@@ -267,7 +266,7 @@ con.register("dim_branch", fuer_duckdb(lade_csv("dim_branch")))</div>
 
   <section class="section-block" id="spielplatz">
     <h2>Spielplatz</h2>
-    <p>Unten läuft ein vollständiges PostgreSQL im Browser (PGlite, WebAssembly) mit dem Miniaturbestand der Fallstudie: 19 Bestellungen, 55 Positionen und 12 Rezensionen in denselben beiden Schemata und demselben Suchpfad wie die echte Datenbank. Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf <code>Datenbank zurücksetzen</code> stellt den Ausgangsbestand wieder her.</p>
+    <p>Unten läuft dieselbe Browser-Datenbank wie in Lab 01 (PGlite, WebAssembly): 19 Bestellungen, 55 Positionen und 12 Rezensionen in den Schemata <code>wawi</code> und <code>burgermetrics</code>. Die beiden SQL-Übungen dieses Labs laufen hier und wortgleich in DuckDB. Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf <code>Datenbank zurücksetzen</code> stellt den Ausgangsbestand wieder her.</p>
     <div data-datenbank="postgres"></div>
     <p>Die Startabfrage zählt Bestellungen je Filiale — dieselbe Abfrage, die B03 in DuckDB über die CSV-Dateien stellt. Hier liefert sie fünf Zeilen, weil im Miniaturbestand fünf Filialen Bestellungen haben; über den vollständigen Datensatz sind es acht. Der SQL-Text bleibt derselbe.</p>
     <div data-sql-konsole data-start="SELECT b.branch_name, count(*) FROM fact_orders o JOIN dim_branch b USING (branch_id) GROUP BY 1 ORDER BY 2 DESC;"></div>
