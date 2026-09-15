@@ -108,21 +108,13 @@ def sichern(cur, namen):
     return stand
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--neu", action="store_true",
-                    help="nur auffrischen, nichts umbauen")
-    args = ap.parse_args()
-
-    c = verbinde()
-    c.autocommit = True
-    cur = c.cursor()
-
+def materialisiere(cur, neu=False):
+    """Baut oder erneuert die Sichten innerhalb der Transaktion des Aufrufers."""
     art = objekte(cur)
     namen = sorted(art)
     folge = reihenfolge(namen, abhaengigkeiten(cur, set(namen)))
 
-    if args.neu:
+    if neu:
         print(f"  {sum(1 for n in folge if art[n] == 'm')} materialisierte Sichten\n")
         for name in folge:
             if art[name] != "m":
@@ -152,9 +144,30 @@ def main():
     # ANALYZE, damit der Planer die neuen Tabellen kennt.
     cur.execute(f"ANALYZE")
     print("\n  ANALYZE gelaufen.")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--neu", action="store_true",
+                    help="nur auffrischen, nichts umbauen")
+    args = ap.parse_args()
+
+    c = verbinde()
+    c.autocommit = False
+    try:
+        with c.cursor() as cur:
+            materialisiere(cur, neu=args.neu)
+        c.commit()
+    except BaseException:
+        # Auch nach DROP oder einem erfolgreichen REFRESH bleibt bei Fehlern
+        # und Abbruch der gesamte vorherige Stand erhalten.
+        c.rollback()
+        raise
+    finally:
+        c.close()
+    print("  Änderungen bestätigt.")
     print("  Nicht vergessen: docker compose restart rest — PostgREST liest das")
     print("  Schema nur beim Start (PGRST_DB_CHANNEL_ENABLED=false).")
-    c.close()
 
 
 if __name__ == "__main__":

@@ -159,22 +159,47 @@ export class PostgrestQuelle extends Datenquelle {
     this.zwischenspeicher = new Map();
   }
 
-  async hole(sicht, abfrage = '', { schema = this.schema, frisch = false } = {}) {
-    const schluessel = schema + '.' + sicht + '?' + abfrage;
+  async hole(sicht, abfrage = '', { schema = this.schema, frisch = false, seitenweise = false } = {}) {
+    const schluessel = schema + '.' + sicht + '?' + abfrage + (seitenweise ? '#alle' : '');
     if (!frisch && this.zwischenspeicher.has(schluessel)) return this.zwischenspeicher.get(schluessel);
-    const antwort = await fetch(`${this.url}/rest/v1/${sicht}?${abfrage}`, {
-      headers: {
-        apikey: this.schluessel,
-        Authorization: `Bearer ${this.schluessel}`,
-        'Accept-Profile': schema,
-      },
-    });
-    if (!antwort.ok) {
-      throw new Error(`${sicht}: HTTP ${antwort.status} — ${await antwort.text()}`);
-    }
-    // PostgREST liefert numeric als Zeichenkette; einmal zentral umwandeln,
-    // damit im Dashboard nirgends Number(...) noetig ist.
-    const daten = (await antwort.json()).map(zahlenWandeln);
+    const daten = [];
+    let gesamt;
+    do {
+      const parameter = new URLSearchParams(abfrage);
+      if (seitenweise) {
+        parameter.set('limit', '1000');
+        parameter.set('offset', String(daten.length));
+      }
+      const antwort = await fetch(`${this.url}/rest/v1/${sicht}?${parameter}`, {
+        headers: {
+          apikey: this.schluessel,
+          Authorization: `Bearer ${this.schluessel}`,
+          'Accept-Profile': schema,
+          ...(seitenweise ? { Prefer: 'count=exact' } : {}),
+        },
+      });
+      if (!antwort.ok) {
+        throw new Error(`${sicht}: HTTP ${antwort.status} — ${await antwort.text()}`);
+      }
+      // PostgreSQL-Zahlen sind bereits JSON-Zahlen. Numerischen Text (etwa
+      // PLZ, Artikelname oder Rezension) unverändert lassen.
+      const seite = await antwort.json();
+      if (seitenweise) {
+        const bereich = antwort.headers.get('Content-Range') || '';
+        const treffer = /^(?:(\d+)-(\d+)|\*)\/(\d+)$/.exec(bereich);
+        if (!treffer || (seite.length && (Number(treffer[1]) !== daten.length
+            || Number(treffer[2]) - Number(treffer[1]) + 1 !== seite.length))) {
+          throw new Error(`${sicht}: ungültiger Content-Range, Ergebnis möglicherweise unvollständig`);
+        }
+        gesamt = Number(treffer[3]);
+        if (!seite.length && daten.length < gesamt) {
+          throw new Error(`${sicht}: leere Folgeseite, Ergebnis unvollständig`);
+        }
+      }
+      daten.push(...seite);
+    } while (seitenweise && daten.length < gesamt);
+    // Erst vollständige Ergebnisse speichern; ein Fehler beim Nachladen darf
+    // beim nächsten Versuch keinen scheinbar erfolgreichen Teilbestand liefern.
     this.zwischenspeicher.set(schluessel, daten);
     return daten;
   }
@@ -201,8 +226,7 @@ export class PostgrestQuelle extends Datenquelle {
       try { meldung = JSON.parse(meldung).message || meldung; } catch (_) { /* Text bleibt */ }
       throw new Error(`${funktion}: HTTP ${antwort.status} — ${meldung}`);
     }
-    const daten = await antwort.json();
-    return Array.isArray(daten) ? daten.map(zahlenWandeln) : zahlenWandeln(daten);
+    return antwort.json();
   }
 
   kennzahlenJahr()     { return this.hole('v_kennzahlen_jahr', 'order=jahr'); }
@@ -236,7 +260,7 @@ export class PostgrestQuelle extends Datenquelle {
   promotionen()        { return this.hole('v_promotion', 'order=bestellungen.desc'); }
   wetterLagen()        { return this.hole('v_wetter_lage', 'order=umsatz_je_tag.desc'); }
   wetterTemperatur()   { return this.hole('v_wetter_temperatur', 'order=klasse'); }
-  wetterTage()         { return this.hole('v_wetter_tag', 'order=tag'); }
+  wetterTage()         { return this.hole('v_wetter_tag', 'order=tag', { seitenweise: true }); }
   kohorten()           { return this.hole('v_kohorte', 'order=kohorte,jahr'); }
   warenkorbRegeln()    { return this.hole('v_warenkorb_auswahl', 'order=nr'); }
   simulationBasis()    { return this.hole('v_simulation_basis', 'order=umsatz.desc'); }
@@ -248,15 +272,6 @@ export class PostgrestQuelle extends Datenquelle {
   produkteJahr()       { return this.hole('v_produkt_jahr', 'jahr=eq.2025&order=menge.desc'); }
   einzelwerte()        { return this.hole('v_kennzahl_einzeln', ''); }
   einzelwerteZusatz()  { return this.hole('v_kennzahl_zusatz', ''); }
-}
-
-/** Wandelt Zahlen-Zeichenketten (PostgREST numeric) in echte Zahlen. */
-function zahlenWandeln(zeile) {
-  const aus = {};
-  for (const [k, v] of Object.entries(zeile)) {
-    aus[k] = (typeof v === 'string' && v !== '' && !isNaN(v)) ? Number(v) : v;
-  }
-  return aus;
 }
 
 /**

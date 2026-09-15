@@ -26,14 +26,15 @@ export function pruefeEingabe({ sterne, inhalt }) {
   const sterneZahl = Number(sterne);
   if (!Number.isInteger(sterneZahl) || sterneZahl < 1 || sterneZahl > 5) befunde.push('Bitte 1 bis 5 Sterne wählen.');
   const text = normalisiereText(inhalt);
-  if (text.length < 5) befunde.push('Der Text braucht mindestens 5 Zeichen.');
-  if (text.length > 500) befunde.push('Der Text darf höchstens 500 Zeichen haben.');
+  const laenge = [...text].length; // Unicode-Zeichen wie PostgreSQL char_length
+  if (laenge < 5) befunde.push('Der Text braucht mindestens 5 Zeichen.');
+  if (laenge > 500) befunde.push('Der Text darf höchstens 500 Zeichen haben.');
   return befunde;
 }
 
 /** Zähler unter dem Textfeld: „37 / 500" — gezählt wie die Datenbank: Leerraumfolgen als ein Zeichen, Ränder weg. */
 export function zaehlerText(inhalt) {
-  return `${normalisiereText(inhalt).length} / 500`;
+  return `${[...normalisiereText(inhalt)].length} / 500`;
 }
 
 /** Ein ISO-Datum (auch mit Uhrzeit) als Tag.Monat.Jahr. */

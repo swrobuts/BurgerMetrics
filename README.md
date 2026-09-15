@@ -64,7 +64,14 @@ python3 dataset/load_duckdb.py --lokal
 
 Das Skript prüft die geladenen Zeilenzahlen gegen die Sollwerte aus
 `dataset/README.md` und legt `dataset/burger_metrics.duckdb` an. Darin rechnen
-Sie die Aufgaben aus `dataset/uebungsblatt.md`. Die erste Probe:
+Sie die Aufgaben aus `dataset/uebungsblatt.md`.
+
+Beim erneuten Laden werden nur die ausgewählten Datensatztabellen ersetzt;
+eigene Übungstabellen bleiben erhalten. Der Import läuft in einer Transaktion:
+Fehlt eine Zeile oder schlägt das Einlesen fehl, wird der gesamte Import
+zurückgerollt und das Skript endet mit einem Fehlerstatus.
+
+Die erste Probe:
 
 ```sql
 SELECT count(*) FROM fact_orders;                   -- 754.513
