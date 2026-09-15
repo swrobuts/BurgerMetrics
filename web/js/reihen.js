@@ -9,7 +9,7 @@
  * braucht.
  */
 
-/** Holt alle 33 Sichten parallel. */
+/** Holt alle 34 Sichten parallel. */
 export async function ladeAlles(quelle) {
   const fragen = {
     kennzahlenJahr: quelle.kennzahlenJahr(), umsatzMonat: quelle.umsatzMonat(),

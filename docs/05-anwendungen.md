@@ -54,7 +54,7 @@ Die Abwägung fällt hier zugunsten der Lesbarkeit aus, weil die Anwendungen Leh
 
 ### Daten zur Laufzeit aus der Semantikschicht
 
-Im Quelltext des Berichts steht **keine Nutzdatenzahl**: keine Datenreihe, kein Kachelwert, kein Text der Management Summary. Beim Aufruf lädt die Seite 33 Sichten der Semantikschicht (`db/aufbau/0005` bis `0015`) über PostgREST und baut daraus 91 Datenreihen, 72 Kacheln und 30 Summary-Karten — in rund drei Sekunden. Die CSV-Dateien liest der Bericht nach wie vor nicht; er liest deren Abbild in der Datenbank.
+Im Quelltext des Berichts steht **keine Nutzdatenzahl**: keine Datenreihe, kein Kachelwert, kein Text der Management Summary. Beim Aufruf lädt die Seite 34 Sichten der Semantikschicht (`db/aufbau/0005` bis `0015`) über PostgREST und baut daraus 91 Datenreihen, 72 Kacheln und 30 Summary-Karten — in rund drei Sekunden. Die CSV-Dateien liest der Bericht nach wie vor nicht; er liest deren Abbild in der Datenbank.
 
 Die Arbeit ist auf vier Module in `web/js/` verteilt: `konfiguration.js` kennt als einzige Datei eine Adresse, `datenquelle.js` ist der Vertrag aus benannten Fragen, `reihen.js` übersetzt die Antworten in die Form, die Chart.js erwartet, `kacheln.js` und `texte.js` füllen Kennzahlen und Deutungstexte. Der Bericht kennt keine Tabelle, keine Spalte und keinen Join — nur die Namen der Sichten.
 

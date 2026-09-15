@@ -163,7 +163,7 @@ prüfen). Danach läuft der ETL nur für Shop-Rezensionen.
 
 Mini-Skripte: `dataset/burgermetrics_mini.sql` und `dataset/wawi_mini.sql` bekommen je zwölf
 Rezensionen zu vorhandenen Belegen, `dataset/wawi_zu_analytisch.sql` die Abbildung
-`rezension → fact_reviews` — der Nachweis lautet dann „neun von neun zeilengleich".
+`rezension → fact_reviews` — der Nachweis lautet dann „neun von neun zeilengleich“.
 
 ### 3.4 Rechte und Proben
 
@@ -208,7 +208,7 @@ Einstieg (≥ 25 je Stufe), Produktsatz je Kategorie Burger/Side/Drink/Dessert/B
 Kategorie und Polarität, mit Platzhalter `{produkt}`), Kontextsatz (Wartezeit ↔
 `order_duration_min` in Klassen, Kanal ↔ `order_channel`, Filiale ↔ `branch_name` mit
 Wahrscheinlichkeit 0,3, Preis ↔ Aktion/Rabatt), Schluss (Empfehlung ↔ Sterne). Ein bis vier
-Sätze, 10–60 Wörter. Rund 15 % der Texte umgangssprachlich: Kleinschreibung, „ae/oe/ue" statt
+Sätze, 10–60 Wörter. Rund 15 % der Texte umgangssprachlich: Kleinschreibung, „ae/oe/ue“ statt
 Umlaute, mehrfache Satzzeichen — **kein Emoji**. Keine echten Personen, keine Beleidigungen,
 keine Markennamen außer den Produktnamen des Bestands.
 
@@ -235,7 +235,7 @@ API. Ablauf:
    korrigiert oder das Los wiederholt.
 
 Abbruchkriterium: Reicht die Zeit nicht für 100 Lose, werden die Lose in zufälliger
-Reihenfolge geglättet und der Stand im README genannt (z. B. „6.000 von 10.000 geglättet").
+Reihenfolge geglättet und der Stand im README genannt (z. B. „6.000 von 10.000 geglättet“).
 
 ### 4.3 Dokumentation
 
@@ -249,14 +249,14 @@ Feldbeschreibung, Herkunft (Generator + Glättung), Kontrollzahlen (10.000 Zeile
   `rezensionenProdukt()` → `v_rezension_produkt`, `kundenstimmen()` → `v_kundenstimmen`,
   `rezensionAnlegen(r)` → `rufe('rezension_anlegen', r)`, `letzteRezensionen()` →
   `v_rezension_letzte` (frisch).
-* Am Produkt (Karte und Detail): „★ 4,3 · 128 Bewertungen" aus `v_rezension_produkt`; ohne
-  Rezension „noch keine Bewertung". Knopf **Bewerten** öffnet ein Modal: fünf Sterne
+* Am Produkt (Karte und Detail): „★ 4,3 · 128 Bewertungen“ aus `v_rezension_produkt`; ohne
+  Rezension „noch keine Bewertung“. Knopf **Bewerten** öffnet ein Modal: fünf Sterne
   (Radio-Gruppe, Tastatur bedienbar), Textfeld mit Zähler (5–500), Filialwahl (vorbelegt aus
   `cartBranch`), Senden. Unter dem Formular die drei Kundenstimmen aus `v_kundenstimmen`.
 * Speichern über `window.rezensionSpeichern` (Modulblock, mit `sitzung: SITZUNG`) →
-  `rezensionAnlegen`. Bestätigung: „Gespeichert als `wawi.rezension #4711`", Ø am Produkt wird
+  `rezensionAnlegen`. Bestätigung: „Gespeichert als `wawi.rezension #4711`“, Ø am Produkt wird
   neu geladen. Fehler werden mit der Meldung der Datenbank angezeigt (z. B. Bremse).
-* Datenmodus: eine Anmerkung „Rezension → `wawi.rezension` → ETL → `fact_reviews`" im Stil
+* Datenmodus: eine Anmerkung „Rezension → `wawi.rezension` → ETL → `fact_reviews`“ im Stil
   der vorhandenen Datenanmerkungen; die zuletzt gespeicherte Rezension erscheint als Datensatz.
 * Sicherheit: Besuchertexte werden nirgends auf der Seite gerendert; alles, was angezeigt wird,
   kommt aus `v_kundenstimmen` (Simulation) und wird mit `textContent` gesetzt. Längen- und
@@ -295,7 +295,7 @@ Feldbeschreibung, Herkunft (Generator + Glättung), Kontrollzahlen (10.000 Zeile
   verketteten Einzeiler, Ergebnisse als DataFrame anzeigen statt drucken.
 * Diagramme mit matplotlib (Standardfarben, beschriftete Achsen, Nullpunkt bei Länge und Fläche),
   keine Wortwolken.
-* Am Kopf ein „In Colab öffnen"-Link und eine `pip`-Zelle (`sqlalchemy psycopg2-binary duckdb
+* Am Kopf ein „In Colab öffnen“-Link und eine `pip`-Zelle (`sqlalchemy psycopg2-binary duckdb
   scikit-learn mlxtend statsmodels holidays dash`); `notebooks/requirements.txt` daneben.
 * Ausgeführt eingecheckt (GitHub rendert die Ergebnisse); `notebooks/pruefe_notebooks.sh`
   führt alle per `jupyter nbconvert --execute --to notebook --inplace` aus und ist die Abnahme.
@@ -404,7 +404,7 @@ Terminal- und Deploy-Simulator werden nicht übernommen (kein Lab braucht sie); 
 
 | Lab | Abschnitte (Dramaturgie des Leitfadens) | Übungen |
 |---|---|---|
-| 01 Zugang | Warum eine Rolle; Verbindungsdaten; Werkzeuge (Nachbildung DBeaver/DataGrip-Dialog); Schemata und Suchpfad; Sichten als Vertrag; Grenzen; Stolpersteine (Präfix, Timeout, „permission denied") | `sql` ×3 auf mini, `quiz`, `zuordnen`, `checkliste` (echte Verbindung herstellen) |
+| 01 Zugang | Warum eine Rolle; Verbindungsdaten; Werkzeuge (Nachbildung DBeaver/DataGrip-Dialog); Schemata und Suchpfad; Sichten als Vertrag; Grenzen; Stolpersteine (Präfix, Timeout, „permission denied“) | `sql` ×3 auf mini, `quiz`, `zuordnen`, `checkliste` (echte Verbindung herstellen) |
 | 02 Daten beschaffen | CSV/LFS (Zeigerdatei erkennen); DuckDB; Export nach Parquet; was in welches Werkzeug | `sql` ×2 auf mini (Abfragen, die in DuckDB und PostgreSQL gleich laufen), `reihenfolge`, `quiz`, `zuordnen` |
 | 03 Datenmodell | Frage → Grain → Dimensionen → Fakten; die Schritte werden in PGlite gebaut (`CREATE TABLE AS`, `CREATE VIEW`); Fan Trap; Rezensionen anbinden | `sql` ×4 mit `kontrolle`, `quiz` |
 | 04 Power BI | aus WInf-SP Lab 12 übertragen: Verbindung PostgreSQL, Modell aus Fremdschlüsseln, DAX-Measures (`Umsatz`, `AOV`, `Ø Sterne`), Bericht; Shelf-Simulator (Power BI: Field Wells, Tableau: Shelves) mit BM-Feldern | `regal` ×2, `quiz`, `zuordnen`, `checkliste` |
@@ -426,12 +426,12 @@ jeder Seite im Browser (Kopf, Navigation, Übungen, Datenbankband), Aufruf von
 
 ## 10 Verknüpfungen und Dokumentation im BM-Repo
 
-* `web/index.html`: vierte Kachel `c-orange` „Lernumgebung BM-Lab" → `lab/` (relativ, funktioniert lokal und auf Pages)
+* `web/index.html`: vierte Kachel `c-orange` „Lernumgebung BM-Lab“ → `lab/` (relativ, funktioniert lokal und auf Pages)
   (Kartenraster auf vier Spalten, ab 1024 px zwei, mobil eine); Tastenkürzel `4`; im Abschnitt
   Analytics-Projektablauf ein Satz zu Notebooks und Dash mit Link ins Repo.
-* `README.md`: Abschnitte „Notebooks und Dash" und „Lernumgebung" (Adresse
-  `swrobuts.github.io/BurgerMetrics/lab/`); Tabelle „Was wo liegt" um `notebooks/`, `dash/` und
-  `web/lab/` ergänzt; Rezensionen in „Die Kette" (Schritt 4 und 5).
+* `README.md`: Abschnitte „Notebooks und Dash“ und „Lernumgebung“ (Adresse
+  `swrobuts.github.io/BurgerMetrics/lab/`); Tabelle „Was wo liegt“ um `notebooks/`, `dash/` und
+  `web/lab/` ergänzt; Rezensionen in „Die Kette“ (Schritt 4 und 5).
 * `db/README.md`: Zeile `0021`, Rezensionsweg, `uebungsrezensionen_loeschen()`.
 * `docs/02-datenmodell.md` (fact_reviews im Galaxy-Schema), `docs/05-anwendungen.md`
   (Shop-Feature), `docs/07-lehrbezug.md` (Modul Datenbasierte Fallstudien, Notebooks, BM-Lab),
@@ -493,7 +493,7 @@ parallelisieren, sobald Phase 2 steht.
 * **Glättungsvolumen.** 10.000 Texte in 100 Losen sind viel Ausgabe; das Abbruchkriterium in
   4.2 hält den Bestand konsistent, auch wenn nicht alle Lose geglättet werden.
 * **Synthetischer Bestand.** Effekte externer Daten sind nicht real; jedes Notebook, das externe
-  Daten nutzt, sagt das im Abschnitt „Was offen bleibt".
+  Daten nutzt, sagt das im Abschnitt „Was offen bleibt“.
 * **Tableau und Nur-Lese-Transaktionen.** `studi_daba` hat `default_transaction_read_only = on`;
   Tableau legt für manche Filter und Extrakte temporäre Tabellen an, was dann scheitert. In der Regel
   weicht Tableau selbst aus — in Phase 6 mit dem Demo-Konto durchspielen und im Lab 05 als

@@ -8,17 +8,25 @@
 
 ```
 BurgerMetrics/
-├── web/          index.html · pos.html · shop.html · dashboard.html
-├── dataset/      13 CSV-Dateien (LFS) · generate_obt.py · verify_readme.py
-│                 README.md · uebungsblatt.md · uebungsblatt.pdf
-│                 erp_datenmodell.excalidraw
-├── docs/         diese Dokumentation · zwei Prüfberichte
+├── web/          index.html · pos.html · shop.html · dashboard.html · abgleich.html
+│                 js/ · tests/ · lab/
+├── dataset/      15 CSV-Dateien (Git LFS) · generate_obt.py · generate_reviews.py
+│                 load_duckdb.py · verify_readme.py · wawi_mini.sql
+│                 burgermetrics_mini.sql · wawi_zu_analytisch.sql · README.md
+│                 uebungsblatt.md/.pdf · erp_datenmodell.excalidraw
+├── db/           aufbau/ · betrieb/ · tests/ · lade_csv.py · materialisieren.py
+│                 skript_ausfuehren.py
+├── notebooks/    00–08 · quellen/ · daten_extern/ · tests/
+├── dash/         Dash-App (wird ausgeführt)
+├── mcp/          MCP-Server (Betreiberzugang)
+├── docs/         diese Dokumentation · sechs Prüfberichte
 ├── .github/workflows/static.yml
 ├── .gitattributes
-└── .gitignore
+├── .gitignore
+└── .env.example
 ```
 
-Die Trennung folgt der Frage, wer was braucht: `web/` wird veröffentlicht, `dataset/` wird heruntergeladen und lokal ausgewertet, `docs/` wird gelesen.
+Die Trennung folgt der Frage, wer was braucht: `web/` wird veröffentlicht, `dataset/` wird heruntergeladen und lokal ausgewertet, `db/`, `notebooks/` und `dash/` werden ausgeführt, `mcp/` ist der Betreiberzugang, `docs/` wird gelesen.
 
 Bis August 2026 lagen alle Dateien flach im Wurzelverzeichnis, und der Datenbestand existierte zusätzlich in einem zweiten, nicht versionierten Ordner. Übungsblatt, ERP-Modell und Datensatz-Dokumentation waren dadurch für Studierende unsichtbar — sie standen nicht im Repository.
 
@@ -39,11 +47,11 @@ graph LR
     style SITE fill:#003E6D,color:#fff
 ```
 
-Der entscheidende Parameter ist `path: 'web'`. Der Ablauf lädt **nur das Web-Verzeichnis** hoch, nicht das gesamte Repository.
+Der entscheidende Parameter ist `path: 'web'`. Der Ablauf lädt **nur das Web-Verzeichnis** hoch, nicht das gesamte Repository. Seit September 2026 enthält dieses Artefakt auch `web/lab/` mit der PGlite-Laufzeit (rund 20 MB, davon 19 MB PGlite; kein Build-Schritt).
 
 Das war nicht immer so. Ursprünglich stand dort `path: '.'`, mit zwei Folgen:
 
-**Das Auslieferungspaket umfasste 311 MB CSV-Daten**, die von der veröffentlichten Seite nirgends verlinkt werden. Nach der Umstellung sind es rund 530 KB.
+**Das Auslieferungspaket umfasste rund 315 MB CSV-Daten**, die von der veröffentlichten Seite nirgends verlinkt werden. Nach der Umstellung waren es rund 530 KB; seit September 2026 sind es mit `web/lab/` rund 20 MB.
 
 **Die CSV-Dateien wären als Verweisdateien ausgeliefert worden.** `actions/checkout` holt ohne `lfs: true` nur die LFS-Verweise, nicht die Inhalte. Wer eine CSV-Datei von der veröffentlichten Seite geladen hätte, hätte 130 Byte Text statt der Daten erhalten — ein Fehler, der erst beim Öffnen der Datei auffällt.
 
@@ -116,7 +124,7 @@ Ohne diese Vergleichsmessung wäre offen geblieben, ob ein Befund am Versionswec
 **Vor der ersten Änderung:**
 
 ```bash
-git lfs install          # ohne dies landen 311 MB Rohdaten in der Historie
+git lfs install          # ohne dies landen rund 315 MB Rohdaten in der Historie
 git lfs fsck             # prüft die Vollständigkeit der LFS-Objekte
 git config core.fileMode false   # bei Ablage in OneDrive/iCloud
 ```
@@ -128,7 +136,7 @@ Die dritte Zeile betrifft eine Eigenheit von Cloud-Synchronisation: Sie kann Dat
 ```bash
 cd dataset
 python generate_obt.py       # OBT neu erzeugen
-python verify_readme.py      # 79 Angaben nachrechnen, Exit-Code prüfen
+python verify_readme.py      # 91 Angaben nachrechnen, Exit-Code prüfen
 ```
 
 ---

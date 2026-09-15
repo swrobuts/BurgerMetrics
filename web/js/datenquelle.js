@@ -7,7 +7,7 @@
  * schreibt eine neue Klasse mit denselben Methoden und traegt sie unten in
  * `waehleQuelle` ein. Am Dashboard aendert sich dabei keine Zeile.
  *
- * Der Vertrag ist absichtlich schmal: 33 benannte Fragen, jede liefert ein
+ * Der Vertrag ist absichtlich schmal: 34 benannte Fragen, jede liefert ein
  * Array von Objekten mit stabilen Feldnamen. Diese Namen sind die eigentliche
  * Schnittstelle — sie stehen serverseitig in db/aufbau/0005_semantik.sql.
  *

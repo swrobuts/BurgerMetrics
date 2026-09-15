@@ -30,7 +30,7 @@ Ein solcher Preis ist immer vorhanden. Eine Entscheidung ohne Nachteil war keine
 |---|---|
 | Eine Faktentabelle auf Positionsebene | Bestellmerkmale (Rabatt, Dauer, Bewertung) müssten je Position wiederholt werden; jede Summe darüber wäre falsch |
 | Eine Faktentabelle auf Bestellebene | Produktanalysen wären unmöglich — genau die Warenkorbanalyse fiele weg |
-| **Zwei Faktentabellen, geteilte Dimensionen** | **gewählt** |
+| **Zwei Faktentabellen, geteilte Dimensionen** | **gewählt** (seit September 2026 drei, [E10](#e10)) |
 
 **Begründung:** Der Sachverhalt wird tatsächlich auf zwei Ebenen gemessen. Eine Bestellung hat einen Rabatt, eine Wartezeit und eine Bewertung; eine Position hat eine Menge und einen Einzelpreis. Beides in eine Tabelle zu zwingen, würde eine der beiden Ebenen beschädigen.
 

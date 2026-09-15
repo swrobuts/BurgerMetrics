@@ -16,7 +16,7 @@ Auswertungsmodell, die Semantikschicht und das Dashboard selbst.
 
 ## Klonen
 
-Die CSV-Dateien liegen in Git LFS und sind zusammen rund 311 MB groß. Ohne
+Die CSV-Dateien liegen in Git LFS und sind zusammen rund 315 MB groß. Ohne
 LFS bekommen Sie nur Textzeiger statt Daten.
 
 ```bash
@@ -134,7 +134,7 @@ zeilengleich.
 
 Im Quelltext von `web/dashboard.html` steht **keine einzige Geschäftszahl**.
 Weder in den Kacheln noch in den Tabellen noch in den Deutungstexten. Die
-Seite lädt beim Aufruf 33 Sichten aus der Datenbank und baut daraus alles,
+Seite lädt beim Aufruf 34 Sichten aus der Datenbank und baut daraus alles,
 was sie zeigt.
 
 Das war nicht immer so. In der ersten Fassung standen die Zahlen fest im

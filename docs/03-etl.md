@@ -11,14 +11,16 @@ Dieses Kapitel beschreibt, wie die ausgelieferten Dateien entstehen und welche V
 ```mermaid
 graph TB
     GEN["Generierung<br/><i>einmalig, außerhalb des Repositorys</i>"]
-    STAR["Galaxy-Schema<br/>12 CSV-Dateien · 135 MB<br/>2 Fakten + 10 Dimensionen"]
+    REV["generate_reviews.py<br/>10.000 Rezensionen · geglättet"]
+    STAR["Galaxy-Schema<br/>13 CSV-Dateien · rund 137 MB<br/>3 Fakten + 10 Dimensionen"]
     OBT["One Big Table<br/>obt_orders.csv · 176 MB<br/>754.513 × 41"]
-    VER["verify_readme.py<br/>79 Kennzahlen"]
+    VER["verify_readme.py<br/>91 Kennzahlen"]
     DOC["dataset/README.md<br/>dokumentierte Muster"]
-    DASH["dashboard.html<br/>fest eingetragene Werte"]
-    VAL["docs/validierung-*.md<br/>185 geprüfte Werte"]
+    DASH["dashboard.html<br/>liest 34 Sichten zur Laufzeit"]
+    VAL["docs/validierung-dashboard-*.md<br/>drei Prüfberichte"]
 
     GEN --> STAR
+    REV --> STAR
     STAR -->|generate_obt.py| OBT
     STAR --> VER
     VER -->|prüft| DOC
@@ -27,14 +29,15 @@ graph TB
 
     style STAR fill:#003E6D,color:#fff
     style VER fill:#fff,stroke:#1B6B3C,stroke-width:2px
+    style REV fill:#fff,stroke:#1B6B3C,stroke-width:2px
     style VAL fill:#fff,stroke:#1B6B3C,stroke-width:2px
 ```
 
-Zwei Dinge fallen auf. Erstens ist die **Generierung selbst nicht Teil des Repositorys** — die CSV-Dateien sind die Quelle der Wahrheit, nicht ein Generatorskript. Zweitens gibt es **zwei getrennte Prüfstrecken**: eine für die Datensatz-Dokumentation, eine für den Bericht.
+Zwei Dinge fallen auf. Erstens ist die **Generierung der Bestellungen nicht Teil des Repositorys** — die CSV-Dateien sind die Quelle der Wahrheit, nicht ein Generatorskript. Bei den Rezensionen ist das anders: Seit September 2026 erzeugt `dataset/generate_reviews.py` sie im Repository, die Texte wurden anschließend geglättet (`fact_reviews_roh.csv` → `fact_reviews.csv`, [Entscheidung E10](08-entscheidungen.md#e10)). Zweitens gibt es **zwei getrennte Prüfstrecken**: eine für die Datensatz-Dokumentation, eine für den Bericht.
 
 ---
 
-## 3.2 Warum die Generierung nicht im Repository liegt
+## 3.2 Warum die Generierung der Bestellungen nicht im Repository liegt
 
 Das ist eine bewusste Entscheidung mit einem Nachteil, den man kennen sollte.
 
@@ -44,11 +47,13 @@ Das ist eine bewusste Entscheidung mit einem Nachteil, den man kennen sollte.
 
 Der zweite Punkt wird dadurch aufgefangen, dass alle Muster in [`dataset/README.md`](../dataset/README.md) mit nachgerechneten Werten dokumentiert und über `verify_readme.py` überprüfbar sind. Die Dokumentation tritt an die Stelle des Generators.
 
+Für die Rezensionen gilt diese Abwägung nicht in gleicher Form: Seit September 2026 erzeugt `dataset/generate_reviews.py` sie im Repository, die Texte wurden anschließend geglättet (`fact_reviews_roh.csv` → `fact_reviews.csv`, [Entscheidung E10](08-entscheidungen.md#e10)).
+
 ---
 
 ## 3.3 Die One Big Table erzeugen
 
-`dataset/generate_obt.py` ist die einzige Transformation im Repository. Sie erzeugt die denormalisierte Tabelle aus den Schema-Dateien:
+`dataset/generate_obt.py` ist die Transformation für die One Big Table. Sie erzeugt die denormalisierte Tabelle aus den Schema-Dateien:
 
 ```bash
 cd dataset
@@ -140,7 +145,7 @@ Daraus folgt eine allgemeine Regel für Datenpipelines: **Eine Transformation, d
 
 ## 3.5 Große Dateien: Git LFS
 
-Der Datenbestand umfasst 311 MB, davon allein 176 MB in `obt_orders.csv`. Solche Dateien gehören nicht in die reguläre Git-Historie: Git speichert jede Version vollständig, und binäre Änderungen lassen sich nicht zusammenführen.
+Der Datenbestand umfasst rund 315 MB (15 Dateien), davon allein 176 MB in `obt_orders.csv`. Solche Dateien gehören nicht in die reguläre Git-Historie: Git speichert jede Version vollständig, und binäre Änderungen lassen sich nicht zusammenführen.
 
 Deshalb sind alle CSV-Dateien über **Git LFS** verwaltet. In `.gitattributes` steht:
 
@@ -158,7 +163,7 @@ size 53346072
 
 Der Inhalt liegt getrennt davon im LFS-Speicher. Das Muster `*.csv` enthält keinen Schrägstrich und greift deshalb auf jeder Verzeichnisebene — die Umstellung auf die Ordnerstruktur `dataset/` ließ die LFS-Verwaltung unberührt.
 
-**Praktische Folge für Mitarbeitende:** Wer das Repository ohne installiertes `git-lfs` klont, erhält Verweisdateien statt Daten. Umgekehrt gilt: Wer bei fehlendem `git-lfs` einen Commit erzeugt, schreibt 311 MB Rohdaten in die Historie. Vor der ersten Arbeit am Repository also:
+**Praktische Folge für Mitarbeitende:** Wer das Repository ohne installiertes `git-lfs` klont, erhält Verweisdateien statt Daten. Umgekehrt gilt: Wer bei fehlendem `git-lfs` einen Commit erzeugt, schreibt rund 315 MB (15 Dateien) Rohdaten in die Historie. Vor der ersten Arbeit am Repository also:
 
 ```bash
 git lfs install
