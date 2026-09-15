@@ -78,7 +78,7 @@
       "aufgabe": { "de": "<p>Ordnen Sie jede Zelle der Fallstudien-Notebooks ihrem Zweck zu.</p>" },
       "ziele": [ { "id": "pakete", "text": { "de": "Pakete bereitstellen" } }, { "id": "verbindung", "text": { "de": "Verbindung und Ladehelfer" } }, { "id": "ausgabe", "text": { "de": "deutsche Zahlen in Ausgaben" } }, { "id": "analyse", "text": { "de": "Daten holen und auswerten" } } ],
       "paare": [
-        { "begriff": { "de": "%pip install -q sqlalchemy psycopg2-binary duckdb …" }, "ziel": "pakete" },
+        { "begriff": { "de": "subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', …])" }, "ziel": "pakete" },
         { "begriff": { "de": "engine = create_engine(VERBINDUNG)" }, "ziel": "verbindung" },
         { "begriff": { "de": "def lade_csv(name): … media.githubusercontent.com …" }, "ziel": "verbindung" },
         { "begriff": { "de": "def zahl(wert, nachkommastellen=0): …" }, "ziel": "ausgabe" },
@@ -91,7 +91,7 @@
       "titel": { "de": "Ein Notebook von oben nach unten" },
       "aufgabe": { "de": "<p>Bringen Sie die Zellen eines Fallstudien-Notebooks in die Reihenfolge, in der sie laufen müssen.</p>" },
       "eintraege": [
-        { "id": "pip", "text": { "de": "%pip install -q … (in Colab)" } },
+        { "id": "pip", "text": { "de": "subprocess.check_call([..., 'pip', 'install', ...]) (in Colab wie lokal)" } },
         { "id": "verbindung", "text": { "de": "VERBINDUNG, create_engine, lade_sql, lade_csv" } },
         { "id": "zahl", "text": { "de": "def zahl(wert, nachkommastellen=0)" } },
         { "id": "daten", "text": { "de": "daten = lade_sql(\"SELECT …\")" } },
@@ -106,7 +106,7 @@
       "aufgabe": { "de": "<p>Öffnen Sie <code>notebooks/00_zugang_und_daten.ipynb</code> über den Colab-Link im Repository und arbeiten Sie die Liste ab.</p>" },
       "schritte": [
         { "text": { "de": "Notebook in Colab geöffnet (Link „In Colab öffnen“ im Kopf oder über <code>colab.research.google.com/github/swrobuts/BurgerMetrics/blob/main/notebooks/00_zugang_und_daten.ipynb</code>)." } },
-        { "text": { "de": "pip-Zelle ausgeführt; die Meldung <code>Note: you may need to restart the kernel</code> gelesen und die Runtime neu gestartet." } },
+        { "text": { "de": "pip-Zelle ausgeführt; die Ausgabe <code>Pakete bereit.</code> erschienen; Runtime vorsorglich neu gestartet, bevor es weitergeht." } },
         { "text": { "de": "Verbindungszelle ausgeführt — ohne Fehler; danach zeigt die Tabellenübersicht <code>burgermetrics 14</code>, <code>wawi 16</code> Tabellen und <code>38</code> materialisierte Sichten." } },
         { "text": { "de": "Die DuckDB-Zelle liefert die acht Filialtypen; <code>lade_csv(\"dim_branch\")</code> hat eine echte CSV geladen, keinen LFS-Zeiger." } },
         { "text": { "de": "Die Export-Zelle hat <code>export/</code> mit vier Sichten als CSV und Parquet gefüllt (163 Zeilen zusammen)." } },

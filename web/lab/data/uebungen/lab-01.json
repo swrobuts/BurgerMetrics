@@ -87,14 +87,14 @@
       "aufgabe": { "de": "<p>Ordnen Sie jede Meldung der Ursache zu.</p>" },
       "ziele": [ { "id": "praefix", "text": { "de": "falsches oder fehlendes Schema" } }, { "id": "readonly", "text": { "de": "nur lesende Transaktion der Rolle" } }, { "id": "recht", "text": { "de": "fehlendes Ausführungsrecht" } }, { "id": "grenze", "text": { "de": "Zeit- oder Sitzungsgrenze" } } ],
       "paare": [
-        { "begriff": { "de": "relation \"public.fact_orders\" does not exist" }, "ziel": "praefix" },
+        { "begriff": { "de": "permission denied for schema public" }, "ziel": "praefix" },
         { "begriff": { "de": "cannot execute INSERT in a read-only transaction" }, "ziel": "readonly" },
         { "begriff": { "de": "permission denied for function bestellung_anlegen" }, "ziel": "recht" },
         { "begriff": { "de": "canceling statement due to statement timeout" }, "ziel": "grenze" },
         { "begriff": { "de": "cannot execute CREATE TABLE in a read-only transaction" }, "ziel": "readonly" },
         { "begriff": { "de": "too many connections for role \"studi_daba\"" }, "ziel": "grenze" }
       ],
-      "rueckmeldung": { "de": "Vier Ursachen, sechs Meldungen. Die read-only-Meldungen sind der zweite Riegel neben den fehlenden Rechten; die Grenzen schützen die Instanz vor Versehen." } },
+      "rueckmeldung": { "de": "Vier Ursachen, sechs Meldungen. Die read-only-Meldung kommt von einer abschaltbaren Voreinstellung der Rolle, nicht von einer echten Sperre; die wirksame Sperre sind die fehlenden Rechte (ACLs) auf Tabellen, Schemata und Funktionen. Die Grenzen schützen die Instanz vor Versehen." } },
 
     { "id": "W01-06", "typ": "checkliste",
       "titel": { "de": "Die echte Verbindung herstellen" },

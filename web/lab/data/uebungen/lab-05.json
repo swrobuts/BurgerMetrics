@@ -94,10 +94,10 @@
           "optionen": [ { "de": "Über die CSV-Dateien aus notebooks/export/ — die Public Edition kennt keine Datenbankverbindung" }, { "de": "Über den PostgreSQL-Connector mit studi_daba" }, { "de": "Gar nicht" } ],
           "richtig": [0], "mehrfach": false,
           "erklaerung": { "de": "Die Public Edition liest Dateien, Google Drive und OData, bis 15 Millionen Zeilen je Arbeitsmappe. Notebook 00 exportiert vier Sichten als CSV und Parquet." } },
-        { "frage": { "de": "Eine Live-Verbindung mit studi_daba meldet „cannot execute CREATE TABLE in a read-only transaction“. Was ist die Ursache?" },
+        { "frage": { "de": "Eine Live-Verbindung mit studi_daba meldet „permission denied to create temporary tables in database \"postgres\"“. Was ist die Ursache?" },
           "optionen": [ { "de": "Tableau will eine temporäre Tabelle anlegen; die Rolle darf nicht schreiben" }, { "de": "Das Kennwort ist falsch" }, { "de": "Die Datenbank ist voll" } ],
           "richtig": [0], "mehrfach": false,
-          "erklaerung": { "de": "Die Meldung stammt von PostgreSQL: Die Transaktion der Rolle ist nur lesend. Ein Extract oder ein Datenquellenfilter umgeht den Vorgang." } }
+          "erklaerung": { "de": "Die Meldung stammt von PostgreSQL: Der Rolle fehlt die TEMPORARY-Berechtigung auf der Datenbank. Anders als bei einer gewöhnlichen Tabelle greift hier nicht die nur lesende Transaktion — die nimmt temporäre Tabellen ausdrücklich aus —, sondern fehlt das Recht direkt. Ein Extract oder ein Datenquellenfilter umgeht den Vorgang." } }
       ],
       "rueckmeldung": { "de": "Live fragt, Extract kopiert, Public liest Dateien — und die Rolle bleibt in allen drei Fällen nur lesend." } },
 

@@ -2,7 +2,7 @@
 #
 # Quelle: notebooks/quellen/gemeinsam.py (VERBINDUNG). Dieselbe Zelle steht in jedem der
 # neun Notebooks als zweite Codezelle, direkt unter der pip-Zelle:
-#     %pip install -q sqlalchemy psycopg2-binary duckdb scikit-learn 'mlxtend>=0.23.2' statsmodels holidays dash
+#     import subprocess, sys; pakete = [...]; subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', *pakete])
 #     (in acht Notebooks dieselbe Liste; Notebook 08 ergänzt transformers torch)
 # In Colab: den Inhalt dieser Datei in eine Codezelle einfügen und ausführen.
 # Lokal genügt notebooks/requirements.txt.

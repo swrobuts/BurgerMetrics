@@ -186,9 +186,9 @@
       <div class="karte">
         <div class="kopfzeile">Verboten</div>
         <ul>
-          <li>INSERT, UPDATE, DELETE, CREATE — jede Transaktion ist grundsätzlich nur lesend</li>
+          <li>INSERT, UPDATE, DELETE, CREATE — in einer Standardsitzung zuerst durch die nur lesende Voreinstellung verhindert (<code>default_transaction_read_only = on</code>, mit <code>SET TRANSACTION READ WRITE</code> abschaltbar); wer sie abschaltet, scheitert an den fehlenden Rechten (ACLs) auf jede Tabelle, jedes Schema und jede Funktion.</li>
           <li>EXECUTE auf <code>wawi.bestellung_anlegen()</code> und <code>wawi.rezension_anlegen()</code></li>
-          <li>eigene Rechte im Schema <code>public</code> — die Rolle hat dort keine, und die Fallstudie führt dort keine Tabellen; <code>SELECT * FROM public.xyz</code> endet deshalb mit <code>relation "public.xyz" does not exist</code>, nicht mit <code>permission denied</code></li>
+          <li>eigene Rechte im Schema <code>public</code> — die Rolle hat dort weder USAGE noch CREATE; <code>SELECT * FROM public.xyz</code> endet deshalb mit <code>permission denied for schema public</code>, nicht mit <code>relation … does not exist</code></li>
         </ul>
       </div>
     </div>
@@ -197,8 +197,9 @@
   <section class="section-block" id="stolper">
     <h2>Stolpersteine</h2>
     <p>Vier Ursachen erzeugen die Fehlermeldungen, denen Sie mit dieser Rolle begegnen. Alle Meldungen stehen hier wörtlich — so erscheinen sie auch bei Ihnen.</p>
-    <p><strong>Falsches oder fehlendes Schema.</strong> Ein Name ohne Präfix trifft im Suchpfad zunächst wawi (Abschnitt „Schemata und Suchpfad“) — das ist kein Fehler, nur eine andere Sicht als vielleicht gemeint. Ein Fehler wird daraus erst, wenn eine Tabelle in einem Schema gesucht wird, in dem die Fallstudie keine Tabellen hat, etwa <code>public</code>:</p>
-    <p><code>ERROR:  relation "public.fact_orders" does not exist</code></p>
+    <p><strong>Falsches oder fehlendes Schema.</strong> Ein Name ohne Präfix trifft im Suchpfad zunächst wawi (Abschnitt „Schemata und Suchpfad“) — das ist kein Fehler, nur eine andere Sicht als vielleicht gemeint. Ein Fehler wird daraus erst, wenn ausdrücklich ein Schema genannt wird, auf das die Rolle keine USAGE-Berechtigung hat, etwa <code>public</code>:</p>
+    <p><code>ERROR:  permission denied for schema public</code></p>
+    <p>Ein unbekannter Name ganz ohne Präfix liefert weiterhin <code>relation "xyz" does not exist</code> — der Suchpfad enthält <code>public</code> nicht.</p>
     <p><strong>Nur lesende Transaktion.</strong> Jede verändernde Anweisung scheitert an derselben Sperre, ob sie eine Zeile einfügt oder eine Tabelle anlegt:</p>
     <p><code>ERROR:  cannot execute INSERT in a read-only transaction</code><br><code>ERROR:  cannot execute CREATE TABLE in a read-only transaction</code></p>
     <p><strong>Fehlendes Ausführungsrecht.</strong> Die Rolle darf keine der beiden schreibenden Funktionen aufrufen:</p>
