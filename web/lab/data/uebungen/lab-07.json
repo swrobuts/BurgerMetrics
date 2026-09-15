@@ -6,9 +6,9 @@
       "befehl": "-- Recency (Tage seit Stichtag), Frequency, Monetary je Kunde\nSELECT customer_id,\n       DATE '2026-03-31' - max(date) AS recency_tage,\n       count(*)                      AS frequenz,\n       round(sum(net_total), 2)      AS monetaer\nFROM fact_orders\nGROUP BY customer_id\nORDER BY recency_tage;\n\n-- Notebook 02 rechnet genauso, mit Stichtag 31.03.2026 und allen 754.513 Bestellungen",
       "teile": [
         { "was": "DATE '2026-03-31' - max(date)", "bedeutet": { "de": "Recency: die Tage seit der letzten Bestellung, vom Stichtag des Notebooks (31.03.2026) rückwärts zum jüngsten Bestelldatum je Kunde gerechnet. Ein Datum minus ein Datum ergibt in PostgreSQL eine ganze Zahl von Tagen." } },
-        { "was": "count(*)", "bedeutet": { "de": "Frequency: die Zahl der Bestellungen je Kunde. Im Browser hat jeder Kunde genau eine Bestellung, im Bestand bis zu 36 je Jahr." } },
-        { "was": "round(sum(net_total), 2)", "bedeutet": { "de": "Monetary: der Umsatz je Kunde, auf Cent gerundet — dieselbe Spalte wie in W07-04, hier über alle Kunden statt für eine einzelne Bestellung." } },
-        { "was": "GROUP BY customer_id", "bedeutet": { "de": "Eine Zeile je Kunde: der Grain der RFM-Tabelle. Notebook 02 bildet daraus mit ntile(5) Quintile und mit festen Regeln die Segmente von v_rfm_kunde." } },
+        { "was": "count(*)", "bedeutet": { "de": "Frequency: die Zahl der Bestellungen je Kunde. Im Browser hat jeder Kunde genau eine Bestellung; im Bestand reicht sie bis 73 Bestellungen über den gesamten Zeitraum, bei 24.992 Kunden (Notebook 02)." } },
+        { "was": "round(sum(net_total), 2)", "bedeutet": { "de": "Monetary: der Umsatz je Kunde, auf Cent gerundet — dieselbe Spalte wie in W07-04." } },
+        { "was": "GROUP BY customer_id", "bedeutet": { "de": "Eine Zeile je Kunde: der Grain der RFM-Tabelle. Notebook 02 bildet daraus in Python Quintile (Funktion quintil(), nach dem Muster von ntile(5) in der Sicht v_rfm_kunde)." } },
         { "was": "ORDER BY recency_tage", "bedeutet": { "de": "Die zuletzt aktiven Kunden zuerst — dieselbe Spalte, nach der später auch das R-Quintil gebildet wird." } }
       ],
       "ausgabe": "customer_id | recency_tage | frequenz | monetaer\n19890 | 47 | 1 | 12.04\n14240 | 179 | 1 | 14.43\n2691 | 364 | 1 | 5.78\n24815 | 545 | 1 | 7.79\n9669 | 699 | 1 | 7.16\n23371 | 906 | 1 | 6.69\n8662 | 1095 | 1 | 15.21\n8315 | 1276 | 1 | 21.20\n459 | 1430 | 1 | 2.53\n16010 | 1639 | 1 | 8.00\n6923 | 1824 | 1 | 6.49\n249 | 2005 | 1 | 5.28\n1943 | 2168 | 1 | 16.80\n21966 | 2371 | 1 | 8.05\n5967 | 2552 | 1 | 16.97\n22612 | 2728 | 1 | 11.95\n21454 | 2879 | 1 | 14.64\n1250 | 3084 | 1 | 8.47\n18641 | 3239 | 1 | 11.37"
@@ -71,7 +71,7 @@
       "loesung": "SELECT customer_id, max(date) AS letzte_bestellung, count(*) AS bestellungen,\n       round(sum(net_total), 2) AS umsatz\nFROM fact_orders\nGROUP BY customer_id\nORDER BY umsatz DESC, customer_id",
       "sortiert": true,
       "hinweis": { "de": "<p>Recency ist <code>max(date)</code> (Tage seit dem Stichtag rechnet das Notebook), Frequency <code>count(*)</code>, Monetary <code>sum(net_total)</code>. Gruppieren nach <code>customer_id</code>.</p>" },
-      "rueckmeldung": { "de": "Im Browser hat jeder der 19 Kunden eine Bestellung; im Bestand sind es 24.992 Kunden mit bis zu 36 Bestellungen je Jahr. Aus diesen drei Spalten entstehen Quintile, Segmente und die Sicht v_rfm_kunde." } },
+      "rueckmeldung": { "de": "Im Browser hat jeder der 19 Kunden eine Bestellung; im Bestand sind es 24.992 Kunden, die Frequenz reicht bis 73 Bestellungen über den gesamten Zeitraum. Aus diesen drei Spalten entstehen Quintile, Segmente und die Sicht v_rfm_kunde." } },
 
     { "id": "W07-05", "typ": "reihenfolge",
       "titel": { "de": "CRISP-DM" },

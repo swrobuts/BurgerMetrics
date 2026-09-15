@@ -37,7 +37,7 @@
 <div class="lab-header">
   <div class="lab-num-big">07</div>
   <h1 class="lab-title">Data Mining</h1>
-  <p class="lab-intro">Lab 03 hat das analytische Modell gebaut, aus dem die Notebooks der Fallstudie lesen: <code>fact_orders</code>, <code>dim_product</code>, <code>dim_branch</code>, <code>dim_date</code>, <code>dim_weather</code>. Lab 06 hat gezeigt, wie ein Notebook läuft — Runtime, Kopfzellen, <code>read_sql</code>. Die Notebooks 02 bis 07 setzen darauf sechs Fragen auf: welche Kunden wertvoll sind, welche Produkte zusammengehören, wie hoch der Umsatz morgen ist, was Zufriedenheit erklärt, welche Tage aus dem Rahmen fallen. Jedes Verfahren liefert eine Kennzahl; erst eine Gegenprobe macht daraus einen Befund.</p>
+  <p class="lab-intro">Lab 03 hat das analytische Modell gebaut, aus dem die Notebooks der Fallstudie lesen: <code>fact_orders</code>, <code>dim_product</code>, <code>dim_branch</code>, <code>dim_date</code>. Lab 06 hat gezeigt, wie ein Notebook läuft — Runtime, Kopfzellen, <code>read_sql</code>. Die Notebooks 02 bis 07 setzen darauf sechs Fragen auf: welche Kunden wertvoll sind, welche Produkte zusammengehören, wie hoch der Umsatz morgen ist, wie stark Wetter und Ereignisse hineinspielen, was Zufriedenheit erklärt, welche Tage aus dem Rahmen fallen. Jedes Verfahren liefert eine Kennzahl; erst eine Gegenprobe macht daraus einen Befund.</p>
   <div class="lernziele">
     <span class="lernziel-chip">RFM · K-Means</span>
     <span class="lernziel-chip">Apriori · Support, Konfidenz, Lift</span>
@@ -81,7 +81,7 @@
     </div>
     <div class="concept-box">
       <h3>Kennzahl ist nicht Befund</h3>
-      <p>Eine Kennzahl beschreibt, was ein Verfahren mit den vorliegenden Daten ausrechnet — ein Lift, ein Fehler in Euro, eine Trefferquote, eine Zahl markierter Tage. Ob sie mehr ist als das, was Zufall oder ein zu freizügig gewählter Parameter auch geliefert hätten, zeigt erst die Gegenprobe: der Vergleich mit einer Basisrate, mit einem zweiten, unabhängigen Verfahren oder mit Tagen, die dem Ereignis ähneln, aber nicht dazugehören. Der Abschnitt „Ehrlich bleiben“ sammelt, wo diese Gegenprobe eine Kennzahl bestätigt und wo sie sie widerlegt.</p>
+      <p>Eine Kennzahl beschreibt, was ein Verfahren mit den vorliegenden Daten ausrechnet — ein Lift, ein Fehler in Euro, eine Trefferquote, eine Zahl markierter Tage. Ob sie mehr ist als das, was Zufall oder ein zu freizügig gewählter Parameter auch geliefert hätten, zeigt erst die Gegenprobe: der Vergleich mit einer Basisrate, mit einem zweiten, unabhängigen Verfahren oder mit Tagen, die dem Ereignis ähneln, aber nicht dazugehören.</p>
     </div>
   </section>
 
@@ -102,7 +102,7 @@
       </table>
     </div>
     <p>An Notebook 02 lässt sich das durchgehen: Business Understanding ist die Frage, welche Kunden wertvoll sind und ob sich Kunden ohne Vorgabe gruppieren lassen. Data Understanding ist <code>fact_orders</code> mit 754.513 Bestellungen von 24.992 Kunden. Data Preparation baut RFM-Werte je Kunde in SQL und teilt sie mit <code>customer_id</code> als Zweitschlüssel in Quintile. Modeling wendet feste Regeln für die RFM-Segmente an und trainiert K-Means auf den standardisierten Werten. Evaluation ist die Gegenprobe: Die Python-Segmente stimmen zu 100 Prozent mit der Sicht <code>v_rfm_kunde</code> überein. Deployment ist diese Sicht selbst — sie liegt schon in der Datenbank, und das Notebook belegt, dass beide Wege zum selben Ergebnis kommen.</p>
-    <p>Ein siebter Abschnitt gehört nicht offiziell zu CRISP-DM, steht aber in jedem Notebook: Was offen bleibt — was die Kennzahl nicht zeigt. Der Abschnitt „Ehrlich bleiben“ sammelt diese Grenzen.</p>
+    <p>Ein Abschnitt, den CRISP-DM nicht kennt, steht trotzdem in jedem Notebook: Was offen bleibt — was die Kennzahl nicht zeigt.</p>
   </section>
 
   <section class="section-block" id="rfm">
@@ -168,7 +168,7 @@
         <tbody>
           <tr><td>BBQ Sauce</td><td>Chicken Nuggets 6pc</td><td>1,1 %</td><td>11,23</td><td>27,7 %</td><td>45,9 %</td></tr>
           <tr><td>BBQ Sauce</td><td>Chicken Nuggets 9pc</td><td>1,1 %</td><td>10,32</td><td>27,2 %</td><td>42,2 %</td></tr>
-          <tr><td>Classic Burger</td><td>Ketchup Extra</td><td>1,1 %</td><td>5,15</td><td>28,3 %</td><td>19,2 %</td></tr>
+          <tr><td>Classic Burger</td><td>Ketchup Extra</td><td>1,1 %</td><td>5,14</td><td>28,3 %</td><td>19,2 %</td></tr>
           <tr><td>Ketchup Extra</td><td>Double Burger</td><td>1,0 %</td><td>4,78</td><td>19,0 %</td><td>26,3 %</td></tr>
           <tr><td>Cola 0.3l</td><td>Small Fries</td><td>12,8 %</td><td>3,23</td><td>61,9 %</td><td>66,6 %</td></tr>
           <tr><td>Hash Browns</td><td>Coffee</td><td>1,8 %</td><td>3,20</td><td>64,0 %</td><td>9,1 %</td></tr>
@@ -205,7 +205,7 @@
         </tbody>
       </table>
     </div>
-    <p>An Feiertagen ist der Fehler am höchsten, an Ereignistagen am niedrigsten, sogar unter dem Fehler an gewöhnlichen Tagen. Notebook 05 untersucht den Wettereffekt genauer (Abschnitt „Ehrlich bleiben“).</p>
+    <p>An Feiertagen ist der Fehler am höchsten, an Ereignistagen am niedrigsten, sogar unter dem Fehler an gewöhnlichen Tagen.</p>
     <p>Wer Jahresumsätze vergleicht, sieht 2017 und 2026 als Einbruch: 2017 beginnt am 15. März, 2026 endet am 31. März — beide Jahre sind Rumpfjahre. Der Umsatz je Tag zeigt das echte Bild: 2025 lag er im Jahresmittel bei 1.473,7 €, ein voller Jahresgang. Verglichen im gleichen Zeitraum — Januar bis März — liegt 2026 mit 1.343,4 € je Tag sogar leicht über 2025 (1.336,7 €, plus 0,5 Prozent). Der scheinbare Rückgang ist ein Basiseffekt: Ein volles Jahr 2025 wird mit dem ersten, umsatzschwächsten Quartal 2026 verglichen.</p>
     <p>Ein echtes Prognosemodell würde die Vergangenheit der Reihe selbst als Merkmal nutzen (Lags, gleitende Mittel) und die Prüfung über mehrere Zeitfenster wiederholen (rollierendes Backtesting). Beides ist hier bewusst weggelassen, damit der Unterschied zwischen erklärenden Merkmalen und Autokorrelation sichtbar bleibt.</p>
   </section>
@@ -284,13 +284,13 @@
     <h3>Entschieden</h3>
     <p>Was jemand festgelegt hat, nicht gemessen. Notebook 02 wählt k = 4 für K-Means, obwohl die Silhouette k = 2 bevorzugt (0,475 gegen 0,378) — weil sich vier Gruppen noch beschreiben lassen, wie das Notebook ausdrücklich festhält. Notebook 07 markiert mit dem Isolation Forest genau 178 Tage, weil der Parameter <code>contamination = 0,01</code> ein Prozent der 17.744 Filialtage als Vorgabe festlegt: Die 178 Treffer sind eine Vorgabe, kein Befund.</p>
     <h3>Widerlegt</h3>
-    <p>Was wie ein Befund aussah und an der Gegenprobe scheiterte. Notebook 05 findet ohne Monatskontrolle einen Temperatureffekt von 41,64 € je Grad (p &lt; 0,001) — mit Monat und Jahr im selben Modell ist Temperatur nicht mehr signifikant (p = 0,171): Der scheinbare Wettereffekt war die Jahreszeit, die erst die Monatskontrolle abfängt. Dieselbe Regression zeigt für Heimspieltage −251,50 € (p &lt; 0,001); die Gegenprobe an vergleichbaren Tagen (gleicher Wochentag, Monat und Jahr, ohne Feiertage und Ereignistage) zeigt das Gegenteil: Heimspieltage liegen im Mittel 40,3 € über solchen Tagen, sonstige Tage 1,3 € darunter — der Koeffizient ist ein Artefakt der additiven Kontrolle. Und Notebook 08 (Lab 08) trifft mit TF-IDF und logistischer Regression 100,0 Prozent auf denselben 500 Texten, auf denen ein BERT-Modell nur 94,2 Prozent erreicht — in den Worten des Notebooks „zu gut, um wahr zu sein“: Die Rezensionen sind simuliert, und ein Modell, das die Bausteine des Generators lernt, kennt die Antwort.</p>
+    <p>Was wie ein Befund aussah und an der Gegenprobe scheiterte. Notebook 05 findet ohne Monatskontrolle einen Temperatureffekt von 41,64 € je Grad (p &lt; 0,001) — mit Monat und Jahr im selben Modell ist Temperatur nicht mehr signifikant (p = 0,171): Der scheinbare Wettereffekt war die Jahreszeit, die erst die Monatskontrolle abfängt. Eine erweiterte Regression mit den externen Merkmalen (gemessenes Wetter, Ferien, Heimspiele) zeigt für Heimspieltage −251,50 € (p &lt; 0,001); die Gegenprobe an vergleichbaren Tagen (gleicher Wochentag, Monat und Jahr, ohne Feiertage und Ereignistage) zeigt das Gegenteil: Heimspieltage liegen im Mittel 40,3 € über solchen Tagen, sonstige Tage 1,3 € darunter — der Koeffizient ist ein Artefakt der additiven Kontrolle. Und Notebook 08 (Lab 08) trifft mit TF-IDF und logistischer Regression 100,0 Prozent auf denselben 500 Texten, auf denen ein BERT-Modell nur 94,2 Prozent erreicht — in den Worten des Notebooks „zu gut, um wahr zu sein“: Die Rezensionen sind simuliert, und ein Modell, das die Bausteine des Generators lernt, kennt die Antwort.</p>
     <p>Der Bestand hinter allen Notebooks ist synthetisch. Das erklärt beide Richtungen: Manche Effekte sind absichtlich eingebaut und lassen sich mehrfach bestätigen, wie Kiliani; andere sind Rauschen oder Artefakte der Rechnung, wie das Heimspiel oder ein zu perfektes Sentiment-Modell. Welche Seite zutrifft, entscheidet nicht die Kennzahl allein, sondern die Gegenprobe.</p>
   </section>
 
   <section class="section-block" id="spielplatz">
     <h2>Spielplatz</h2>
-    <p>Unten läuft dieselbe Browser-Datenbank wie in den anderen Labs (PGlite, WebAssembly): 19 Bestellungen, 55 Positionen und 12 Rezensionen in den Schemata <code>wawi</code> und <code>burgermetrics</code>. Die Startabfrage zeigt für jeden Kunden die Zahl der Bestellungen und den Umsatz, absteigend sortiert — dieselbe Grundlage wie B01 und W07-04, nur ohne die Spalte für die letzte Bestellung. Von hier aus lässt sich B01 nachbauen oder die Sicht <code>v_warenkorb_regeln</code> aus Notebook 03 abfragen.</p>
+    <p>Unten läuft dieselbe Browser-Datenbank wie in den anderen Labs (PGlite, WebAssembly): 19 Bestellungen, 55 Positionen und 12 Rezensionen in den Schemata <code>wawi</code> und <code>burgermetrics</code>. Die Startabfrage zeigt für jeden Kunden die Zahl der Bestellungen und den Umsatz, absteigend sortiert — dieselbe Grundlage wie B01 und W07-04, nur ohne die Spalte für die letzte Bestellung. Von hier aus lässt sich B01 nachbauen oder die Sicht <code>v_kennzahlen_jahr</code> abfragen.</p>
     <div data-datenbank="postgres"></div>
     <div class="info-box">
       <p>Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf „Datenbank zurücksetzen“ stellt den Ausgangsbestand wieder her.</p>
@@ -312,13 +312,12 @@
   <section class="section-block" id="zusammenfassung">
     <h2>Zusammenfassung</h2>
     <ul>
-      <li>Data Mining beginnt bei einer Frage, nicht bei einem Verfahren: Frage → Verfahren → Kennzahl → Gegenprobe → Befund. Die Notebooks 02 bis 07 beantworten sechs Fragen mit sechs Verfahren; Notebook 05 liefert die Beispiele für den Abschnitt „Ehrlich bleiben“.</li>
-      <li>CRISP-DM ordnet jedes Notebook in sechs Schritte: Business und Data Understanding (Fragestellung, Daten), Data Preparation und Modeling (Vorgehen), Evaluation (Ergebnis, mit Gegenprobe) und Deployment (die Sichten und Dashboards, die die Notebooks nur bestätigen).</li>
+      <li>Data Mining beginnt bei einer Frage, nicht bei einem Verfahren: Frage → Verfahren → Kennzahl → Gegenprobe → Befund. Die Notebooks 02 bis 07 beantworten sechs Fragen mit sechs Verfahren; Notebook 05 liefert die Beispiele für den Abschnitt „Ehrlich bleiben“. CRISP-DM ordnet dieselben Notebooks in sechs Schritte: Business und Data Understanding (Fragestellung, Daten), Data Preparation und Modeling (Vorgehen), Evaluation (Ergebnis, mit Gegenprobe) und Deployment (die Sichten und Dashboards, die die Notebooks nur bestätigen).</li>
       <li>RFM aus <code>fact_orders</code> (754.513 Bestellungen, 24.992 Kunden) liefert dieselben Segmente wie <code>v_rfm_kunde</code> (100 Prozent Übereinstimmung); K-Means wählt k = 4, obwohl die Silhouette k = 2 bevorzugt — eine Entscheidung. Cluster 3 (6.084 Kunden, 11,1 Tage, 36,1 Bestellungen, 698,0 €) und Cluster 2 (1.910 Kunden, 337,9 Tage) markieren die Enden der Skala.</li>
       <li>Apriori auf dem ersten Quartal 2025 (30.537 Warenkörbe) findet Chicken Nuggets 6pc → BBQ-Sauce mit Lift 11,23 (8,97 über den ganzen Bestand); Medium Fries und Bier haben über ein Prozent Support, aber Lift 1,00 — kein Signal. Support sagt, wie häufig; Lift, ob es mehr als Zufall ist.</li>
       <li>Gradient Boosting schlägt im Backtesting (BM Europastern, zwölf Monate) die lineare Regression knapp (168,9 € gegen 172,4 € MAE) und deutlich den naiven Mittelwert (286,6 €); der scheinbare Rückgang 2026 gegenüber 2025 ist ein Basiseffekt der Rumpfjahre (1.343,4 € je Tag gegen 1.336,7 € im gleichen Zeitraum).</li>
       <li>Entscheidungsbaum und Random Forest treffen bei der Zufriedenheit (142.317 bewertete Bestellungen) 50,6 Prozent — kaum mehr als die Basisrate von 50,4 Prozent; die Bestelldauer trägt 36 Prozent der Merkmalswichtigkeit, aber Recall 98/3/0 Prozent (mittel/niedrig/hoch) zeigt, dass nur die mittlere Klasse getroffen wird.</li>
-      <li>z-Score (79), IQR (213) und Isolation Forest (178, durch <code>contamination = 0,01</code> vorgegeben) überschneiden sich, aber nicht vollständig; belegt sind die 15 stärksten Treffer, die alle drei Verfahren gemeinsam finden — überwiegend Kiliani (56 Filialtage) und Mozartfest.</li>
+      <li>z-Score (79), IQR (213) und Isolation Forest (178, durch <code>contamination = 0,01</code> vorgegeben) überschneiden sich, aber nicht vollständig; die 15 stärksten Treffer, die alle drei Verfahren gemeinsam finden, sind 13 Kiliani und 2 Mozartfest — unter allen 178 Isolation-Forest-Treffern erklärt der Kalender 56 Filialtage mit Kiliani.</li>
       <li>Der Bestand ist synthetisch: Manche Effekte sind eingebaut und lassen sich mehrfach bestätigen, andere sind Artefakte, die erst eine Gegenprobe entlarvt — Temperatur ohne Monatskontrolle, das Heimspiel. Notebook 05 (Wetter und Ereignisse) und Notebook 08 (Sentiment) folgen mit ihren übrigen Befunden in Lab 08.</li>
     </ul>
     <div data-lab-nav></div>
