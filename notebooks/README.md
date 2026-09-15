@@ -4,6 +4,10 @@ Neun Notebooks, jedes für sich lauffähig — in Google Colab (Link am Kopf jed
 oder lokal. Alle lesen die Datenbank mit dem Demo-Konto `studi_daba` (nur lesend) und
 brauchen kein Geheimnis.
 
+Vollständige Abnahme am 15. September 2026: alle neun Notebooks mit 105
+Codezellen erfolgreich ausgeführt, einschließlich des BERT-Vergleichs.
+[Prüfbericht und behobene Fehler](../docs/validierung-notebooks-2026-09-15.md).
+
 | Notebook | Inhalt |
 |---|---|
 | `00_zugang_und_daten` | Verbindung, Schemata und Sichten, CSV per Git LFS, DuckDB, Export für Power BI und Tableau, Grenzen der Rolle, Dash inline |
@@ -22,6 +26,10 @@ brauchen kein Geheimnis.
 python3 -m pip install -r notebooks/requirements.txt
 jupyter lab notebooks/
 ```
+
+Die erste Zelle installiert Zusatzpakete mit dem Python-Interpreter des
+Notebooks. Die Argumente werden direkt an `pip` übergeben; das funktioniert
+auch unter Windows. Ein Installationsfehler bricht die Ausführung ab.
 
 ## Neu bauen und abnehmen
 
