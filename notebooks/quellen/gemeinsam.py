@@ -5,6 +5,7 @@ Python-Strings, dieses Modul schreibt sie mit nbformat als .ipynb. So bleibt der
 Quelltext lesbar im Diff, und die ausgeführte Fassung mit Ausgaben liegt daneben.
 """
 from pathlib import Path
+import shlex
 
 import nbformat
 from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
@@ -53,8 +54,11 @@ def kopf(nummer, titel, dateiname, pakete=PAKETE):
                   "Fallstudie BurgerMetrics · Datenbasierte Fallstudien (THWS). "
                   "Die Datenbank ist mit dem Demo-Konto `studi_daba` lesend erreichbar; "
                   "nichts in diesem Notebook schreibt in die Datenbank.")
-    pipzelle = (f"# In Colab einmal ausführen; lokal genügt notebooks/requirements.txt\n"
-                f"%pip install -q {pakete}")
+    pipzelle = ("# In Colab einmal ausführen; lokal genügt notebooks/requirements.txt\n"
+                "import subprocess\nimport sys\n\n"
+                f"pakete = {shlex.split(pakete)!r}\n"
+                "subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', *pakete])\n"
+                "print('Pakete bereit.')")
     return [md(titelzelle), code(pipzelle), code(VERBINDUNG), code(HILFEN)]
 
 

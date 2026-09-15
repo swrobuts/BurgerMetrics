@@ -75,7 +75,9 @@ def beide_richtungen(a, b):
     return {"A": a, "B": b, "konfidenz_A_B": float(hin.iloc[0]) if len(hin) else None,
             "konfidenz_B_A": float(zurueck.iloc[0]) if len(zurueck) else None}
 
-beste = paare.sort_values("lift", ascending=False).drop_duplicates("support").head(6)
+# Zwei unterschiedliche Produktpaare koennen denselben Support haben.
+mit_paar = paare.assign(produktpaar=paare.apply(lambda z: frozenset((z["A"], z["B"])), axis=1))
+beste = mit_paar.sort_values("lift", ascending=False).drop_duplicates("produktpaar").head(6)
 pd.DataFrame([beide_richtungen(z.A, z.B) for z in beste.itertuples()]).round(3)
 """),
 md("### Vergleich mit der Semantikschicht (ganzer Bestand)"),
