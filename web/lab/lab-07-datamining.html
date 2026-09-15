@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="de" data-lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 07 · Data Mining · BM-Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/bm.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23C2410C'/><text x='16' y='23' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='%23FFFFFF'>B</text></svg>" />
+</head>
+<body class="lab-page" data-lab="lab-07">
+
+<header class="header">
+  <div class="header-left">
+    <a class="header-logo" href="index.html"><span class="mark">BM</span>-Lab</a>
+    <a class="header-back" href="index.html">← Zur Übersicht</a>
+  </div>
+</header>
+
+<nav class="sidebar" aria-label="Lab-Navigation">
+  <div class="sidebar-title">Abschnitte</div>
+  <a class="sidebar-link" href="#warum">Frage, Verfahren, Kennzahl</a>
+  <a class="sidebar-link" href="#crispdm">CRISP-DM</a>
+  <a class="sidebar-link" href="#rfm">Kundensegmente</a>
+  <a class="sidebar-link" href="#warenkorb">Warenkorbanalyse</a>
+  <a class="sidebar-link" href="#prognose">Nachfrageprognose</a>
+  <a class="sidebar-link" href="#zufriedenheit">Zufriedenheit</a>
+  <a class="sidebar-link" href="#ausreisser">Ausreißer</a>
+  <a class="sidebar-link" href="#ehrlich">Ehrlich bleiben</a>
+  <a class="sidebar-link" href="#spielplatz">Spielplatz</a>
+  <a class="sidebar-link" href="#uebungen">Übungen</a>
+  <a class="sidebar-link" href="#zusammenfassung">Zusammenfassung</a>
+</nav>
+
+<div class="lab-header">
+  <div class="lab-num-big">07</div>
+  <h1 class="lab-title">Data Mining</h1>
+  <p class="lab-intro">Lab 03 hat das analytische Modell gebaut, aus dem die Notebooks der Fallstudie lesen: <code>fact_orders</code>, <code>dim_product</code>, <code>dim_branch</code>, <code>dim_date</code>, <code>dim_weather</code>. Lab 06 hat gezeigt, wie ein Notebook läuft — Runtime, Kopfzellen, <code>read_sql</code>. Die Notebooks 02 bis 07 setzen darauf sechs Fragen auf: welche Kunden wertvoll sind, welche Produkte zusammengehören, wie hoch der Umsatz morgen ist, was Zufriedenheit erklärt, welche Tage aus dem Rahmen fallen. Jedes Verfahren liefert eine Kennzahl; erst eine Gegenprobe macht daraus einen Befund.</p>
+  <div class="lernziele">
+    <span class="lernziel-chip">RFM · K-Means</span>
+    <span class="lernziel-chip">Apriori · Support, Konfidenz, Lift</span>
+    <span class="lernziel-chip">Backtesting · MAE</span>
+    <span class="lernziel-chip">Entscheidungsbaum · Random Forest</span>
+    <span class="lernziel-chip">z-Score · IQR · Isolation Forest</span>
+    <span class="lernziel-chip">CRISP-DM</span>
+  </div>
+  <div data-einordnung></div>
+</div>
+
+<main class="main-content">
+
+  <section class="section-block" id="warum">
+    <h2>Die Frage vor dem Verfahren</h2>
+    <p>Data Mining beginnt bei einer Frage, die das Geschäft stellt — nicht bei einem Verfahren, das jemand ausprobieren möchte. Sechs Notebooks der Fallstudie (<code>02_rfm_und_kundensegmente.ipynb</code> bis <code>07_ausreisser_tagesumsatz.ipynb</code>) beantworten sechs verschiedene Fragen mit sechs verschiedenen Verfahren:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Notebook</th><th>Frage</th><th>Verfahren</th><th>Kennzahl</th></tr></thead>
+        <tbody>
+          <tr><td>02</td><td>Welche Kunden sind wertvoll, welche verloren — und lassen sie sich ohne Vorgabe in Gruppen teilen?</td><td>RFM-Regeln, K-Means</td><td>Segmentgröße, Recency/Frequenz/Umsatz je Cluster</td></tr>
+          <tr><td>03</td><td>Welche Produkte werden zusammen gekauft — und ist das mehr als Zufall?</td><td>Apriori, Assoziationsregeln</td><td>Support, Konfidenz, Lift</td></tr>
+          <tr><td>04</td><td>Wie gut lässt sich der Tagesumsatz einer Filiale aus Kalender und Wetter vorhersagen?</td><td>STL-Zerlegung, lineare Regression, Gradient Boosting</td><td>MAE und MAPE im Backtesting, gegen den naiven Mittelwert</td></tr>
+          <tr><td>05</td><td>Wie stark hängt der Tagesumsatz von Wetter, Wochentag, Feiertagen und Ereignissen ab?</td><td>lineare Regression mit Kalenderkontrolle</td><td>Koeffizient und p-Wert, Gegenprobe an Vergleichstagen</td></tr>
+          <tr><td>06</td><td>Was unterscheidet zufriedene von unzufriedenen Bestellungen?</td><td>Entscheidungsbaum, Random Forest</td><td>Trefferquote gegen Basisrate, Recall je Klasse</td></tr>
+          <tr><td>07</td><td>Welche Tage fallen im Umsatz einer Filiale aus dem Rahmen — und lassen sie sich erklären?</td><td>z-Score, IQR, Isolation Forest</td><td>Zahl der Treffer, Überschneidung der drei Verfahren</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notebook 05 bekommt in diesem Lab keinen eigenen Abschnitt: Sein Befund liefert das Beispiel für den Abschnitt „Ehrlich bleiben“, in dem eine Gegenprobe einen Regressionskoeffizienten widerlegt. Notebook 08 (Sentiment) folgt mit Lab 08.</p>
+    <div class="kette">
+      <div class="glied hell"><span class="titel">Frage</span><span class="was">was das Geschäft wissen will</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Verfahren</span><span class="was">RFM, Apriori, Regression, Baum, Isolation Forest …</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Kennzahl</span><span class="was">Lift, MAE, Trefferquote, Zahl der Treffer</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Gegenprobe</span><span class="was">Basisrate, ein zweites Verfahren, Vergleichstage</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied betont"><span class="titel">Befund</span><span class="was">was übrig bleibt, wenn die Gegenprobe besteht</span></div>
+    </div>
+    <div class="concept-box">
+      <h3>Kennzahl ist nicht Befund</h3>
+      <p>Eine Kennzahl beschreibt, was ein Verfahren mit den vorliegenden Daten ausrechnet — ein Lift, ein Fehler in Euro, eine Trefferquote, eine Zahl markierter Tage. Ob sie mehr ist als das, was Zufall oder ein zu freizügig gewählter Parameter auch geliefert hätten, zeigt erst die Gegenprobe: der Vergleich mit einer Basisrate, mit einem zweiten, unabhängigen Verfahren oder mit Tagen, die dem Ereignis ähneln, aber nicht dazugehören. Der Abschnitt „Ehrlich bleiben“ sammelt, wo diese Gegenprobe eine Kennzahl bestätigt und wo sie sie widerlegt.</p>
+    </div>
+  </section>
+
+  <section class="section-block" id="crispdm">
+    <h2>CRISP-DM: ein Vorgehensmodell</h2>
+    <p>CRISP-DM (Cross-Industry Standard Process for Data Mining) beschreibt sechs Schritte, die in jedem Data-Mining-Projekt vorkommen — als Kreislauf, nicht als starre Abfolge: Eine Evaluation, die nicht überzeugt, führt zurück zu Business Understanding oder zu neuen Merkmalen in der Data Preparation. Jedes der sechs Notebooks dieser Fallstudie gliedert sich in fünf Abschnitte — Fragestellung, Daten, Vorgehen, Ergebnis, Was offen bleibt —, und diese fünf lassen sich auf die sechs CRISP-DM-Schritte abbilden:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>CRISP-DM-Schritt</th><th>Leitfrage</th><th>Abschnitt im Notebook</th></tr></thead>
+        <tbody>
+          <tr><td>Business Understanding</td><td>welche Entscheidung hängt an der Antwort?</td><td>Fragestellung</td></tr>
+          <tr><td>Data Understanding</td><td>welche Tabellen, welcher Grain, welche Lücken?</td><td>Daten</td></tr>
+          <tr><td>Data Preparation</td><td>Aggregation in SQL, Merkmale, Splits</td><td>Vorgehen (erster Teil)</td></tr>
+          <tr><td>Modeling</td><td>Verfahren wählen und anwenden</td><td>Vorgehen (zweiter Teil)</td></tr>
+          <tr><td>Evaluation</td><td>Kennzahl gegen Basisrate, Gegenprobe</td><td>Ergebnis</td></tr>
+          <tr><td>Deployment</td><td>Sicht, Dashboard, Notebook mit Ausgaben</td><td>außerhalb des Notebooks: <code>v_*</code>, Dashboard (Lab 01), Dash-App (Lab 06)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>An Notebook 02 lässt sich das durchgehen: Business Understanding ist die Frage, welche Kunden wertvoll sind und ob sich Kunden ohne Vorgabe gruppieren lassen. Data Understanding ist <code>fact_orders</code> mit 754.513 Bestellungen von 24.992 Kunden. Data Preparation baut RFM-Werte je Kunde in SQL und teilt sie mit <code>customer_id</code> als Zweitschlüssel in Quintile. Modeling wendet feste Regeln für die RFM-Segmente an und trainiert K-Means auf den standardisierten Werten. Evaluation ist die Gegenprobe: Die Python-Segmente stimmen zu 100 Prozent mit der Sicht <code>v_rfm_kunde</code> überein. Deployment ist diese Sicht selbst — sie liegt schon in der Datenbank, und das Notebook belegt, dass beide Wege zum selben Ergebnis kommen.</p>
+    <p>Ein siebter Abschnitt gehört nicht offiziell zu CRISP-DM, steht aber in jedem Notebook: Was offen bleibt — was die Kennzahl nicht zeigt. Der Abschnitt „Ehrlich bleiben“ sammelt diese Grenzen.</p>
+  </section>
+
+  <section class="section-block" id="rfm">
+    <h2>RFM und K-Means: Kundensegmente</h2>
+    <p>Notebook 02 fragt, welche Kunden wertvoll sind, welche verloren, und ob sich Kunden ohne Vorgabe in Gruppen teilen lassen, die sich sinnvoll beschreiben lassen. Grundlage ist <code>fact_orders</code>: 754.513 Bestellungen von 24.992 Kunden, aggregiert je Kunde zu drei Größen — Recency (Tage seit der letzten Bestellung, zum Stichtag 31.03.2026), Frequency (Zahl der Bestellungen) und Monetary (Umsatz).</p>
+    <p>Jede der drei Größen wird in fünf gleich große Quintile geteilt (<code>ntile(5)</code> in SQL); weil bei Gleichständen die Reihenfolge entscheidet, sortiert die Abfrage zusätzlich nach <code>customer_id</code> — nur so liefern SQL und die Python-Nachbildung dieselbe Einteilung. B01 zeigt die Grundlage: Recency, Frequency und Monetary je Kunde, hier auf dem Miniaturbestand des Browsers, in dem jeder Kunde genau eine Bestellung hat.</p>
+    <div data-befehl="B01"></div>
+    <p>Aus den drei Quintilwerten bilden feste Regeln sieben Segmente — dieselben Regeln, mit denen die Sicht <code>v_rfm_kunde</code> arbeitet:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Segment</th><th>Kunden</th><th>Ø Recency</th><th>Ø Frequenz</th><th>Umsatz gesamt</th></tr></thead>
+        <tbody>
+          <tr><td>Loyal</td><td>5.040</td><td>35,9 Tage</td><td>36,4</td><td>3.530.038,6 €</td></tr>
+          <tr><td>Abwanderungsgefahr</td><td>4.998</td><td>88,3 Tage</td><td>30,2</td><td>2.893.014,4 €</td></tr>
+          <tr><td>Verloren</td><td>4.998</td><td>275,8 Tage</td><td>28,3</td><td>2.694.481,2 €</td></tr>
+          <tr><td>Champions</td><td>4.183</td><td>15,5 Tage</td><td>44,4</td><td>3.498.876,7 €</td></tr>
+          <tr><td>Schläfer</td><td>1.963</td><td>49,6 Tage</td><td>16,2</td><td>642.781,5 €</td></tr>
+          <tr><td>Potenzial</td><td>1.929</td><td>15,6 Tage</td><td>21,8</td><td>857.050,5 €</td></tr>
+          <tr><td>Neukunden</td><td>1.881</td><td>15,9 Tage</td><td>10,6</td><td>406.135,8 €</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Notebook 02 rechnet diese Segmente unabhängig in Python nach (Quintile und Regeln, nicht die Sicht selbst) und vergleicht das Ergebnis mit <code>v_rfm_kunde</code>: Alle vier Spalten — R-Wert, F-Wert, M-Wert, Segment — stimmen bei 100 Prozent der Kunden überein. Das ist die Gegenprobe für diesen Teil des Notebooks: Zwei unabhängige Wege, SQL und Python, kommen zum selben Ergebnis.</p>
+    <div class="concept-box">
+      <h3>K-Means: Gruppen ohne Vorgabe</h3>
+      <p>RFM-Segmente folgen Regeln, die jemand festgelegt hat. K-Means sucht Gruppen in den Daten selbst. Weil Recency, Frequency und Monetary schief verteilt sind — einzelne Kunden waren seit Jahren nicht da —, logarithmiert das Notebook alle drei und standardisiert sie danach, damit keine der drei Größen die Distanz zwischen Kunden allein bestimmt.</p>
+    </div>
+    <p>Die Silhouette bewertet, wie gut getrennt die Gruppen für eine gegebene Zahl <code>k</code> sind:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>k</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th></tr></thead>
+        <tbody>
+          <tr><td>Silhouette</td><td>0,475</td><td>0,368</td><td>0,378</td><td>0,354</td><td>0,336</td><td>0,331</td><td>0,329</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Die Silhouette bevorzugt k = 2 (0,475); das Notebook wählt k = 4, weil sich vier Gruppen noch beschreiben lassen — eine Entscheidung, keine Messung, wie das Notebook ausdrücklich festhält. Die vier Cluster:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Cluster</th><th>Kunden</th><th>Ø Recency</th><th>Ø Frequenz</th><th>Ø Umsatz</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>6.105</td><td>76,6 Tage</td><td>17,0</td><td>340,0 €</td></tr>
+          <tr><td>1</td><td>10.893</td><td>95,7 Tage</td><td>38,5</td><td>734,3 €</td></tr>
+          <tr><td>2</td><td>1.910</td><td>337,9 Tage</td><td>5,9</td><td>105,6 €</td></tr>
+          <tr><td>3</td><td>6.084</td><td>11,1 Tage</td><td>36,1</td><td>698,0 €</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Cluster 3 (6.084 Kunden) hat die niedrigste Recency bei hoher Frequenz und hohem Umsatz — die aktivsten Kunden. Cluster 2 (1.910 Kunden) hat mit Abstand die höchste Recency sowie die niedrigste Frequenz und den niedrigsten Umsatz — Kunden, die seit Langem nicht bestellt haben. Cluster 1 ist mit 10.893 Kunden die größte Gruppe und ähnelt Cluster 3 bei Frequenz und Umsatz, hat aber eine deutlich höhere Recency; Cluster 0 liegt bei allen drei Größen im Mittelfeld.</p>
+    <p>Elbow und Silhouette geben Hinweise; wie viele Gruppen das Geschäft ansprechen kann, entscheidet das Geschäft. Die Kundendaten sind synthetisch und gleichverteilt über die Stadtteile — echte Segmente hätten mehr Struktur.</p>
+  </section>
+
+  <section class="section-block" id="warenkorb">
+    <h2>Warenkorbanalyse mit Apriori</h2>
+    <p>Notebook 03 fragt, welche Produkte zusammen gekauft werden — und ob das mehr als Zufall ist. Grundlage sind die Warenkörbe des ersten Quartals 2025 aus <code>fact_order_items</code> mit Produktnamen aus <code>dim_product</code>: 30.537 Warenkörbe, 57 Produkte, im Mittel 3,93 verschiedene Produkte je Korb. Zum Vergleich rechnet die Sicht <code>v_warenkorb_regeln</code> dieselben Regeln über den ganzen Bestand.</p>
+    <p>Jeder Warenkorb wird zu einer Zeile Bestellung × Produkt (wahr/falsch). Apriori (Paket <code>mlxtend</code>) findet mit einer Mindesthäufigkeit von einem Prozent Support 348 häufige Kombinationen, davon 297 mit zwei oder mehr Produkten. <code>association_rules</code> leitet daraus Regeln ab und behält nur solche mit Lift ab 1 — darunter ist eine Kombination seltener als der Zufall.</p>
+    <div class="info-box">
+      <p><strong>Support</strong> ist der Anteil der Warenkörbe, die eine Kombination enthalten. <strong>Konfidenz</strong> von A → B ist der Anteil der Körbe mit A, die auch B enthalten. <strong>Lift</strong> setzt die Konfidenz ins Verhältnis zur Häufigkeit von B insgesamt: Lift 1 heißt, B kommt mit A nicht öfter vor als sonst; Lift über 1 heißt häufiger, unter 1 seltener. Support und Lift einer Regel sind für A → B und B → A gleich, die Konfidenz nicht — sie hängt davon ab, wie häufig die Ausgangsseite allein ist.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Produkt A</th><th>Produkt B</th><th>Support</th><th>Lift</th><th>Konfidenz A → B</th><th>Konfidenz B → A</th></tr></thead>
+        <tbody>
+          <tr><td>BBQ Sauce</td><td>Chicken Nuggets 6pc</td><td>1,1 %</td><td>11,23</td><td>27,7 %</td><td>45,9 %</td></tr>
+          <tr><td>BBQ Sauce</td><td>Chicken Nuggets 9pc</td><td>1,1 %</td><td>10,32</td><td>27,2 %</td><td>42,2 %</td></tr>
+          <tr><td>Classic Burger</td><td>Ketchup Extra</td><td>1,1 %</td><td>5,15</td><td>28,3 %</td><td>19,2 %</td></tr>
+          <tr><td>Ketchup Extra</td><td>Double Burger</td><td>1,0 %</td><td>4,78</td><td>19,0 %</td><td>26,3 %</td></tr>
+          <tr><td>Cola 0.3l</td><td>Small Fries</td><td>12,8 %</td><td>3,23</td><td>61,9 %</td><td>66,6 %</td></tr>
+          <tr><td>Hash Browns</td><td>Coffee</td><td>1,8 %</td><td>3,20</td><td>64,0 %</td><td>9,1 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Die stärkste Regel verbindet Chicken Nuggets mit BBQ-Sauce: Lift 11,23 im ersten Quartal 2025 gegenüber 8,97 über den ganzen Bestand (Sicht <code>v_warenkorb_regeln</code>) — im kleineren Quartalsdatensatz fällt der Lift etwas höher aus. Ein Lift nahe 1 ist dagegen kein Signal: Medium Fries und Bier haben über den ganzen Bestand 3,28 Prozent Support, aber Lift 1,00 — sie kommen zusammen praktisch so oft vor wie unabhängig voneinander. Sieben weitere Paare liegen ähnlich nah an 1; im ersten Quartal 2025 erreichen alle acht mehr als ein Prozent Support, aber ihr Lift liegt unter 1 (0,87 bis 0,98) und damit unter der Schwelle, die <code>association_rules</code> für eine Regel verlangt — deshalb fehlen sie in der Regelliste.</p>
+    <p>Apriori findet Kombinationen, keine Ursachen: Dass Pommes zum Burger gehören, wusste die Speisekarte schon. Interessant werden Regeln, die nicht auf der Hand liegen — dafür braucht es mehr Produkte, als diese Karte hat, oder feinere Merkmale wie Tageszeit und Kanal.</p>
+  </section>
+
+  <section class="section-block" id="prognose">
+    <h2>Nachfrageprognose mit Backtesting</h2>
+    <p>Notebook 04 fragt, wie gut sich der Tagesumsatz einer Filiale aus Kalender und Wetter vorhersagen lässt — und wie man das ehrlich prüft. Beispielfiliale ist BM Europastern, die älteste mit der längsten Reihe: 3.304 Tage vom 15.03.2017 bis zum 31.03.2026, ohne Lücken. Eine STL-Zerlegung teilt die Reihe in Trend, Wochenmuster und Rest; der Trend trägt 66,8 Prozent der Varianz des Umsatzes, das Wochenmuster 23,3 Prozent, der Rest 8,6 Prozent.</p>
+    <p>Merkmale sind Wochentag und Monat als Kategorien, Feiertag, Ereignis, Temperatur, Niederschlag und eine laufende Tagesnummer für den Trend. Trainiert wird auf allen Tagen bis zum 31.03.2025 (2.939 Tage), geprüft auf den zwölf Monaten danach (365 Tage) — Daten, die die Modelle beim Lernen nie gesehen haben (Backtesting):</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Modell</th><th>MAE</th><th>MAPE</th></tr></thead>
+        <tbody>
+          <tr><td>Lineare Regression</td><td>172,4 €</td><td>11,9 %</td></tr>
+          <tr><td>Gradient Boosting</td><td>168,9 €</td><td>12,2 %</td></tr>
+          <tr><td>Mittelwert der letzten 365 Lerntage</td><td>286,6 €</td><td>19,5 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Gradient Boosting hat den niedrigeren Fehler in Euro, die lineare Regression den niedrigeren prozentualen Fehler; beide schlagen den naiven Mittelwert deutlich. In der Merkmalswichtigkeit des Gradient Boosting trägt die laufende Tagesnummer 65,1 Prozent — sie steht für den Trend, nicht für einen Kalendereffekt. Mit Abstand folgen zwei Wochentags-Merkmale (13,1 und 6,9 Prozent) und die Temperatur (4,7 Prozent); Niederschlag erscheint nicht unter den zehn wichtigsten Merkmalen.</p>
+    <p>Der Fehler verteilt sich ungleich auf Tagestypen:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Tagestyp</th><th>Tage im Prüfzeitraum</th><th>MAE (Gradient Boosting)</th></tr></thead>
+        <tbody>
+          <tr><td>Ereignis</td><td>57</td><td>147,2 €</td></tr>
+          <tr><td>Feiertag</td><td>11</td><td>197,3 €</td></tr>
+          <tr><td>gewöhnlich</td><td>297</td><td>172,0 €</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>An Feiertagen ist der Fehler am höchsten, an Ereignistagen am niedrigsten, sogar unter dem Fehler an gewöhnlichen Tagen. Notebook 05 untersucht den Wettereffekt genauer (Abschnitt „Ehrlich bleiben“).</p>
+    <p>Wer Jahresumsätze vergleicht, sieht 2017 und 2026 als Einbruch: 2017 beginnt am 15. März, 2026 endet am 31. März — beide Jahre sind Rumpfjahre. Der Umsatz je Tag zeigt das echte Bild: 2025 lag er im Jahresmittel bei 1.473,7 €, ein voller Jahresgang. Verglichen im gleichen Zeitraum — Januar bis März — liegt 2026 mit 1.343,4 € je Tag sogar leicht über 2025 (1.336,7 €, plus 0,5 Prozent). Der scheinbare Rückgang ist ein Basiseffekt: Ein volles Jahr 2025 wird mit dem ersten, umsatzschwächsten Quartal 2026 verglichen.</p>
+    <p>Ein echtes Prognosemodell würde die Vergangenheit der Reihe selbst als Merkmal nutzen (Lags, gleitende Mittel) und die Prüfung über mehrere Zeitfenster wiederholen (rollierendes Backtesting). Beides ist hier bewusst weggelassen, damit der Unterschied zwischen erklärenden Merkmalen und Autokorrelation sichtbar bleibt.</p>
+  </section>
+
+  <section class="section-block" id="zufriedenheit">
+    <h2>Was Zufriedenheit erklärt</h2>
+    <p>Notebook 06 fragt, was zufriedene von unzufriedenen Bestellungen unterscheidet — Kanal, Wartezeit, Filiale, Uhrzeit oder Wochentag. Grundlage sind die 142.317 Bestellungen mit <code>satisfaction_score</code> — 18,9 Prozent aller Bestellungen, eine selbstselektierte Stichprobe (<code>dataset/README.md</code>): Wer bewertet, ist nicht zufällig gewählt. Die Zufriedenheit wird in drei Klassen geteilt, mit festen Grenzen, damit sie über Notebooks hinweg gleich bleiben: niedrig unter 3,5, mittel bis unter 4,2, hoch ab 4,2.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Klasse</th><th>Bestellungen</th></tr></thead>
+        <tbody>
+          <tr><td>mittel</td><td>71.757</td></tr>
+          <tr><td>niedrig</td><td>47.123</td></tr>
+          <tr><td>hoch</td><td>23.437</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Wer immer „mittel“ sagt, trifft 50,4 Prozent der Bestellungen — die Basisrate. Ein Entscheidungsbaum mit Tiefe 3 (auf 106.737 Bestellungen trainiert, an 35.580 geprüft) trifft 50,6 Prozent; die erste und einzig wirksame Trennung verläuft über die Bestelldauer. Ein Random Forest (200 Bäume, Tiefe 8, 14 Merkmale) trifft ebenfalls 50,6 Prozent:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Klasse</th><th>Precision</th><th>Recall</th><th>F1-Score</th></tr></thead>
+        <tbody>
+          <tr><td>mittel</td><td>50,6 %</td><td>98,3 %</td><td>66,8 %</td></tr>
+          <tr><td>niedrig</td><td>51,5 %</td><td>3,2 %</td><td>6,0 %</td></tr>
+          <tr><td>hoch</td><td>0,0 %</td><td>0,0 %</td><td>0,0 %</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Die Trefferquote von 50,6 Prozent ist kaum mehr als die Basisrate von 50,4 Prozent — und der Klassifikationsbericht zeigt, woran das liegt: „mittel“ erreicht einen Recall von 98 Prozent, weil das Modell diese Klasse ganz überwiegend vorhersagt; „niedrig“ nur 3 Prozent, „hoch“ wird kein einziges Mal vorhergesagt. Schwer sind nicht die mittleren, sondern die beiden äußeren Urteile. In der Merkmalswichtigkeit des Random Forest trägt die Bestelldauer 36 Prozent, mit Abstand vor der Uhrzeit (24 Prozent); alle übrigen Merkmale liegen einzeln darunter.</p>
+    <p>Die Merkmalswichtigkeit sagt, welche Merkmale das Modell nutzt, nicht, was die Zufriedenheit verursacht. Und die Stichprobe ist selbstselektiert. Beides gehört in jede Interpretation.</p>
+  </section>
+
+  <section class="section-block" id="ausreisser">
+    <h2>Ausreißer im Tagesumsatz</h2>
+    <p>Notebook 07 fragt, welche Tage im Umsatz einer Filiale aus dem Rahmen fallen — und ob sie sich erklären lassen. Grundlage sind 17.744 Filialtage aus <code>fact_orders</code> für acht Filialen, dazu Feiertag und Ereignis aus <code>dim_date</code> und das Eröffnungsdatum aus <code>dim_branch</code>. Drei Verfahren laufen nebeneinander: der z-Score je Filiale (mehr als drei Standardabweichungen vom Filialmittel), der Interquartilsabstand (IQR, Tukeys Regel: außerhalb von 1,5 IQR unter Q1 oder über Q3) und ein Isolation Forest über Umsatz, Bestellungen und Wochentag.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Verfahren</th><th>Treffer</th></tr></thead>
+        <tbody>
+          <tr><td>z-Score</td><td>79</td></tr>
+          <tr><td>IQR</td><td>213</td></tr>
+          <tr><td>Isolation Forest</td><td>178</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="warn-box">
+      <p>Anders als z-Score und IQR liefert der Isolation Forest keine Schwelle, sondern eine Rangfolge; der Parameter <code>contamination = 0,01</code> legt fest, dass das auffälligste eine Prozent der Filialtage markiert wird — die 178 Treffer sind also eine Vorgabe, kein Befund.</p>
+    </div>
+    <p>Die drei Verfahren überschneiden sich deutlich, aber nicht vollständig: Jeder der 79 z-Score-Ausreißer ist zugleich ein IQR-Ausreißer, und 59 von ihnen (75 Prozent) markiert auch der Isolation Forest. Von den 213 IQR-Ausreißern markiert der Isolation Forest 105 (49 Prozent); umgekehrt tragen 73 der 178 vom Isolation Forest markierten Tage (41 Prozent) keine der beiden anderen Markierungen. Die 15 stärksten Treffer nach dem Isolation Forest sind dabei durchweg auch z-Score- und IQR-Ausreißer — die stärksten Ausschläge finden alle drei Verfahren gemeinsam.</p>
+    <p>Eine Erklärung aus Kalender und Eröffnung zeigt eine klare Richtung:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Erklärung</th><th>Filialtage</th><th>Ø z-Wert</th></tr></thead>
+        <tbody>
+          <tr><td>Wochenende</td><td>60</td><td>0,80 (−2,41 bis 3,73)</td></tr>
+          <tr><td>Kiliani</td><td>56</td><td>3,25</td></tr>
+          <tr><td>Mozartfest</td><td>26</td><td>2,84</td></tr>
+          <tr><td>unerklärt</td><td>18</td><td>−1,60</td></tr>
+          <tr><td>Weihnachtsmarkt</td><td>8</td><td>−1,40</td></tr>
+          <tr><td>Weinfest</td><td>5</td><td>2,57</td></tr>
+          <tr><td>Ostermontag</td><td>2</td><td>−2,27</td></tr>
+          <tr><td>Mainfranken Messe</td><td>2</td><td>2,70</td></tr>
+          <tr><td>Allerheiligen</td><td>1</td><td>3,57</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Kiliani, Mozartfest, Weinfest und die Mainfranken Messe liegen durchweg über dem Filialmittel — die Sommerfeste. Nach unten fallen vor allem Ostermontag und der Weihnachtsmarkt; die 18 unerklärten Filialtage liegen im Mittel ebenfalls darunter. Der Wochenendeffekt ist mit 60 Filialtagen uneinheitlich: Wochenenden schlagen sowohl nach oben als auch nach unten aus. Eine Eröffnungsphase kommt unter den Treffern nicht vor. Für BM Europastern bestätigt sich das Bild: von 24 markierten Tagen sind 13 Kiliani, 5 Wochenende, 3 unerklärt, 2 Mozartfest und 1 Allerheiligen.</p>
+    <p>„Unerklärt“ heißt: nicht aus dem Kalender erklärbar. Im synthetischen Bestand ist das Rauschen; in echten Daten wäre es der Anfang einer Nachfrage, der eine Filiale nachgehen sollte.</p>
+  </section>
+
+  <section class="section-block" id="ehrlich">
+    <h2>Ehrlich bleiben: belegt, entschieden, widerlegt</h2>
+    <p>Nicht jede Kennzahl, die ein Verfahren ausgibt, ist ein Befund. Drei Kategorien trennen, was eine Gegenprobe bestätigt, was eine bewusste Wahl war, und was eine Gegenprobe widerlegt hat.</p>
+    <h3>Belegt</h3>
+    <p>Was mehrere unabhängige Wege bestätigen. Notebook 02 rechnet die RFM-Segmente unabhängig in Python nach und vergleicht sie mit der Sicht <code>v_rfm_kunde</code>: Alle vier Spalten stimmen bei 100 Prozent der Kunden überein. Notebook 07 markiert mit dem Isolation Forest 178 Tage — belegt sind davon nicht alle 178, sondern die 15 stärksten Ausschläge, die z-Score, IQR und Isolation Forest gemeinsam finden. Und der Kiliani-Effekt zeigt sich in zwei unabhängigen Rechnungen: als +1.139,77 € gegenüber einem Tag ohne Ereignis in der Regression von Notebook 05 (p &lt; 0,001) und als 56 Filialtage mit einem mittleren z-Wert von 3,25 in Notebook 07.</p>
+    <h3>Entschieden</h3>
+    <p>Was jemand festgelegt hat, nicht gemessen. Notebook 02 wählt k = 4 für K-Means, obwohl die Silhouette k = 2 bevorzugt (0,475 gegen 0,378) — weil sich vier Gruppen noch beschreiben lassen, wie das Notebook ausdrücklich festhält. Notebook 07 markiert mit dem Isolation Forest genau 178 Tage, weil der Parameter <code>contamination = 0,01</code> ein Prozent der 17.744 Filialtage als Vorgabe festlegt: Die 178 Treffer sind eine Vorgabe, kein Befund.</p>
+    <h3>Widerlegt</h3>
+    <p>Was wie ein Befund aussah und an der Gegenprobe scheiterte. Notebook 05 findet ohne Monatskontrolle einen Temperatureffekt von 41,64 € je Grad (p &lt; 0,001) — mit Monat und Jahr im selben Modell ist Temperatur nicht mehr signifikant (p = 0,171): Der scheinbare Wettereffekt war die Jahreszeit, die erst die Monatskontrolle abfängt. Dieselbe Regression zeigt für Heimspieltage −251,50 € (p &lt; 0,001); die Gegenprobe an vergleichbaren Tagen (gleicher Wochentag, Monat und Jahr, ohne Feiertage und Ereignistage) zeigt das Gegenteil: Heimspieltage liegen im Mittel 40,3 € über solchen Tagen, sonstige Tage 1,3 € darunter — der Koeffizient ist ein Artefakt der additiven Kontrolle. Und Notebook 08 (Lab 08) trifft mit TF-IDF und logistischer Regression 100,0 Prozent auf denselben 500 Texten, auf denen ein BERT-Modell nur 94,2 Prozent erreicht — in den Worten des Notebooks „zu gut, um wahr zu sein“: Die Rezensionen sind simuliert, und ein Modell, das die Bausteine des Generators lernt, kennt die Antwort.</p>
+    <p>Der Bestand hinter allen Notebooks ist synthetisch. Das erklärt beide Richtungen: Manche Effekte sind absichtlich eingebaut und lassen sich mehrfach bestätigen, wie Kiliani; andere sind Rauschen oder Artefakte der Rechnung, wie das Heimspiel oder ein zu perfektes Sentiment-Modell. Welche Seite zutrifft, entscheidet nicht die Kennzahl allein, sondern die Gegenprobe.</p>
+  </section>
+
+  <section class="section-block" id="spielplatz">
+    <h2>Spielplatz</h2>
+    <p>Unten läuft dieselbe Browser-Datenbank wie in den anderen Labs (PGlite, WebAssembly): 19 Bestellungen, 55 Positionen und 12 Rezensionen in den Schemata <code>wawi</code> und <code>burgermetrics</code>. Die Startabfrage zeigt für jeden Kunden die Zahl der Bestellungen und den Umsatz, absteigend sortiert — dieselbe Grundlage wie B01 und W07-04, nur ohne die Spalte für die letzte Bestellung. Von hier aus lässt sich B01 nachbauen oder die Sicht <code>v_warenkorb_regeln</code> aus Notebook 03 abfragen.</p>
+    <div data-datenbank="postgres"></div>
+    <div class="info-box">
+      <p>Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf „Datenbank zurücksetzen“ stellt den Ausgangsbestand wieder her.</p>
+    </div>
+    <div data-sql-konsole data-start="SELECT customer_id, count(*) AS bestellungen, round(sum(net_total), 2) AS umsatz FROM fact_orders GROUP BY customer_id ORDER BY umsatz DESC;"></div>
+  </section>
+
+  <section class="section-block" id="uebungen">
+    <h2>Übungen</h2>
+    <p>Fünf Übungen: eine Frage-Verfahren-Zuordnung über alle sechs Notebooks, zwei Quizze zu Lift und zur ehrlichen Interpretation, die SQL-Grundlage der RFM-Rechnung, und die sechs Schritte von CRISP-DM in ihre Reihenfolge gebracht.</p>
+    <div data-uebung="W07-01"></div>
+    <div data-uebung="W07-02"></div>
+    <div data-uebung="W07-03"></div>
+    <div data-uebung="W07-04"></div>
+    <div data-uebung="W07-05"></div>
+    <div data-fortschritt></div>
+  </section>
+
+  <section class="section-block" id="zusammenfassung">
+    <h2>Zusammenfassung</h2>
+    <ul>
+      <li>Data Mining beginnt bei einer Frage, nicht bei einem Verfahren: Frage → Verfahren → Kennzahl → Gegenprobe → Befund. Die Notebooks 02 bis 07 beantworten sechs Fragen mit sechs Verfahren; Notebook 05 liefert die Beispiele für den Abschnitt „Ehrlich bleiben“.</li>
+      <li>CRISP-DM ordnet jedes Notebook in sechs Schritte: Business und Data Understanding (Fragestellung, Daten), Data Preparation und Modeling (Vorgehen), Evaluation (Ergebnis, mit Gegenprobe) und Deployment (die Sichten und Dashboards, die die Notebooks nur bestätigen).</li>
+      <li>RFM aus <code>fact_orders</code> (754.513 Bestellungen, 24.992 Kunden) liefert dieselben Segmente wie <code>v_rfm_kunde</code> (100 Prozent Übereinstimmung); K-Means wählt k = 4, obwohl die Silhouette k = 2 bevorzugt — eine Entscheidung. Cluster 3 (6.084 Kunden, 11,1 Tage, 36,1 Bestellungen, 698,0 €) und Cluster 2 (1.910 Kunden, 337,9 Tage) markieren die Enden der Skala.</li>
+      <li>Apriori auf dem ersten Quartal 2025 (30.537 Warenkörbe) findet Chicken Nuggets 6pc → BBQ-Sauce mit Lift 11,23 (8,97 über den ganzen Bestand); Medium Fries und Bier haben über ein Prozent Support, aber Lift 1,00 — kein Signal. Support sagt, wie häufig; Lift, ob es mehr als Zufall ist.</li>
+      <li>Gradient Boosting schlägt im Backtesting (BM Europastern, zwölf Monate) die lineare Regression knapp (168,9 € gegen 172,4 € MAE) und deutlich den naiven Mittelwert (286,6 €); der scheinbare Rückgang 2026 gegenüber 2025 ist ein Basiseffekt der Rumpfjahre (1.343,4 € je Tag gegen 1.336,7 € im gleichen Zeitraum).</li>
+      <li>Entscheidungsbaum und Random Forest treffen bei der Zufriedenheit (142.317 bewertete Bestellungen) 50,6 Prozent — kaum mehr als die Basisrate von 50,4 Prozent; die Bestelldauer trägt 36 Prozent der Merkmalswichtigkeit, aber Recall 98/3/0 Prozent (mittel/niedrig/hoch) zeigt, dass nur die mittlere Klasse getroffen wird.</li>
+      <li>z-Score (79), IQR (213) und Isolation Forest (178, durch <code>contamination = 0,01</code> vorgegeben) überschneiden sich, aber nicht vollständig; belegt sind die 15 stärksten Treffer, die alle drei Verfahren gemeinsam finden — überwiegend Kiliani (56 Filialtage) und Mozartfest.</li>
+      <li>Der Bestand ist synthetisch: Manche Effekte sind eingebaut und lassen sich mehrfach bestätigen, andere sind Artefakte, die erst eine Gegenprobe entlarvt — Temperatur ohne Monatskontrolle, das Heimspiel. Notebook 05 (Wetter und Ereignisse) und Notebook 08 (Sentiment) folgen mit ihren übrigen Befunden in Lab 08.</li>
+    </ul>
+    <div data-lab-nav></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>THWS Business School · Datenbasierte Fallstudien · BM-Lab · Lab 07 · Stand 09/2026</p>
+</footer>
+
+<script type="module" src="assets/bm.js"></script>
+</body>
+</html>
