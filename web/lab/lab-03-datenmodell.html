@@ -273,7 +273,7 @@ FROM ((SELECT * FROM v_umsatz_filiale_jahr
 
   <section class="section-block" id="spielplatz">
     <h2>Spielplatz</h2>
-    <p>Unten läuft ein vollständiges PostgreSQL im Browser (PGlite, WebAssembly) mit dem Miniaturbestand der Fallstudie: 19 Bestellungen, 55 Positionen und 12 Rezensionen in denselben beiden Schemata und demselben Suchpfad wie die echte Datenbank. Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf „Datenbank zurücksetzen“ stellt den Ausgangsbestand wieder her.</p>
+    <p>Unten läuft dieselbe Browser-Datenbank wie in Lab 01 und Lab 02 (PGlite, WebAssembly): 19 Bestellungen, 55 Positionen und 12 Rezensionen in den Schemata <code>wawi</code> und <code>burgermetrics</code>. Die drei Schritte dieses Labs — Dimension, Faktentabelle, Sicht — entstehen hier; in der echten Datenbank dürfte die Rolle <code>studi_daba</code> keine Tabelle anlegen (Lab 01). Was Sie hier schreiben, wirkt nur in diesem Browserfenster; der Knopf „Datenbank zurücksetzen“ stellt den Ausgangsbestand wieder her.</p>
     <div data-datenbank="postgres"></div>
     <div class="info-box">
       <p>Die Übungen legen Tabellen und Sichten in dieser Datenbank an. <code>CREATE TABLE</code> ohne Schemaangabe landet im ersten Schema des Suchpfads, also in <code>wawi</code> — <code>information_schema.tables</code> zeigt es. Vor jeder Prüfung sät die Seite die Datenbank neu; deshalb braucht keine Übung ein <code>DROP</code>, und jede lässt sich für sich allein prüfen.</p>

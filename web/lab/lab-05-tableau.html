@@ -53,7 +53,7 @@
   <section class="section-block" id="warum">
     <h2>Was Tableau hier leistet — und was gleich bleibt</h2>
     <p>Power BI (Lab 04), das Dashboard, die Notebooks und die Dash-App der Fallstudie lesen ihre Kennzahlen aus den Sichten <code>v_*</code> des Schemas <code>burgermetrics</code> — jede Kennzahl genau einmal definiert (Lab 01, „Sichten als Vertrag“). Tableau Desktop ist ein weiterer Leser derselben Datenbank, mit einer anderen Arbeitsweise: Power BI verlangt erst ein Modell mit Beziehungen und Measures und setzt dann Bilder darauf; in Tableau ziehen Sie ein Feld auf ein Regal, und in demselben Augenblick ist eine Abfrage formuliert und ihr Ergebnis gezeichnet. Das Arbeitsblatt ist die Abfrage.</p>
-    <p>Was gleich bleibt, ist das Ergebnis. Umsatz ist die Summe von <code>net_total</code>, dem Bestellwert nach Rabatt (Lab 03), und <code>v_kennzahlen_jahr</code> liefert dafür <strong>2.994.771,13 €</strong> für 2025 aus <strong>136.557</strong> Bestellungen. Ein Blatt in Tableau, das eine andere Zahl zeigt, ist keine zweite Meinung, sondern ein Fehler — eine fehlende Beziehung, ein falsches Aggregat, eine Kennung, die summiert wurde. Die Checkliste dieses Labs endet deshalb mit derselben Kontrollzahl wie die in Lab 04.</p>
+    <p>Was gleich bleibt, ist das Ergebnis. Umsatz ist die Summe von <code>net_total</code>, dem Bestellwert nach Rabatt (Lab 03), und <code>v_kennzahlen_jahr</code> liefert dafür <strong>2.994.771,13 €</strong> für 2025 aus <strong>136.557</strong> Bestellungen. Ein Blatt in Tableau, das eine andere Zahl zeigt, ist ein Fehler — eine fehlende Beziehung, ein falsches Aggregat, eine Kennung, die summiert wurde. Die Checkliste dieses Labs endet deshalb mit derselben Kontrollzahl wie die in Lab 04.</p>
     <div class="kette">
       <div class="glied hell"><span class="titel">Lab 01 · 03</span><span class="was">Datenbank, Sichten, Galaxy-Schema</span></div>
       <span class="pfeil">→</span>
@@ -69,7 +69,7 @@
       <p><strong>Werkzeug und Stand.</strong> Dieses Lab bezieht sich auf Tableau Desktop 2026.2, erschienen am 27.08.2026 (Stand 09/2026). Preis und Lizenzbedingungen sind nach Herstellerangabe zu prüfen; die Studentenlizenz für Tableau Desktop und Tableau Prep ist seit 01.02.2025 eingestellt. Kostenlos ist die Tableau Desktop Public Edition — sie kennt keine Datenbankverbindung, dafür den Weg über die CSV-Dateien aus <code>notebooks/export/</code> (Abschnitt „Verbinden“). Der Bestand der Fallstudie ist synthetisch, und das Konto <code>studi_daba</code> liest nur.</p>
     </div>
     <div class="auswahl-hinweis">
-      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Tableau steht in diesem Kurs neben Power BI (Lab 04) und Python (Lab 06): drei Wege zu denselben Sichten, und die Kontrollzahl muss in jedem dieselbe sein.</p>
+      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Tableau steht neben Power BI (Lab 04) und Python (Lab 06): drei Wege zu denselben Sichten, und die Kontrollzahl muss in jedem dieselbe sein.</p>
     </div>
   </section>
 
@@ -262,7 +262,7 @@
       </div>
       <div class="karte">
         <div class="kopfzeile">In jeder Filiale dieselbe Summe</div>
-        <p>Blatt 2 zeigt in jeder Filiale denselben Wert, den Gesamtumsatz. Dann sind <code>fact_orders</code> und <code>dim_branch</code> auf der Data-Source-Seite nicht verbunden: <code>Branch Name</code> kann die Bestellungen nicht aufteilen. Keine Fehlermeldung — das Bild ist die Meldung. Abhilfe: zurück auf die Data-Source-Seite, die Verbindung über <code>branch_id</code> prüfen oder anlegen (Nachbildung im Abschnitt „Verbinden“).</p>
+        <p>Blatt 2 zeigt in jeder Filiale denselben Wert, den Gesamtumsatz. Dann sind <code>fact_orders</code> und <code>dim_branch</code> auf der Data-Source-Seite nicht verbunden: <code>Branch Name</code> kann die Bestellungen nicht aufteilen. Tableau meldet nichts; der Fehler ist nur im Blatt zu sehen. Abhilfe: zurück auf die Data-Source-Seite, die Verbindung über <code>branch_id</code> prüfen oder anlegen (Nachbildung im Abschnitt „Verbinden“).</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">Tabelle statt Balken</div>
@@ -281,7 +281,7 @@
 
   <section class="section-block" id="simulator">
     <h2>Simulator</h2>
-    <p>Der Simulator unten trägt die Beschriftung von Tableau: links das <code>Data</code> pane mit Dimensionen als <strong>blauen</strong> Pillen (<code>Abc</code>, ein Kalendersymbol für die geordneten Felder Monat und Stunde) und Kennzahlen als <strong>grünen</strong> (<code>#</code>); rechts die Regale <code>Columns</code>, <code>Rows</code>, <code>Color</code> und <code>Filters</code> — <code>Color</code> vertritt die Marks card. Drei Dinge unterscheiden ihn vom Werkzeug. Felder werden in den Regalen ausgewählt statt gezogen. Kennzahlen kommen mit <code>SUM</code> auf das Regal und tragen im Chip die Aggregation, die Sie umstellen: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>. Und das Diagramm folgt der Regel aus dem Abschnitt „Das Regal“: Dimension auf Columns und Kennzahl auf Rows ergeben senkrechte Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie, <code>Color</code> Serien oder Stapel; nur Dimensionen, eine Kennzahl ohne Dimension oder Dimension und Kennzahl auf demselben Regal ergeben im Simulator eine Tabelle.</p>
+    <p>Der Simulator unten trägt die Beschriftung von Tableau: links das <code>Data</code> pane mit Dimensionen als <strong>blauen</strong> Pillen (<code>Abc</code>, ein Kalendersymbol für die geordneten Felder Monat und Stunde) und Kennzahlen als <strong>grünen</strong> (<code>#</code>); rechts die Regale <code>Columns</code>, <code>Rows</code>, <code>Color</code> und <code>Filters</code> — <code>Color</code> vertritt die Marks card. Drei Dinge unterscheiden ihn von Tableau Desktop. Felder werden in den Regalen ausgewählt statt gezogen. Kennzahlen kommen mit <code>SUM</code> auf das Regal und tragen im Chip die Aggregation, die Sie umstellen: <code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>MIN</code>, <code>MAX</code>. Und das Diagramm folgt der Regel aus dem Abschnitt „Das Regal“: Dimension auf Columns und Kennzahl auf Rows ergeben senkrechte Balken, umgekehrt waagerechte, eine geordnete Dimension eine Linie, <code>Color</code> Serien oder Stapel; nur Dimensionen, eine Kennzahl ohne Dimension oder Dimension und Kennzahl auf demselben Regal ergeben im Simulator eine Tabelle.</p>
     <p>Die Daten: 2.000 Bestellungen des Jahres 2025 aus <code>obt_orders</code> als flache Tabelle, wie in Lab 04.</p>
     <div class="table-scroll">
       <table>

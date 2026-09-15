@@ -176,12 +176,12 @@
       </table>
     </div>
     <p>Die stärkste Regel verbindet Chicken Nuggets mit BBQ-Sauce: Lift 11,23 im ersten Quartal 2025 gegenüber 8,97 über den ganzen Bestand (Sicht <code>v_warenkorb_regeln</code>) — im kleineren Quartalsdatensatz fällt der Lift etwas höher aus. Ein Lift nahe 1 ist dagegen kein Signal: Medium Fries und Bier haben über den ganzen Bestand 3,28 Prozent Support, aber Lift 1,00 — sie kommen zusammen praktisch so oft vor wie unabhängig voneinander. Sieben weitere Paare liegen ähnlich nah an 1; im ersten Quartal 2025 erreichen alle acht mehr als ein Prozent Support, aber ihr Lift liegt unter 1 (0,87 bis 0,98) und damit unter der Schwelle, die <code>association_rules</code> für eine Regel verlangt — deshalb fehlen sie in der Regelliste.</p>
-    <p>Apriori findet Kombinationen, keine Ursachen: Dass Pommes zum Burger gehören, wusste die Speisekarte schon. Interessant werden Regeln, die nicht auf der Hand liegen — dafür braucht es mehr Produkte, als diese Karte hat, oder feinere Merkmale wie Tageszeit und Kanal.</p>
+    <p>Apriori findet Kombinationen, keine Ursachen. Regeln, die nicht schon aus der Speisekarte folgen, brauchen mehr Produkte, als diese Karte hat, oder feinere Merkmale wie Tageszeit und Kanal.</p>
   </section>
 
   <section class="section-block" id="prognose">
     <h2>Nachfrageprognose mit Backtesting</h2>
-    <p>Notebook 04 fragt, wie gut sich der Tagesumsatz einer Filiale aus Kalender und Wetter vorhersagen lässt — und wie man das ehrlich prüft. Beispielfiliale ist BM Europastern, die älteste mit der längsten Reihe: 3.304 Tage vom 15.03.2017 bis zum 31.03.2026, ohne Lücken. Eine STL-Zerlegung teilt die Reihe in Trend, Wochenmuster und Rest; der Trend trägt 66,8 Prozent der Varianz des Umsatzes, das Wochenmuster 23,3 Prozent, der Rest 8,6 Prozent.</p>
+    <p>Notebook 04 fragt, wie gut sich der Tagesumsatz einer Filiale aus Kalender und Wetter vorhersagen lässt, und prüft die Antwort im Backtesting. Beispielfiliale ist BM Europastern, die älteste mit der längsten Reihe: 3.304 Tage vom 15.03.2017 bis zum 31.03.2026, ohne Lücken. Eine STL-Zerlegung teilt die Reihe in Trend, Wochenmuster und Rest; der Trend trägt 66,8 Prozent der Varianz des Umsatzes, das Wochenmuster 23,3 Prozent, der Rest 8,6 Prozent.</p>
     <p>Merkmale sind Wochentag und Monat als Kategorien, Feiertag, Ereignis, Temperatur, Niederschlag und eine laufende Tagesnummer für den Trend. Trainiert wird auf allen Tagen bis zum 31.03.2025 (2.939 Tage), geprüft auf den zwölf Monaten danach (365 Tage) — Daten, die die Modelle beim Lernen nie gesehen haben (Backtesting):</p>
     <div class="table-scroll">
       <table>
@@ -206,7 +206,7 @@
       </table>
     </div>
     <p>An Feiertagen ist der Fehler am höchsten, an Ereignistagen am niedrigsten, sogar unter dem Fehler an gewöhnlichen Tagen.</p>
-    <p>Wer Jahresumsätze vergleicht, sieht 2017 und 2026 als Einbruch: 2017 beginnt am 15. März, 2026 endet am 31. März — beide Jahre sind Rumpfjahre. Der Umsatz je Tag zeigt das echte Bild: 2025 lag er im Jahresmittel bei 1.473,7 €, ein voller Jahresgang. Verglichen im gleichen Zeitraum — Januar bis März — liegt 2026 mit 1.343,4 € je Tag sogar leicht über 2025 (1.336,7 €, plus 0,5 Prozent). Der scheinbare Rückgang ist ein Basiseffekt: Ein volles Jahr 2025 wird mit dem ersten, umsatzschwächsten Quartal 2026 verglichen.</p>
+    <p>Wer Jahresumsätze vergleicht, sieht 2017 und 2026 als Einbruch: 2017 beginnt am 15. März, 2026 endet am 31. März — beide Jahre sind Rumpfjahre. Der Umsatz je Tag ist von der Länge des Jahres unabhängig: 2025 lag er im Jahresmittel bei 1.473,7 €, ein voller Jahresgang. Verglichen im gleichen Zeitraum — Januar bis März — liegt 2026 mit 1.343,4 € je Tag sogar leicht über 2025 (1.336,7 €, plus 0,5 Prozent). Der scheinbare Rückgang ist ein Basiseffekt: Ein volles Jahr 2025 wird mit dem ersten, umsatzschwächsten Quartal 2026 verglichen.</p>
     <p>Ein echtes Prognosemodell würde die Vergangenheit der Reihe selbst als Merkmal nutzen (Lags, gleitende Mittel) und die Prüfung über mehrere Zeitfenster wiederholen (rollierendes Backtesting). Beides ist hier bewusst weggelassen, damit der Unterschied zwischen erklärenden Merkmalen und Autokorrelation sichtbar bleibt.</p>
   </section>
 
@@ -234,7 +234,7 @@
         </tbody>
       </table>
     </div>
-    <p>Die Trefferquote von 50,6 Prozent ist kaum mehr als die Basisrate von 50,4 Prozent — und der Klassifikationsbericht zeigt, woran das liegt: „mittel“ erreicht einen Recall von 98 Prozent, weil das Modell diese Klasse ganz überwiegend vorhersagt; „niedrig“ nur 3 Prozent, „hoch“ wird kein einziges Mal vorhergesagt. Schwer sind nicht die mittleren, sondern die beiden äußeren Urteile. In der Merkmalswichtigkeit des Random Forest trägt die Bestelldauer 36 Prozent, mit Abstand vor der Uhrzeit (24 Prozent); alle übrigen Merkmale liegen einzeln darunter.</p>
+    <p>Die Trefferquote von 50,6 Prozent ist kaum mehr als die Basisrate von 50,4 Prozent — und der Klassifikationsbericht zeigt, woran das liegt: „mittel“ erreicht einen Recall von 98 Prozent, weil das Modell diese Klasse ganz überwiegend vorhersagt; „niedrig“ nur 3 Prozent, „hoch“ wird kein einziges Mal vorhergesagt. Schwer sind die beiden äußeren Urteile. In der Merkmalswichtigkeit des Random Forest trägt die Bestelldauer 36 Prozent, mit Abstand vor der Uhrzeit (24 Prozent); alle übrigen Merkmale liegen einzeln darunter.</p>
     <p>Die Merkmalswichtigkeit sagt, welche Merkmale das Modell nutzt, nicht, was die Zufriedenheit verursacht. Und die Stichprobe ist selbstselektiert. Beides gehört in jede Interpretation.</p>
   </section>
 
@@ -255,7 +255,7 @@
       <p>Anders als z-Score und IQR liefert der Isolation Forest keine Schwelle, sondern eine Rangfolge; der Parameter <code>contamination = 0,01</code> legt fest, dass das auffälligste eine Prozent der Filialtage markiert wird — die 178 Treffer sind also eine Vorgabe, kein Befund.</p>
     </div>
     <p>Die drei Verfahren überschneiden sich deutlich, aber nicht vollständig: Jeder der 79 z-Score-Ausreißer ist zugleich ein IQR-Ausreißer, und 59 von ihnen (75 Prozent) markiert auch der Isolation Forest. Von den 213 IQR-Ausreißern markiert der Isolation Forest 105 (49 Prozent); umgekehrt tragen 73 der 178 vom Isolation Forest markierten Tage (41 Prozent) keine der beiden anderen Markierungen. Die 15 stärksten Treffer nach dem Isolation Forest sind dabei durchweg auch z-Score- und IQR-Ausreißer — die stärksten Ausschläge finden alle drei Verfahren gemeinsam.</p>
-    <p>Eine Erklärung aus Kalender und Eröffnung zeigt eine klare Richtung:</p>
+    <p>Notebook 07 sucht für die 178 Treffer des Isolation Forest eine Erklärung im Kalender — Feiertag, Ereignis, Wochenende — und im Eröffnungsdatum; 18 Filialtage bleiben unerklärt:</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Erklärung</th><th>Filialtage</th><th>Ø z-Wert</th></tr></thead>
@@ -272,7 +272,7 @@
         </tbody>
       </table>
     </div>
-    <p>Kiliani, Mozartfest, Weinfest und die Mainfranken Messe liegen durchweg über dem Filialmittel — die Sommerfeste. Nach unten fallen vor allem Ostermontag und der Weihnachtsmarkt; die 18 unerklärten Filialtage liegen im Mittel ebenfalls darunter. Der Wochenendeffekt ist mit 60 Filialtagen uneinheitlich: Wochenenden schlagen sowohl nach oben als auch nach unten aus. Eine Eröffnungsphase kommt unter den Treffern nicht vor. Für BM Europastern bestätigt sich das Bild: von 24 markierten Tagen sind 13 Kiliani, 5 Wochenende, 3 unerklärt, 2 Mozartfest und 1 Allerheiligen.</p>
+    <p>Kiliani, Mozartfest, Weinfest und die Mainfranken Messe liegen durchweg über dem Filialmittel — die Sommerfeste. Nach unten fallen vor allem Ostermontag und der Weihnachtsmarkt; die 18 unerklärten Filialtage liegen im Mittel ebenfalls darunter. Der Wochenendeffekt ist mit 60 Filialtagen uneinheitlich: Wochenenden schlagen sowohl nach oben als auch nach unten aus. Eine Eröffnungsphase kommt unter den Treffern nicht vor. Für BM Europastern gilt dasselbe: von 24 markierten Tagen sind 13 Kiliani, 5 Wochenende, 3 unerklärt, 2 Mozartfest und 1 Allerheiligen.</p>
     <p>„Unerklärt“ heißt: nicht aus dem Kalender erklärbar. Im synthetischen Bestand ist das Rauschen; in echten Daten wäre es der Anfang einer Nachfrage, der eine Filiale nachgehen sollte.</p>
   </section>
 

@@ -69,7 +69,7 @@
       <p>Ein Notebook ist fertig, wenn es nach „Runtime → Restart“ und erneutem Ausführen aller Zellen von oben nach unten dieselben Zahlen zeigt wie zuvor. Für die Notebooks der Fallstudie erledigt das <code>pruefe_notebooks.sh</code> (rund 20 Minuten für alle neun); für ein eigenes Notebook ist es ein Handgriff vor jeder Abgabe.</p>
     </div>
     <div class="auswahl-hinweis">
-      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Colab steht hier, weil jedes Notebook der Fallstudie einen Colab-Link im Kopf trägt und dort ohne Installation läuft. Dieselben Dateien laufen lokal in Jupyter (<code>python3 -m pip install -r notebooks/requirements.txt</code>, dann <code>jupyter lab notebooks/</code>) und in jeder anderen Jupyter-Umgebung; das Format <code>.ipynb</code> ist der gemeinsame Nenner, nicht die Plattform.</p>
+      <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Colab steht hier, weil jedes Notebook der Fallstudie einen Colab-Link im Kopf trägt und dort ohne Installation läuft. Dieselben Dateien laufen lokal in Jupyter (<code>python3 -m pip install -r notebooks/requirements.txt</code>, dann <code>jupyter lab notebooks/</code>) und in jeder anderen Jupyter-Umgebung; gemeinsam ist das Format <code>.ipynb</code>, nicht die Plattform.</p>
     </div>
   </section>
 
@@ -198,7 +198,7 @@ Dash-App gebaut; zum Starten DASH_STARTEN = True setzen.</div>
   <section class="section-block" id="geheim">
     <h2>Zugangsdaten</h2>
     <p>Zugangsdaten gehören nicht ins Repository. Ein Notebook, das nach GitHub gespeichert wird, nimmt jede Zeichenkette mit — auch in Textzellen und Kommentaren —, und ein Kennwort, das einmal in einem Commit steht, bleibt in der Historie, auch wenn die nächste Fassung es entfernt. Es lässt sich nicht zurückholen, nur ändern.</p>
-    <p>Das Demo-Konto ist die bewusste Ausnahme. <code>studi_daba</code>/<code>thws</code> steht offen in jedem Notebook, in <code>dash/app.py</code> und in <code>db/aufbau/0020_demo_rolle.sql</code>, weil das Konto eigens dafür angelegt ist: öffentlich, nur lesend (<code>default_transaction_read_only = on</code>), auf einen synthetischen Bestand ohne echte Personen und Bestellungen (Lab 01). Ein Kennwort zu verbergen ergibt nur Sinn, wenn es etwas schützt.</p>
+    <p>Das Demo-Konto ist die bewusste Ausnahme. <code>studi_daba</code>/<code>thws</code> steht offen in jedem Notebook, in <code>dash/app.py</code> und in <code>db/aufbau/0020_demo_rolle.sql</code>, weil das Konto eigens dafür angelegt ist: öffentlich, nur lesend (<code>default_transaction_read_only = on</code>), auf einen synthetischen Bestand ohne echte Personen und Bestellungen (Lab 01).</p>
     <div class="karten">
       <div class="karte">
         <div class="kopfzeile">In Colab: das Secrets-Panel</div>

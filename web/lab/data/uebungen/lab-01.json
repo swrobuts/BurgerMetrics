@@ -80,7 +80,7 @@
           "richtig": [0], "mehrfach": false,
           "erklaerung": { "de": "Eine Sicht ist die Definition, die Materialisierung macht sie schnell. Tabellen darf die Rolle lesen; gewöhnliche Sichten werden bei jedem Aufruf neu berechnet." } }
       ],
-      "rueckmeldung": { "de": "Die Rolle ist die Leseöffnung des Bestands. Alles, was sie nicht darf, gehört in Ihre eigene Datenbank." } },
+      "rueckmeldung": { "de": "Die Rolle liest beide Schemata und schreibt nichts. Alles, was sie nicht darf, gehört in Ihre eigene Datenbank." } },
 
     { "id": "W01-05", "typ": "zuordnen",
       "titel": { "de": "Meldung und Ursache" },
