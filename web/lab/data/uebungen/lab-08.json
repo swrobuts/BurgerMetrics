@@ -1,0 +1,275 @@
+{
+  "befehle": {
+    "B01": {
+      "titel": {
+        "de": "Ein Aufruf: hole_wetter() aus Notebook 05"
+      },
+      "prompt": "Python",
+      "befehl": "def hole_wetter():\n    # Open-Meteo Archive: Tageswerte fuer Wuerzburg ueber den ganzen Zeitraum, ohne Schluessel\n    antwort = requests.get(\"https://archive-api.open-meteo.com/v1/archive\", timeout=60, params={\n        \"latitude\": 49.79, \"longitude\": 9.95, \"start_date\": \"2017-03-15\", \"end_date\": \"2026-03-31\",\n        \"daily\": \"temperature_2m_max,temperature_2m_min,precipitation_sum\", \"timezone\": \"Europe/Berlin\"})\n    antwort.raise_for_status()\n    d = antwort.json()[\"daily\"]\n    return pd.DataFrame({\"tag\": d[\"time\"], \"tmax\": d[\"temperature_2m_max\"],\n                         \"tmin\": d[\"temperature_2m_min\"], \"niederschlag_mm\": d[\"precipitation_sum\"]})",
+      "teile": [
+        {
+          "was": "params={ \"latitude\": 49.79, \"longitude\": 9.95, … }",
+          "bedeutet": {
+            "de": "Die Anfrageparameter: Breite und Länge in Dezimalgrad (Würzburg), der Zeitraum als start_date/end_date, die gewünschten Tageswerte in daily — kommagetrennt, ohne Leerzeichen — und die Zeitzone. Kein Schlüssel nötig: die Archiv-API ist ohne Anmeldung nutzbar."
+          }
+        },
+        {
+          "was": "timeout=60",
+          "bedeutet": {
+            "de": "Bricht nach 60 Sekunden ohne Antwort ab, statt unbegrenzt zu warten. Für den vollen Zeitraum der Fallstudie (3.304 Tage) braucht die Antwort einige Sekunden."
+          }
+        },
+        {
+          "was": "antwort.raise_for_status()",
+          "bedeutet": {
+            "de": "Wirft eine Ausnahme bei einem HTTP-Fehlerstatus (4xx/5xx), statt stillschweigend mit einer Fehlerantwort weiterzurechnen — dasselbe Muster wie bei den anderen vier externen Quellen."
+          }
+        },
+        {
+          "was": "antwort.json()[\"daily\"]",
+          "bedeutet": {
+            "de": "Die Antwort ist ein Objekt mit latitude, longitude, timezone und daily; daily selbst ist ein Objekt aus gleich langen Listen, eine je angefragtem Feld, ein Element je Tag."
+          }
+        },
+        {
+          "was": "pd.DataFrame({\"tag\": d[\"time\"], \"tmax\": d[\"temperature_2m_max\"], …})",
+          "bedeutet": {
+            "de": "Parallele Listen werden zu Spalten: d[\"time\"][i] und d[\"temperature_2m_max\"][i] gehören zum selben Tag i. Genau dieses Muster prüft W08-01 — und genau hier würde eine ungleich lange Liste mit ValueError scheitern."
+          }
+        }
+      ],
+      "ausgabe": "quelle | zeilen\nOpen-Meteo | 3304\nSchulferien | 70\nKickers-Heimspiele | 110\nVPI | 10"
+    }
+  },
+  "uebungen": [
+    {
+      "id": "W08-01",
+      "typ": "json",
+      "titel": {
+        "de": "Eine Open-Meteo-Antwort reparieren"
+      },
+      "aufgabe": {
+        "de": "<p>Die Antwort unten hat drei Syntaxfehler und einen Sachfehler: einfache Anführungszeichen, ein Komma zu viel, ein fehlendes Komma — und <code>temperature_2m_max</code> hat weniger Werte als <code>time</code>. Machen Sie daraus gültiges JSON mit drei Tagen und drei Werten.</p>"
+      },
+      "start": "{\n  'latitude': 49.79,\n  \"longitude\": 9.95\n  \"timezone\": \"Europe/Berlin\",\n  \"daily\": {\n    \"time\": [\"2025-07-01\", \"2025-07-02\", \"2025-07-03\"],\n    \"temperature_2m_max\": [31.2, 33.8],\n  }\n}",
+      "loesung": "{\n  \"latitude\": 49.79,\n  \"longitude\": 9.95,\n  \"timezone\": \"Europe/Berlin\",\n  \"daily\": {\n    \"time\": [\"2025-07-01\", \"2025-07-02\", \"2025-07-03\"],\n    \"temperature_2m_max\": [31.2, 33.8, 29.4]\n  }\n}",
+      "regeln": [
+        {
+          "pfad": "/latitude",
+          "typ": "number"
+        },
+        {
+          "pfad": "/longitude",
+          "typ": "number"
+        },
+        {
+          "pfad": "/daily",
+          "typ": "object",
+          "schluessel": [
+            "time",
+            "temperature_2m_max"
+          ]
+        },
+        {
+          "pfad": "/daily/time",
+          "typ": "array",
+          "laenge": 3,
+          "jedes": [
+            {
+              "pfad": "",
+              "typ": "string",
+              "muster": "^\\d{4}-\\d{2}-\\d{2}$"
+            }
+          ]
+        },
+        {
+          "pfad": "/daily/temperature_2m_max",
+          "typ": "array",
+          "laenge": 3,
+          "jedes": [
+            {
+              "pfad": "",
+              "typ": "number"
+            }
+          ],
+          "text": {
+            "de": "temperature_2m_max braucht genau einen Wert je Tag in time — drei Tage, drei Zahlen."
+          }
+        }
+      ],
+      "hinweis": {
+        "de": "<p>JSON kennt nur doppelte Anführungszeichen; nach dem letzten Element steht kein Komma; zwischen zwei Feldern muss eines stehen. Die Listen unter <code>daily</code> sind parallel: gleicher Index, gleicher Tag.</p>"
+      },
+      "rueckmeldung": {
+        "de": "Genau so baut hole_wetter() in Notebook 05 den DataFrame: pd.DataFrame({\"tag\": d[\"time\"], \"tmax\": d[\"temperature_2m_max\"], …}) — parallele Listen werden zu Spalten. Ungleich lange Listen würden dort mit ValueError scheitern."
+      }
+    },
+    {
+      "id": "W08-02",
+      "typ": "sql",
+      "titel": {
+        "de": "Über das Datum verknüpfen: Umsatz je Saison"
+      },
+      "aufgabe": {
+        "de": "<p>Verknüpfen Sie <code>fact_orders</code> über <code>date</code> mit <code>dim_date</code> und berechnen Sie je <code>season</code> die Zahl der Bestellungen und den Umsatz (<code>round(sum(net_total), 2)</code>), absteigend nach Umsatz.</p>"
+      },
+      "start": "SELECT d.season\nFROM fact_orders o\nJOIN dim_date d USING (date)\n",
+      "loesung": "SELECT d.season, count(*) AS bestellungen, round(sum(o.net_total), 2) AS umsatz\nFROM fact_orders o\nJOIN dim_date d USING (date)\nGROUP BY d.season\nORDER BY umsatz DESC",
+      "sortiert": true,
+      "hinweis": {
+        "de": "<p><code>USING (date)</code> verbindet über die gleichnamige Spalte. Externe Quellen hängen genauso: eine Tabelle mit einer Datumsspalte, ein Join darüber.</p>"
+      },
+      "rueckmeldung": {
+        "de": "Die Saison steht in dim_date, das Wetter in dim_weather, Feiertage und Heimspiele in den CSV-Dateien — alle über das Datum. Wer das Datum als Text lädt, bekommt keinen Treffer: erst in date wandeln."
+      }
+    },
+    {
+      "id": "W08-03",
+      "typ": "sql",
+      "titel": {
+        "de": "Sterne je Produkt aus der Sicht"
+      },
+      "aufgabe": {
+        "de": "<p>Aus <code>burgermetrics.v_rezension_produkt</code>: je Produkt mit mindestens einer Rezension <code>product_name</code>, <code>anzahl</code>, <code>sterne_mittel</code> und <code>anteil_positiv_pct</code>, absteigend nach <code>anzahl</code>, bei Gleichstand nach <code>product_name</code>.</p>"
+      },
+      "start": "SELECT product_name\nFROM burgermetrics.v_rezension_produkt\n",
+      "loesung": "SELECT product_name, anzahl, sterne_mittel, anteil_positiv_pct\nFROM burgermetrics.v_rezension_produkt\nWHERE anzahl > 0\nORDER BY anzahl DESC, product_name",
+      "sortiert": true,
+      "hinweis": {
+        "de": "<p>Das Schema muss davorstehen (Lab 01); <code>WHERE anzahl > 0</code> lässt Produkte ohne Rezension weg.</p>"
+      },
+      "rueckmeldung": {
+        "de": "Dieselbe Sicht füllt die vierte Karte der Dash-App. Im Bestand hat sie 57 Zeilen mit 10.000 Rezensionen — und jede Shop-Rezension kommt nach dem nächsten ETL-Lauf hinzu."
+      }
+    },
+    {
+      "id": "W08-04",
+      "typ": "checkliste",
+      "titel": {
+        "de": "Vom Shop in die Datenbank"
+      },
+      "aufgabe": {
+        "de": "<p>Schreiben Sie im Online-Shop der Fallstudie eine Rezension und finden Sie sie in der Datenbank wieder. Sie brauchen den Shop (<code>swrobuts.github.io/BurgerMetrics/shop.html</code>) und eine Verbindung aus Lab 01.</p>"
+      },
+      "schritte": [
+        {
+          "text": {
+            "de": "Im Shop auf einer Produktkarte <code>Bewerten</code> gewählt; das Formular zeigt den aktuellen Stand (Ø Sterne, Anzahl) des Produkts."
+          }
+        },
+        {
+          "text": {
+            "de": "Sterne gewählt, einen Text mit 5 bis 500 Zeichen geschrieben, Filiale gewählt, gesendet — die Meldung nennt die neue Nummer (<code>Gespeichert als wawi.rezension #…</code>)."
+          }
+        },
+        {
+          "text": {
+            "de": "Der Ø am Produkt hat sich sofort geändert (die Sicht <code>wawi.v_rezension_produkt</code> rechnet live)."
+          }
+        },
+        {
+          "text": {
+            "de": "In der Datenbank: <code>SELECT * FROM wawi.v_rezension_letzte ORDER BY erstellt_am DESC LIMIT 3;</code> zeigt die Rezension mit <code>quelle = 'shop'</code>."
+          }
+        },
+        {
+          "text": {
+            "de": "<code>SELECT count(*) FROM burgermetrics.fact_reviews WHERE source = 'shop';</code> zählt sie noch nicht — die Übernahme (<code>uebernahme_aus_wawi()</code>) macht der Betreiber bewusst."
+          }
+        },
+        {
+          "text": {
+            "de": "Zwanzig Rezensionen in zehn Minuten aus derselben Sitzung: Der Shop meldet einen Fehler (HTTP 503, Bremse der Datenbank) — die 21. kommt nicht durch."
+          }
+        }
+      ],
+      "rueckmeldung": {
+        "de": "Der Weg Shop → wawi.rezension → Sicht ist derselbe wie bei Bestellungen. Übungsrezensionen räumt der Betreiber mit uebungsrezensionen_loeschen() weg; der kuratierte Bestand bleibt unverändert."
+      }
+    },
+    {
+      "id": "W08-05",
+      "typ": "quiz",
+      "titel": {
+        "de": "Lizenz, Verzug, Sentiment"
+      },
+      "aufgabe": {
+        "de": "<p>Drei Fragen zu externen Daten.</p>"
+      },
+      "fragen": [
+        {
+          "frage": {
+            "de": "Was verlangt CC BY 4.0 von einem Notebook, das Open-Meteo-Daten nutzt?"
+          },
+          "optionen": [
+            {
+              "de": "Die Nennung der Quelle — etwa „Weather data by Open-Meteo.com“"
+            },
+            {
+              "de": "Eine Gebühr ab dem ersten Aufruf"
+            },
+            {
+              "de": "Nichts, weil die Daten frei sind"
+            }
+          ],
+          "richtig": [
+            0
+          ],
+          "mehrfach": false,
+          "erklaerung": {
+            "de": "Frei heißt nicht anonym: Alle fünf Quellen der Fallstudie binden die Nutzung an die Nennung; ODbL verlangt zusätzlich die Weitergabe abgeleiteter Datenbanken unter gleicher Lizenz."
+          }
+        },
+        {
+          "frage": {
+            "de": "Warum fehlen in einer Open-Meteo-Archivantwort die letzten Tage?"
+          },
+          "optionen": [
+            {
+              "de": "Die Reanalyse ERA5 liegt mit rund fünf Tagen Verzug vor"
+            },
+            {
+              "de": "Weil der Aufruf ohne Schlüssel gekürzt wird"
+            },
+            {
+              "de": "Weil die Zeitzone falsch war"
+            }
+          ],
+          "richtig": [
+            0
+          ],
+          "mehrfach": false,
+          "erklaerung": {
+            "de": "Archivdaten sind Reanalysen, keine Live-Messungen. Für den Bestand bis 31.03.2026 spielt der Verzug keine Rolle."
+          }
+        },
+        {
+          "frage": {
+            "de": "TF-IDF trifft 100 Prozent der Rezensionen, BERT 94,2 Prozent. Welches Ergebnis ist belastbarer?"
+          },
+          "optionen": [
+            {
+              "de": "BERT: Es hat die Satzbausteine des Generators nie gesehen"
+            },
+            {
+              "de": "TF-IDF: 100 Prozent ist das Maximum"
+            },
+            {
+              "de": "Beide gleich"
+            }
+          ],
+          "richtig": [
+            0
+          ],
+          "mehrfach": false,
+          "erklaerung": {
+            "de": "Die Rezensionen sind simuliert; TF-IDF lernt die Bausteine, nicht die Sprache. 100 Prozent sind ein Warnsignal — echte Shop-Rezensionen sind die eigentliche Prüfung."
+          }
+        }
+      ],
+      "rueckmeldung": {
+        "de": "Datum als Schlüssel, Lizenz als Pflicht, Gegenprobe als Regel — und die erste echte Rezension aus dem Shop ist der erste Text, an dem sich Notebook 08 bewähren muss."
+      }
+    }
+  ]
+}
