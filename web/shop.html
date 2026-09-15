@@ -6072,11 +6072,11 @@ setTimeout(() => {
 // Die Versionsnummer hinter den Modulen bricht den Browser-Cache: Pages liefert
 // Dateien zehn Minuten lang aus dem Cache, und eine neue shop.html mit einer alten
 // datenquelle.js endet in „is not a function“. Wer ein Modul ändert, zählt hier hoch.
-import { QUELLE } from './js/konfiguration.js?v=20260912';
-import { waehleQuelle } from './js/datenquelle.js?v=20260912';
-import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js?v=20260912';
+import { QUELLE } from './js/konfiguration.js?v=20260915';
+import { waehleQuelle } from './js/datenquelle.js?v=20260915';
+import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js?v=20260915';
 import { bewertungText, pruefeEingabe, zaehlerText, datumText, nachArtikel,
-         stimmenNachArtikel, datensatzZeilen } from './js/rezensionen.js?v=20260912';
+         stimmenNachArtikel, datensatzZeilen } from './js/rezensionen.js?v=20260915';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;

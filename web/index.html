@@ -10,7 +10,7 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --red:#B91C1C;--gold:#b45309;--blue:#1d4ed8;--green:#047857;--purple:#6d28d9;
+  --red:#B91C1C;--gold:#b45309;--blue:#1d4ed8;--green:#047857;--purple:#6d28d9;--orange:#C2410C;
   --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;
   --g500:#6b7280;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--g900:#111827;
   --font:'Inter',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;
@@ -40,7 +40,7 @@ body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;
 .sec .lead{font-size:15px;color:var(--g500);margin-bottom:24px;text-align:justify;hyphens:auto;-webkit-hyphens:auto;line-height:1.75}
 
 /* === CARDS === */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .card{display:flex;flex-direction:column;background:#fff;border:2px solid var(--g200);border-radius:14px;padding:28px 24px;text-decoration:none;color:inherit;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.04);position:relative;cursor:pointer}
 .card:hover{box-shadow:0 8px 28px rgba(0,0,0,.1);transform:translateY(-3px)}
 .card:active{transform:translateY(0);box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -49,17 +49,19 @@ body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;
 .c-red .card-cta{color:var(--red);background:#fef2f2;border:1px solid #fecaca}
 .c-gold .card-cta{color:var(--gold);background:#fffbeb;border:1px solid #fde68a}
 .c-blue .card-cta{color:var(--blue);background:#eff6ff;border:1px solid #bfdbfe}
+.c-orange .card-cta{color:var(--orange);background:#FDF1E7;border:1px solid #f5c8b3}
 .card:hover .card-cta{gap:10px}
 .c-red:hover .card-cta{background:#fde2e2;border-color:#f9a8a8}
 .c-gold:hover .card-cta{background:#fef3c7;border-color:#fbbf24}
 .c-blue:hover .card-cta{background:#dbeafe;border-color:#93c5fd}
+.c-orange:hover .card-cta{background:#f9dccb;border-color:#ee9f7c}
 .cta-arrow{transition:transform .2s;display:inline-block}
 .card:hover .cta-arrow{transform:translateX(3px)}
-.c-red:hover{border-color:#fecaca}.c-gold:hover{border-color:#fde68a}.c-blue:hover{border-color:#bfdbfe}
+.c-red:hover{border-color:#fecaca}.c-gold:hover{border-color:#fde68a}.c-blue:hover{border-color:#bfdbfe}.c-orange:hover{border-color:#f5c8b3}
 .card-top{height:4px;border-radius:14px 14px 0 0;margin:-28px -24px 18px;width:calc(100% + 48px)}
-.c-red .card-top{background:var(--red)}.c-gold .card-top{background:var(--gold)}.c-blue .card-top{background:var(--blue)}
+.c-red .card-top{background:var(--red)}.c-gold .card-top{background:var(--gold)}.c-blue .card-top{background:var(--blue)}.c-orange .card-top{background:var(--orange)}
 .card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.c-red .card-icon{background:#fef2f2;color:var(--red)}.c-gold .card-icon{background:#fffbeb;color:var(--gold)}.c-blue .card-icon{background:#eff6ff;color:var(--blue)}
+.c-red .card-icon{background:#fef2f2;color:var(--red)}.c-gold .card-icon{background:#fffbeb;color:var(--gold)}.c-blue .card-icon{background:#eff6ff;color:var(--blue)}.c-orange .card-icon{background:#FDF1E7;color:var(--orange)}
 .card-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--g400);margin-bottom:2px}
 .card h3{font-size:20px;font-weight:800;color:var(--g900);margin-bottom:8px}
 .card p{font-size:14px;color:var(--g500);line-height:1.7;flex:1;margin-bottom:14px}
@@ -67,6 +69,7 @@ body{font-family:var(--font);background:#fff;color:var(--g700);line-height:1.65;
 .c-red .card-tag{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
 .c-gold .card-tag{background:#fffbeb;color:var(--gold);border:1px solid #fde68a}
 .c-blue .card-tag{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe}
+.c-orange .card-tag{background:#FDF1E7;color:var(--orange);border:1px solid #f5c8b3}
 
 /* === WORKFLOW (Flowchart) === */
 .wf-box{padding:8px 0}
@@ -219,13 +222,24 @@ footer{text-align:center;padding:20px 16px;border-top:1px solid var(--g200);marg
       <p>BI-Plattform mit Zeitreihen 2017–2026, Filial-Scorecard, RFM-Segmentierung, Kanalanalyse und Management Summary. Alle Werte aus den CSV-Daten berechnet.</p>
       <span class="card-tag">Analytics · Data Mining</span>
     </a>
+    <a class="card c-orange" href="lab/">
+      <div class="card-top"></div>
+      <div class="card-header">
+        <div class="card-icon"><i class="fa-solid fa-flask"></i></div>
+        <div class="card-cta">Lab öffnen <span class="cta-arrow">→</span></div>
+      </div>
+      <div class="card-label">Lernumgebung</div>
+      <h3>BM-Lab</h3>
+      <p>Acht Labs mit 41 Übungen im Browser: Zugang, Daten, Datenmodell, Power BI, Tableau, Python, Data Mining, externe Daten — mit PostgreSQL im Browser, ohne Konto.</p>
+      <span class="card-tag">Übungen · PGlite · Regal-Simulator</span>
+    </a>
   </div>
 </div>
 
 <!-- ANALYTICS WORKFLOW -->
 <div class="sec" style="padding-top:0">
   <h2>Analytics-Projektablauf</h2>
-  <p class="lead">Der folgende Ablauf beschreibt die typische Vorgehensweise in einem Analytics-Projekt — von der Rohdatenbereitstellung bis zur fertigen Entscheidungsvorlage. Jeder Schritt lässt sich mit den BurgerMetrics-CSV-Dateien konkret nachvollziehen. Die Daten simulieren dabei Exporte aus operativen Quellsystemen (POS-Kassensystem, Online-Bestellportal), wie sie in der betrieblichen Praxis aus ERP- oder Warenwirtschaftssystemen erzeugt werden. Das Datenmodell folgt dem Galaxy-Schema (Fact Constellation) mit zwei Faktentabellen (fact_orders, fact_order_items) und neun Dimensionstabellen, ergänzt um eine vollständig vorverknüpfte One Big Table (obt_orders.csv) für den schnellen Einstieg ohne SQL-JOINs.</p>
+  <p class="lead">Der folgende Ablauf beschreibt die typische Vorgehensweise in einem Analytics-Projekt — von der Rohdatenbereitstellung bis zur fertigen Entscheidungsvorlage. Jeder Schritt lässt sich mit den BurgerMetrics-CSV-Dateien konkret nachvollziehen. Die Daten simulieren dabei Exporte aus operativen Quellsystemen (POS-Kassensystem, Online-Bestellportal), wie sie in der betrieblichen Praxis aus ERP- oder Warenwirtschaftssystemen erzeugt werden. Das Datenmodell folgt dem Galaxy-Schema (Fact Constellation) mit zwei Faktentabellen (fact_orders, fact_order_items) und neun Dimensionstabellen, ergänzt um eine vollständig vorverknüpfte One Big Table (obt_orders.csv) für den schnellen Einstieg ohne SQL-JOINs. Die neun Notebooks unter <a href="https://github.com/swrobuts/BurgerMetrics/tree/main/notebooks">notebooks/</a> und die Dash-App unter <a href="https://github.com/swrobuts/BurgerMetrics/tree/main/dash">dash/</a> führen diesen Ablauf mit Python gegen die Datenbank vor — vom Zugang mit dem Demo-Konto bis zur Sentiment-Analyse.</p>
   <div class="wf-box">
     <div class="wf-flow">
       <div class="wf-node">
@@ -410,6 +424,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='1')location.href='pos.html';
   if(e.key==='2')location.href='shop.html';
   if(e.key==='3')location.href='dashboard.html';
+  if(e.key==='4')location.href='lab/';
 });
 </script>
 </body>
