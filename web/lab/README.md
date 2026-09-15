@@ -174,5 +174,5 @@ Fehler.
 Kein eigenes Setup: Der Merge auf `main` löst den vorhandenen Workflow
 `.github/workflows/static.yml` aus, der `web/` samt `web/lab/` auf GitHub Pages ausliefert;
 `web/.nojekyll` besteht bereits. Adresse danach: `https://swrobuts.github.io/BurgerMetrics/lab/`.
-Die PGlite-Dateien (rund 19 MB) liegen im Repository, damit die SQL-Übungen im Hörsaal an keinem
-fremden Dienst hängen.
+Das Paket unter `web/lab/` ist rund 20 MB groß, davon die PGlite-Dateien rund 19 MB; sie liegen im
+Repository, damit die SQL-Übungen im Hörsaal an keinem fremden Dienst hängen.
