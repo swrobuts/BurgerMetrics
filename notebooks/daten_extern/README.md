@@ -10,4 +10,6 @@
 Notebook 05 liest zuerst diese Dateien; fehlen sie — etwa in Colab, wo der Ordner
 `daten_extern/` nicht existiert —, liest es dieselben Dateien aus GitHub (Branch `main`). Erst
 wenn auch das scheitert oder `AKTUALISIEREN = True` gesetzt ist, ruft es die Anbieter erneut.
+Der kuratierte VPI hat keinen automatischen Abruf und wird unabhängig von diesem Schalter
+aus der lokalen Datei oder aus GitHub gelesen.
 Feiertage kommen aus dem Python-Paket `holidays` (MIT) und brauchen keine Datei.
