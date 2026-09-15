@@ -2,20 +2,20 @@
 
 Ein MCP-Server über die beiden Schemata `wawi` und `burgermetrics` auf
 `supabase.butscher.cloud`. Er ist das Fenster des **Betreibers**: Er
-meldet sich mit dem Konto aus der nicht versionierten `.env` an, demselben,
-mit dem `lade_csv.py` und `materialisieren.py` arbeiten. Für Studierende
-ist er nicht gedacht — die haben die Rolle `studi_daba` aus
-[`../db/aufbau/0020_demo_rolle.sql`](../db/aufbau/0020_demo_rolle.sql) und
-können sich damit einen eigenen Server bauen; dieser hier ist die Vorlage.
+nutzt zum Schreiben das Betreiberkonto aus der nicht versionierten `.env`.
+Für Lesezugriffe meldet er sich separat als `studi_daba` an. Dieselbe
+Lesefunktion steht mit `BM_MCP_NUR_LESEN=1` auch ohne Betreiberzugang bereit.
 
 ## Wo die Rechte liegen
 
-Nicht hier. Der Server hat keine eigene Rechteprüfung; was das Konto in
-der Datenbank darf, darf der Agent. Zwei Riegel gibt es trotzdem, beide
-in der Datenbank statt im Programm:
+Die Schreibsperre liegt in den Datenbankrechten der Leserolle:
 
-* `abfragen()` läuft **immer** in einer nur lesenden Transaktion. Ein
-  `UPDATE` darin weist PostgreSQL ab, nicht der Server.
+* `abfragen()` und Metadatenabfragen verwenden **immer** eine direkte Anmeldung
+  als `studi_daba`. Der Server prüft `session_user` und `current_user` und lehnt
+  andere Identitäten ab. Ein Pooler-Suffix im Anmeldenamen ist möglich.
+  Die ACLs dieser Rolle sperren Schreiben auch nach `COMMIT; BEGIN READ WRITE`
+  oder `RESET ROLE`. Die zusätzliche `READ ONLY`-Voreinstellung allein wäre
+  keine Sicherheitsgrenze.
 * `ausfuehren()` ist der einzige Schreibweg: eine Transaktion je Aufruf,
   Commit nur ohne Fehler, und der Aufrufer muss einen Grund nennen. Wer
   den Server nur lesend betreiben will, setzt `BM_MCP_NUR_LESEN=1` in der
@@ -24,8 +24,22 @@ in der Datenbank statt im Programm:
 ## Einrichten
 
 **1 · Zugangsdaten.** `.env` im Wurzelverzeichnis, wie in `.env.example`:
-`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`. Fehlt sie,
-startet der Server nicht und sagt das.
+`PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`. Im Nur-Lesen-Modus
+sind `PGUSER` und `PGPASSWORD` nicht erforderlich.
+
+Lesezugang: `BM_MCP_READ_USER=studi_daba`, `BM_MCP_READ_PASSWORD=thws`
+(öffentliche Demo-Standardwerte). Vor Benutzung müssen **beide** Skripte
+[`0020_demo_rolle.sql`](../db/aufbau/0020_demo_rolle.sql) und
+[`studi_daba_lesend.sql`](../db/betrieb/studi_daba_lesend.sql) angewandt sein;
+das zweite entfernt auch indirekte Schreibwege über `PUBLIC` und Funktionen.
+Ein anderer Rollenname oder das Betreiberkonto ist kein Ersatz.
+
+Alle Verbindungen erzwingen `sslmode=verify-full`: Das Serverzertifikat muss
+zu `PGHOST` passen und vertrauenswürdig sein. Mit `PGSSLROOTCERT` die CA-Datei
+angeben; ohne Angabe gilt die libpq-Standarddatei `~/.postgresql/root.crt`.
+Die CA über einen vertrauenswürdigen Weg beziehen. Auch ein gesetztes
+`PGSSLMODE=disable` schaltet diese Prüfung nicht ab. Ein Endpunkt ohne
+geeignetes TLS-Zertifikat muss zuerst auf Betreiberseite eingerichtet werden.
 
 **2 · Umgebung.** Der Server bekommt eine eigene, damit er die
 Arbeitsumgebung nicht anfasst, in der noch anderes läuft:
@@ -78,7 +92,7 @@ claude mcp add burgermetrics-db -- <Pfad>/mcp/.venv/bin/python <Pfad>/mcp/server
 | `tabellen_auflisten` | Tabellen, Sichten, materialisierte Sichten mit Zeilenzahl und Kommentar |
 | `tabelle_beschreiben` | Spalten, Typen, Schlüssel, Fremdschlüssel — und wer auf die Tabelle verweist |
 | `beziehungen_auflisten` | alle Fremdschlüssel eines Schemas: das Datenmodell als Liste |
-| `abfragen` | SQL lesen, höchstens 500 Zeilen, nur lesende Transaktion |
+| `abfragen` | SQL lesen, höchstens 500 Zeilen, eingeschränkte Datenbankrolle |
 | `serverstand` | Konto, Server, und ob der Prozess veraltet ist |
 
 | Ändern | |
@@ -92,7 +106,5 @@ die Projektschemata, und `kunde`, `mitarbeiter`, `rechnung` und
 
 ## Was ein Studierender daraus macht
 
-Denselben Server mit anderem Konto: `PGUSER=studi_daba`,
-`PGPASSWORD=thws` in einer eigenen `.env`. Die Rolle ist nur lesend,
-`ausfuehren()` liefe dann in den Satz der Datenbank — man kann es auch
-gleich mit `BM_MCP_NUR_LESEN=1` abschalten.
+Denselben Server mit `BM_MCP_NUR_LESEN=1`, dem Lesezugang und einer gültigen
+CA-Konfiguration starten. Betreiberzugangsdaten sind dafür nicht nötig.

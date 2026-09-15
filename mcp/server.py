@@ -13,16 +13,14 @@ ausfuehren.
 
 WESSEN KONTO
 
-Das des Betreibers, aus der nicht versionierten .env im Wurzelverzeichnis
-(PGHOST, PGPORT, PGDATABASE, PGUSER, PGPASSWORD) - dasselbe Konto, mit
-dem lade_csv.py und materialisieren.py arbeiten. Dieser Server ist NICHT
-fuer Studierende gedacht; die haben die Rolle studi_daba
-(db/aufbau/0020_demo_rolle.sql) und koennen sich damit einen eigenen
-Server bauen. Fehlt die .env, startet der Server nicht.
+Schreiben: Betreiberkonto aus PGUSER/PGPASSWORD. Lesen: direkte Anmeldung
+als studi_daba (BM_MCP_READ_USER/BM_MCP_READ_PASSWORD). Die Rolle muss mit
+db/aufbau/0020_demo_rolle.sql UND db/betrieb/studi_daba_lesend.sql
+eingerichtet sein. Alle Verbindungen verlangen TLS mit Zertifikatspruefung.
 
 LESEN UND SCHREIBEN
 
-abfragen() laeuft in einer nur lesenden Transaktion, immer. ausfuehren()
+abfragen() nutzt immer die eingeschraenkte Leserolle. ausfuehren()
 ist der Schreibweg: DDL und DML, eine Transaktion je Aufruf, Commit nur
 ohne Fehler. Wer den Server nur lesend betreiben will, setzt in der
 Umgebung BM_MCP_NUR_LESEN=1 - dann meldet ausfuehren() sich ab.
@@ -58,8 +56,8 @@ from mcp.server.mcpserver import MCPServer
 
 # ─────────────────────────────────────────────────────── Zugangsdaten
 #
-# Aus der .env des Repos, wie lade_csv.py. Nichts davon steht hier im
-# Quelltext: Das Konto ist das des Betreibers.
+# Aus der .env des Repos. Die Demo-Leserolle hat absichtlich oeffentliche
+# Zugangsdaten; Betreibergeheimnisse stehen niemals im Quelltext.
 WURZEL = pathlib.Path(__file__).resolve().parent.parent
 
 
@@ -82,10 +80,12 @@ PORT = int(os.environ.get("PGPORT", "5432") or 5432)
 DATENBANK = os.environ.get("PGDATABASE", "postgres")
 BENUTZER = os.environ.get("PGUSER", "")
 PASSWORT = os.environ.get("PGPASSWORD", "")
+LESE_BENUTZER = os.environ.get("BM_MCP_READ_USER", "studi_daba")
+LESE_PASSWORT = os.environ.get("BM_MCP_READ_PASSWORD", "thws")
 NUR_LESEN = os.environ.get("BM_MCP_NUR_LESEN", "") not in ("", "0", "nein", "false")
 
-if not (HOST and BENUTZER and PASSWORT):
-    sys.stderr.write(f"burgermetrics-db: PGHOST, PGUSER und PGPASSWORD fehlen. "
+if not HOST or (not NUR_LESEN and not (BENUTZER and PASSWORT)):
+    sys.stderr.write(f"burgermetrics-db: PGHOST fehlt oder Betreiberzugang PGUSER/PGPASSWORD fehlt. "
                      f"Erwartet in {WURZEL / '.env'} (siehe .env.example).\n")
     raise SystemExit(2)
 
@@ -123,19 +123,34 @@ _STAND_BEIM_START = _fingerabdruck(_DATEI)
 
 # ─────────────────────────────────────────────────────── Verbindung
 def _verbindung(schreibend: bool = False):
-    """Eine frische Verbindung je Aufruf. Lesend heisst: die Datenbank
-    selbst weist jede Aenderung ab (SET TRANSACTION READ ONLY), nicht
-    dieses Programm. Schreibend: eine Transaktion, Commit durch den Aufrufer."""
+    """Frische Anmeldung je Aufruf; Lesezugriffe erhalten nie Betreiberrechte.
+
+    READ ONLY ist nur eine Voreinstellung. Die wirksame Sperre sind die
+    Datenbankrechte von studi_daba, auch nach COMMIT/BEGIN oder RESET ROLE.
+    """
+    if schreibend and NUR_LESEN:
+        raise ValueError("Schreibzugriff ist mit BM_MCP_NUR_LESEN abgeschaltet")
     con = psycopg2.connect(host=HOST, port=PORT, dbname=DATENBANK,
-                           user=BENUTZER, password=PASSWORT,
-                           connect_timeout=10,
+                           user=BENUTZER if schreibend else LESE_BENUTZER,
+                           password=PASSWORT if schreibend else LESE_PASSWORT,
+                           connect_timeout=10, sslmode="verify-full",
                            application_name="burgermetrics-mcp")
-    if schreibend:
-        con.set_session(readonly=False, autocommit=False)
-    else:
-        con.set_session(readonly=True, autocommit=True)
-        with con.cursor() as cur:
-            cur.execute("SET statement_timeout = '120s'")
+    try:
+        if schreibend:
+            con.set_session(readonly=False, autocommit=False)
+        else:
+            con.autocommit = True
+            with con.cursor() as cur:
+                # Pooler duerfen einen Suffix im Login-Namen verlangen. Die
+                # tatsaechliche DB-Identitaet muss trotzdem studi_daba sein.
+                cur.execute("SELECT session_user, current_user")
+                if cur.fetchone() != ("studi_daba", "studi_daba"):
+                    raise ValueError("Lesezugriffe verlangen eine direkte Anmeldung als studi_daba")
+                cur.execute("SET statement_timeout = '120s'")
+            con.set_session(readonly=True, autocommit=True)
+    except Exception:
+        con.close()
+        raise
     return con
 
 
@@ -222,7 +237,7 @@ def serverstand() -> str:
     """Zeigt, womit dieser Prozess verbunden ist, wer er in der Datenbank
     ist, und ob die geladene Fassung von server.py noch die Datei auf der
     Platte ist."""
-    zeilen: list[str] = [f"Verbindung: {BENUTZER}@{HOST}:{PORT}/{DATENBANK}"]
+    zeilen: list[str] = [f"Leseverbindung: {LESE_BENUTZER}@{HOST}:{PORT}/{DATENBANK}"]
     try:
         z = _lesen("SELECT current_user, current_setting('search_path') AS suchpfad, "
                    "current_setting('statement_timeout') AS zeitgrenze, "
@@ -367,7 +382,7 @@ def abfragen(sql: str, limit: int = 100) -> str:
 
     sql    Eine SELECT-Abfrage (auch WITH, EXPLAIN). Tabellen mit
            Schemapraefix nennen: wawi.rechnung, burgermetrics.fact_orders.
-           Die Transaktion ist nur lesend; Aenderungen weist die
+           Die Leserolle hat keine Schreibrechte; Aenderungen weist die
            Datenbank ab. Dafuer gibt es ausfuehren().
     limit  Hoechstens 500 Zeilen. Wer mehr braucht, aggregiert.
     """
@@ -435,7 +450,7 @@ if not NUR_LESEN:
 def _selbsttest() -> int:
     """Verbindet sich, liest je eine Zeile aus beiden Schemata, prueft,
     dass Schreiben scheitert, zaehlt die Werkzeuge."""
-    print(f"Verbindung als {BENUTZER} zu {HOST}:{PORT}/{DATENBANK}")
+    print(f"Leseverbindung als {LESE_BENUTZER} zu {HOST}:{PORT}/{DATENBANK}")
     try:
         z = _lesen("SELECT current_user, current_setting('search_path') AS sp")[0]
     except Exception as fehler:                       # noqa: BLE001
@@ -450,8 +465,9 @@ def _selbsttest() -> int:
             print(f"  FEHLER  {schema}.{tabelle}: {_fehler(fehler)}")
             print("          Stimmen die Zugangsdaten in .env?")
             return 1
-    antwort = abfragen("INSERT INTO wawi.zahlungsart SELECT * FROM wawi.zahlungsart LIMIT 0")
-    if "liest nur" not in antwort:
+    antwort = abfragen("COMMIT; BEGIN READ WRITE; RESET ROLE; "
+                       "INSERT INTO wawi.zahlungsart SELECT * FROM wawi.zahlungsart LIMIT 0")
+    if "permission denied" not in antwort:
         print(f"  FEHLER  abfragen() hat Schreiben nicht abgewiesen: {antwort}")
         return 1
     print("  ok      abfragen() weist Schreiben ab")
