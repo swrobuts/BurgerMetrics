@@ -82,6 +82,23 @@ function deutschBefunde (wert, pfad = '') {
 }
 
 /** Die Saatfolge steht zweimal (Browser: bm.js per fetch, Node: sql.mjs per fs). Abweichungen Eintrag für Eintrag. */
+/**
+ * Bilder einer Seite: jedes <img> unter assets/ muss existieren und einen
+ * Alternativtext tragen; jeder Link auf ein Bild unter assets/ muss existieren.
+ * `existiert` entscheidet über die Datei — so lässt sich die Regel ohne Dateien prüfen.
+ */
+function bildBefunde (html, existiert) {
+  const befunde = []
+  for (const m of html.matchAll(/<img\s[^>]*src="(assets\/[^"]+)"[^>]*>/g)) {
+    if (!existiert(m[1])) befunde.push(`Bild ${m[1]} fehlt`)
+    if (!/\salt="[^"]+"/.test(m[0])) befunde.push(`Bild ${m[1]} ohne Alternativtext`)
+  }
+  for (const m of html.matchAll(/href="(assets\/[^"#?]+\.(?:png|jpg|jpeg|webp|svg))"/g)) {
+    if (!existiert(m[1])) befunde.push(`verlinktes Bild ${m[1]} fehlt`)
+  }
+  return befunde
+}
+
 function saatAbweichungen (a, b) {
   const befunde = []
   if (a.length !== b.length) befunde.push(`${a.length} gegen ${b.length} Einträge`)
@@ -234,6 +251,8 @@ for (const [lab, htmlDatei] of Object.entries(HTML_ZU_LAB).sort()) {
   for (const m of html.matchAll(/href="((?:vorlagen|data)\/[^"#?]+)"/g)) {
     gut(existsSync(join(WURZEL, m[1])), `${lab}: verlinkte Datei ${m[1]} existiert`)
   }
+  const bilder = bildBefunde(html, (pfad) => existsSync(join(WURZEL, pfad)))
+  gut(bilder.length === 0, `${lab}: Bilder vorhanden und mit Alternativtext`, bilder.join('; '))
   gut(!VORLAGENRESTE.test(html), `${lab}: keine Reste der Vorlage (PITM, winf, WInf-SP, Velo City)`)
   gut(!ENGLISCH_HTML.test(html), `${lab}: nur Deutsch (kein lang="en", kein data-lang-btn, kein ?lang=)`)
   gut(/assets\/bm\.css/.test(html) && /<script type="module" src="assets\/bm\.js"><\/script>/.test(html), `${lab}: bindet bm.css und bm.js ein`)
@@ -395,6 +414,12 @@ gut(deutschBefunde({ uebungen: [{ typ: 'json', titel: { de: 'T' }, erwartet: { t
   gut(saatAbweichungen(kopie, SAAT).length === 1, 'Saat: ein geänderter Vorspann wird gemeldet')
   gut(saatAbweichungen(SAAT.slice(0, 2), SAAT).length >= 1, 'Saat: ein fehlender Eintrag wird gemeldet')
 }
+
+// Bilder: fehlende Datei und fehlender Alternativtext werden gemeldet, ein sauberes Bild nicht.
+gut(bildBefunde('<img src="assets/tableau/x.png" alt="Dialog">', () => true).length === 0, 'Bilder: ein vorhandenes Bild mit Alternativtext ist ohne Befund')
+gut(bildBefunde('<img src="assets/tableau/x.png" alt="Dialog">', () => false).length === 1, 'Bilder: eine fehlende Bilddatei wird gemeldet')
+gut(bildBefunde('<img src="assets/tableau/x.png" alt="">', () => true).length === 1, 'Bilder: ein leerer Alternativtext wird gemeldet')
+gut(bildBefunde('<a href="assets/tableau/x.png">', () => false).length === 1, 'Bilder: ein Link auf ein fehlendes Bild wird gemeldet')
 
 // Regex-Regeln der Seitenprüfung.
 gut(ENGLISCH_HTML.test('<span lang="en">x</span>') && ENGLISCH_HTML.test('href="lab-01.html?lang=en"') && !ENGLISCH_HTML.test('<html lang="de" data-lang="de">'),

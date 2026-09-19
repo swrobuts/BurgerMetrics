@@ -737,6 +737,9 @@ tr:nth-child(even) td { background: var(--bg-soft); }
    die es geht, mit Ziffern markiert und darunter erklärt. Ein Foto altert
    mit jeder Version und lässt sich nicht übersetzen; die Nachbildung
    zeigt, was bleibt.
+   Ausnahme Lab 05: Dort stehen geprüfte Bildschirmfotos von Tableau Desktop
+   2026.2 (19.09.2026) im selben Rahmen (.shot > a.foto > img), die Ziffern
+   sind in das Bild gezeichnet, die Legende darunter bleibt.
    =========================================================================== */
 
 .shot {
@@ -814,6 +817,18 @@ tr:nth-child(even) td { background: var(--bg-soft); }
 .shot-legende li { display: grid; grid-template-columns: 1.6rem 1fr; gap: 0.4rem; align-items: start; }
 .shot-legende .callout { margin: 0.1rem 0 0; }
 .shot-hinweis { font-size: 0.76rem; color: var(--ink-soft); text-align: right; margin: -0.8rem 0 1rem; font-style: italic; }
+
+/* Bildschirmfotos (Lab 05): im Rahmen der Nachbildung oder als Reihe von Figuren. */
+.shot > a.foto { display: block; }
+.shot > a.foto img { display: block; width: 100%; height: auto; }
+.foto-reihe { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 1rem; align-items: start; margin: 1.2rem 0 0.4rem; }
+.foto-reihe.eins { grid-template-columns: minmax(0, 1fr); }
+.foto { margin: 0; }
+.foto a { display: block; }
+.foto img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 4px 18px rgba(26, 20, 23, 0.08); background: #fff; }
+.foto figcaption { font-size: 0.8rem; color: var(--ink-soft); margin: 0.4rem 0 0; }
+.foto-hinweis { font-size: 0.76rem; color: var(--ink-soft); text-align: right; margin: 0.4rem 0 1rem; font-style: italic; }
+@media (max-width: 720px) { .foto-reihe { grid-template-columns: minmax(0, 1fr); } }
 
 /* ------------------------------------------------------------ Kopiervorlagen */
 

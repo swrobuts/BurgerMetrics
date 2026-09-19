@@ -1,5 +1,6 @@
 // tableau-berechnete-felder.txt — Calculated Fields für das Dashboard zur Fallstudie BurgerMetrics
-// Kopiervorlage zu Lab 05 (Befehlskarte B03). Tableau Desktop 2026.2. Stand 09/2026.
+// Kopiervorlage zu Lab 05 (Befehlskarte B03). Tableau Desktop 2026.2; Blöcke 1, 3 und 4
+// am 19.09.2026 in Tableau Desktop 2026.2 angelegt und geprüft, Block 2 nicht.
 //
 // Vier Blöcke, je ein Feld: drei für die Datenbank (Blatt aus fact_orders,
 // dim_branch, fact_reviews), einer für die CSV-Dateien der Public Edition.
@@ -20,7 +21,10 @@
 //    Tableau rechnet das Verhältnis je Zelle des Blatts: je Filiale, je Monat, gesamt.
 //    Dieselbe Kennzahl heißt in v_kennzahlen_jahr aov; für 2025: 21,93 €
 //    aus 2.994.771,13 € und 136.557 Bestellungen.
-//    SUM([Net Total]) / [Order Id] mischt Aggregat und Zeile — der Dialog weist das ab.
+//    SUM([Net Total]) / [Order Id] mischt Aggregat und Zeile — der Dialog meldet
+//    „Die Berechnung enthält Fehler.“ und auf Klick: „Für diese Funktion können keine
+//    Aggregatargumente und Nicht-Aggregatargumente gemischt werden.“ Die gültige Formel
+//    meldet „Die Berechnung ist gültig.“; als Text im Blatt mit dem Jahr 2025: 21,93.
 // Name: Bestellwert
 SUM([Net Total]) / COUNT([Order Id])
 
@@ -38,7 +42,8 @@ AVG([Stars])
 //    neben jedem Monat die Summe seiner Filiale. Ohne Branch Name im Blatt fasst
 //    Tableau die Filialsummen wieder zusammen, und es steht der Gesamtwert da.
 //    Ein gewöhnlicher Filter auf dem Blatt ändert diesen Wert nicht, ein
-//    Datenquellenfilter schon.
+//    Datenquellenfilter schon. Im Datenbereich ordnet Tableau das Feld unter dim_branch
+//    ein, der Tabelle seiner Ebene.
 // Name: Umsatz je Filiale (FIXED)
 { FIXED [Branch Name] : SUM([Net Total]) }
 
@@ -47,14 +52,18 @@ AVG([Stars])
 //    v_umsatz_monat.csv und v_filiale.csv tragen je Zeile schon Summen — die Spalten
 //    umsatz und bestellungen, in Tableau [Umsatz] und [Bestellungen]. Deshalb Summe
 //    durch Summe, kein COUNT: Eine Zeile ist ein Monat oder eine Filiale, keine Bestellung.
+//    Vorher in den Textdatei-Eigenschaften das Gebietsschema auf Englisch (Vereinigte
+//    Staaten) stellen — sonst liest die deutsche Oberfläche umsatz (5897.6) als Text.
+//    Der Feldname steht so in der Formel, wie er im Datenbereich erscheint.
 //    Block 1 und Block 4 definieren beide das Feld Bestellwert — je Datenquelle
 //    eines, nicht beide in einer Arbeitsmappe.
 // Name: Bestellwert
 SUM([Umsatz]) / SUM([Bestellungen])
 
 // ---------------------------------------------------------------------------
-// Kein Calculated Field, sondern das Feld „Initial SQL“ im Verbindungsdialog der
-// Live-Verbindung (Befehlskarte B01): stellt burgermetrics vor wawi, damit die
-// Sichten v_* ohne Präfix gefunden werden. SET schreibt nichts und läuft in der
-// nur lesenden Transaktion der Rolle studi_daba.
+// Kein Calculated Field, sondern der Reiter „Initiale SQL-Befehle“ im Verbindungsdialog
+// (Befehlskarte B01): stellt burgermetrics vor wawi, damit eigene Abfragen unter
+// „Neue benutzerdefinierte SQL“ die Sichten v_* ohne Präfix finden — die Tabellenliste
+// zeigt ohnehin jede Tabelle mit ihrem Schema. SET schreibt nichts und läuft in der
+// nur lesenden Transaktion der Rolle studi_daba; geprüft am 19.09.2026.
 //   SET search_path TO burgermetrics, wawi

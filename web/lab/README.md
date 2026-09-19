@@ -40,6 +40,7 @@ web/lab/
   assets/jsonpruefung.js     Prüfung der JSON-Übungen (unverändert aus WInf-SP)
   assets/regal.js            Aggregation und Zielprüfung des Shelf-Simulators (aus WInf-SP; nur die zwei deutschen Prüfmeldungen auf Shelf umgestellt)
   assets/pglite/             PostgreSQL als WebAssembly (PGlite), lokal statt vom CDN (rund 19 MB)
+  assets/tableau/            Sieben Bildschirmfotos von Tableau Desktop 2026.2 für Lab 05 (19.09.2026, rund 590 KB)
   data/wawi_mini.sql         Schema wawi: Kopie aus dataset/ (Kasse, Shop, Rezensionen)
   data/burgermetrics_mini.sql Schema burgermetrics: Kopie aus dataset/ (Galaxy-Schema mit fact_reviews)
   data/bm_sichten.sql        Sechs Sichten der Semantikschicht auf dem Miniaturbestand
@@ -93,7 +94,9 @@ Abweichungen:
    haben.
 
 Ein Lab besteht aus `lab-0N-name.html`, `data/uebungen/lab-0N.json` und seinen Kopiervorlagen
-unter `vorlagen/`; nichts anderes wird angefasst (nicht `bm.js`, nicht `bm.css`, nicht
+unter `vorlagen/` (Lab 05 zusätzlich aus den Bildschirmfotos unter `assets/tableau/`, die an
+die Stelle der Nachbildungen treten — geprüfte Oberfläche statt gezeichneter, Ziffern im Bild,
+Legende darunter); nichts anderes wird angefasst (nicht `bm.js`, nicht `bm.css`, nicht
 `index.html`, keine anderen Labs). Übungs-IDs `W0N-01` …, Befehlskarten `B01` …; die Zahl der
 Übungen je Lab steht in `LABS` in `assets/bm.js`. Platzhalter, die die Laufzeit füllt:
 
@@ -148,7 +151,7 @@ node --test tools/datenbank.test.mjs
 Der Lauf braucht keinen Browser und prüft: Platzhalter und JSON deckungsgleich, Deutsch-Pflicht,
 Übungszahlen wie in `LABS`, Antwortindizes, Zuordnungsziele, JSON-Lösungen bestehen ihre Regeln
 (und die Starttexte nicht), Reihenfolge-Start ungleich Lösung, Shelf-Lösung erfüllt das Ziel,
-Befehlskarten vollständig, verlinkte Dateien vorhanden, Seitenbausteine (`data-lab`, große
+Befehlskarten vollständig, verlinkte Dateien und Bilder vorhanden (Bilder mit Alternativtext), Seitenbausteine (`data-lab`, große
 Nummer, Seitennavigation, Einordnung, Fortschritt, Navigation), genau ein Datenbankband je Seite
 mit SQL-Übungen, keine Terminal-, Deploy- oder SQLite-Reste, keine Reste der Vorlage, die
 Palette in `bm.css`, die Saatfolge in `bm.js` gegen `tools/sql.mjs`. Danach läuft **jede
