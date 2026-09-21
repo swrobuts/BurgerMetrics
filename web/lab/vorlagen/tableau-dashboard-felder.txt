@@ -1,0 +1,149 @@
+// tableau-dashboard-felder.txt — Parameter und Calculated Fields für das Kennzahlen-Dashboard
+// zur Fallstudie BurgerMetrics. Kopiervorlage zu Lab 05 (Befehlskarte B05). Tableau Desktop 2026.2,
+// am 22.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft; die Arbeitsmappe liegt
+// unter tableau/BurgerMetrics.twb im Repository.
+//
+// Datenquelle: fact_orders, dim_branch (Branch Id = Branch Id) und fact_reviews
+// (Order Id = Order Id) aus dem Schema burgermetrics, als Extrakt (Befehlskarte B01).
+// Tableau schreibt die Spalten mit Großbuchstaben und Leerzeichen:
+//   fact_orders.net_total     → [Net Total]        fact_orders.date  → [Date]
+//   fact_orders.order_id      → [Order Id]         dim_branch.branch_name → [Branch Name]
+//   fact_reviews.stars        → [Stars]            fact_reviews.date → [Date (Fact Reviews)]
+// Jedes Feld einzeln anlegen: Menü ▾ neben dem Suchfeld des Datenbereichs → „Berechnetes
+// Feld erstellen…“, der Name in das Namensfeld, die Formel in den Formelbereich. Zeilen mit //
+// sind Kommentare und dürfen mit eingefügt werden. Die Reihenfolge ist die der Abhängigkeiten:
+// Ein Feld nennt nur Felder, die davor stehen.
+//
+// Der Unterschied zu Power BI (Lab 04): Das Jahr ist kein Filter, sondern ein Parameter.
+// Ein Filter auf 2025 würde die Zeilen von 2024 entfernen — und mit ihnen das Vorjahr.
+// Der Parameter lässt alle Zeilen im Blatt; jedes Feld wählt mit IF YEAR([Date]) = [Jahr]
+// selbst aus, welche es summiert. Eine Datumstabelle und SAMEPERIODLASTYEAR braucht es nicht.
+
+// ---------------------------------------------------------------------------
+// 0) Parameter Jahr — kein Calculated Field: Menü ▾ neben dem Suchfeld → „Parameter
+//    erstellen…“. Name Jahr, Datentyp Ganzzahl, aktueller Wert 2025, Anzeigeformat ohne
+//    Tausendertrennzeichen (Zahl (benutzerdefiniert), 0 Dezimalstellen), zulässige Werte
+//    Bereich: Minimum 2018, Maximum 2026, Schrittgröße 1. Im Dashboard über das Menü ▾
+//    eines Blatts → Parameter → Jahr eingeblendet; das Kontextmenü der Steuerung stellt
+//    „Eingabe“ statt „Schieberegler“ ein.
+
+// ---------------------------------------------------------------------------
+// 1) Die vier Kennzahlen ohne Jahr — wie in tableau-berechnete-felder.txt (Lab 05, B03).
+//    Kontrolle mit einem Filter auf 2025: 2.994.771 · 136.557 · 21,93 · 3,750.
+// Name: Umsatz
+SUM([Net Total])
+// Name: Bestellungen
+COUNT([Order Id])
+// Name: Bestellwert
+[Umsatz] / [Bestellungen]
+// Name: Ø Sterne
+AVG([Stars])
+
+// ---------------------------------------------------------------------------
+// 2) Ist und Vorjahr über den Parameter — IF innerhalb der Aggregation: Zeilen des
+//    gewählten Jahres tragen ihren Wert bei, alle anderen NULL, und SUM, COUNT und AVG
+//    lassen NULL aus. Für das Vorjahr steht [Jahr] - 1. Die Sterne kommen aus
+//    fact_reviews und nehmen deshalb das Datum der Rezension.
+//    Kontrolle für 2025: Umsatz Jahr 2.994.771, Umsatz VJ 2.841.075 (v_kennzahlen_jahr).
+// Name: Umsatz Jahr
+SUM(IF YEAR([Date]) = [Jahr] THEN [Net Total] END)
+// Name: Umsatz VJ
+SUM(IF YEAR([Date]) = [Jahr] - 1 THEN [Net Total] END)
+// Name: Bestellungen Jahr
+COUNT(IF YEAR([Date]) = [Jahr] THEN [Order Id] END)
+// Name: Bestellungen VJ
+COUNT(IF YEAR([Date]) = [Jahr] - 1 THEN [Order Id] END)
+// Name: Bestellwert Jahr
+[Umsatz Jahr] / [Bestellungen Jahr]
+// Name: Bestellwert VJ
+[Umsatz VJ] / [Bestellungen VJ]
+// Name: Ø Sterne Jahr
+AVG(IF YEAR([Date (Fact Reviews)]) = [Jahr] THEN [Stars] END)
+// Name: Ø Sterne VJ
+AVG(IF YEAR([Date (Fact Reviews)]) = [Jahr] - 1 THEN [Stars] END)
+
+// ---------------------------------------------------------------------------
+// 3) Abweichung — relativ für Beträge und Zählungen, absolut für die Sterne.
+//    Ohne Vorjahr (2017) ist der Nenner NULL, und das Feld bleibt leer.
+//    Kontrolle für 2025: +5,4 % · +2,4 % · +2,9 % · +0,05 Sterne.
+//    Standardformat der Prozentfelder: Prozentsatz mit 1 Dezimalstelle
+//    (Kontextmenü des Felds → Standardeigenschaften → Zahlenformat).
+// Name: Δ Umsatz %
+([Umsatz Jahr] - [Umsatz VJ]) / [Umsatz VJ]
+// Name: Δ Bestellungen %
+([Bestellungen Jahr] - [Bestellungen VJ]) / [Bestellungen VJ]
+// Name: Δ Bestellwert %
+([Bestellwert Jahr] - [Bestellwert VJ]) / [Bestellwert VJ]
+// Name: Δ Ø Sterne
+[Ø Sterne Jahr] - [Ø Sterne VJ]
+
+// ---------------------------------------------------------------------------
+// 4) Richtung als Text — die einzige Farbe des Dashboards liegt auf diesem Feld:
+//    im Blatt „Abweichung je Monat“ auf Farbe, dann „Farben bearbeiten…“ — plus Grün
+//    #2E7D32, minus Rot #A32638. 2025 ist in jedem Monat plus; die Legende wird im
+//    Dashboard entfernt, die Farbe erklärt sich aus dem Vorzeichen.
+// Name: Δ Umsatz Richtung
+IF [Δ Umsatz %] >= 0 THEN "plus" ELSE "minus" END
+
+// ---------------------------------------------------------------------------
+// 5) Tausend Euro für die Diagramme — Linien und Small Multiples zeigen Tsd. €, damit
+//    die Achse 200 bis 300 heißt und nicht 200.000 bis 300.000.
+// Name: Umsatz Tsd Jahr
+[Umsatz Jahr] / 1000
+// Name: Umsatz Tsd VJ
+[Umsatz VJ] / 1000
+
+// ---------------------------------------------------------------------------
+// 6) Der rote Punkt — ein Feld, das nur im jüngsten Monat des gewählten Jahres einen Wert
+//    hat: MIN([Date]) ist das Datum der Zelle (ein Monat), der FIXED-Ausdruck das jüngste
+//    Datum des Jahres im ganzen Bestand; MAX() um den FIXED-Ausdruck macht ihn zum
+//    Aggregat, sonst meldet der Dialog „Aggregat- und Nicht-Aggregatargumente gemischt“.
+//    Auf eine zweite Achse gelegt (Doppelachse, synchronisiert, Kopfzeile ausgeblendet)
+//    zeichnet es einen Kreis mit Beschriftung: Dezember 2025 = 245,5.
+// Name: Umsatz Tsd letzter Monat
+IF MONTH(MIN([Date])) = MONTH(MAX({ FIXED : MAX(IF YEAR([Date]) = [Jahr] THEN [Date] END) }))
+THEN [Umsatz Tsd Jahr] END
+
+// ---------------------------------------------------------------------------
+// 7) Die führende Filiale — zwei verschachtelte Level-of-Detail-Ausdrücke: innen die
+//    Jahressumme je Filiale, außen das Maximum darüber; der Name der Filiale, deren Summe
+//    dem Maximum gleicht. Für 2025: BM Europastern.
+// Name: Top Filiale
+{ FIXED : MAX(IF { FIXED [Branch Name] : SUM(IF YEAR([Date]) = [Jahr] THEN [Net Total] END) }
+  = { FIXED : MAX({ FIXED [Branch Name] : SUM(IF YEAR([Date]) = [Jahr] THEN [Net Total] END) }) }
+  THEN [Branch Name] END) }
+
+// ---------------------------------------------------------------------------
+// 8) Der Titel als Feld — er rechnet mit, wenn das Jahr wechselt. STR() schreibt
+//    Dezimalpunkte („2.99“), REPLACE macht das Komma daraus; das Pluszeichen kommt aus
+//    dem IF, weil STR() keines setzt. Ergebnis für 2025:
+//    „Umsatz 2025: 2,99 Mio. €, +5,4 % zum Vorjahr – BM Europastern liegt vorn“.
+//    Im Blatt „Titel“ auf Text, Schrift 16 pt, Blatttitel im Dashboard ausgeblendet.
+// Name: Titel Dashboard
+"Umsatz " + STR([Jahr]) + ": "
+  + REPLACE(STR(ROUND([Umsatz Jahr] / 1000000, 2)), ".", ",") + " Mio. €, "
+  + IF [Δ Umsatz %] >= 0 THEN "+" ELSE "" END
+  + REPLACE(STR(ROUND([Δ Umsatz %] * 100, 1)), ".", ",") + " % zum Vorjahr – "
+  + MAX([Top Filiale]) + " liegt vorn"
+
+// ---------------------------------------------------------------------------
+// 9) Die Abweichungstexte der vier Karten — je Karte ein Feld, das den grünen Satz
+//    unter der Zahl liefert. Ohne Vorjahr im Bestand steht der Hinweis statt der Zahl.
+//    Für 2025: „+5,4 % zum Vorjahr“, „+2,4 % zum Vorjahr“, „+2,9 % zum Vorjahr“,
+//    „+0,05 Sterne zum Vorjahr“.
+// Name: Δ Umsatz Text
+IF ISNULL([Umsatz VJ]) THEN "kein Vorjahr im Bestand"
+ELSE IF [Δ Umsatz %] >= 0 THEN "+" ELSE "" END
+  + REPLACE(STR(ROUND([Δ Umsatz %] * 100, 1)), ".", ",") + " % zum Vorjahr" END
+// Name: Δ Bestellungen Text
+IF ISNULL([Bestellungen VJ]) THEN "kein Vorjahr im Bestand"
+ELSE IF [Δ Bestellungen %] >= 0 THEN "+" ELSE "" END
+  + REPLACE(STR(ROUND([Δ Bestellungen %] * 100, 1)), ".", ",") + " % zum Vorjahr" END
+// Name: Δ Bestellwert Text
+IF ISNULL([Bestellwert VJ]) THEN "kein Vorjahr im Bestand"
+ELSE IF [Δ Bestellwert %] >= 0 THEN "+" ELSE "" END
+  + REPLACE(STR(ROUND([Δ Bestellwert %] * 100, 1)), ".", ",") + " % zum Vorjahr" END
+// Name: Δ Ø Sterne Text
+IF ISNULL([Ø Sterne VJ]) THEN "kein Vorjahr im Bestand"
+ELSE IF [Δ Ø Sterne] >= 0 THEN "+" ELSE "" END
+  + REPLACE(STR(ROUND([Δ Ø Sterne], 2)), ".", ",") + " Sterne zum Vorjahr" END

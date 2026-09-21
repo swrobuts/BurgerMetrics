@@ -38,3 +38,6 @@ dataset/glaettung/lose/
 notebooks/.ipynb_checkpoints/
 dash/__pycache__/
 notebooks/export/
+
+# Sperrdatei von Tableau Desktop, solange die Arbeitsmappe geöffnet ist
+tableau/.~*.twbr

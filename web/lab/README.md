@@ -40,7 +40,7 @@ web/lab/
   assets/jsonpruefung.js     Prüfung der JSON-Übungen (unverändert aus WInf-SP)
   assets/regal.js            Aggregation und Zielprüfung des Shelf-Simulators (aus WInf-SP; nur die zwei deutschen Prüfmeldungen auf Shelf umgestellt)
   assets/pglite/             PostgreSQL als WebAssembly (PGlite), lokal statt vom CDN (rund 19 MB)
-  assets/tableau/            Sieben Bildschirmfotos von Tableau Desktop 2026.2 für Lab 05 (19.09.2026, rund 590 KB)
+  assets/tableau/            Neunzehn Bildschirmfotos von Tableau Desktop 2026.2 für Lab 05 (19.09. und 22.09.2026, rund 1,9 MB)
   assets/powerbi/            Zwanzig Bildschirmfotos von Power BI Desktop (August 2026) für Lab 04 (21.09.2026, rund 2,6 MB)
   data/wawi_mini.sql         Schema wawi: Kopie aus dataset/ (Kasse, Shop, Rezensionen)
   data/burgermetrics_mini.sql Schema burgermetrics: Kopie aus dataset/ (Galaxy-Schema mit fact_reviews)
@@ -98,7 +98,7 @@ Ein Lab besteht aus `lab-0N-name.html`, `data/uebungen/lab-0N.json` und seinen K
 unter `vorlagen/` (Lab 04 und 05 zusätzlich aus den Bildschirmfotos unter `assets/powerbi/` und
 `assets/tableau/`, die an die Stelle der Nachbildungen treten — geprüfte Oberfläche statt
 gezeichneter, Ziffern im Bild, Legende darunter; das Power-BI-Projekt dazu liegt unter
-`powerbi/` im Repository); nichts anderes wird angefasst (nicht `bm.js`, nicht `bm.css`, nicht
+`powerbi/`, die Tableau-Arbeitsmappe unter `tableau/` im Repository); nichts anderes wird angefasst (nicht `bm.js`, nicht `bm.css`, nicht
 `index.html`, keine anderen Labs). Übungs-IDs `W0N-01` …, Befehlskarten `B01` …; die Zahl der
 Übungen je Lab steht in `LABS` in `assets/bm.js`. Platzhalter, die die Laufzeit füllt:
 
