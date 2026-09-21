@@ -27,6 +27,7 @@
   <a class="sidebar-link" href="#modell">Das Modell</a>
   <a class="sidebar-link" href="#dax">Measures in DAX</a>
   <a class="sidebar-link" href="#bericht">Der Bericht</a>
+  <a class="sidebar-link" href="#dashboard">Das Dashboard</a>
   <a class="sidebar-link" href="#stolper">Stolpersteine</a>
   <a class="sidebar-link" href="#simulator">Simulator</a>
   <a class="sidebar-link" href="#uebungen">Übungen</a>
@@ -36,13 +37,14 @@
 <div class="lab-header">
   <div class="lab-num-big">04</div>
   <h1 class="lab-title">Power BI</h1>
-  <p class="lab-intro">Lab 03 hat das Auswertungsmodell der Fallstudie nachgebaut: Faktentabellen an gemeinsamen Dimensionen, Kennzahlen als Sichten. Dieses Lab liest dasselbe Modell mit Power BI Desktop — PostgreSQL anbinden, die Fremdschlüssel als Beziehungen prüfen, Kennzahlen als Measures in DAX definieren und daraus einen Bericht mit Kacheln, Balken und einer Linie bauen. Die Kontrollzahl bleibt dieselbe wie im Dashboard und in den Notebooks: 2.994.771,13 € Umsatz für 2025.</p>
+  <p class="lab-intro">Lab 03 hat das Auswertungsmodell der Fallstudie nachgebaut: Faktentabellen an gemeinsamen Dimensionen, Kennzahlen als Sichten. Dieses Lab liest dasselbe Modell mit Power BI Desktop — PostgreSQL anbinden, die Fremdschlüssel als Beziehungen prüfen, Kennzahlen als Measures in DAX definieren, daraus einen Bericht mit Tabelle, Balken und einer Linie bauen und zuletzt ein Dashboard nach den Regeln von Tufte und Bissantz: Grau vor Farbe, Zahlen bleiben Zahlen, Abweichungen in einer eigenen Zeile. Die Kontrollzahl bleibt dieselbe wie im Dashboard und in den Notebooks: 2.994.771,13 € Umsatz für 2025.</p>
   <div class="lernziele">
     <span class="lernziel-chip">Import gegen DirectQuery</span>
     <span class="lernziel-chip">Beziehung *:1</span>
     <span class="lernziel-chip">Measure gegen berechnete Spalte</span>
     <span class="lernziel-chip">Filterkontext · CALCULATE</span>
     <span class="lernziel-chip">Kachel · Balken · Linie</span>
+    <span class="lernziel-chip">Dashboard: Vorjahr · Abweichung · Small Multiples</span>
   </div>
   <div data-einordnung></div>
 </div>
@@ -67,11 +69,13 @@
       <span class="pfeil">→</span>
       <div class="glied betont"><span class="titel">DAX</span><span class="was">Measures im Filterkontext</span></div>
       <span class="pfeil">→</span>
-      <div class="glied"><span class="titel">Bericht</span><span class="was">Kacheln, Balken, Linie</span></div>
+      <div class="glied"><span class="titel">Bericht</span><span class="was">Tabelle, Balken, Linie</span></div>
+      <span class="pfeil">→</span>
+      <div class="glied"><span class="titel">Dashboard</span><span class="was">Vorjahr, Abweichung, Small Multiples</span></div>
     </div>
     <p>Die Reihenfolge der Abschnitte ist die Reihenfolge der Arbeit: erst die Verbindung, dann das Modell mit seinen Beziehungen, dann die Measures, zuletzt der Bericht. Wer mit dem Diagramm beginnt, zieht Spalten in ein Bild und überlässt Power BI die Wahl der Aggregation — und für jede Zahlenspalte, auch für eine Bestellnummer, schlägt Power BI die Summe vor. Der Simulator dieses Labs bildet genau diesen Mechanismus nach.</p>
     <div class="info-box">
-      <p><strong>Werkzeug und Stand.</strong> Power BI Desktop läuft unter Windows; dieses Lab bezieht sich auf das Update August 2026 (Stand 09/2026). Preis und Lizenzbedingungen sind nach Herstellerangabe zu prüfen. Der Bestand der Fallstudie ist synthetisch, und das Konto <code>studi_daba</code> liest nur — was Power BI in das Modell kopiert, sind keine personenbezogenen Daten.</p>
+      <p><strong>Werkzeug und Stand.</strong> Power BI Desktop läuft unter Windows; dieses Lab bezieht sich auf Version 2.157.1354.0, das Update August 2026. Klickwege, Meldungen und Bildschirmfotos sind am 21.09.2026 mit dieser Version in einer Windows-11-VM in deutscher Oberfläche gegen die Datenbank der Fallstudie geprüft; die englischen Begriffe des Labs stehen dort als Datenbereich (Data pane), Build-Bereich mit den Ablagen X-Achse, Y-Achse, Zeilen, Werte (Field Wells), Modellansicht und Measure. Das fertige Projekt liegt als Power-BI-Projekt (<code>.pbip</code>) unter <a href="https://github.com/swrobuts/BurgerMetrics/tree/main/powerbi/BurgerMetrics"><code>powerbi/BurgerMetrics/</code></a> im Repository — ohne Daten und ohne Kennwort; nach dem Öffnen fragt Power BI nach der Anmeldung. Preis und Lizenzbedingungen sind nach Herstellerangabe zu prüfen. Der Bestand der Fallstudie ist synthetisch, und das Konto <code>studi_daba</code> liest nur — was Power BI in das Modell kopiert, sind keine personenbezogenen Daten.</p>
     </div>
     <div class="auswahl-hinweis">
       <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Power BI steht neben Tableau (Lab 05) und Python (Lab 06): drei Wege zu denselben Sichten, und die Kontrollzahl muss in jedem dieselbe sein.</p>
@@ -115,48 +119,37 @@
 
   <section class="section-block" id="verbinden">
     <h2>Verbinden</h2>
-    <p>Der Weg zur Datenbank beginnt mit <code>Start → Daten abrufen → PostgreSQL-Datenbank</code>. Der Dialog fragt nach Server und Datenbank: Server <code>supabase.butscher.cloud:5433</code> — der Port steht mit Doppelpunkt hinter dem Servernamen —, Datenbank <code>postgres</code>, Modus Import. Die Warnung zur unverschlüsselten Verbindung bestätigen Sie mit OK; die Verbindung läuft wie in Lab 01 ohne SSL. Im zweiten Schritt folgt die Anmeldung: Authentifizierung <em>Datenbank</em>, Benutzer <code>studi_daba</code>, Kennwort <code>thws</code>. Power BI merkt sich die Anmeldung je Server.</p>
-    <p>Der PostgreSQL-Connector bringt seinen Treiber mit: Npgsql ist seit Dezember 2019 in Power BI Desktop enthalten, seit Oktober 2024 in Version 4.0.17 — eine Installation entfällt (Stand 09/2026). Nach der Anmeldung öffnet sich der Navigator mit den beiden Schemata als Ordnern. Für ein eigenes Modell kreuzen Sie die Tabellen <code>dim_*</code> und <code>fact_*</code> an; wer nur die fertigen Kennzahlen des Dashboards braucht, lädt stattdessen die Sichten <code>v_*</code>. <code>obt_orders</code> bleibt draußen: 41 Spalten, die alles doppelt tragen, was in Fakten und Dimensionen schon steht.</p>
+    <p>Der Weg zur Datenbank beginnt mit <code>Start → Daten abrufen → Weitere… → PostgreSQL-Datenbank</code>; im Suchfeld des Dialogs „Datenquelle auswählen“ genügt <code>PostgreSQL</code>. Die Verbindung ist ein einziger Dialog, „Mit Datenquelle verbinden“: Server <code>supabase.butscher.cloud:5433</code> — der Port steht mit Doppelpunkt hinter dem Servernamen —, Datenbank <code>postgres</code>, Konnektivitätsmodus <em>Importieren</em>, darunter die Anmeldeinformationen mit Authentifizierungsart <em>Standard</em>, Benutzername <code>studi_daba</code> und Kennwort <code>thws</code>, Datenschutzebene <em>Keine</em>. Das Kästchen „Verschlüsselte Verbindung verwenden“ ist vorausgewählt; der Server der Fallstudie läuft ohne SSL (Lab 01), und in den Datenquelleneinstellungen steht die Verbindung danach mit „Verbindung verschlüsseln“ aus. Power BI merkt sich die Anmeldung je Server: Beim zweiten Verbinden sind Benutzername und Kennwort schon eingetragen, und die Einstellung findet sich unter <code>Datei → Optionen und Einstellungen → Datenquelleneinstellungen → Berechtigungen bearbeiten</code>.</p>
+    <div class="foto-reihe">
+      <figure class="foto"><a class="foto" href="assets/powerbi/verbindungsdialog.png" target="_blank" rel="noopener"><img src="assets/powerbi/verbindungsdialog.png" alt="Dialog Mit Datenquelle verbinden in Power BI Desktop: Verbindungseinstellungen mit Server, Datenbank, Konnektivitätsmodus Importieren oder DirectQuery, Erweiterte Optionen; Anmeldeinformationen für die Verbindung mit Authentifizierungsart Standard, Benutzername, Kennwort, Datenschutzebene Keine und dem angekreuzten Kästchen Verschlüsselte Verbindung verwenden; Schaltflächen Zurück, Abbrechen, Weiter" width="1600" height="945" loading="lazy"></a><figcaption>Der Dialog, leer: <span class="callout">1</span> Server mit Port, <span class="callout">2</span> Importieren oder DirectQuery, <span class="callout">3</span> Authentifizierungsart Standard mit Benutzername und Kennwort, <span class="callout">4</span> das vorausgewählte Kästchen zur Verschlüsselung, <span class="callout">5</span> Weiter.</figcaption></figure>
+      <figure class="foto"><a class="foto" href="assets/powerbi/berechtigungen.png" target="_blank" rel="noopener"><img src="assets/powerbi/berechtigungen.png" alt="Dialog Datenquelleneinstellungen mit dem Unterdialog Berechtigungen bearbeiten für supabase.butscher.cloud:5433;postgres: Anmeldeinformationen Typ Datenbank mit Schaltflächen Bearbeiten und Löschen, Verschlüsselung mit nicht angekreuztem Kästchen Verbindungen verschlüsseln, Datenschutzebene Keine, Systemeigene Datenbankabfragen" width="1200" height="1041" loading="lazy"></a><figcaption>Die gespeicherte Anmeldung: <span class="callout">1</span> Typ Datenbank, <span class="callout">2</span> Verbindung unverschlüsselt, <span class="callout">3</span> Datenschutzebene Keine. „Löschen“ entfernt das Kennwort vom Rechner.</figcaption></figure>
+    </div>
+    <p class="foto-hinweis">Bildschirmfotos vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
+    <p>Anders als bei Tableau (Lab 05) ist kein Treiber zu installieren: Der PostgreSQL-Connector bringt Npgsql mit (nach Herstellerangabe seit Dezember 2019, Stand 09/2026). Nach „Weiter“ öffnet sich der Navigator „Daten auswählen“ mit einer Liste aller Tabellen und Sichten der Datenbank, jede als <code>schema.tabelle</code> — 48 Einträge, darunter die 16 Tabellen und 10 Sichten von <code>wawi</code>. <code>burgermetrics</code> im Suchfeld lässt 14 übrig: die 14 Tabellen des Auswertungsmodells. <strong>Die 38 materialisierten Sichten <code>v_*</code> fehlen in der Liste</strong> — der Navigator kennt Tabellen und gewöhnliche Sichten, keine materialisierten (Stolperstein unten). Für ein eigenes Modell kreuzen Sie <code>dim_branch</code>, <code>dim_customer</code>, <code>dim_date</code>, <code>dim_product</code>, <code>fact_orders</code>, <code>fact_order_items</code> und <code>fact_reviews</code> an; <code>obt_orders</code> bleibt draußen: 41 Spalten, die alles doppelt tragen, was in Fakten und Dimensionen schon steht. „Load“ lädt die sieben Tabellen in den Speicher; der Dialog „Laden“ zählt die Zeilen je Tabelle mit — 8, 25.000, 3.377, 57, 754.513, 2.950.082 und 10.000.</p>
     <div data-befehl="B01"></div>
     <div class="shot">
-      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Navigator</span><span class="spacer"></span>Power BI Desktop · Update August 2026</div>
-      <div class="shot-body eins">
-        <div class="shot-main">
-          <ul class="baum" style="pointer-events:none">
-            <li>▾ burgermetrics <span class="callout">1</span></li>
-            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_branch <span class="callout">2</span></li>
-            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_customer</li>
-            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_date</li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_employee</li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_payment_method</li>
-            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> dim_product</li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_promotion</li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_supplier</li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_time_slot</li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> dim_weather</li>
-            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_order_items</li>
-            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_orders</li>
-            <li class="ein"><input type="checkbox" checked aria-hidden="true" tabindex="-1"> fact_reviews</li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> obt_orders <span class="callout">3</span></li>
-            <li class="ein"><input type="checkbox" aria-hidden="true" tabindex="-1"> v_kennzahlen_jahr <span class="callout">4</span></li>
-            <li>▸ wawi <span class="callout">5</span></li>
-          </ul>
-        </div>
-      </div>
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Navigator „Daten auswählen“</span><span class="spacer"></span>Power BI Desktop · August 2026</div>
+      <a class="foto" href="assets/powerbi/navigator.png" target="_blank" rel="noopener"><img src="assets/powerbi/navigator.png" alt="Navigator Daten auswählen in Power BI Desktop: Suchfeld mit burgermetrics, Ordner PostgreSQL-Datenbank mit 14 Einträgen, angekreuzt burgermetrics.dim_branch, dim_customer, dim_date, dim_product, fact_order_items, fact_orders und fact_reviews, nicht angekreuzt dim_employee, dim_payment_method, dim_promotion, dim_supplier, dim_time_slot, dim_weather und obt_orders; rechts Vorschau ist deaktiviert; unten Zurück, Abbrechen, Load" width="1600" height="923" loading="lazy"></a>
     </div>
-    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <p class="foto-hinweis">Bildschirmfoto vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
     <ol class="shot-legende">
-      <li><span class="callout">1</span><span>Die beiden Schemata der Datenbank erscheinen als Ordner. <code>burgermetrics</code> ist aufgeklappt: 14 Tabellen und die 38 materialisierten Sichten.</span></li>
-      <li><span class="callout">2</span><span>Angekreuzt sind die sieben Tabellen des Modells in diesem Lab: vier Dimensionen (<code>dim_branch</code>, <code>dim_customer</code>, <code>dim_date</code>, <code>dim_product</code>) und drei Faktentabellen (<code>fact_orders</code>, <code>fact_order_items</code>, <code>fact_reviews</code>) — dieselben Tabellen wie in Lab 03.</span></li>
+      <li><span class="callout">1</span><span>Das Suchfeld mit <code>burgermetrics</code>. Ohne Suchbegriff stehen alle 48 Tabellen und Sichten der Datenbank in einer Liste, aus <code>wawi</code>, <code>burgermetrics</code> und den Systemschemata; eine Schemaauswahl gibt es nicht.</span></li>
+      <li><span class="callout">2</span><span>Angekreuzt sind die sieben Tabellen des Modells in diesem Lab: vier Dimensionen und drei Faktentabellen — dieselben Tabellen wie in Lab 03.</span></li>
       <li><span class="callout">3</span><span><code>obt_orders</code> bleibt abgewählt: 41 Spalten, in denen Bestellung, Filiale, Kunde und Kalender bereits verbunden sind. Wer sie zusätzlich lädt, hat jede Kennzahl zweimal im Modell.</span></li>
-      <li><span class="callout">4</span><span>Eine der 38 materialisierten Sichten im selben Ordner. <code>v_kennzahlen_jahr</code> liefert Bestellungen, Umsatz und Bestellwert je Jahr fertig (Lab 01) — der kürzere Weg, wenn kein eigenes Modell gebraucht wird.</span></li>
-      <li><span class="callout">5</span><span><code>wawi</code> bleibt zugeklappt: Das operative Modell mit seinen 16 Tabellen ist nicht die Quelle eines Berichts.</span></li>
+      <li><span class="callout">4</span><span>„[14]“ — die 14 Tabellen. Die 38 materialisierten Sichten <code>v_*</code> zeigt der Navigator nicht; <code>v_kennzahlen_jahr</code> kommt nur über eine SQL-Anweisung ins Modell (Stolperstein „Materialisierte Sichten fehlen im Navigator“).</span></li>
+      <li><span class="callout">5</span><span>„Vorschau ist deaktiviert“: Bei großen Tabellen zeigt der Navigator keine Zeilen; die Struktur ist erst nach dem Laden im Datenbereich zu sehen.</span></li>
+      <li><span class="callout">6</span><span>„Load“ lädt sofort; „Daten transformieren“ daneben öffnete den Power-Query-Editor. Für dieses Lab wird nichts transformiert.</span></li>
     </ol>
+    <div class="foto-reihe">
+      <figure class="foto"><a class="foto" href="assets/powerbi/laden.png" target="_blank" rel="noopener"><img src="assets/powerbi/laden.png" alt="Dialog Laden in Power BI Desktop während des Imports: burgermetrics dim_branch 8 Zeilen, dim_customer 25.000 Zeilen, dim_date 3.377 Zeilen, dim_product 57 Zeilen, fact_order_items 774.326 Zeilen von tcp://supabase.butscher.cloud:5433/postgres" width="1200" height="750" loading="lazy"></a><figcaption>Der Dialog „Laden“ während des Imports: je Tabelle der Zähler der bisher gelesenen Zeilen — <code>fact_order_items</code> steht hier bei 774.326 von 2.950.082. Der Import der sieben Tabellen dauerte in dieser Prüfung rund zwei Minuten.</figcaption></figure>
+      <figure class="foto"><a class="foto" href="assets/powerbi/sql-anweisung.png" target="_blank" rel="noopener"><img src="assets/powerbi/sql-anweisung.png" alt="Dialog Mit Datenquelle verbinden mit aufgeklappten Erweiterten Optionen: Server supabase.butscher.cloud:5433, Datenbank postgres, Importieren, Feld SQL-Anweisung mit SELECT * FROM burgermetrics.v_kennzahlen_jahr, Kästchen Beziehungsspalten einbeziehen" width="1600" height="891" loading="lazy"></a><figcaption>Der Weg zu einer Sicht: <span class="callout">1</span> Server und Datenbank wie oben, <span class="callout">2</span> unter „Erweiterte Optionen“ die SQL-Anweisung <code>SELECT * FROM burgermetrics.v_kennzahlen_jahr</code>, <span class="callout">3</span> Weiter. Power Query fragt danach einmal, ob die „native Datenbankabfrage“ ausgeführt werden darf.</figcaption></figure>
+    </div>
+    <p class="foto-hinweis">Bildschirmfotos vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
   </section>
 
   <section class="section-block" id="modell">
-    <h2>Das Modell: Beziehungen aus Fremdschlüsseln</h2>
-    <p>Ein Galaxy-Schema braucht in Power BI Beziehungen zwischen Fakten und Dimensionen, sonst steht in jeder Zeile eines Bildes der Gesamtwert. Die Option „Beziehungen aus Datenquellen beim ersten Laden importieren“ ist standardmäßig aktiv (Stand 09/2026): Power BI liest die Fremdschlüssel der Datenbank und spiegelt sie als Beziehungen — Kardinalität <code>*:1</code>, Filterrichtung einfach. In <code>burgermetrics</code> sind es 13 Fremdschlüssel, und wer alle 14 Tabellen lädt, bekommt 13 Beziehungen:</p>
+    <h2>Das Modell: Beziehungen aus Fremdschlüsseln — und zwei von Hand</h2>
+    <p>Ein Galaxy-Schema braucht in Power BI Beziehungen zwischen Fakten und Dimensionen, sonst steht in jeder Zeile eines Bildes der Gesamtwert. Zwei Optionen unter <code>Datei → Optionen und Einstellungen → Optionen → Datei laden</code> sind vorausgewählt: „Beim ersten Laden Beziehungen aus Datenquellen importieren“ und „Neue Beziehungen nach dem Laden der Daten automatisch erkennen“. In <code>burgermetrics</code> gibt es 13 Fremdschlüssel:</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Von</th><th>Nach</th><th>Beziehungen</th></tr></thead>
@@ -168,15 +161,15 @@
         </tbody>
       </table>
     </div>
-    <p>Von den 13 betreffen zehn die sieben Tabellen aus dem Navigator oben: drei an <code>fact_orders</code>, zwei an <code>fact_order_items</code>, fünf an <code>fact_reviews</code>. An jeder Linie steht <code>*</code> an der Faktentabelle und <code>1</code> an der Dimension; bei <code>fact_order_items → fact_orders</code> und <code>fact_reviews → fact_orders</code> ist die Bestellung die 1-Seite, weil <code>order_id</code> dort eindeutig ist. Der Rest ist Handarbeit an drei Stellen:</p>
+    <p>Von den 13 betreffen zehn die sieben Tabellen aus dem Navigator oben. Nach dem Laden standen acht davon im Modell — alle über Spalten, die auf <code>_id</code> enden, im Projektordner mit dem Präfix <code>AutoDetected_</code>. Die zwei Fremdschlüssel auf das Datum fehlten: <code>fact_orders.date → dim_date.date</code> und <code>fact_reviews.date → dim_date.date</code> zeigen auf die eindeutige Spalte <code>date</code>, nicht auf den Primärschlüssel <code>date_id</code>, und kamen weder aus dem Fremdschlüssel-Import noch aus der automatischen Erkennung. Sie entstehen von Hand: Modellansicht → Beziehungen verwalten → Neue Beziehung, oben <code>fact_orders</code> mit der Spalte <code>date</code>, unten <code>dim_date</code> mit <code>date</code>, Kardinalität Viele-zu-Eins (*:1), Kreuzfilterrichtung Einfach. An jeder Linie steht danach <code>*</code> an der Faktentabelle und <code>1</code> an der Dimension. Die Beziehung <code>fact_reviews → fact_orders</code> über <code>order_id</code> hat Power BI selbst als Eins-zu-Eins angelegt — jede Bestellung hat höchstens eine Rezension, <code>order_id</code> ist auf beiden Seiten eindeutig — und selbst auf inaktiv gesetzt, weil sie neben der direkten Beziehung zum Datum ein zweiter Filterpfad wäre. Handarbeit bleibt an drei Stellen:</p>
     <div class="karten">
       <div class="karte">
-        <div class="kopfzeile">Ein Kreis</div>
-        <p><code>fact_reviews</code> hängt an <code>dim_date</code> und an <code>fact_orders</code>, <code>fact_orders</code> wieder an <code>dim_date</code> — zwei Filterpfade vom Datum zu den Rezensionen. Die Beziehung <code>fact_reviews → fact_orders</code> wird inaktiv gesetzt; die direkte zum Datum bleibt aktiv. Das löst auch die Kreise über <code>dim_customer</code> und <code>dim_branch</code>: <code>Ø Sterne</code> je Filiale und Jahr läuft dann über die eigenen Beziehungen der Rezensionen.</p>
+        <div class="kopfzeile">Das Datum</div>
+        <p>Zwei Beziehungen von Hand, <code>fact_orders[date] → dim_date[date]</code> und <code>fact_reviews[date] → dim_date[date]</code>, beide <code>*:1</code>. Ohne sie filtert das Jahr nichts: Eine Kachel mit <code>Umsatz</code> und dem Filter <code>dim_date[year] = 2025</code> zeigt weiter alle Jahre, 14.522.378,70 €. Dazu <code>dim_date</code> als Datumstabelle markieren (Tabellentools → Als Datumstabelle markieren, Spalte <code>date</code>), damit Zeitintelligenz wie <code>SAMEPERIODLASTYEAR</code> darauf rechnet (Abschnitt „Das Dashboard“).</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">Ohne Fremdschlüssel</div>
-        <p><code>dim_weather</code> (eine Zeile je Tag, Schlüssel <code>date</code>) und <code>dim_time_slot</code> (eine Zeile je Stunde, Schlüssel <code>hour</code>) haben in der Datenbank keinen Fremdschlüssel — beim ersten Laden entsteht keine Beziehung. Wer sie braucht, legt sie von Hand an: <code>fact_orders[date] → dim_weather[date]</code> und <code>fact_orders[hour] → dim_time_slot[hour]</code>, beide <code>*:1</code>.</p>
+        <p><code>dim_weather</code> (eine Zeile je Tag, Schlüssel <code>date</code>) und <code>dim_time_slot</code> (eine Zeile je Stunde, Schlüssel <code>hour</code>) haben in der Datenbank keinen Fremdschlüssel — beim Laden entsteht keine Beziehung. Wer sie braucht, legt sie wie das Datum von Hand an: <code>fact_orders[date] → dim_weather[date]</code> und <code>fact_orders[hour] → dim_time_slot[hour]</code>, beide <code>*:1</code>.</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">Nicht laden</div>
@@ -184,89 +177,24 @@
       </div>
     </div>
     <div class="shot">
-      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Modellansicht</span><span class="spacer"></span>Power BI Desktop · Update August 2026</div>
-      <div class="shot-body eins">
-        <div class="shot-main">
-          <svg viewBox="0 0 660 340" role="img" aria-label="Modellansicht: fact_orders in der Mitte, Beziehungen zu dim_customer, dim_branch und dim_date; fact_order_items und fact_reviews als weitere Faktentabellen" style="width:100%;height:auto;display:block;font-family:var(--mono);font-size:12px">
-            <defs>
-              <style>
-                .mv-box { fill: #fff; stroke: var(--line); stroke-width: 1.2; }
-                .mv-box.fakt { stroke: var(--primary); stroke-width: 2; }
-                .mv-name { fill: var(--ink); font-weight: 700; }
-                .mv-cols { fill: var(--ink-soft); font-size: 9.5px; }
-                .mv-stern { stroke: var(--primary); stroke-width: 2; fill: none; }
-                .mv-linie { stroke: var(--ink-soft); stroke-width: 1.4; fill: none; }
-                .mv-inaktiv { stroke: var(--ink-soft); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
-                .mv-kard { fill: var(--ink); font-family: var(--sans); font-size: 10px; font-weight: 700; }
-                .mv-callout { fill: var(--primary); }
-                .mv-callout-text { fill: #fff; font-family: var(--sans); font-size: 10px; font-weight: 800; text-anchor: middle; }
-              </style>
-            </defs>
-            <!-- Linien: Stern um fact_orders -->
-            <line class="mv-stern" x1="330" y1="148" x2="330" y2="64" />
-            <line class="mv-stern" x1="265" y1="148" x2="175" y2="64" />
-            <line class="mv-stern" x1="395" y1="148" x2="485" y2="64" />
-            <!-- Linien: fact_order_items -->
-            <line class="mv-linie" x1="175" y1="276" x2="265" y2="192" />
-            <line class="mv-linie" x1="200" y1="298" x2="245" y2="298" />
-            <!-- Linien: fact_reviews -->
-            <line class="mv-inaktiv" x1="460" y1="170" x2="415" y2="170" />
-            <line class="mv-linie" x1="545" y1="148" x2="545" y2="64" />
-            <line class="mv-linie" x1="480" y1="148" x2="405" y2="64" />
-            <polyline class="mv-linie" points="622,148 622,8 115,8 115,20" />
-            <line class="mv-linie" x1="470" y1="192" x2="405" y2="276" />
-            <!-- Kardinalitäten: * an der Faktentabelle, 1 an der Dimension -->
-            <text class="mv-kard" x="336" y="141">*</text><text class="mv-kard" x="336" y="77">1</text>
-            <text class="mv-kard" x="256" y="140">*</text><text class="mv-kard" x="181" y="79">1</text>
-            <text class="mv-kard" x="398" y="140">*</text><text class="mv-kard" x="470" y="79">1</text>
-            <text class="mv-kard" x="180" y="270">*</text><text class="mv-kard" x="268" y="206">1</text>
-            <text class="mv-kard" x="205" y="294">*</text><text class="mv-kard" x="232" y="294">1</text>
-            <text class="mv-kard" x="450" y="164">*</text><text class="mv-kard" x="419" y="164">1</text>
-            <text class="mv-kard" x="551" y="141">*</text><text class="mv-kard" x="551" y="77">1</text>
-            <text class="mv-kard" x="470" y="140">*</text><text class="mv-kard" x="410" y="79">1</text>
-            <text class="mv-kard" x="627" y="141">*</text><text class="mv-kard" x="121" y="18">1</text>
-            <text class="mv-kard" x="460" y="203">*</text><text class="mv-kard" x="410" y="270">1</text>
-            <!-- Tabellen -->
-            <rect class="mv-box" x="30" y="20" width="170" height="44" rx="5" />
-            <text class="mv-name" x="40" y="38">dim_customer</text>
-            <text class="mv-cols" x="40" y="54">customer_id · loyalty_tier</text>
-            <rect class="mv-box" x="245" y="20" width="170" height="44" rx="5" />
-            <text class="mv-name" x="255" y="38">dim_branch</text>
-            <text class="mv-cols" x="255" y="54">branch_id · branch_name</text>
-            <rect class="mv-box" x="460" y="20" width="170" height="44" rx="5" />
-            <text class="mv-name" x="470" y="38">dim_date</text>
-            <text class="mv-cols" x="470" y="54">date · year · month</text>
-            <rect class="mv-box fakt" x="245" y="148" width="170" height="44" rx="5" />
-            <text class="mv-name" x="255" y="166">fact_orders</text>
-            <text class="mv-cols" x="255" y="182">order_id · date · net_total</text>
-            <rect class="mv-box" x="460" y="148" width="170" height="44" rx="5" />
-            <text class="mv-name" x="470" y="166">fact_reviews</text>
-            <text class="mv-cols" x="470" y="182">review_id · order_id · stars</text>
-            <rect class="mv-box" x="30" y="276" width="170" height="44" rx="5" />
-            <text class="mv-name" x="40" y="294">fact_order_items</text>
-            <text class="mv-cols" x="40" y="310">order_id · product_id</text>
-            <rect class="mv-box" x="245" y="276" width="170" height="44" rx="5" />
-            <text class="mv-name" x="255" y="294">dim_product</text>
-            <text class="mv-cols" x="255" y="310">product_id · category</text>
-            <!-- Ziffern -->
-            <circle class="mv-callout" cx="400" cy="160" r="9" /><text class="mv-callout-text" x="400" y="164">1</text>
-            <circle class="mv-callout" cx="315" cy="106" r="9" /><text class="mv-callout-text" x="315" y="110">2</text>
-            <circle class="mv-callout" cx="437" cy="184" r="9" /><text class="mv-callout-text" x="437" y="188">3</text>
-            <circle class="mv-callout" cx="562" cy="106" r="9" /><text class="mv-callout-text" x="562" y="110">4</text>
-            <circle class="mv-callout" cx="204" cy="246" r="9" /><text class="mv-callout-text" x="204" y="250">5</text>
-          </svg>
-        </div>
-      </div>
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Modellansicht</span><span class="spacer"></span>Power BI Desktop · August 2026</div>
+      <a class="foto" href="assets/powerbi/modellansicht.png" target="_blank" rel="noopener"><img src="assets/powerbi/modellansicht.png" alt="Modellansicht in Power BI Desktop mit sieben Tabellen: dim_customer, dim_date und dim_product oben, dim_branch, fact_orders und fact_order_items in der Mitte, fact_reviews unten rechts; Linien mit Stern und Eins an den Enden, eine gestrichelte Linie zwischen fact_reviews und fact_orders; oben die Schaltfläche Beziehungen verwalten" width="1600" height="1380" loading="lazy"></a>
     </div>
-    <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
+    <p class="foto-hinweis">Bildschirmfoto vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
     <ol class="shot-legende">
-      <li><span class="callout">1</span><span><code>fact_orders</code> in der Mitte, drei Linien zu <code>dim_customer</code>, <code>dim_branch</code> und <code>dim_date</code> — der Stern, den die Prüfung nach dem Laden zeigen muss. Die Beziehungen zu <code>dim_payment_method</code> und <code>dim_promotion</code> entstehen erst, wenn diese Tabellen mitgeladen werden.</span></li>
-      <li><span class="callout">2</span><span>An jeder Linie <code>*</code> an der Faktentabelle und <code>1</code> an der Dimension: viele Bestellungen, eine Filiale. Die Filterrichtung ist einfach — ein Filter auf <code>dim_branch[branch_name]</code> wirkt in <code>fact_orders</code>, nicht umgekehrt.</span></li>
-      <li><span class="callout">3</span><span>Die gestrichelte Linie <code>fact_reviews → fact_orders</code> ist inaktiv. Aktiv wäre sie der zweite Filterpfad vom Datum zu den Rezensionen; <code>fact_reviews</code> trägt sein eigenes Datum und braucht den Umweg über die Bestellung nicht.</span></li>
-      <li><span class="callout">4</span><span>Die direkte Beziehung <code>fact_reviews → dim_date</code> bleibt aktiv; ebenso die zu <code>dim_branch</code>, <code>dim_customer</code> und <code>dim_product</code>. <code>Ø Sterne</code> je Filiale und Jahr rechnet über diese Linien.</span></li>
+      <li><span class="callout">1</span><span><code>fact_orders</code> in der Mitte mit Linien zu <code>dim_branch</code>, <code>dim_customer</code> und <code>dim_date</code> — der Stern, den die Prüfung nach dem Laden zeigen muss. Die Beziehungen zu <code>dim_payment_method</code> und <code>dim_promotion</code> entstehen erst, wenn diese Tabellen mitgeladen werden.</span></li>
+      <li><span class="callout">2</span><span>An jeder Linie <code>*</code> an der Faktentabelle und <code>1</code> an der Dimension: viele Bestellungen, eine Filiale. Der Pfeil in der Mitte zeigt die Filterrichtung — ein Filter auf <code>dim_branch[branch_name]</code> wirkt in <code>fact_orders</code>, nicht umgekehrt.</span></li>
+      <li><span class="callout">3</span><span>Die gestrichelte Linie <code>fact_reviews → fact_orders</code> ist inaktiv, <code>1</code> an beiden Enden: Power BI hat sie als Eins-zu-Eins erkannt und selbst abgeschaltet. Aktiv wäre sie der zweite Filterpfad vom Datum zu den Rezensionen.</span></li>
+      <li><span class="callout">4</span><span>Die beiden Linien zu <code>dim_date</code>, von Hand angelegt. Über sie filtert das Jahr Bestellungen und Rezensionen; <code>Ø Sterne</code> je Filiale und Jahr rechnet über die eigenen Beziehungen der Rezensionen.</span></li>
       <li><span class="callout">5</span><span><code>fact_order_items</code> hängt mit <code>*:1</code> an <code>fact_orders</code> — die Positionen haben ihren eigenen Grain (Lab 03). Ein Measure auf jeder der beiden Tabellen rechnet richtig; eine zusammengeführte Tabelle nicht (Abschnitt „Stolpersteine“).</span></li>
+      <li><span class="callout">6</span><span>„Beziehungen verwalten“ öffnet die Liste aller Beziehungen mit Status; „Neue Beziehung“ darin legt die fehlenden an.</span></li>
     </ol>
-    <p>Prüfung nach dem Laden: Modellansicht öffnen, <code>fact_orders</code> in der Mitte, Linien zu den Dimensionen. Fehlt eine, steht in jeder Zeile des Bildes dieselbe Summe — der Fehler ist sichtbar, bevor er in einen Bericht kommt.</p>
+    <div class="foto-reihe">
+      <figure class="foto"><a class="foto" href="assets/powerbi/neue-beziehung.png" target="_blank" rel="noopener"><img src="assets/powerbi/neue-beziehung.png" alt="Dialog Neue Beziehung in Power BI Desktop: Von Tabelle burgermetrics fact_orders mit markierter Spalte date, In Tabelle burgermetrics dim_date mit markierter Spalte date, Kardinalität Viele-zu-Eins (*:1), Kreuzfilterrichtung Einfach, Kästchen Diese Beziehung aktivieren angekreuzt, Schaltfläche Speichern" width="1200" height="1356" loading="lazy"></a><figcaption>Neue Beziehung: <span class="callout">1</span> Von Tabelle <code>fact_orders</code>, <span class="callout">2</span> Spalte <code>date</code> anklicken, <span class="callout">3</span> In Tabelle <code>dim_date</code>, <span class="callout">4</span> Spalte <code>date</code>, <span class="callout">5</span> Viele-zu-Eins, <span class="callout">6</span> Einfach, <span class="callout">7</span> aktiv, <span class="callout">8</span> Speichern. Dasselbe für <code>fact_reviews</code>.</figcaption></figure>
+      <figure class="foto"><a class="foto" href="assets/powerbi/beziehungen-verwalten.png" target="_blank" rel="noopener"><img src="assets/powerbi/beziehungen-verwalten.png" alt="Dialog Beziehungen verwalten in Power BI Desktop mit zehn Zeilen: fact_order_items zu fact_orders und dim_product, fact_orders zu dim_branch, dim_customer und dim_date, fact_reviews zu dim_branch, dim_customer, dim_date, fact_orders und dim_product; alle Aktiv außer fact_reviews (order_id) zu fact_orders (order_id) mit 1 zu 1 und Status Inaktiv" width="1600" height="1389" loading="lazy"></a><figcaption>Beziehungen verwalten nach der Handarbeit: <span class="callout">1</span> Neue Beziehung, <span class="callout">2</span> Automatische Erkennung, <span class="callout">3</span> die zwei Zeilen zum Datum mit dem Kalendersymbol, <span class="callout">4</span> die einzige inaktive Beziehung, <span class="callout">5</span> mit <code>1</code> auf beiden Seiten.</figcaption></figure>
+    </div>
+    <p class="foto-hinweis">Bildschirmfotos vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
+    <p>Prüfung nach dem Laden: Modellansicht öffnen, <code>fact_orders</code> in der Mitte, Linien zu allen drei Dimensionen — zählen Sie die Linien zu <code>dim_date</code>. Fehlt eine, steht in jeder Zeile des Bildes dieselbe Summe — der Fehler ist sichtbar, bevor er in einen Bericht kommt (Bildschirmfoto im Abschnitt „Stolpersteine“).</p>
   </section>
 
   <section class="section-block" id="dax">
@@ -276,6 +204,18 @@
       <a class="vorlage" href="vorlagen/powerbi-measures.dax" download><span class="symbol">📄</span><span><span class="datei">powerbi-measures.dax</span><br><span class="was">Fünf Measures für den Bericht, je eines pro Block, Erklärung in Kommentarzeilen; Kontrollzahlen für 2025.</span></span></a>
     </div>
     <div data-befehl="B02"></div>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Measuretools und Formelleiste</span><span class="spacer"></span>Power BI Desktop · August 2026</div>
+      <a class="foto" href="assets/powerbi/measure-formelleiste.png" target="_blank" rel="noopener"><img src="assets/powerbi/measure-formelleiste.png" alt="Power BI Desktop mit dem Menüband Measuretools: Name Ø Sterne, Hometabelle fact_reviews, Format Allgemein, Datenkategorie Nicht kategorisiert, Schaltflächen Neues Measure und Quickmeasure; darunter die Formelleiste mit Ø Sterne = AVERAGE(fact_reviews[stars]); rechts der Datenbereich mit fact_orders und den Measures Bestellungen und Bestellwert" width="2056" height="544" loading="lazy"></a>
+    </div>
+    <p class="foto-hinweis">Bildschirmfoto vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Der Name des Measures, wie er vor dem Gleichheitszeichen steht — <code>Ø Sterne</code> darf Leerzeichen und Sonderzeichen tragen.</span></li>
+      <li><span class="callout">2</span><span>Die Formelleiste mit der Formel; Eingabe legt das Measure an. Ein Fehler in der Formel erscheint darunter in Rot, das Measure entsteht trotzdem und zeigt ihn beim Ziehen in ein Bild.</span></li>
+      <li><span class="callout">3</span><span>Das Format kommt nach dem Anlegen über die Measuretools: Währung mit 2 Dezimalstellen für Beträge, Ganze Zahl mit Tausendertrennzeichen für <code>Bestellungen</code>. Ohne Format zeigt eine Kachel <code>2994771,13</code>.</span></li>
+      <li><span class="callout">4</span><span>Die Hometabelle: Ein Measure gehört zu der Tabelle, die beim Anlegen im Datenbereich markiert war — <code>fact_reviews</code> für <code>Ø Sterne</code>, <code>fact_orders</code> für die übrigen vier. Rechnen tut es über das ganze Modell.</span></li>
+      <li><span class="callout">5</span><span>Im Datenbereich stehen Measures mit dem Taschenrechner-Symbol unter ihrer Hometabelle; Spalten mit Σ sind Zahlen, für die Power BI eine Summe vorschlägt.</span></li>
+    </ol>
     <div class="vergleich">
       <div>
         <h3>Measure</h3>
@@ -304,21 +244,31 @@
 
   <section class="section-block" id="bericht">
     <h2>Der Bericht</h2>
-    <p>Der Bericht ist eine Seite mit vier Kacheln, einem Balkendiagramm und einer Linie. Jedes Bild wählt die Aufteilung eines Measures nach Filiale oder Monat; die Definition der Kennzahl bleibt in der Sicht.</p>
+    <p>Der Bericht ist eine Seite mit einer Tabelle, einem Balkendiagramm und einer Linie; die Kacheln kommen im Dashboard. Jedes Bild wählt die Aufteilung eines Measures nach Filiale oder Monat; die Definition der Kennzahl bleibt in der Sicht.</p>
     <div class="table-scroll">
       <table>
         <thead><tr><th>Bild</th><th>Felder</th><th>Was es zeigt</th></tr></thead>
         <tbody>
-          <tr><td>Kachel Umsatz</td><td><code>[Umsatz]</code></td><td>eine Zahl ohne Achsen — mit dem Filter <code>dim_date[year] = 2025</code> auf der Seite 2.994.771,13 €</td></tr>
-          <tr><td>Kachel Bestellungen</td><td><code>[Bestellungen]</code></td><td>136.557 für 2025</td></tr>
-          <tr><td>Kachel Bestellwert</td><td><code>[Bestellwert]</code></td><td>der Quotient der beiden Kacheln darüber, im selben Filter</td></tr>
-          <tr><td>Kachel Ø Sterne</td><td><code>[Ø Sterne]</code></td><td>der Mittelwert aus <code>fact_reviews</code>, über die eigene Beziehung zu <code>dim_date</code> gefiltert</td></tr>
-          <tr><td>Balken Umsatz je Filiale</td><td>Achse <code>dim_branch[branch_name]</code>, Wert <code>[Umsatz]</code></td><td>acht verschieden hohe Balken, BM Europastern vorn</td></tr>
-          <tr><td>Linie Umsatz je Monat</td><td>Achse <code>dim_date[month]</code>, Wert <code>[Umsatz]</code></td><td>zwölf Punkte für 2025</td></tr>
+          <tr><td>Tabelle „Kennzahlen 2025“</td><td>Spalten <code>[Bestellungen]</code>, <code>[Bestellwert]</code>, <code>[Ø Sterne]</code>, <code>[Umsatz]</code></td><td>eine Zeile ohne Dimension — mit dem Seitenfilter <code>dim_date[year] = 2025</code>: 136.557 · 21,93 € · 3,75 · 2.994.771,13 €</td></tr>
+          <tr><td>Balken Umsatz je Filiale</td><td>Y-Achse <code>dim_branch[branch_name]</code>, X-Achse <code>[Umsatz]</code></td><td>acht verschieden lange Balken, BM Europastern vorn mit 537.906,79 €</td></tr>
+          <tr><td>Linie Umsatz je Monat</td><td>X-Achse <code>dim_date[month]</code>, Y-Achse <code>[Umsatz]</code></td><td>zwölf Punkte für 2025, Spitze im Juli</td></tr>
         </tbody>
       </table>
     </div>
-    <p>Der Filter auf <code>dim_date[year]</code> gilt für die ganze Seite: Alle sechs Bilder rechnen im selben Filterkontext, und die Balken summieren sich auf die Kachel. Ein Bild, das aus der Reihe fällt, verrät eine fehlende Beziehung — zeigt der Balken in jeder Filiale die Kachel, filtert <code>dim_branch</code> die Fakten nicht.</p>
+    <p>Der Filter auf <code>dim_date[year]</code> steht im Filterbereich unter „Filter für diese Seite“ und gilt für die ganze Seite: Alle drei Bilder rechnen im selben Filterkontext, und die Balken summieren sich auf die Tabelle. Ein Bild, das aus der Reihe fällt, verrät eine fehlende Beziehung — zeigt der Balken in jeder Filiale die Summe der Tabelle, filtert <code>dim_branch</code> die Fakten nicht.</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Berichtsansicht, Seite „Bericht“</span><span class="spacer"></span>Power BI Desktop · August 2026</div>
+      <a class="foto" href="assets/powerbi/bericht.png" target="_blank" rel="noopener"><img src="assets/powerbi/bericht.png" alt="Berichtsansicht in Power BI Desktop: oben links die Tabelle Kennzahlen 2025 mit Bestellungen 136.557, Bestellwert 21,93 €, Ø Sterne 3,75 und Umsatz 2.994.771,13 €, darunter das Balkendiagramm BM Europastern erzielt 2025 den höchsten Umsatz und das Liniendiagramm Der Umsatz 2025 erreicht im Juli seinen Höchstwert; rechts der Filterbereich mit year ist 2025, der Formatbereich, der Build-Bereich und der Datenbereich" width="2056" height="1174" loading="lazy"></a>
+    </div>
+    <p class="foto-hinweis">Bildschirmfoto vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Die Tabelle mit den vier Measures und dem Titel „Kennzahlen 2025 — die Kontrollzahlen aus v_kennzahlen_jahr“: Alle vier Zahlen stimmen mit der Sicht überein.</span></li>
+      <li><span class="callout">2</span><span>Balkendiagramm (gruppiert, waagerecht): <code>branch_name</code> auf der Y-Achse, <code>Umsatz</code> auf der X-Achse, Titel als Aussage. Die Achse beginnt bei null.</span></li>
+      <li><span class="callout">3</span><span>Liniendiagramm: <code>month</code> auf der X-Achse, <code>Umsatz</code> auf der Y-Achse. Die Y-Achse ist beschnitten — bei einer Linie zulässig, weil die Position kodiert, nicht die Länge.</span></li>
+      <li><span class="callout">4</span><span>Der Filterbereich mit „Filter für diese Seite“: <code>year</code> ist 2025. Er gilt für jedes Bild der Seite.</span></li>
+      <li><span class="callout">5</span><span>Der Build-Bereich (Visualisierungen): Symbol des Bildtyps wählen, dann die Felder in die Ablagen ziehen — die Field Wells, die der Simulator unten nachbildet.</span></li>
+      <li><span class="callout">6</span><span>Der Datenbereich mit den Measures unter <code>fact_orders</code>; ein Häkchen legt ein Feld in die erste passende Ablage des markierten Bilds.</span></li>
+    </ol>
     <div class="concept-box">
       <h3>Zwei Regeln aus dem Deck</h3>
       <p><strong>Balken beginnen bei null.</strong> Ihre Länge kodiert den Wert; eine Achse, die erst bei einem hohen Betrag beginnt, macht aus einem kleinen Unterschied einen langen Balken.</p>
@@ -326,30 +276,98 @@
     </div>
   </section>
 
+  <section class="section-block" id="dashboard">
+    <h2>Das Dashboard</h2>
+    <p>Der Bericht zeigt Zahlen; ein Dashboard stellt sie in einen Vergleich. Das Dashboard dieses Labs folgt vier Regeln aus dem Deck: <strong>Grau ist der Normalfall, Farbe die Ausnahme</strong> — die einzige Farbe sitzt in der Abweichung zum Vorjahr, Grün für plus, Rot für minus. <strong>Zahlen bleiben Zahlen</strong> — die Filialen stehen in einer Tabelle, der Balken liegt hinter der Zahl, nicht daneben. <strong>Die Abweichung bekommt eine eigene Zeile</strong> — die Linie zeigt Ist und Vorjahr in Grau und Blau, darunter stehen die Prozentwerte je Monat als eigenes Diagramm. <strong>Small Multiples in derselben Skala</strong> — acht Filialen als acht kleine Linien mit einer gemeinsamen Achse, jede mit dem letzten Wert beschriftet statt mit einer Legende. Der Titel ist ein Measure und nennt Jahr, Summe, Abweichung und die führende Filiale: „Umsatz 2025: 2,99 Mio. €, +5,4 % zum Vorjahr – BM Europastern liegt vorn“.</p>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Seite „Dashboard“</span><span class="spacer"></span>Power BI Desktop · August 2026</div>
+      <a class="foto" href="assets/powerbi/dashboard.png" target="_blank" rel="noopener"><img src="assets/powerbi/dashboard.png" alt="Dashboard-Seite in Power BI Desktop: Titel Umsatz 2025: 2,99 Mio. €, +5,4 % zum Vorjahr – BM Europastern liegt vorn; Jahresauswahl 2025; vier Kacheln Umsatz 2,99 Mio. €, Bestellungen 136.557, Bestellwert 21,93 €, Ø Sterne 3,75 mit grünen Abweichungstexten zum Vorjahr; Tabelle der acht Filialen mit Datenbalken hinter Umsatz Tsd. €, Vorjahr, Δ Vorjahr in Grün, Bestellungen, Bestellwert und Ø Sterne; Liniendiagramm Umsatz je Monat Ist blau und Vorjahr grau mit rotem Punkt und 245 am letzten Monat; Säulen Abweichung zum Vorjahr je Monat in Grün; acht Small Multiples Umsatz je Monat und Filiale mit roten Endpunkten" width="2056" height="1152" loading="lazy"></a>
+    </div>
+    <p class="foto-hinweis">Bildschirmfoto vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>Der Titel als Karte mit dem Measure <code>Titel Dashboard</code>: Er rechnet mit, wenn das Jahr wechselt.</span></li>
+      <li><span class="callout">2</span><span>Die Jahresauswahl, ein Datenschnitt auf <code>dim_date[year]</code> als Dropdown mit Einzelauswahl; 2025 ist voreingestellt. Ohne gewähltes Jahr zeigen die Kacheln „ein Jahr wählen für den Vorjahresvergleich“.</span></li>
+      <li><span class="callout">3</span><span>Vier Karten: <code>Umsatz</code>, <code>Bestellungen</code>, <code>Bestellwert</code>, <code>Ø Sterne</code> — die Kontrollzahlen 2,99 Mio. €, 136.557, 21,93 €, 3,75.</span></li>
+      <li><span class="callout">4</span><span>Darunter je eine Karte mit dem Text-Measure zur Abweichung, gefärbt über das Farb-Measure: +5,4 %, +2,4 %, +2,9 % und +0,05 Sterne zum Vorjahr 2024.</span></li>
+      <li><span class="callout">5</span><span>Die Matrix der acht Filialen, absteigend nach Umsatz: Datenbalken in Grau hinter <code>Umsatz Tsd. €</code>, daneben Vorjahr, <code>Δ Vorjahr</code> in Farbe, Bestellungen, Bestellwert, Ø Sterne; Gesamtzeile 2.995 · 2.841 · +5,4 % · 136.557 · 21,93 € · 3,75.</span></li>
+      <li><span class="callout">6</span><span>Ist (blau) gegen Vorjahr (grau) je Monat in Tsd. €, Serien direkt beschriftet statt mit Legende, der letzte Monat mit rotem Punkt und Wert: Dezember 245.</span></li>
+      <li><span class="callout">7</span><span>Die Abweichung je Monat als eigene Zeile: Säulen mit Vorzeichen, gefärbt über <code>Δ Umsatz Farbe</code> — 2025 in jedem Monat grün, +1,1 % im Februar bis +7,8 % im Juli.</span></li>
+      <li><span class="callout">8</span><span>Small Multiples: eine Linie je Filiale in derselben Skala, jede mit rotem Endpunkt und Wert. BM Europastern liegt bei 44 Tsd. € im Dezember, BM Zellerau und BM Grombühl bei 21.</span></li>
+    </ol>
+    <p>Die Vorjahresmeasures brauchen <code>dim_date</code> als markierte Datumstabelle und <code>SAMEPERIODLASTYEAR</code>; die Vorlage <code>powerbi-dashboard.dax</code> enthält alle 20 Measures und die Spalte <code>Monat</code> mit Erklärung, Befehlskarte B03 zerlegt die wichtigsten. Die Klickwege für die vier Bausteine, die den Unterschied zum Bericht machen, stehen in Befehlskarte B04 und den Bildschirmfotos darunter.</p>
+    <div class="vorlagen">
+      <a class="vorlage" href="vorlagen/powerbi-dashboard.dax" download><span class="symbol">📄</span><span><span class="datei">powerbi-dashboard.dax</span><br><span class="was">Vorjahr, Abweichung, Farbe und Text als Measures, der Titel als Measure, die Spalte Monat — mit Kontrollzahlen für 2025.</span></span></a>
+    </div>
+    <div data-befehl="B03"></div>
+    <div data-befehl="B04"></div>
+    <div class="foto-reihe">
+      <figure class="foto"><a class="foto" href="assets/powerbi/dashboard-measure-vj.png" target="_blank" rel="noopener"><img src="assets/powerbi/dashboard-measure-vj.png" alt="Menüband Measuretools mit Name Umsatz VJ, Hometabelle fact_orders, Format Währung mit 2 Dezimalstellen; Formelleiste mit Umsatz VJ = IF(HASONEVALUE(dim_date[year]), CALCULATE([Umsatz], SAMEPERIODLASTYEAR(dim_date[date]))); rechts im Datenbereich der Anzeigeordner Dashboard unter fact_orders mit den Measures" width="2056" height="695" loading="lazy"></a><figcaption><span class="callout">1</span> <code>Umsatz VJ</code> in der Formelleiste, <span class="callout">2</span> Format Währung mit zwei Dezimalstellen, <span class="callout">3</span> der Anzeigeordner „Dashboard“ im Datenbereich — ein Ordner, in dem die 20 Measures beisammenliegen (Eigenschaften in der Modellansicht, Feld „Anzeigeordner“).</figcaption></figure>
+      <figure class="foto"><a class="foto" href="assets/powerbi/dashboard-datenbalken.png" target="_blank" rel="noopener"><img src="assets/powerbi/dashboard-datenbalken.png" alt="Dashboard-Seite mit markierter Filialmatrix; rechts der Formatbereich mit den Abschnitten Zeilengesamtsumme, Bestimmte Spalte, Zellelemente; unter Zellelemente die Datenreihe Umsatz Tsd. € und die Schalter Hintergrundfarbe, Schriftfarbe, Datenbalken eingeschaltet, Symbole, Web-URL" width="2056" height="1174" loading="lazy"></a><figcaption>Balken hinter der Zahl: <span class="callout">1</span> Matrix markieren, <span class="callout">2</span> Format → Zellelemente, <span class="callout">3</span> Datenreihe <code>Umsatz Tsd. €</code> wählen, <span class="callout">4</span> Datenbalken einschalten, <span class="callout">5</span> über fx die Farbe auf Grau stellen und die Achse auf null lassen.</figcaption></figure>
+    </div>
+    <div class="foto-reihe">
+      <figure class="foto"><a class="foto" href="assets/powerbi/dashboard-datenbalken-dialog.png" target="_blank" rel="noopener"><img src="assets/powerbi/dashboard-datenbalken-dialog.png" alt="Dialog Datenbalken in Power BI Desktop: Formatstil Datenbalken, Übernehmen für Nur Werte, Minimum Niedrigster Wert, Maximum Höchster Wert, Balkenrichtung Von links nach rechts, Farbfelder für Positiver Balken, Negativer Balken und Achse, Kästchen Nur Balken anzeigen" width="1400" height="1126" loading="lazy"></a><figcaption>Der Dialog „Datenbalken“: Minimum und Maximum bleiben auf niedrigstem und höchstem Wert, „Nur Balken anzeigen“ bleibt aus — die Zahl bleibt lesbar, der Balken ist Beiwerk.</figcaption></figure>
+      <figure class="foto"><a class="foto" href="assets/powerbi/dashboard-farbe-feldwert.png" target="_blank" rel="noopener"><img src="assets/powerbi/dashboard-farbe-feldwert.png" alt="Dialog Farbe – Kategorien in Power BI Desktop: Formatstil Feldwert, Welches Feld sollten wir als Grundlage nehmen: Δ Umsatz Farbe" width="1400" height="555" loading="lazy"></a><figcaption>Farbe aus einem Measure: Format → Spalten → Farbe → fx, <span class="callout">1</span> Formatstil „Feldwert“, <span class="callout">2</span> als Feld das Measure <code>Δ Umsatz Farbe</code>, das je Monat einen Hex-Code liefert. Dieselbe Einstellung färbt die Δ-Spalte der Matrix und die Texte unter den Kacheln.</figcaption></figure>
+    </div>
+    <div class="shot">
+      <div class="shot-bar"><span class="ampel"><i></i><i></i><i></i></span><span class="titel">Small Multiples</span><span class="spacer"></span>Power BI Desktop · August 2026</div>
+      <a class="foto" href="assets/powerbi/dashboard-smallmultiples.png" target="_blank" rel="noopener"><img src="assets/powerbi/dashboard-smallmultiples.png" alt="Dashboard-Seite mit markiertem Liniendiagramm der acht Filialen; rechts der Build-Bereich mit X-Achse Monat, Y-Achse Umsatz und letzter Monat, Small Multiples Filiale; daneben der Formatbereich mit den Abschnitten Marker und Datenbeschriftungen eingeschaltet" width="2056" height="1174" loading="lazy"></a>
+    </div>
+    <p class="foto-hinweis">Bildschirmfoto vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
+    <ol class="shot-legende">
+      <li><span class="callout">1</span><span>X-Achse: die Spalte <code>Monat</code> aus <code>dim_date</code> — Monatskürzel, nach <code>month</code> sortiert, damit Jan vor Feb steht.</span></li>
+      <li><span class="callout">2</span><span>Y-Achse: <code>Umsatz Tsd</code> und dazu <code>Umsatz Tsd letzter Monat</code>, ein Measure, das nur im jüngsten Monat einen Wert hat. Es zeichnet den roten Punkt und trägt die einzige Beschriftung.</span></li>
+      <li><span class="callout">3</span><span>Small Multiples: <code>branch_name</code> — aus einem Diagramm werden acht, zwei Zeilen zu vier Spalten (Format → Small Multiples → Layout).</span></li>
+      <li><span class="callout">4</span><span>Das Ergebnis mit gemeinsamer Skala 0 bis 50 Tsd. €: Die Höhe der Linie ist zwischen den Filialen vergleichbar, weil jede dieselbe Achse hat.</span></li>
+      <li><span class="callout">5</span><span>Datenbeschriftungen an, aber je Serie: für <code>Umsatz Tsd</code> aus, für <code>letzter Monat</code> an — Format → Datenbeschriftungen → Einstellungen übernehmen auf → Serie.</span></li>
+      <li><span class="callout">6</span><span>Marker ebenso je Serie: kleine blaue Punkte auf der Hauptlinie, ein großer roter auf dem letzten Monat.</span></li>
+    </ol>
+    <div class="concept-box">
+      <h3>Was das Dashboard nicht tut</h3>
+      <p>Kein Kuchen, keine Tacho-Anzeige, keine eingefärbten Kacheln: Länge kodiert Größe, Fläche und Farbe tun es nicht. Keine Legende: Serien und Small Multiples sind direkt beschriftet. Keine Gitternetze, keine Rahmen, keine Schatten. Die Balken der Matrix beginnen bei null; die Y-Achse der Linie ist beschnitten, weil dort die Position kodiert. Wo ein Kennzahlentitel stünde („Umsatz nach Monat“), steht die Einheit — „in Tsd. €“ — und wo die Aussage hingehört, steht sie im Titel.</p>
+    </div>
+  </section>
+
   <section class="section-block" id="stolper">
     <h2>Stolpersteine</h2>
     <div class="karten">
       <div class="karte">
-        <div class="kopfzeile">Verbindung scheitert an Npgsql</div>
-        <p>Eine Version von Power BI Desktop vor Dezember 2019 meldet beim Verbinden, dass sie keine Verbindung herstellen kann und der Anbieter Npgsql fehlt — der Treiber wurde damals noch nicht mitgeliefert. Abhilfe: Power BI Desktop aktualisieren. Seit Dezember 2019 ist Npgsql enthalten, seit Oktober 2024 in Version 4.0.17; mit dem Update August 2026 (Stand 09/2026) ist nichts zu installieren.</p>
+        <div class="kopfzeile">Materialisierte Sichten fehlen im Navigator</div>
+        <p>Der Navigator „Daten auswählen“ listet Tabellen und gewöhnliche Sichten — in der Datenbank der Fallstudie 48 Einträge —, aber keine materialisierten Sichten. Die 38 Sichten <code>v_*</code> in <code>burgermetrics</code> sind materialisiert (Lab 01) und tauchen nicht auf, auch nicht mit <code>v_</code> im Suchfeld. Abhilfe: im Verbindungsdialog unter „Erweiterte Optionen“ das Feld „SQL-Anweisung“ mit <code>SELECT * FROM burgermetrics.v_kennzahlen_jahr</code>; Power Query fragt einmal „Native Datenbankabfrage — Möchten Sie diese native Abfrage genehmigen?“, danach kommt die Sicht als Tabelle „Abfrage“ ins Modell — zehn Zeilen, 2025 mit 136.557 · 2.994.771,13 · 21,93. Die Genehmigung merkt sich Power BI je Abfrage in den Datenquelleneinstellungen unter „Systemeigene Datenbankabfragen“.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Die Datumsbeziehung fehlt</div>
+        <p>Nach dem Laden hat das Modell acht Beziehungen, alle über <code>_id</code>-Spalten; die zwei Fremdschlüssel auf <code>dim_date.date</code> sind nicht dabei. Symptom: Der Filter <code>dim_date[year] = 2025</code> ändert nichts, jede Kachel zeigt den Wert aller Jahre. Abhilfe: Modellansicht → Beziehungen verwalten → Neue Beziehung, <code>fact_orders[date]</code> und <code>fact_reviews[date]</code> je auf <code>dim_date[date]</code>, Viele-zu-Eins; danach „Als Datumstabelle markieren“.</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">In jeder Zeile dieselbe Summe</div>
-        <p>Ein Balkendiagramm „Umsatz je Filiale“ zeigt in jeder Filiale denselben Wert, den Gesamtumsatz. Dann fehlt die Beziehung zwischen <code>fact_orders</code> und <code>dim_branch</code>: Die Dimension kann die Fakten nicht filtern. Power BI meldet nichts; der Fehler ist nur im Bild zu sehen. Abhilfe: Modellansicht öffnen, die Linie prüfen oder anlegen (<code>*:1</code>, Filterrichtung einfach).</p>
+        <p>Ein Balkendiagramm „Umsatz je Filiale“ zeigt in jeder Filiale denselben Wert, den Gesamtumsatz — und eine zusätzliche Zeile „(Leer)“. Dann ist die Beziehung zwischen <code>fact_orders</code> und <code>dim_branch</code> inaktiv oder fehlt: Die Dimension kann die Fakten nicht filtern, jede Filiale bekommt die Summe, und die Bestellungen ohne Filiale sammeln sich unter „(Leer)“. Power BI meldet nichts; der Fehler ist nur im Bild zu sehen. Abhilfe: Modellansicht öffnen, die Linie prüfen oder anlegen (<code>*:1</code>, Filterrichtung einfach). Nachgestellt, indem die Beziehung in „Beziehungen verwalten“ auf inaktiv gesetzt wurde:</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">Measure auf einer zusammengeführten Tabelle</div>
-        <p>Wer <code>fact_orders</code> und <code>fact_order_items</code> zu einer Tabelle zusammenführt und darauf <code>SUM(net_total)</code> rechnet, hat die Fan Trap aus Lab 03: Jeder Bestellwert zählt so oft, wie die Bestellung Positionen hat — 14,7 statt 3,0 Mio. € für 2025 (14.692.551 € gegen 2.994.771 €). Power BI meldet nichts. Abhilfe: zwei Faktentabellen mit eigener Beziehung, jedes Measure auf dem Grain, auf dem der Betrag entsteht.</p>
+        <p>Wer <code>fact_orders</code> und <code>fact_order_items</code> zu einer Tabelle zusammenführt und darauf <code>SUM(net_total)</code> rechnet, hat die Fan Trap aus Lab 03: Jeder Bestellwert zählt so oft, wie die Bestellung Positionen hat — 14,7 statt 3,0 Mio. € für 2025 (14.692.551 € gegen 2.994.771 €, aus der Datenbank gerechnet). Power BI meldet nichts. Abhilfe: zwei Faktentabellen mit eigener Beziehung, jedes Measure auf dem Grain, auf dem der Betrag entsteht.</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">DirectQuery auf fact_order_items</div>
-        <p>Im DirectQuery-Modus scheitert jede Abfrage, die mehr als 1.000.000 Zeilen liefert (Stand 09/2026). Ein Bild auf Positionsebene über <code>fact_order_items</code> tut das: Die Tabelle hat 2.950.082 Zeilen. Eine Aggregation — Positionen je Bestellung, je Filiale — bleibt unter der Grenze. Die Grenze gilt für DirectQuery; die Checkliste lädt die Tabelle per Import.</p>
+        <p>Im DirectQuery-Modus scheitert jedes Bild, dessen Abfrage mehr als 1.000.000 Zeilen liefert: „Fehler beim Abrufen von Daten für dieses Visual. Das Resultset einer Abfrage an eine externe Datenquelle hat die maximal zulässige Größe von 1000000 Zeilen überschritten.“ Ein Bild auf Positionsebene über <code>fact_order_items</code> tut das — die Tabelle hat 2.950.082 Zeilen; nachgestellt mit einem Measure, das je <code>order_item_id</code> rechnet. Eine Aggregation — Positionen je Bestellung, je Filiale — bleibt unter der Grenze. Die Grenze gilt für DirectQuery; die Checkliste lädt die Tabelle per Import.</p>
+      </div>
+      <div class="karte">
+        <div class="kopfzeile">Verbindung scheitert an Npgsql</div>
+        <p>Eine Version von Power BI Desktop vor Dezember 2019 meldet beim Verbinden, dass sie keine Verbindung herstellen kann und der Anbieter Npgsql fehlt — der Treiber wurde damals noch nicht mitgeliefert. Abhilfe: Power BI Desktop aktualisieren. Seit Dezember 2019 ist Npgsql nach Herstellerangabe enthalten; mit Version 2.157.1354.0 (August 2026) war in dieser Prüfung nichts zu installieren.</p>
       </div>
       <div class="karte">
         <div class="kopfzeile">Zwanzig Sitzungen im Hörsaal</div>
         <p>Die Rolle <code>studi_daba</code> hält höchstens zwanzig gleichzeitige Sitzungen (Lab 01). Ein DirectQuery-Bericht öffnet für jedes Bild Abfragen; ein Hörsaal voller solcher Berichte belegt die zwanzig Sitzungen in Minuten, und die nächste Anmeldung scheitert mit <code>FATAL:  too many connections for role "studi_daba"</code>. Import fragt die Datenbank nur beim Laden und beim Aktualisieren.</p>
       </div>
     </div>
+    <div class="foto-reihe">
+      <figure class="foto"><a class="foto" href="assets/powerbi/ohne-beziehung.png" target="_blank" rel="noopener"><img src="assets/powerbi/ohne-beziehung.png" alt="Berichtsseite mit inaktiver Beziehung: das Balkendiagramm Umsatz je Filiale zeigt neun gleich lange Balken, darunter eine Zeile (Leer); das Liniendiagramm daneben ist unverändert; rechts der Filterbereich mit year ist 2025" width="1600" height="811" loading="lazy"></a><figcaption>Ohne Beziehung zu <code>dim_branch</code>: <span class="callout">1</span> in jeder Filiale die Gesamtsumme, <span class="callout">2</span> dazu die Zeile „(Leer)“. Die Linie daneben rechnet weiter richtig, weil ihre Beziehung zum Datum steht.</figcaption></figure>
+      <figure class="foto"><a class="foto" href="assets/powerbi/directquery-fehler.png" target="_blank" rel="noopener"><img src="assets/powerbi/directquery-fehler.png" alt="Fehlerdialog in Power BI Desktop: Fehler beim Abrufen von Daten für dieses Visual. Das Resultset einer Abfrage an eine externe Datenquelle hat die maximal zulässige Größe von 1000000 Zeilen überschritten. Überprüfen Sie die technischen Details, um weitere Informationen zu erhalten. Schaltflächen Details anzeigen, Support kontaktieren, Schließen" width="1600" height="450" loading="lazy"></a><figcaption>Die Meldung im DirectQuery-Modus, wörtlich; das Bild bleibt leer mit einem Fehlersymbol, bis die Abfrage unter die Grenze fällt.</figcaption></figure>
+    </div>
+    <div class="foto-reihe">
+      <figure class="foto"><a class="foto" href="assets/powerbi/powerquery-sicht.png" target="_blank" rel="noopener"><img src="assets/powerbi/powerquery-sicht.png" alt="Power-Query-Editor mit der Abfrage Abfrage: Formelleiste PostgreSQL.Database mit Server supabase.butscher.cloud:5433, Datenbank postgres und Query SELECT * FROM burgermetrics.v_kennzahlen_jahr und der Vorschau mit zehn Zeilen jahr, bestellungen, umsatz, aov, bruttoumsatz, rabatt von 2017 bis 2026" width="1600" height="699" loading="lazy"></a><figcaption>Die materialisierte Sicht über die SQL-Anweisung: <span class="callout">1</span> die Formel in M mit <code>Query</code>, <span class="callout">2</span> zehn Jahre, 2025 mit 136.557 Bestellungen und 2.994.771,13 €.</figcaption></figure>
+      <figure class="foto"><a class="foto" href="assets/powerbi/optionen-beziehungen.png" target="_blank" rel="noopener"><img src="assets/powerbi/optionen-beziehungen.png" alt="Dialog Optionen in Power BI Desktop, Seite Daten laden: unter Beziehungen die Kästchen Beim ersten Laden Beziehungen aus Datenquellen importieren angekreuzt, Beim Aktualisieren von Daten Beziehungen aktualisieren oder löschen nicht angekreuzt, Neue Beziehungen nach dem Laden der Daten automatisch erkennen angekreuzt; darunter Zeitintelligenz mit Autom. Datum/Uhrzeit angekreuzt" width="1400" height="1112" loading="lazy"></a><figcaption>Die Optionen, mit denen geladen wurde: <span class="callout">1</span> Import aus Datenquellen an, <span class="callout">2</span> automatische Erkennung an, <span class="callout">3</span> Seite „Daten laden“ der aktuellen Datei. Trotzdem fehlten die zwei Datumsbeziehungen.</figcaption></figure>
+    </div>
+    <p class="foto-hinweis">Bildschirmfotos vom 21.09.2026, Power BI Desktop 2.157.1354.0 (August 2026) unter Windows 11, deutsche Oberfläche — zum Vergrößern anklicken.</p>
   </section>
 
   <section class="section-block" id="simulator">
@@ -380,7 +398,7 @@
 
   <section class="section-block" id="uebungen">
     <h2>Übungen</h2>
-    <p>Fünf Übungen: zwei im Simulator — Umsatz je Filiale als Balken, Bestellungen je Monat als Linie mit <code>COUNT</code> statt <code>SUM</code> —, ein Quiz zu Import, Beziehungen und Measures, eine Zuordnung von DAX-Ausdruck und Zweck und eine Checkliste für den Bericht in Power BI Desktop gegen die Datenbank der Fallstudie.</p>
+    <p>Fünf Übungen: zwei im Simulator — Umsatz je Filiale als Balken, Bestellungen je Monat als Linie mit <code>COUNT</code> statt <code>SUM</code> —, ein Quiz zu Import, Beziehungen und Measures, eine Zuordnung von DAX-Ausdruck und Zweck und eine Checkliste für Bericht und Dashboard in Power BI Desktop gegen die Datenbank der Fallstudie.</p>
     <div data-uebung="W04-01"></div>
     <div data-uebung="W04-02"></div>
     <div data-uebung="W04-03"></div>
@@ -394,11 +412,12 @@
     <ul>
       <li>Power BI ist ein weiterer Leser der Datenbank: ein Modell aus den Tabellen des Galaxy-Schemas (Lab 03), Measures in DAX, ein Bericht. Die Definition der Kennzahl bleibt in der Sicht (Lab 01); die Kontrollzahl ist 2.994.771,13 € Umsatz aus 136.557 Bestellungen für 2025.</li>
       <li>Import kopiert die Tabellen in den Speicher, DirectQuery fragt bei jedem Bild die Datenbank — Grenze 1.000.000 Zeilen je Abfrageergebnis, Microsoft empfiehlt Import (Stand 09/2026). Für den Kurs gilt Import: Die Rolle hält zwanzig Sitzungen.</li>
-      <li>Verbinden: <code>Start → Daten abrufen → PostgreSQL-Datenbank</code>, Server <code>supabase.butscher.cloud:5433</code>, Datenbank <code>postgres</code>, Authentifizierung Datenbank mit <code>studi_daba</code> / <code>thws</code>; Npgsql ist seit Dezember 2019 enthalten. Im Navigator <code>dim_*</code> und <code>fact_*</code> laden, <code>obt_orders</code> nicht.</li>
-      <li>„Beziehungen aus Datenquellen beim ersten Laden importieren“ ist standardmäßig aktiv und macht aus 13 Fremdschlüsseln 13 Beziehungen, <code>*:1</code> mit einfacher Filterrichtung. Von Hand: <code>fact_reviews → fact_orders</code> inaktiv setzen (die direkte Beziehung zum Datum bleibt aktiv), <code>dim_weather</code> und <code>dim_time_slot</code> ohne Fremdschlüssel selbst verbinden.</li>
+      <li>Verbinden: <code>Start → Daten abrufen → Weitere… → PostgreSQL-Datenbank</code>, ein Dialog mit Server <code>supabase.butscher.cloud:5433</code>, Datenbank <code>postgres</code>, Importieren, Authentifizierungsart Standard mit <code>studi_daba</code> / <code>thws</code>; kein Treiber zu installieren. Im Navigator <code>burgermetrics</code> suchen, <code>dim_*</code> und <code>fact_*</code> laden, <code>obt_orders</code> nicht; die materialisierten Sichten <code>v_*</code> fehlen dort und kommen über die SQL-Anweisung. Geprüft am 21.09.2026 mit Version 2.157.1354.0 (August 2026).</li>
+      <li>Nach dem Laden stehen acht Beziehungen im Modell, alle über <code>_id</code>-Spalten, <code>*:1</code> mit einfacher Filterrichtung; <code>fact_reviews → fact_orders</code> ist 1:1 und von Power BI selbst inaktiv gesetzt. Von Hand: die zwei Beziehungen auf <code>dim_date[date]</code>, dann <code>dim_date</code> als Datumstabelle markieren; <code>dim_weather</code> und <code>dim_time_slot</code> ohne Fremdschlüssel ebenso.</li>
       <li>Fünf Measures — <code>Umsatz</code>, <code>Bestellungen</code>, <code>Bestellwert</code>, <code>Ø Sterne</code>, <code>Umsatz 2025</code> — rechnen im Filterkontext und speichern nichts; <code>CALCULATE</code> ändert den Filterkontext, <code>DIVIDE</code> schützt vor der Division durch null. Berechnete Spalten bilden Kategorien je Zeile.</li>
-      <li>Der Bericht: vier Kacheln, Balken je Filiale, Linie je Monat, ein Filter auf das Jahr für die ganze Seite. Balken beginnen bei null, Titel sind Aussagen.</li>
-      <li>Stolpersteine: eine alte Desktop-Version ohne Npgsql (aktualisieren), dieselbe Summe in jeder Zeile (Beziehung fehlt), ein Measure auf einer zusammengeführten Tabelle (Fan Trap, 14,7 statt 3,0 Mio. €), DirectQuery über <code>fact_order_items</code> (Zeilengrenze), zwanzig Sitzungen im Hörsaal. Lab 05 baut auf denselben Sichten ein Dashboard in Tableau, Lab 06 liest sie mit Python.</li>
+      <li>Der Bericht: Tabelle der Kontrollzahlen, Balken je Filiale, Linie je Monat, ein Seitenfilter auf das Jahr. Balken beginnen bei null, Titel sind Aussagen.</li>
+      <li>Das Dashboard: Grau vor Farbe, Zahlen bleiben Zahlen, Abweichung in eigener Zeile, Small Multiples in derselben Skala, letzter Punkt markiert. Werkzeuge: <code>SAMEPERIODLASTYEAR</code> auf der markierten Datumstabelle, Datenbalken in der Matrix, Farbe als Measure über „Feldwert“, Small Multiples im Build-Bereich, Titel als Measure. Vorlage <code>powerbi-dashboard.dax</code>, Projekt unter <code>powerbi/BurgerMetrics/</code>.</li>
+      <li>Stolpersteine: materialisierte Sichten fehlen im Navigator (SQL-Anweisung), die Datumsbeziehung fehlt (von Hand anlegen), dieselbe Summe in jeder Zeile samt „(Leer)“ (Beziehung prüfen), eine zusammengeführte Tabelle (Fan Trap, 14,7 statt 3,0 Mio. €), DirectQuery über 1.000.000 Zeilen („Das Resultset einer Abfrage … hat die maximal zulässige Größe von 1000000 Zeilen überschritten“), eine alte Desktop-Version ohne Npgsql, zwanzig Sitzungen im Hörsaal. Lab 05 stellt dieselben Fragen mit Tableau.</li>
     </ul>
     <div data-lab-nav></div>
   </section>

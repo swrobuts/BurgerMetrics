@@ -1,0 +1,155 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "887578a31a0214101522",
+  "position": {
+    "x": 16,
+    "y": 0,
+    "z": 0,
+    "height": 192,
+    "width": 1504,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_orders"
+                    }
+                  },
+                  "Property": "Bestellungen"
+                }
+              },
+              "queryRef": "fact_orders.Bestellungen",
+              "nativeQueryRef": "Bestellungen"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_orders"
+                    }
+                  },
+                  "Property": "Bestellwert"
+                }
+              },
+              "queryRef": "fact_orders.Bestellwert",
+              "nativeQueryRef": "Bestellwert"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_reviews"
+                    }
+                  },
+                  "Property": "Ø Sterne"
+                }
+              },
+              "queryRef": "fact_reviews.Ø Sterne",
+              "nativeQueryRef": "Ø Sterne"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fact_orders"
+                    }
+                  },
+                  "Property": "Umsatz"
+                }
+              },
+              "queryRef": "fact_orders.Umsatz",
+              "nativeQueryRef": "Umsatz"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Kennzahlen 2025 – die Kontrollzahlen aus v_kennzahlen_jahr'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "a9ac9278703b051a90ea",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Bestellungen"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "c5f04e3520528bcd8000",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Bestellwert"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "c0b8ab832286e46b6321",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_reviews"
+              }
+            },
+            "Property": "Ø Sterne"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "cb38e07d12e3682e7a89",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

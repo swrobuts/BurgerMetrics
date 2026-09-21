@@ -1,0 +1,267 @@
+table fact_orders
+	lineageTag: 15867c2d-d1a9-4375-8020-8070f0d2de03
+
+	measure Umsatz = SUM(fact_orders[net_total])
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		lineageTag: 79851052-2547-4741-ba14-b05c3d22e656
+
+	measure Bestellungen = COUNTROWS(fact_orders)
+		formatString: #,0
+		lineageTag: 80dbac7b-4880-4135-a672-ef5a1c5fe6ed
+
+	measure Bestellwert = DIVIDE([Umsatz], [Bestellungen])
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		lineageTag: b096b24e-d976-4a28-9365-b5b0b3436b43
+
+	measure 'Umsatz 2025' = CALCULATE([Umsatz], dim_date[year] = 2025)
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		lineageTag: c0539244-c1d8-4b88-a358-035e7abe6c0d
+
+	measure 'Umsatz VJ' = IF(HASONEVALUE(dim_date[year]), CALCULATE([Umsatz], SAMEPERIODLASTYEAR(dim_date[date])))
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		displayFolder: Dashboard
+		lineageTag: da807629-6be0-4170-a272-5ea36f41222f
+
+	measure 'Δ Umsatz' = [Umsatz] - [Umsatz VJ]
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		displayFolder: Dashboard
+		lineageTag: e5e3e1f0-ba8d-474e-9d93-e013d2095da5
+
+	measure 'Δ Umsatz %' = DIVIDE([Δ Umsatz], [Umsatz VJ])
+		formatString: +0.0\ %;-0.0\ %;0.0\ %
+		displayFolder: Dashboard
+		lineageTag: 1124075c-4d10-4a27-ad5e-ab3cb080f70d
+
+	measure 'Bestellungen VJ' = IF(HASONEVALUE(dim_date[year]), CALCULATE([Bestellungen], SAMEPERIODLASTYEAR(dim_date[date])))
+		formatString: #,0
+		displayFolder: Dashboard
+		lineageTag: fd14c997-2239-425b-ac21-a9783debd452
+
+	measure 'Δ Bestellungen %' = DIVIDE([Bestellungen] - [Bestellungen VJ], [Bestellungen VJ])
+		formatString: +0.0\ %;-0.0\ %;0.0\ %
+		displayFolder: Dashboard
+		lineageTag: 185aed5c-17a5-4393-8c5e-ee04e6266e32
+
+	measure 'Bestellwert VJ' = DIVIDE([Umsatz VJ], [Bestellungen VJ])
+		formatString: #,0.00\ "€";-#,0.00\ "€";#,0.00\ "€"
+		displayFolder: Dashboard
+		lineageTag: 74371191-f8b7-4ceb-abf3-3c6c8cd326bd
+
+	measure 'Δ Bestellwert %' = DIVIDE([Bestellwert] - [Bestellwert VJ], [Bestellwert VJ])
+		formatString: +0.0\ %;-0.0\ %;0.0\ %
+		displayFolder: Dashboard
+		lineageTag: a773d56a-baa6-4050-be50-4c2afdb58aa2
+
+	measure 'Umsatz Tsd' = DIVIDE([Umsatz], 1000)
+		formatString: #,0
+		displayFolder: Dashboard
+		lineageTag: 42956cc6-e52c-4f0c-a83f-e1bbe09c48c1
+
+	measure 'Umsatz VJ Tsd' = DIVIDE([Umsatz VJ], 1000)
+		formatString: #,0
+		displayFolder: Dashboard
+		lineageTag: 95723daf-0ddc-4bb8-9faa-9951c478a6c3
+
+	measure 'Δ Umsatz Farbe' = IF([Δ Umsatz] >= 0, "#2E7D32", "#A32638")
+		displayFolder: Dashboard
+		lineageTag: fe9e0049-66d2-442e-acc2-05924785fa10
+
+	measure 'Δ Bestellungen Farbe' = IF([Bestellungen] >= [Bestellungen VJ], "#2E7D32", "#A32638")
+		displayFolder: Dashboard
+		lineageTag: b70ba4d3-de19-481c-a454-7d43d4d4ceba
+
+	measure 'Δ Bestellwert Farbe' = IF([Bestellwert] >= [Bestellwert VJ], "#2E7D32", "#A32638")
+		displayFolder: Dashboard
+		lineageTag: ee6f7c4d-3e08-45b2-969a-b34be7f86a69
+
+	measure 'Δ Umsatz Text' = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Umsatz VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Umsatz %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr"))
+		displayFolder: Dashboard
+		lineageTag: 906eb4a0-53d2-4aa0-a294-00c62c5a3a27
+
+	measure 'Δ Bestellungen Text' = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Bestellungen VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Bestellungen %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr"))
+		displayFolder: Dashboard
+		lineageTag: 0b585136-2e32-4a22-b4cb-a11bfd832ab9
+
+	measure 'Δ Bestellwert Text' = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Bestellwert VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Bestellwert %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr"))
+		displayFolder: Dashboard
+		lineageTag: d9ce44f6-f891-4547-9e10-b834b6b3b2d6
+
+	measure 'Top Filiale' = MAXX(TOPN(1, VALUES(dim_branch[branch_name]), [Umsatz], DESC), dim_branch[branch_name])
+		displayFolder: Dashboard
+		lineageTag: 5a2ad00d-5293-405c-be98-3b7d8dca72b5
+
+	measure 'Titel Dashboard' = "Umsatz " & IF(HASONEVALUE(dim_date[year]), SELECTEDVALUE(dim_date[year]), MIN(dim_date[year]) & "–" & MAX(dim_date[year])) & ": " & FORMAT(DIVIDE([Umsatz], 1000000), "0.00") & " Mio. €" & IF(ISBLANK([Umsatz VJ]), "", ", " & FORMAT([Δ Umsatz %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr") & " – " & [Top Filiale] & " liegt vorn"
+		displayFolder: Dashboard
+		lineageTag: 72a71c68-4819-4c3e-a759-2a7db0119209
+
+	measure 'Umsatz Tsd letzter Monat' =
+			VAR letzter = CALCULATE(MAX(fact_orders[date]), ALLSELECTED(dim_date))
+			RETURN IF(SELECTEDVALUE(dim_date[month]) = MONTH(letzter), [Umsatz Tsd])
+		formatString: #,0
+		displayFolder: Dashboard
+		lineageTag: a33e286a-e6f9-4bae-95ab-cc4f6b7354c3
+
+	column order_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 01118876-9a92-4f42-95bb-9efb3996bd5d
+		summarizeBy: none
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 75384719-7409-489d-a5da-d4fa2e8fdcc5
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column time
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: 8ff13aec-6f18-4598-ad69-0a5c2170a95c
+		summarizeBy: none
+		sourceColumn: time
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column hour
+		dataType: int64
+		formatString: 0
+		lineageTag: 54485944-9199-4e0e-8e77-4746de25fcd0
+		summarizeBy: sum
+		sourceColumn: hour
+
+		annotation SummarizationSetBy = Automatic
+
+	column branch_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 5850a249-5423-4016-8474-bd437c5c2f5d
+		summarizeBy: none
+		sourceColumn: branch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column customer_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 2c241cb0-f8f2-449e-9ca2-488ff3726a42
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 64972c37-4156-43b2-a4de-dbb54d70582e
+		summarizeBy: sum
+		sourceColumn: payment_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column promo_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 01cd1f9a-638d-4dbe-9887-9b2121aa46b7
+		summarizeBy: sum
+		sourceColumn: promo_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_channel
+		dataType: string
+		lineageTag: 18afa471-a019-4a9a-9761-54387e16733d
+		summarizeBy: none
+		sourceColumn: order_channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column item_count
+		dataType: int64
+		formatString: 0
+		lineageTag: decb3551-3f66-4dd4-b607-ed5f405b2902
+		summarizeBy: sum
+		sourceColumn: item_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column distinct_items
+		dataType: int64
+		formatString: 0
+		lineageTag: 570ea7ab-f594-4170-8554-6ec290cb99ba
+		summarizeBy: sum
+		sourceColumn: distinct_items
+
+		annotation SummarizationSetBy = Automatic
+
+	column gross_total
+		dataType: double
+		lineageTag: 187b7189-3f01-44cf-b11b-59e8279ffece
+		summarizeBy: sum
+		sourceColumn: gross_total
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column discount_amount
+		dataType: double
+		lineageTag: 53161b7b-b741-4522-b44a-716890f5c150
+		summarizeBy: sum
+		sourceColumn: discount_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_total
+		dataType: double
+		lineageTag: 8d78b915-d089-4d54-a659-99426648eb94
+		summarizeBy: sum
+		sourceColumn: net_total
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column order_duration_min
+		dataType: int64
+		formatString: 0
+		lineageTag: d7b57a4e-9f0f-4d0e-9e4c-67a724b85a52
+		summarizeBy: sum
+		sourceColumn: order_duration_min
+
+		annotation SummarizationSetBy = Automatic
+
+	column satisfaction_score
+		dataType: double
+		lineageTag: 3e9b0dff-49db-4fee-939a-aa3ee336bbe2
+		summarizeBy: sum
+		sourceColumn: satisfaction_score
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition fact_orders = m
+		mode: import
+		source =
+				let
+				  Quelle = PostgreSQL.Database("supabase.butscher.cloud:5433", "postgres"),
+				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "fact_orders"]}[Data]
+				in
+				  #"Navigation 1"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

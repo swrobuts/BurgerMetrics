@@ -1,0 +1,173 @@
+table dim_branch
+	lineageTag: 915d72b2-799e-4ffc-b7f8-ce503ddf3e07
+
+	column branch_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 5d5bdfa5-ed19-4e2c-9094-4d13b0d63360
+		summarizeBy: none
+		sourceColumn: branch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column branch_name
+		dataType: string
+		lineageTag: ea6be461-d518-46d3-8ebc-7bdcef86ff66
+		summarizeBy: none
+		sourceColumn: branch_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column address
+		dataType: string
+		lineageTag: f2e96df7-6f69-4ac8-9cc0-61bf06ea6fe1
+		summarizeBy: none
+		sourceColumn: address
+
+		annotation SummarizationSetBy = Automatic
+
+	column district
+		dataType: string
+		lineageTag: 59bbf82c-8822-4907-a06c-e53476c170d6
+		summarizeBy: none
+		sourceColumn: district
+
+		annotation SummarizationSetBy = Automatic
+
+	column city
+		dataType: string
+		lineageTag: 84aefbb7-650c-4b6f-a914-4830d5133585
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	column postal_code
+		dataType: string
+		lineageTag: 5cb1d234-efc6-497a-a74d-7f3f048ce11e
+		summarizeBy: none
+		sourceColumn: postal_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column latitude
+		dataType: double
+		lineageTag: f4d005e3-eaaf-4820-83dd-d28673d9133c
+		summarizeBy: sum
+		sourceColumn: latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column longitude
+		dataType: double
+		lineageTag: 68d734d8-9700-4782-9ffd-3ddcda641c41
+		summarizeBy: sum
+		sourceColumn: longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column size_sqm
+		dataType: int64
+		formatString: 0
+		lineageTag: 16e5e0f3-a335-4a6b-8775-8c1833b64c45
+		summarizeBy: sum
+		sourceColumn: size_sqm
+
+		annotation SummarizationSetBy = Automatic
+
+	column seats_indoor
+		dataType: int64
+		formatString: 0
+		lineageTag: 947ff9a1-f105-491b-b5a2-e14cdfb8050c
+		summarizeBy: sum
+		sourceColumn: seats_indoor
+
+		annotation SummarizationSetBy = Automatic
+
+	column seats_outdoor
+		dataType: int64
+		formatString: 0
+		lineageTag: a5585f0e-bb90-4e17-b4f2-df131ee2ff52
+		summarizeBy: sum
+		sourceColumn: seats_outdoor
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_drive_through
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 2f4b885b-0a14-40b9-a8b2-dce7e4b4154f
+		summarizeBy: none
+		sourceColumn: has_drive_through
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_playground
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: a16c8fa3-0f9d-4a1f-b21b-d8af96409a60
+		summarizeBy: none
+		sourceColumn: has_playground
+
+		annotation SummarizationSetBy = Automatic
+
+	column parking_spots
+		dataType: int64
+		formatString: 0
+		lineageTag: a8f995d8-37ec-41e4-aa4d-aa6dd6df851b
+		summarizeBy: sum
+		sourceColumn: parking_spots
+
+		annotation SummarizationSetBy = Automatic
+
+	column opening_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f186659b-9b97-4921-9730-6b52b61a5d73
+		summarizeBy: none
+		sourceColumn: opening_date
+
+		variation Variation
+			isDefault
+			relationship: fd41f477-38cd-430e-a055-83e0630ddfb5
+			defaultHierarchy: LocalDateTable_313a0189-c4d2-4e23-a80c-1ffbadc44f9a.Datumshierarchie
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column monthly_rent_eur
+		dataType: double
+		lineageTag: cd36ddf5-c66e-46f9-aa4d-64e7f107dca1
+		summarizeBy: sum
+		sourceColumn: monthly_rent_eur
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column branch_type
+		dataType: string
+		lineageTag: 749d757b-05dd-46d9-985d-03a6103b054e
+		summarizeBy: none
+		sourceColumn: branch_type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_branch = m
+		mode: import
+		source =
+				let
+				  Quelle = PostgreSQL.Database("supabase.butscher.cloud:5433", "postgres"),
+				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "dim_branch"]}[Data]
+				in
+				  #"Navigation 1"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

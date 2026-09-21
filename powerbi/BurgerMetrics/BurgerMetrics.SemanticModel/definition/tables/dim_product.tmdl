@@ -1,0 +1,140 @@
+table dim_product
+	lineageTag: c0440c89-a87f-4aa2-8162-283371325912
+
+	column product_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 654c0542-6c5d-4b7c-84f6-e55a81f664c0
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_name
+		dataType: string
+		lineageTag: 469785f0-adba-45c0-88f9-83d18f5b39e8
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category
+		dataType: string
+		lineageTag: efa4dfdc-dff1-4c35-9627-1e6d6a16f6fd
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = Automatic
+
+	column subcategory
+		dataType: string
+		lineageTag: 4c6895fa-8bec-4bb6-a0af-a6196ba1016d
+		summarizeBy: none
+		sourceColumn: subcategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column base_price_2017
+		dataType: double
+		lineageTag: 08845175-e176-4e81-9ab6-05959f7eb70f
+		summarizeBy: sum
+		sourceColumn: base_price_2017
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cost_price_2017
+		dataType: double
+		lineageTag: c8fa40b1-1228-421f-88f6-0cb6a1879481
+		summarizeBy: sum
+		sourceColumn: cost_price_2017
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column is_vegetarian
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 6ed32f4a-2646-454f-bc1a-b19511a9e8fd
+		summarizeBy: none
+		sourceColumn: is_vegetarian
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_vegan
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 58864392-0fe0-468e-929e-b9aabf6597eb
+		summarizeBy: none
+		sourceColumn: is_vegan
+
+		annotation SummarizationSetBy = Automatic
+
+	column calories
+		dataType: int64
+		formatString: 0
+		lineageTag: f47d8e06-93e8-47c3-bda2-b73fef97ae96
+		summarizeBy: sum
+		sourceColumn: calories
+
+		annotation SummarizationSetBy = Automatic
+
+	column allergens
+		dataType: string
+		lineageTag: 449b0922-5ff0-45a3-8206-d0b2ccd7fa91
+		summarizeBy: none
+		sourceColumn: allergens
+
+		annotation SummarizationSetBy = Automatic
+
+	column introduced
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 486aa015-092e-40a2-a956-fc4892c4ec35
+		summarizeBy: none
+		sourceColumn: introduced
+
+		variation Variation
+			isDefault
+			relationship: 40eaf99e-31dc-45b5-833b-fa1b0f211c95
+			defaultHierarchy: LocalDateTable_553ff427-8dc7-4a14-bdce-e37ce006a6a9.Datumshierarchie
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column unit_price
+		dataType: double
+		lineageTag: 116efa38-4e18-4773-9fea-ac5b0ec50376
+		summarizeBy: sum
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cost_price
+		dataType: double
+		lineageTag: a9e12f0e-e210-4156-bbbb-151414499787
+		summarizeBy: sum
+		sourceColumn: cost_price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition dim_product = m
+		mode: import
+		source =
+				let
+				  Quelle = PostgreSQL.Database("supabase.butscher.cloud:5433", "postgres"),
+				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "dim_product"]}[Data]
+				in
+				  #"Navigation 1"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

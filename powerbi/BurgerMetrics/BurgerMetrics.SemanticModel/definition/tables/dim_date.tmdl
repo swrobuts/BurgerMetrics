@@ -1,0 +1,156 @@
+table dim_date
+	lineageTag: 22b32636-8b42-411a-a689-f923b4037070
+	dataCategory: Time
+
+	column date_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 5432cd85-f482-4717-9888-7011a3961937
+		summarizeBy: sum
+		sourceColumn: date_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		isKey
+		formatString: Long Date
+		lineageTag: 807246c0-74bc-42e9-9ab4-bce5e6d8d229
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 49977e16-a586-46bb-9901-e495ea7d4665
+		summarizeBy: sum
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column quarter
+		dataType: string
+		lineageTag: 6ad45f7f-6c87-45cf-8b76-5c8ac9d21ae0
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 14b59c86-d40f-46b0-ad4e-fef973498acf
+		summarizeBy: sum
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name
+		dataType: string
+		lineageTag: 73c1670c-c88f-4499-a076-515bf727e106
+		summarizeBy: none
+		sourceColumn: month_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column calendar_week
+		dataType: int64
+		formatString: 0
+		lineageTag: 6dd82053-ed5c-4dcb-810a-6a690affbc6c
+		summarizeBy: sum
+		sourceColumn: calendar_week
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_of_month
+		dataType: int64
+		formatString: 0
+		lineageTag: 5313a3d7-f230-443d-8a55-1447e5a9f8b3
+		summarizeBy: sum
+		sourceColumn: day_of_month
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_of_week
+		dataType: int64
+		formatString: 0
+		lineageTag: 957c3f44-ed02-47cf-b77d-54611e1d2d42
+		summarizeBy: sum
+		sourceColumn: day_of_week
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_name
+		dataType: string
+		lineageTag: 964980b9-3e77-4c76-a466-8f3dd7869e10
+		summarizeBy: none
+		sourceColumn: day_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_weekend
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 7ad6ac73-8d87-4994-89a9-8c1c227a1dfb
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_holiday
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: caa50573-788e-43ea-96aa-722cc9a524f1
+		summarizeBy: none
+		sourceColumn: is_holiday
+
+		annotation SummarizationSetBy = Automatic
+
+	column holiday_name
+		dataType: string
+		lineageTag: 8b996ced-fe4e-414d-8097-47c1cace3b5e
+		summarizeBy: none
+		sourceColumn: holiday_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column special_event
+		dataType: string
+		lineageTag: 90f3b362-3bfd-4bf9-ac59-741d08ae22b1
+		summarizeBy: none
+		sourceColumn: special_event
+
+		annotation SummarizationSetBy = Automatic
+
+	column season
+		dataType: string
+		lineageTag: e20dfdff-61b0-4330-8f93-07fab58620d5
+		summarizeBy: none
+		sourceColumn: season
+
+		annotation SummarizationSetBy = Automatic
+
+	column Monat = SWITCH(dim_date[month], 1, "Jan", 2, "Feb", 3, "Mär", 4, "Apr", 5, "Mai", 6, "Jun", 7, "Jul", 8, "Aug", 9, "Sep", 10, "Okt", 11, "Nov", 12, "Dez")
+		lineageTag: a76bef0e-1856-4b5b-b767-15a53969ebb7
+		summarizeBy: none
+		sortByColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				  Quelle = PostgreSQL.Database("supabase.butscher.cloud:5433", "postgres"),
+				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "dim_date"]}[Data]
+				in
+				  #"Navigation 1"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

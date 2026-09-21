@@ -1,0 +1,130 @@
+table fact_reviews
+	lineageTag: 74b0423e-4ffe-4cd0-86c2-24f0bda483e7
+
+	measure 'Ø Sterne' = AVERAGE(fact_reviews[stars])
+		formatString: 0.00
+		lineageTag: 19aca442-5bb6-452f-a814-d991158e8070
+
+	measure 'Ø Sterne VJ' = IF(HASONEVALUE(dim_date[year]), CALCULATE([Ø Sterne], SAMEPERIODLASTYEAR(dim_date[date])))
+		formatString: 0.00
+		displayFolder: Dashboard
+		lineageTag: e37c587f-5784-4eff-a753-d1ec1afec729
+
+	measure 'Δ Ø Sterne' = [Ø Sterne] - [Ø Sterne VJ]
+		formatString: +0.00;-0.00;0.00
+		displayFolder: Dashboard
+		lineageTag: ee76e73c-7869-4a02-ba26-1caa9a8c0a21
+
+	measure 'Δ Ø Sterne Farbe' = IF([Δ Ø Sterne] >= 0, "#2E7D32", "#A32638")
+		displayFolder: Dashboard
+		lineageTag: dcd94052-2ce5-46ff-9ee0-cb6596c0b437
+
+	measure 'Δ Ø Sterne Text' = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Ø Sterne VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Ø Sterne], "+0.00;-0.00;0.00") & " Sterne zum Vorjahr"))
+		displayFolder: Dashboard
+		lineageTag: 7052647e-15d9-4bc6-9850-dc4053684a65
+
+	column review_id
+		dataType: int64
+		formatString: 0
+		lineageTag: a4f0dc0c-2c77-40ac-99cd-28b88d8a849a
+		summarizeBy: sum
+		sourceColumn: review_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 78694064-8fcc-41d5-b663-9cdf7574befe
+		summarizeBy: none
+		sourceColumn: date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column time
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: f50c8d71-deaf-4ca8-a0c1-19fec6ce7311
+		summarizeBy: none
+		sourceColumn: time
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column customer_id
+		dataType: int64
+		formatString: 0
+		lineageTag: d16625a8-6db6-4aa8-bec3-8af5da7479a2
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 33c9b483-4497-4a3d-9868-0f5ac4332443
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column branch_id
+		dataType: int64
+		formatString: 0
+		lineageTag: c9d6e0fa-4e6a-4ddb-a8a6-aecbb1001e30
+		summarizeBy: none
+		sourceColumn: branch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column order_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 783ba0e7-4611-4941-a42e-f9d9b55ef9e6
+		summarizeBy: sum
+		sourceColumn: order_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column stars
+		dataType: int64
+		formatString: 0
+		lineageTag: d8b3e4dd-2241-44a1-aea2-8de9ca12a7c6
+		summarizeBy: sum
+		sourceColumn: stars
+
+		annotation SummarizationSetBy = Automatic
+
+	column review_text
+		dataType: string
+		lineageTag: b75c3ed8-1f69-4657-a6eb-01d44ad9c7fb
+		summarizeBy: none
+		sourceColumn: review_text
+
+		annotation SummarizationSetBy = Automatic
+
+	column source
+		dataType: string
+		lineageTag: 64fd0033-b9de-4a8d-8ed4-ec1b4213a979
+		summarizeBy: none
+		sourceColumn: source
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_reviews = m
+		mode: import
+		source =
+				let
+				  Quelle = PostgreSQL.Database("supabase.butscher.cloud:5433", "postgres"),
+				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "fact_reviews"]}[Data]
+				in
+				  #"Navigation 1"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

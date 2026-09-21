@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "BurgerMetrics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "a2917916-6b34-4304-93f9-abe97609fbfa"
+  }
+}
