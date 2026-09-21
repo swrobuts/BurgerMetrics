@@ -1,0 +1,230 @@
+cultureInfo de-DE
+
+	linguisticMetadata =
+			{
+			  "Version": "2.0.0",
+			  "Language": "en-US",
+			  "Entities": {
+			    "fact_orders.δ_umsatz_": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_orders",
+			          "ConceptualProperty": "Δ Umsatz %"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Δ Vorjahr": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_orders.bestellungen": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_orders",
+			          "ConceptualProperty": "Bestellungen"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Bestellungen": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_orders.bestellwert": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_orders",
+			          "ConceptualProperty": "Bestellwert"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Bestellwert": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        },
+			        {
+			          "Bestellwert €": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_orders.umsatz": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_orders",
+			          "ConceptualProperty": "Umsatz"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Umsatz": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_orders.umsatz_tsd": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_orders",
+			          "ConceptualProperty": "Umsatz Tsd"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Umsatz": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        },
+			        {
+			          "Umsatz Tsd. €": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_orders.umsatz_vj_tsd": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_orders",
+			          "ConceptualProperty": "Umsatz VJ Tsd"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Vorjahr": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        },
+			        {
+			          "Vorjahr Tsd. €": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_orders.umsatz_tsd_letzter_monat": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_orders",
+			          "ConceptualProperty": "Umsatz Tsd letzter Monat"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "letzter Monat": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "fact_reviews.ø_sterne": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "fact_reviews",
+			          "ConceptualProperty": "Ø Sterne"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Ø Sterne (Rezensionen)": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    },
+			    "dim_branch.branch_name": {
+			      "Definition": {
+			        "Binding": {
+			          "ConceptualEntity": "dim_branch",
+			          "ConceptualProperty": "branch_name"
+			        }
+			      },
+			      "State": "Generated",
+			      "Terms": [
+			        {
+			          "Filiale": {
+			            "State": "Suggested",
+			            "Source": {
+			              "Type": "External",
+			              "Agent": "PowerBI.VisualColumnRename"
+			            },
+			            "Weight": 0.9
+			          }
+			        }
+			      ]
+			    }
+			  }
+			}
+		contentType: json
+

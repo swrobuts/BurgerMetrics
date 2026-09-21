@@ -1,16 +1,17 @@
 {
   "befehle": {
     "B01": {
-      "titel": { "de": "Klickweg: PostgreSQL anbinden und die Tabellen wählen" },
+      "titel": { "de": "Klickweg: PostgreSQL anbinden und die Tabellen wählen (geprüft 21.09.2026, Power BI Desktop August 2026)" },
       "prompt": "🖱",
-      "befehl": "Start → Daten abrufen → PostgreSQL-Datenbank\n    Server       supabase.butscher.cloud:5433\n    Datenbank    postgres\n    Modus        Import\n    Warnung zur unverschlüsselten Verbindung → OK\n\nAuthentifizierung: Datenbank\n    Benutzer     studi_daba\n    Kennwort     thws\n\nNavigator → Ordner burgermetrics\n    [x] dim_branch   [x] dim_customer   [x] dim_date   [x] dim_product\n    [x] fact_orders  [x] fact_order_items   [x] fact_reviews\n    [ ] obt_orders\n# danach laden; obt_orders bleibt draußen",
+      "befehl": "Start → Daten abrufen → Weitere… → Suchfeld: PostgreSQL\n    → PostgreSQL-Datenbank → Verbinden\nMit Datenquelle verbinden (ein Dialog)\n    Server                supabase.butscher.cloud:5433\n    Datenbank             postgres\n    Konnektivitätsmodus   Importieren\n    Erweiterte Optionen   nur für Sichten: SQL-Anweisung\n        SELECT * FROM burgermetrics.v_kennzahlen_jahr\n    Authentifizierungsart Standard\n    Benutzername          studi_daba\n    Kennwort              thws\n    Datenschutzebene      Keine\n    [x] Verschlüsselte Verbindung verwenden\n                                    # Server ohne SSL\n    Weiter\nDaten auswählen (Navigator)\n    Suchfeld: burgermetrics            # [14] Tabellen\n    [x] dim_branch    [x] dim_customer\n    [x] dim_date      [x] dim_product\n    [x] fact_orders   [x] fact_order_items\n    [x] fact_reviews  [ ] obt_orders    # bleibt draußen\n    Load                               # rund zwei Minuten",
       "teile": [
-        { "was": "PostgreSQL-Datenbank", "bedeutet": { "de": "Der Connector für PostgreSQL. Sein Treiber Npgsql ist seit Dezember 2019 in Power BI Desktop enthalten, seit Oktober 2024 in Version 4.0.17 — eine Installation entfällt. Stand 09/2026." } },
-        { "was": "supabase.butscher.cloud:5433", "bedeutet": { "de": "Server und Port in einem Feld, getrennt durch einen Doppelpunkt. Der Port 5433 gehört dazu — 5432 ist der PostgreSQL-Standard und hier falsch (Lab 01)." } },
-        { "was": "Import", "bedeutet": { "de": "Kopiert die gewählten Tabellen in den Speicher von Power BI. DirectQuery würde bei jedem Bild Abfragen an die Datenbank schicken — mit zwanzig Sitzungen der Rolle im Hörsaal keine Wahl (Abschnitt „Stolpersteine“)." } },
-        { "was": "Warnung zur unverschlüsselten Verbindung", "bedeutet": { "de": "Die Verbindung läuft ohne SSL, wie in Lab 01. Power BI weist darauf hin; OK bestätigt. Der Bestand ist synthetisch, und das Konto liest nur." } },
-        { "was": "Authentifizierung: Datenbank", "bedeutet": { "de": "Benutzer und Kennwort des Demo-Kontos wie in Lab 01. Power BI merkt sich die Anmeldung je Server." } },
-        { "was": "Ordner burgermetrics", "bedeutet": { "de": "Beide Schemata erscheinen im Navigator als Ordner. Für ein eigenes Modell dim_* und fact_* ankreuzen, für fertige Kennzahlen die Sichten v_*; obt_orders bleibt draußen — 41 Spalten, die alles doppelt tragen." } }
+        { "was": "Weitere… → PostgreSQL", "bedeutet": { "de": "Der Connector für PostgreSQL. Sein Treiber Npgsql ist enthalten — in dieser Prüfung war nichts zu installieren (Version 2.157.1354.0, August 2026)." } },
+        { "was": "supabase.butscher.cloud:5433", "bedeutet": { "de": "Server und Port in einem Feld, getrennt durch einen Doppelpunkt. Der Port 5433 gehört dazu — 5432 ist der PostgreSQL-Standard und hier falsch (Lab 01). In Power Query steht später PostgreSQL.Database(\"supabase.butscher.cloud:5433\", \"postgres\")." } },
+        { "was": "Importieren", "bedeutet": { "de": "Kopiert die gewählten Tabellen in den Speicher von Power BI. DirectQuery würde bei jedem Bild Abfragen an die Datenbank schicken — mit zwanzig Sitzungen der Rolle im Hörsaal keine Wahl, und jede Abfrage über 1.000.000 Zeilen scheitert (Abschnitt „Stolpersteine“)." } },
+        { "was": "SQL-Anweisung", "bedeutet": { "de": "Unter „Erweiterte Optionen“: der einzige Weg zu den materialisierten Sichten v_*, weil der Navigator sie nicht listet. Power Query fragt danach einmal, ob die native Abfrage ausgeführt werden darf." } },
+        { "was": "Authentifizierungsart Standard", "bedeutet": { "de": "Benutzername und Kennwort des Demo-Kontos wie in Lab 01. Power BI merkt sich die Anmeldung je Server; sichtbar und löschbar unter Datei → Optionen und Einstellungen → Datenquelleneinstellungen." } },
+        { "was": "Verschlüsselte Verbindung verwenden", "bedeutet": { "de": "Vorausgewählt. Der Server der Fallstudie läuft ohne SSL (Lab 01); in den Datenquelleneinstellungen steht die Verbindung danach mit „Verbindung verschlüsseln“ aus. Der Bestand ist synthetisch, und das Konto liest nur." } },
+        { "was": "Suchfeld: burgermetrics", "bedeutet": { "de": "Ohne Suchbegriff listet der Navigator alle 48 Tabellen und Sichten der Datenbank; mit burgermetrics bleiben die 14 Tabellen. Für ein eigenes Modell dim_* und fact_* ankreuzen; obt_orders bleibt draußen — 41 Spalten, die alles doppelt tragen." } }
       ]
     },
     "B02": {
@@ -18,11 +19,37 @@
       "prompt": "DAX",
       "befehl": "Umsatz = SUM(fact_orders[net_total])\nBestellungen = COUNTROWS(fact_orders)\nBestellwert = DIVIDE([Umsatz], [Bestellungen])\nØ Sterne = AVERAGE(fact_reviews[stars])\nUmsatz 2025 = CALCULATE([Umsatz], dim_date[year] = 2025)",
       "teile": [
-        { "was": "SUM(fact_orders[net_total])", "bedeutet": { "de": "Summiert genau eine Spalte im aktuellen Filterkontext: den Bestellwert nach Rabatt, auf dem Grain der Bestellung (Lab 03). Kontrollzahl mit dem Filter Jahr 2025: 2.994.771,13 €." } },
+        { "was": "SUM(fact_orders[net_total])", "bedeutet": { "de": "Summiert genau eine Spalte im aktuellen Filterkontext: den Bestellwert nach Rabatt, auf dem Grain der Bestellung (Lab 03). Kontrollzahl mit dem Filter Jahr 2025: 2.994.771,13 € — im Bericht als Tabelle geprüft. Angelegt über Modellierung → Neues Measure, Format über Measuretools: Währung, 2 Dezimalstellen." } },
         { "was": "COUNTROWS(fact_orders)", "bedeutet": { "de": "Zählt die Zeilen der Faktentabelle im Filterkontext. Das ist die Antwort auf „wie viele Bestellungen“ — nicht die Summe der Bestellnummern, die Power BI für die Zahlenspalte order_id vorschlagen würde. Für 2025: 136.557." } },
         { "was": "DIVIDE([Umsatz], [Bestellungen])", "bedeutet": { "de": "Der mittlere Bestellwert. DIVIDE statt „/“ liefert BLANK statt eines Fehlers, wenn der Nenner null ist — etwa eine Filiale ohne Bestellungen im gewählten Monat. Measures dürfen Measures aufrufen; beide werden im selben Filterkontext berechnet." } },
-        { "was": "AVERAGE(fact_reviews[stars])", "bedeutet": { "de": "Der Mittelwert der Sterne aus der dritten Faktentabelle. Über die aktiven Beziehungen zu dim_branch und dim_date lässt er sich je Filiale und Jahr aufteilen — ohne den Umweg über fact_orders, weil diese Beziehung inaktiv ist." } },
+        { "was": "AVERAGE(fact_reviews[stars])", "bedeutet": { "de": "Der Mittelwert der Sterne aus der dritten Faktentabelle, Hometabelle fact_reviews; 2025: 3,75. Über die aktiven Beziehungen zu dim_branch und dim_date lässt er sich je Filiale und Jahr aufteilen — ohne den Umweg über fact_orders, weil diese Beziehung inaktiv ist." } },
         { "was": "CALCULATE([Umsatz], dim_date[year] = 2025)", "bedeutet": { "de": "Wertet [Umsatz] in einem veränderten Filterkontext aus: Der Filter auf dim_date[year] ersetzt jeden Filter, der von außen auf dieser Spalte liegt; Filter auf anderen Spalten wie Filiale oder Monat bleiben. Die Beziehung fact_orders[date] → dim_date[date] trägt den Filter in die Fakten. Ergebnis ohne weitere Filter: 2.994.771,13 €." } }
+      ]
+    },
+    "B03": {
+      "titel": { "de": "Die Measures des Dashboards (Vorlage powerbi-dashboard.dax)" },
+      "prompt": "📄",
+      "befehl": "// Vorjahr — nur, wenn genau ein Jahr gewählt ist\nUmsatz VJ = IF(HASONEVALUE(dim_date[year]),\n    CALCULATE([Umsatz], SAMEPERIODLASTYEAR(dim_date[date])))\n\n// Abweichung in Prozent; DIVIDE liefert BLANK ohne Vorjahr\nΔ Umsatz % = DIVIDE([Umsatz] - [Umsatz VJ], [Umsatz VJ])\n\n// Farbe als Measure: Grün für plus, Rot für minus\nΔ Umsatz Farbe =\n    IF([Umsatz] >= [Umsatz VJ], \"#2E7D32\", \"#A32638\")\n\n// letzter Monat: nur im jüngsten Monat ein Wert\nUmsatz Tsd letzter Monat =\n    VAR letzter =\n        CALCULATE(MAX(fact_orders[date]), ALLSELECTED(dim_date))\n    RETURN IF(SELECTEDVALUE(dim_date[month]) = MONTH(letzter),\n        [Umsatz Tsd])\n\n// Titel als Measure\nTitel Dashboard = \"Umsatz \" & SELECTEDVALUE(dim_date[year])\n    & \": \" & FORMAT(DIVIDE([Umsatz], 1000000), \"0.00\")\n    & \" Mio. €, \" & FORMAT([Δ Umsatz %], \"+0.0 %;-0.0 %\")\n    & \" zum Vorjahr – \" & [Top Filiale] & \" liegt vorn\"\n\n// berechnete Spalte in dim_date, nach month sortiert\nMonat = SWITCH(dim_date[month], 1, \"Jan\", 2, \"Feb\", …, 12, \"Dez\")",
+      "teile": [
+        { "was": "SAMEPERIODLASTYEAR(dim_date[date])", "bedeutet": { "de": "Verschiebt den Filterkontext um ein Jahr zurück — braucht dim_date als markierte Datumstabelle (Tabellentools → Als Datumstabelle markieren). HASONEVALUE sorgt dafür, dass ohne gewähltes Jahr nichts verglichen wird. 2025 gegen 2024: 2.994.771,13 € gegen 2.841.074,88 €, +5,4 %." } },
+        { "was": "DIVIDE([Umsatz] - [Umsatz VJ], [Umsatz VJ])", "bedeutet": { "de": "Die Abweichung als Anteil des Vorjahrs. Format Prozent mit einer Dezimalstelle und Vorzeichen (+0,0 %;-0,0 %). Für 2017 gibt es kein Vorjahr: BLANK statt Fehler." } },
+        { "was": "IF(…, \"#2E7D32\", \"#A32638\")", "bedeutet": { "de": "Ein Measure, das einen Hex-Code liefert. Im Format eines Bilds unter Farbe → fx → Formatstil „Feldwert“ gewählt, färbt es Säulen, Zellen und Texte — die einzige Farbe im Dashboard, und sie trägt eine Aussage." } },
+        { "was": "ALLSELECTED(dim_date)", "bedeutet": { "de": "Hebt den Monatsfilter der Achse auf, behält die Jahresauswahl: letzter ist der jüngste Tag im gewählten Jahr. Das Measure hat nur in diesem Monat einen Wert und zeichnet als zweite Serie den roten Punkt mit Beschriftung." } },
+        { "was": "Titel Dashboard", "bedeutet": { "de": "Eine Karte mit diesem Measure ist der Titel: Jahr, Summe, Abweichung und die Filiale mit dem höchsten Umsatz (Top Filiale = MAXX(TOPN(1, VALUES(dim_branch[branch_name]), [Umsatz], DESC), dim_branch[branch_name])). Für 2025: „Umsatz 2025: 2,99 Mio. €, +5,4 % zum Vorjahr – BM Europastern liegt vorn“." } },
+        { "was": "Monat", "bedeutet": { "de": "Keine Measure, sondern eine berechnete Spalte in dim_date (Modellierung → Neue Spalte). Ohne Spaltentools → Nach Spalte sortieren → month steht sie alphabetisch: Apr, Aug, Dez." } }
+      ]
+    },
+    "B04": {
+      "titel": { "de": "Vom Bericht zum Dashboard: vier Klickwege" },
+      "prompt": "🖱",
+      "befehl": "Balken hinter der Zahl (Matrix)\n    Matrix markieren → Format → Zellelemente\n    Datenreihe: Umsatz Tsd. € → Datenbalken: Ein\n    fx → Positiver Balken: Grau (#C4C4C4)\nFarbe aus einem Measure (Säulen, Spalten, Texte)\n    Format → Spalten (Werte, Beschriftungen) → Farbe → fx\n    Formatstil: Feldwert → Feld: Δ Umsatz Farbe → OK\nLetzter Punkt markiert (Linie)\n    Y-Achse: Umsatz Tsd  +  Umsatz Tsd letzter Monat\n    Format → Marker: Einstellungen übernehmen auf → Serie\n        letzter Monat: Form Kreis, Größe 7, Farbe Rot\n    Format → Datenbeschriftungen: nur Serie letzter Monat\nSmall Multiples (Linie je Filiale)\n    Build → Small Multiples: branch_name\n    Format → Small Multiples → Layout: 2 Zeilen, 4 Spalten\n    Y-Achse gemeinsam lassen           # gleiche Skala\nSeite\n    Datenschnitt: dim_date[year], Dropdown, Einzelauswahl, 2025\n    Karte mit Titel Dashboard als Überschrift\n    Format → Allgemein → Effekte:\n        Hintergrund, Rahmen, Schatten aus",
+      "teile": [
+        { "was": "Zellelemente → Datenbalken", "bedeutet": { "de": "Der Balken liegt in der Zelle hinter der Zahl; die Zahl bleibt lesbar, die Länge zeigt die Größe. Minimum und Maximum bleiben auf niedrigstem und höchstem Wert, „Nur Balken anzeigen“ bleibt aus." } },
+        { "was": "Formatstil: Feldwert", "bedeutet": { "de": "Statt einer Regel je Bild („wenn größer null, dann grün“) liefert ein Measure die Farbe. Dieselbe Einstellung an drei Stellen — Säulen der Abweichung, Δ-Spalte der Matrix, Texte unter den Kacheln — und die Regel steht einmal, in DAX." } },
+        { "was": "Einstellungen übernehmen auf → Serie", "bedeutet": { "de": "Marker und Datenbeschriftungen lassen sich je Serie schalten: die Hauptlinie mit kleinen Punkten ohne Zahlen, die Serie letzter Monat mit großem roten Punkt und Wert. So bekommt jede Linie genau eine Beschriftung." } },
+        { "was": "Small Multiples", "bedeutet": { "de": "Aus einem Liniendiagramm werden acht kleine, eines je Filiale, mit gemeinsamer Y-Achse. Die gleiche Skala ist der Vergleich: BM Europastern bei 44 Tsd. €, BM Grombühl bei 21 — ohne Legende, jede Kachel trägt ihren Namen." } },
+        { "was": "Datenschnitt, Einzelauswahl", "bedeutet": { "de": "Ein Dropdown auf dim_date[year] mit Einzelauswahl; 2025 ist als Standard gesetzt. Die Vorjahresmeasures brauchen genau ein Jahr — ohne Auswahl zeigen die Kacheln einen Hinweistext statt einer Abweichung." } },
+        { "was": "Effekte aus", "bedeutet": { "de": "Kein Hintergrund, kein Rahmen, kein Schatten, keine Gitternetze, keine Legende: alles weg, was keine Daten trägt. Der Titel jedes Bilds nennt die Einheit („in Tsd. €“), die Aussage steht im Dashboard-Titel." } }
       ]
     }
   },
@@ -71,12 +98,12 @@
           "optionen": [ { "de": "Die Beziehung zwischen fact_orders und dim_branch" }, { "de": "Ein Filter auf das Jahr 2025" }, { "de": "Die Materialisierung der Sicht" } ],
           "richtig": [0], "mehrfach": false,
           "erklaerung": { "de": "Ohne Beziehung kann die Dimension die Fakten nicht filtern; jede Zeile zeigt die Gesamtsumme. Das ist das Bild, an dem man eine fehlende Beziehung erkennt." } },
-        { "frage": { "de": "Welche Angaben werden beim ersten Laden zu Beziehungen?" },
-          "optionen": [ { "de": "Die Fremdschlüssel der Datenbank — 13 in burgermetrics" }, { "de": "Alle Spalten mit gleichem Namen, auch ohne Fremdschlüssel" }, { "de": "Nur die Beziehungen, die man von Hand anlegt" } ],
+        { "frage": { "de": "Nach dem Laden der sieben Tabellen stehen acht Beziehungen im Modell, alle über Spalten, die auf _id enden. Welche fehlen?" },
+          "optionen": [ { "de": "Die zwei Fremdschlüssel auf dim_date.date — sie müssen von Hand angelegt werden" }, { "de": "Keine; die Fremdschlüssel der Datenbank sind alle da" }, { "de": "Alle; Beziehungen entstehen nur von Hand" } ],
           "richtig": [0], "mehrfach": false,
-          "erklaerung": { "de": "Die Option „Beziehungen aus Datenquellen beim ersten Laden importieren“ spiegelt die Fremdschlüssel. dim_weather und dim_time_slot haben keinen und brauchen Handarbeit." } }
+          "erklaerung": { "de": "Die Optionen „Beziehungen aus Datenquellen importieren“ und „automatisch erkennen“ waren an, trotzdem fehlten fact_orders.date → dim_date.date und fact_reviews.date → dim_date.date: Der Fremdschlüssel zeigt auf die eindeutige Spalte date, nicht auf den Primärschlüssel date_id. Ohne sie filtert das Jahr nichts. dim_weather und dim_time_slot haben gar keinen Fremdschlüssel und brauchen ebenso Handarbeit." } }
       ],
-      "rueckmeldung": { "de": "Import, Beziehungen aus Fremdschlüsseln, Measures statt Spalten — drei Entscheidungen, die den Bericht tragen." } },
+      "rueckmeldung": { "de": "Import, Beziehungen — acht automatisch, zwei von Hand —, Measures statt Spalten: drei Entscheidungen, die den Bericht tragen." } },
 
     { "id": "W04-04", "typ": "zuordnen",
       "titel": { "de": "DAX-Ausdruck und Zweck" },
@@ -94,16 +121,17 @@
 
     { "id": "W04-05", "typ": "checkliste",
       "titel": { "de": "Der Bericht in Power BI Desktop" },
-      "aufgabe": { "de": "<p>In Power BI Desktop (Windows; Update August 2026 oder neuer) gegen die Datenbank der Fallstudie. Jeder Schritt endet mit einer Prüfung.</p>" },
+      "aufgabe": { "de": "<p>In Power BI Desktop (Windows; Version 2.157.1354.0, August 2026, oder neuer) gegen die Datenbank der Fallstudie. Jeder Schritt endet mit einer Prüfung; die Zahlen sind am 21.09.2026 in Power BI nachgerechnet.</p>" },
       "schritte": [
-        { "text": { "de": "Start → Daten abrufen → PostgreSQL-Datenbank; Server <code>supabase.butscher.cloud:5433</code>, Datenbank <code>postgres</code>, Modus Import; Warnung zur unverschlüsselten Verbindung mit OK bestätigt." } },
-        { "text": { "de": "Authentifizierung Datenbank mit <code>studi_daba</code> / <code>thws</code>; der Navigator zeigt die Ordner <code>burgermetrics</code> und <code>wawi</code>." } },
-        { "text": { "de": "Aus <code>burgermetrics</code> geladen: <code>dim_branch</code>, <code>dim_date</code>, <code>dim_product</code>, <code>dim_customer</code>, <code>fact_orders</code>, <code>fact_order_items</code>, <code>fact_reviews</code> — <code>obt_orders</code> nicht." } },
-        { "text": { "de": "Modellansicht: <code>fact_orders</code> hat Linien zu <code>dim_branch</code>, <code>dim_date</code>, <code>dim_customer</code>; zwischen <code>fact_reviews</code> und <code>fact_orders</code>/<code>dim_date</code> ist eine Beziehung gestrichelt (inaktiv) — die direkte zum Datum bleibt aktiv." } },
-        { "text": { "de": "Measures angelegt: <code>Umsatz</code>, <code>Bestellungen</code>, <code>Bestellwert</code>, <code>Ø Sterne</code> (Vorlage <code>powerbi-measures.dax</code>)." } },
-        { "text": { "de": "Kachel mit <code>Umsatz</code> und Filter <code>dim_date[year] = 2025</code> zeigt <code>2.994.771,13 €</code>; Kachel <code>Bestellungen</code> zeigt <code>136.557</code>." } },
-        { "text": { "de": "Balkendiagramm Umsatz je <code>branch_name</code>: acht verschieden hohe Balken, BM Europastern vorn — keine gleichen Werte in jeder Zeile." } }
+        { "text": { "de": "Start → Daten abrufen → Weitere… → PostgreSQL-Datenbank; im Dialog „Mit Datenquelle verbinden“ Server <code>supabase.butscher.cloud:5433</code>, Datenbank <code>postgres</code>, Importieren, Authentifizierungsart Standard mit <code>studi_daba</code> / <code>thws</code>; Weiter." } },
+        { "text": { "de": "Im Navigator <code>burgermetrics</code> gesucht — 14 Treffer, keine <code>v_*</code> — und geladen: <code>dim_branch</code>, <code>dim_customer</code>, <code>dim_date</code>, <code>dim_product</code>, <code>fact_orders</code>, <code>fact_order_items</code>, <code>fact_reviews</code>; <code>obt_orders</code> nicht. Der Dialog „Laden“ endet bei 754.513 Bestellungen und 2.950.082 Positionen." } },
+        { "text": { "de": "Modellansicht → Beziehungen verwalten: acht Beziehungen automatisch, <code>fact_reviews (order_id) → fact_orders</code> als 1:1 inaktiv; die zwei zum Datum von Hand angelegt — <code>fact_orders[date]</code> und <code>fact_reviews[date]</code> auf <code>dim_date[date]</code>, Viele-zu-Eins, Einfach — und <code>dim_date</code> als Datumstabelle markiert (Spalte <code>date</code>)." } },
+        { "text": { "de": "Measures angelegt (Modellierung → Neues Measure, Vorlage <code>powerbi-measures.dax</code>): <code>Umsatz</code>, <code>Bestellungen</code>, <code>Bestellwert</code>, <code>Umsatz 2025</code> mit Hometabelle <code>fact_orders</code>, <code>Ø Sterne</code> mit <code>fact_reviews</code>; Format über Measuretools — Währung mit 2 Dezimalstellen, <code>Bestellungen</code> als ganze Zahl mit Tausendertrennzeichen." } },
+        { "text": { "de": "Seite „Bericht“: Seitenfilter <code>year</code> ist 2025; Tabelle mit den vier Measures zeigt <code>136.557</code>, <code>21,93 €</code>, <code>3,75</code>, <code>2.994.771,13 €</code>; Balkendiagramm Umsatz je <code>branch_name</code> mit acht verschieden langen Balken, BM Europastern vorn mit 537.906,79 €; Linie je <code>month</code> mit zwölf Punkten, Spitze im Juli." } },
+        { "text": { "de": "Seite „Dashboard“ (Vorlage <code>powerbi-dashboard.dax</code>, Befehlskarten B03 und B04): Datenschnitt Jahr = 2025; Karte mit <code>Titel Dashboard</code>: „Umsatz 2025: 2,99 Mio. €, +5,4 % zum Vorjahr – BM Europastern liegt vorn“; vier Karten mit Abweichungstext in Grün; Matrix der Filialen mit Datenbalken hinter <code>Umsatz Tsd. €</code>, Gesamt 2.995 · 2.841 · +5,4 %." } },
+        { "text": { "de": "Linie Ist gegen Vorjahr je <code>Monat</code> mit rotem Punkt und 245 im Dezember, darunter die Säulen <code>Δ Umsatz %</code> gefärbt über <code>Δ Umsatz Farbe</code>; Small Multiples je <code>branch_name</code> in derselben Skala, BM Europastern endet bei 44, BM Grombühl bei 21." } },
+        { "text": { "de": "Kontrollzahl: Umsatz 2025 auf beiden Seiten <code>2.994.771,13 €</code>, Vorjahr <code>2.841.074,88 €</code>, Abweichung <code>+5,4 %</code> — dieselben Zahlen wie in <code>v_kennzahlen_jahr</code>." } }
       ],
-      "rueckmeldung": { "de": "Der letzte Schritt ist die Probe auf die Beziehungen. Stimmen 2.994.771,13 € und 136.557, liest der Bericht dieselben Zahlen wie das Dashboard und die Notebooks." } }
+      "rueckmeldung": { "de": "Der letzte Schritt ist die Probe auf die Beziehungen. Stimmen 2.994.771,13 € und 136.557, liest der Bericht dieselben Zahlen wie das Dashboard der Fallstudie und die Notebooks — und das Dashboard in Power BI zeigt sie mit Vorjahr und Abweichung." } }
   ]
 }

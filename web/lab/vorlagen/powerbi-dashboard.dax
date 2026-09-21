@@ -1,0 +1,79 @@
+// powerbi-dashboard.dax — Measures und eine Spalte für das Dashboard zur Fallstudie BurgerMetrics
+// Kopiervorlage zu Lab 04 (Befehlskarte B03). Power BI Desktop 2.157.1354.0 (August 2026),
+// geprüft am 21.09.2026 gegen die Datenbank der Fallstudie. Baut auf powerbi-measures.dax auf:
+// [Umsatz], [Bestellungen], [Bestellwert] und [Ø Sterne] müssen vorher angelegt sein.
+//
+// Voraussetzung für die Vorjahresmeasures: dim_date ist als Datumstabelle markiert
+// (Tabellentools → Als Datumstabelle markieren → Spalte date). Sonst meldet
+// SAMEPERIODLASTYEAR einen Fehler oder rechnet auf der automatischen Datumshierarchie.
+// Jedes Measure einzeln anlegen: Modellierung → Neues Measure, Zeile in die Formelleiste.
+// Formate über Measuretools: Währung mit 2 Dezimalstellen für Beträge, Ganze Zahl mit
+// Tausendertrennzeichen für Bestellungen, Prozent mit 1 Dezimalstelle für Δ-Measures.
+
+// ---------------------------------------------------------------------------
+// 1) Vorjahr — derselbe Zeitraum ein Jahr zurück. HASONEVALUE verhindert, dass
+//    „alle Jahre“ mit „alle Jahre minus eins“ verglichen wird: Ohne ein gewähltes
+//    Jahr bleibt das Measure leer, und die Abweichung zeigt einen Hinweistext.
+//    Kontrolle: 2025 gegen 2024 = 2.994.771,13 € gegen 2.841.074,88 € (v_kennzahlen_jahr).
+Umsatz VJ = IF(HASONEVALUE(dim_date[year]), CALCULATE([Umsatz], SAMEPERIODLASTYEAR(dim_date[date])))
+Bestellungen VJ = IF(HASONEVALUE(dim_date[year]), CALCULATE([Bestellungen], SAMEPERIODLASTYEAR(dim_date[date])))
+Bestellwert VJ = DIVIDE([Umsatz VJ], [Bestellungen VJ])
+Ø Sterne VJ = IF(HASONEVALUE(dim_date[year]), CALCULATE([Ø Sterne], SAMEPERIODLASTYEAR(dim_date[date])))
+
+// ---------------------------------------------------------------------------
+// 2) Abweichung — absolut und in Prozent. DIVIDE liefert BLANK, wenn es kein
+//    Vorjahr gibt (2017). Kontrolle für 2025: +5,4 % Umsatz, +2,4 % Bestellungen,
+//    +2,9 % Bestellwert, +0,05 Sterne.
+Δ Umsatz = [Umsatz] - [Umsatz VJ]
+Δ Umsatz % = DIVIDE([Δ Umsatz], [Umsatz VJ])
+Δ Bestellungen % = DIVIDE([Bestellungen] - [Bestellungen VJ], [Bestellungen VJ])
+Δ Bestellwert % = DIVIDE([Bestellwert] - [Bestellwert VJ], [Bestellwert VJ])
+Δ Ø Sterne = [Ø Sterne] - [Ø Sterne VJ]
+
+// ---------------------------------------------------------------------------
+// 3) Farbe als Measure — die einzige Farbe im Dashboard sitzt in der Abweichung:
+//    Grün (#2E7D32) für plus, Rot (#A32638) für minus. Ein Measure, das einen
+//    Hex-Code liefert, wird in Format → Farbe → fx → Formatstil „Feldwert“ gewählt;
+//    so färbt es Balken und Text, ohne dass eine Regel je Visual gepflegt wird.
+Δ Umsatz Farbe = IF([Δ Umsatz] >= 0, "#2E7D32", "#A32638")
+Δ Bestellungen Farbe = IF([Bestellungen] >= [Bestellungen VJ], "#2E7D32", "#A32638")
+Δ Bestellwert Farbe = IF([Bestellwert] >= [Bestellwert VJ], "#2E7D32", "#A32638")
+Δ Ø Sterne Farbe = IF([Δ Ø Sterne] >= 0, "#2E7D32", "#A32638")
+
+// ---------------------------------------------------------------------------
+// 4) Text unter der Kachel — Zahl und Vorzeichen in einem Satz. FORMAT mit drei
+//    Abschnitten (plus; minus; null) setzt das Vorzeichen; die Kachel selbst zeigt
+//    den Wert, dieses Measure den Vergleich.
+Δ Umsatz Text = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Umsatz VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Umsatz %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr"))
+Δ Bestellungen Text = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Bestellungen VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Bestellungen %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr"))
+Δ Bestellwert Text = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Bestellwert VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Bestellwert %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr"))
+Δ Ø Sterne Text = IF(NOT HASONEVALUE(dim_date[year]), "ein Jahr wählen für den Vorjahresvergleich", IF(ISBLANK([Ø Sterne VJ]), "kein Vorjahr im Bestand", FORMAT([Δ Ø Sterne], "+0.00;-0.00;0.00") & " Sterne zum Vorjahr"))
+
+// ---------------------------------------------------------------------------
+// 5) Tausend Euro — dieselbe Kennzahl mit weniger Ziffern für Tabelle und Linie.
+//    Die Einheit steht in der Spaltenüberschrift („Umsatz Tsd. €“), nicht an jeder Zahl.
+Umsatz Tsd = DIVIDE([Umsatz], 1000)
+Umsatz VJ Tsd = DIVIDE([Umsatz VJ], 1000)
+
+// ---------------------------------------------------------------------------
+// 6) Letzter Monat — nur im jüngsten Monat des gewählten Jahres ein Wert, sonst
+//    BLANK. Als zweite Linie mit rotem Punkt und Beschriftung gelegt, markiert es
+//    den letzten Datenpunkt; die Hauptlinie bleibt ohne Beschriftungen.
+//    ALLSELECTED(dim_date) hebt den Monatsfilter der Achse auf, behält das Jahr.
+Umsatz Tsd letzter Monat =
+    VAR letzter = CALCULATE(MAX(fact_orders[date]), ALLSELECTED(dim_date))
+    RETURN IF(SELECTEDVALUE(dim_date[month]) = MONTH(letzter), [Umsatz Tsd])
+
+// ---------------------------------------------------------------------------
+// 7) Aussagentitel — der Titel des Dashboards ist ein Measure in einer Karte:
+//    Jahr, Summe, Abweichung und die Filiale mit dem höchsten Umsatz.
+//    Für 2025: „Umsatz 2025: 2,99 Mio. €, +5,4 % zum Vorjahr – BM Europastern liegt vorn“
+Top Filiale = MAXX(TOPN(1, VALUES(dim_branch[branch_name]), [Umsatz], DESC), dim_branch[branch_name])
+Titel Dashboard = "Umsatz " & IF(HASONEVALUE(dim_date[year]), SELECTEDVALUE(dim_date[year]), MIN(dim_date[year]) & "–" & MAX(dim_date[year])) & ": " & FORMAT(DIVIDE([Umsatz], 1000000), "0.00") & " Mio. €" & IF(ISBLANK([Umsatz VJ]), "", ", " & FORMAT([Δ Umsatz %], "+0.0 %;-0.0 %;0.0 %") & " zum Vorjahr") & " – " & [Top Filiale] & " liegt vorn"
+
+// ---------------------------------------------------------------------------
+// 8) Keine Measure, sondern eine berechnete Spalte in dim_date (Modellierung →
+//    Neue Spalte, Tabelle dim_date): Monatskürzel für die Achse. Danach
+//    Spaltentools → Nach Spalte sortieren → month, sonst sortiert Power BI
+//    alphabetisch (Apr, Aug, Dez …).
+Monat = SWITCH(dim_date[month], 1, "Jan", 2, "Feb", 3, "Mär", 4, "Apr", 5, "Mai", 6, "Jun", 7, "Jul", 8, "Aug", 9, "Sep", 10, "Okt", 11, "Nov", 12, "Dez")

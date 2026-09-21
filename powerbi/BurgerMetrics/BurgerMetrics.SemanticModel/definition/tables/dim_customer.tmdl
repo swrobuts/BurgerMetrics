@@ -1,0 +1,91 @@
+table dim_customer
+	lineageTag: e16f48fa-22de-4402-87b5-42780d22d7c9
+
+	column customer_id
+		dataType: int64
+		formatString: 0
+		lineageTag: b54ab45f-4877-437b-8e62-6925bfc98247
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column age_group
+		dataType: string
+		lineageTag: 1c5a5678-a9f3-4658-ae30-52730416f75d
+		summarizeBy: none
+		sourceColumn: age_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column gender
+		dataType: string
+		lineageTag: 07fda959-9ed5-4861-87a5-9912c150413b
+		summarizeBy: none
+		sourceColumn: gender
+
+		annotation SummarizationSetBy = Automatic
+
+	column home_district
+		dataType: string
+		lineageTag: 80dd93d7-e01a-4015-8031-89dc936b8c7a
+		summarizeBy: none
+		sourceColumn: home_district
+
+		annotation SummarizationSetBy = Automatic
+
+	column first_visit_year
+		dataType: int64
+		formatString: 0
+		lineageTag: 50d329e4-ce4c-4972-80b0-9930994ae57c
+		summarizeBy: sum
+		sourceColumn: first_visit_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column has_app
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ceeef5d1-9400-4064-ab14-08de1ba8abbd
+		summarizeBy: none
+		sourceColumn: has_app
+
+		annotation SummarizationSetBy = Automatic
+
+	column app_registered_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 5ca98817-be9c-4e60-854d-32db0071d7ad
+		summarizeBy: none
+		sourceColumn: app_registered_date
+
+		variation Variation
+			isDefault
+			relationship: fb00bc4e-05e1-41a5-adde-018ffe43cefa
+			defaultHierarchy: LocalDateTable_3a75e2b1-baa5-4902-870d-dbce7ffbb755.Datumshierarchie
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column loyalty_tier
+		dataType: string
+		lineageTag: df8b64f0-8a86-43a5-a784-923e5e2a8309
+		summarizeBy: none
+		sourceColumn: loyalty_tier
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_customer = m
+		mode: import
+		source =
+				let
+				  Quelle = PostgreSQL.Database("supabase.butscher.cloud:5433", "postgres"),
+				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "dim_customer"]}[Data]
+				in
+				  #"Navigation 1"
+
+	changedProperty = Name
+
+	annotation PBI_ResultType = Table
+

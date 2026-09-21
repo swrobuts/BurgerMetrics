@@ -1,8 +1,12 @@
 // powerbi-measures.dax — fünf Measures für den Bericht zur Fallstudie BurgerMetrics
-// Kopiervorlage zu Lab 04 (Befehlskarte B02). Power BI Desktop, Update August 2026. Stand 09/2026.
+// Kopiervorlage zu Lab 04 (Befehlskarte B02). Power BI Desktop 2.157.1354.0 (August 2026);
+// alle fünf Measures am 21.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft.
 //
-// Jedes Measure wird einzeln angelegt: die Formelzeile in die Formelleiste
-// einfügen; die Kommentarzeilen davor erklären sie.
+// Jedes Measure wird einzeln angelegt: Tabelle im Datenbereich anklicken (sie wird die
+// Hometabelle), Modellierung → Neues Measure, die Formelzeile in die Formelleiste, Eingabe.
+// Das Format kommt danach über Measuretools: Währung mit 2 Dezimalstellen für Umsatz,
+// Bestellwert und Umsatz 2025, Ganze Zahl mit Tausendertrennzeichen für Bestellungen.
+// Die Kommentarzeilen davor erklären die Formel.
 // Tabellen- und Spaltennamen sind die des Schemas burgermetrics (Lab 03):
 //   fact_orders  (order_id, date, branch_id, customer_id, net_total, …)
 //   fact_reviews (review_id, date, branch_id, customer_id, product_id, order_id, stars, …)
@@ -24,13 +28,14 @@ Bestellungen = COUNTROWS(fact_orders)
 // [Umsatz] und [Bestellungen] werden im selben Filterkontext berechnet.
 Bestellwert = DIVIDE([Umsatz], [Bestellungen])
 
-// Ø Sterne: Mittelwert der Sterne aus der dritten Faktentabelle. Über die aktiven
-// Beziehungen zu dim_branch und dim_date je Filiale und Jahr aufteilbar; die
-// Beziehung fact_reviews → fact_orders ist inaktiv und wird nicht gebraucht.
+// Ø Sterne: Mittelwert der Sterne aus der dritten Faktentabelle, Hometabelle fact_reviews.
+// Über die aktiven Beziehungen zu dim_branch und dim_date je Filiale und Jahr aufteilbar;
+// die Beziehung fact_reviews → fact_orders legt Power BI selbst als 1:1 und inaktiv an
+// (order_id ist auf beiden Seiten eindeutig) und wird nicht gebraucht. Kontrollzahl 2025: 3,75
 Ø Sterne = AVERAGE(fact_reviews[stars])
 
 // Umsatz 2025: CALCULATE wertet [Umsatz] in einem veränderten Filterkontext aus.
 // Der Filter auf dim_date[year] ersetzt jeden Filter, der von außen auf dieser
 // Spalte liegt; Filter auf anderen Spalten (Filiale, Monat) bleiben.
-// Ergebnis ohne weitere Filter: 2.994.771,13 €
+// Ergebnis ohne weitere Filter: 2.994.771,13 € — im Bericht als Kachel geprüft.
 Umsatz 2025 = CALCULATE([Umsatz], dim_date[year] = 2025)

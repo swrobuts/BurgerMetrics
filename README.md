@@ -46,6 +46,7 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 | `dash/` | Dash-App mit vier Karten aus der Semantikschicht; `dash/README.md` |
 | `web/` | Online-Shop, Kassensystem, BI-Dashboard und unter `web/lab/` die Lernumgebung BM-Lab |
 | `web/lab/` | Lernumgebung BM-Lab: acht Labs mit 41 Übungen im Browser, PostgreSQL per PGlite; `web/lab/README.md` |
+| `powerbi/` | das Power-BI-Projekt (PBIP) zu Lab 04: Modell, Measures, Bericht und Dashboard als Textdateien, ohne Daten; `powerbi/README.md` |
 | `docs/` | die ausführliche Dokumentation zu Modell, Kennzahlen und Betrieb |
 | `mcp/` | ein MCP-Server über beide Schemata für den Betreiber — Claude Desktop oder Claude Code als Fenster auf die Datenbank |
 
