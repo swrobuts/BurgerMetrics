@@ -1,6 +1,6 @@
 // tableau-dashboard-felder.txt — Parameter und Calculated Fields für das Kennzahlen-Dashboard
 // zur Fallstudie BurgerMetrics. Kopiervorlage zu Lab 05 (Befehlskarte B05). Tableau Desktop 2026.2,
-// am 22.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft (28 Felder); die Arbeitsmappe liegt
+// am 22.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft (27 Felder); die Arbeitsmappe liegt
 // unter tableau/BurgerMetrics.twb im Repository.
 //
 // Datenquelle: fact_orders, dim_branch (Branch Id = Branch Id) und fact_reviews
@@ -23,9 +23,9 @@
 // 0) Parameter Jahr — kein Calculated Field: Menü ▾ neben dem Suchfeld → „Parameter
 //    erstellen…“. Name Jahr, Datentyp Ganzzahl, aktueller Wert 2025, Anzeigeformat ohne
 //    Tausendertrennzeichen (Zahl (benutzerdefiniert), 0 Dezimalstellen), zulässige Werte
-//    Bereich: Minimum 2018, Maximum 2026, Schrittgröße 1. Im Dashboard über das Menü ▾
-//    eines Blatts → Parameter → Jahr eingeblendet; das Kontextmenü der Steuerung stellt
-//    „Eingabe“ statt „Schieberegler“ ein.
+//    Liste: 2018 bis 2026 (Tableau füllt sie aus einem vorher gesetzten Bereich). Im
+//    Dashboard über das Menü ▾ eines Blatts → Parameter → Jahr eingeblendet; das Kontextmenü
+//    der Steuerung stellt „Kompaktliste“ ein — ein Dropdown wie bei einem Filter.
 
 // ---------------------------------------------------------------------------
 // 1) Die vier Kennzahlen ohne Jahr — wie in tableau-berechnete-felder.txt (Lab 05, B03).
@@ -105,16 +105,13 @@ IF MONTH(MIN([Date])) = MONTH(MAX({ FIXED : MAX(IF YEAR([Date]) = [Jahr] THEN [D
 THEN [Umsatz Tsd Jahr] END
 
 // ---------------------------------------------------------------------------
-// 7) Zwei Tabellenberechnungen für das Raster der Small Multiples — acht Filialen in zwei
-//    Reihen zu vier Spalten statt acht Zeilen untereinander. INDEX() zählt die Filialen in
-//    der Sortierung des Blatts (1 bis 8); Spalte ist der Rest der Division durch 4, Zeile der
-//    ganzzahlige Teil. Beide Felder kommen als diskrete (blaue) Pills auf Spalten und Zeilen
-//    vor Monat und Kennzahl; Kontextmenü der Pill → Berechnen per → Branch Name, sonst zählt
-//    INDEX() die Monate. Die Kopfzeilen 0 bis 3 werden ausgeblendet, der Filialname steht als
-//    Beschriftung am Linienanfang (Branch Name auf Beschriftung, Markierungen: Linienenden,
-//    nur Linienanfang).
-// Name: Spalte
-(INDEX() - 1) % 4
+// 7) Eine Tabellenberechnung für die Small Multiples — acht Filialen auf zwei Blätter zu je
+//    vier verteilt, jedes mit dem Filialnamen als Überschrift (Branch Name auf Spalten vor
+//    dem Monat). INDEX() zählt die Filialen in der Sortierung des Blatts (1 bis 8); Zeile ist
+//    der ganzzahlige Teil der Division durch 4: 0 für die ersten vier, 1 für die nächsten.
+//    Das Feld kommt auf den Filter-Shelf; Kontextmenü der Pill → Berechnen per → Branch Name,
+//    sonst zählt INDEX() die Monate. Blatt 1 filtert auf 0, das Duplikat „Filialen je Monat 2“
+//    auf 1; im Dashboard liegen beide untereinander mit derselben festen Achse 10 bis 60.
 // Name: Zeile
 INT((INDEX() - 1) / 4)
 
