@@ -2,16 +2,15 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "b_delta_monat",
   "position": {
-    "x": 956,
-    "y": 520,
+    "x": 969,
+    "y": 548,
     "z": 12,
-    "width": 932,
-    "height": 164,
+    "height": 136,
+    "width": 938,
     "tabOrder": 12
   },
   "visual": {
     "visualType": "clusteredColumnChart",
-    "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
         "Category": {
@@ -191,6 +190,9 @@
       ],
       "dataPoint": [
         {
+          "properties": {}
+        },
+        {
           "properties": {
             "fill": {
               "solid": {
@@ -208,6 +210,15 @@
                 }
               }
             }
+          },
+          "selector": {
+            "data": [
+              {
+                "dataViewWildcard": {
+                  "matchingOption": 1
+                }
+              }
+            ]
           }
         }
       ]
@@ -219,7 +230,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -310,6 +321,39 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "451ef70377db0425531c",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_date"
+              }
+            },
+            "Property": "Monat"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "7e7ea762009a09ae0307",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Δ Umsatz %"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

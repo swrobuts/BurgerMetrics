@@ -225,7 +225,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -489,7 +489,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "12D"
+                  "Value": "14D"
                 }
               }
             },
@@ -507,7 +507,7 @@
             "bold": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }
@@ -568,5 +568,65 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "c8a8c8e0308d1b7903d8",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_date"
+              }
+            },
+            "Property": "Monat"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "30b71d4646107a0e05e6",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz Tsd"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "283c72fa2c243c587d12",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz VJ Tsd"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "8064936924a138857d4b",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz Tsd letzter Monat"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }
