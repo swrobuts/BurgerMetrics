@@ -62,15 +62,15 @@ table fact_orders
 		displayFolder: Dashboard
 		lineageTag: 95723daf-0ddc-4bb8-9faa-9951c478a6c3
 
-	measure 'Δ Umsatz Farbe' = IF([Δ Umsatz] >= 0, "#2E7D32", "#A32638")
+	measure 'Δ Umsatz Farbe' = IF([Δ Umsatz] >= 0, "#003E6E", "#A32638")
 		displayFolder: Dashboard
 		lineageTag: fe9e0049-66d2-442e-acc2-05924785fa10
 
-	measure 'Δ Bestellungen Farbe' = IF([Bestellungen] >= [Bestellungen VJ], "#2E7D32", "#A32638")
+	measure 'Δ Bestellungen Farbe' = IF([Bestellungen] >= [Bestellungen VJ], "#003E6E", "#A32638")
 		displayFolder: Dashboard
 		lineageTag: b70ba4d3-de19-481c-a454-7d43d4d4ceba
 
-	measure 'Δ Bestellwert Farbe' = IF([Bestellwert] >= [Bestellwert VJ], "#2E7D32", "#A32638")
+	measure 'Δ Bestellwert Farbe' = IF([Bestellwert] >= [Bestellwert VJ], "#003E6E", "#A32638")
 		displayFolder: Dashboard
 		lineageTag: ee6f7c4d-3e08-45b2-969a-b34be7f86a69
 
@@ -260,8 +260,6 @@ table fact_orders
 				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "fact_orders"]}[Data]
 				in
 				  #"Navigation 1"
-
-	changedProperty = Name
 
 	annotation PBI_ResultType = Table
 

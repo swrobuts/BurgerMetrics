@@ -5,13 +5,12 @@
     "x": 32,
     "y": 304,
     "z": 10,
-    "width": 900,
     "height": 400,
+    "width": 900,
     "tabOrder": 10
   },
   "visual": {
     "visualType": "pivotTable",
-    "drillFilterOtherVisuals": true,
     "query": {
       "queryState": {
         "Rows": {
@@ -340,9 +339,6 @@
       ],
       "columnFormatting": [
         {
-          "selector": {
-            "metadata": "fact_orders.Umsatz Tsd"
-          },
           "properties": {
             "dataBars": {
               "positiveColor": {
@@ -400,12 +396,12 @@
                 }
               }
             }
+          },
+          "selector": {
+            "metadata": "fact_orders.Umsatz Tsd"
           }
         },
         {
-          "selector": {
-            "metadata": "fact_orders.Δ Umsatz %"
-          },
           "properties": {
             "fontColor": {
               "solid": {
@@ -423,6 +419,9 @@
                 }
               }
             }
+          },
+          "selector": {
+            "metadata": "fact_orders.Δ Umsatz %"
           }
         }
       ]
@@ -525,6 +524,109 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f2dba71fde036e789660",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_branch"
+              }
+            },
+            "Property": "branch_name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "74a514d0029b3b85095b",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz Tsd"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "e8cfd27000d713c9e803",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz VJ Tsd"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "9da6dd9a93a19404ad6a",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Δ Umsatz %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "761689ed21e68cc0380a",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Bestellungen"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "e8846f506b6d857c7ec4",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Bestellwert"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "93d5c9dfecd870b20336",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_reviews"
+              }
+            },
+            "Property": "Ø Sterne"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }
