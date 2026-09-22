@@ -141,6 +141,13 @@ table dim_date
 
 		annotation SummarizationSetBy = Automatic
 
+	column Monatsbeginn = DATE(dim_date[year], dim_date[month], 1)
+		formatString: Short Date
+		lineageTag: 9efb4e3d-f33a-47a7-a2c9-69ae2d18d7b1
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	partition dim_date = m
 		mode: import
 		source =

@@ -23,11 +23,11 @@
                       "Entity": "dim_date"
                     }
                   },
-                  "Property": "Monat"
+                  "Property": "Monatsbeginn"
                 }
               },
-              "queryRef": "dim_date.Monat",
-              "nativeQueryRef": "Monat",
+              "queryRef": "dim_date.Monatsbeginn",
+              "nativeQueryRef": "Monatsbeginn",
               "active": true
             }
           ]
@@ -87,21 +87,6 @@
         }
       },
       "sortDefinition": {
-        "sort": [
-          {
-            "field": {
-              "Column": {
-                "Expression": {
-                  "SourceRef": {
-                    "Entity": "dim_date"
-                  }
-                },
-                "Property": "Monat"
-              }
-            },
-            "direction": "Ascending"
-          }
-        ],
         "isDefaultSort": true
       }
     },
@@ -164,7 +149,7 @@
             "fontSize": {
               "expr": {
                 "Literal": {
-                  "Value": "10D"
+                  "Value": "11D"
                 }
               }
             },
@@ -519,5 +504,65 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f721399fccb70b70c997",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_branch"
+              }
+            },
+            "Property": "branch_name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "c856822e8344925cc9dd",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz Tsd"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "4b0fbead0ada7777c801",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "fact_orders"
+              }
+            },
+            "Property": "Umsatz Tsd letzter Monat"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "1b969eed75b6005b663d",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "dim_date"
+              }
+            },
+            "Property": "Monatsbeginn"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
   }
 }

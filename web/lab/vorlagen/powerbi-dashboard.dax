@@ -79,3 +79,12 @@ Titel Dashboard = "Umsatz " & IF(HASONEVALUE(dim_date[year]), SELECTEDVALUE(dim_
 //    Spaltentools → Nach Spalte sortieren → month, sonst sortiert Power BI
 //    alphabetisch (Apr, Aug, Dez …).
 Monat = SWITCH(dim_date[month], 1, "Jan", 2, "Feb", 3, "Mär", 4, "Apr", 5, "Mai", 6, "Jun", 7, "Jul", 8, "Aug", 9, "Sep", 10, "Okt", 11, "Nov", 12, "Dez")
+
+// ---------------------------------------------------------------------------
+// 9) Zweite berechnete Spalte in dim_date: der Erste jedes Monats. Sie ist ein
+//    Datum und trägt deshalb eine stetige Achse (Format → X-Achse → Typ:
+//    Fortlaufend). Power BI setzt die Beschriftungen dann selbst — in den acht
+//    Small Multiples vier statt zwölf, was das Bild ruhiger macht; die große
+//    Linie darüber behält die Textspalte Monat mit allen zwölf Kürzeln.
+//    Format der Spalte: Kurzes Datum.
+Monatsbeginn = DATE(dim_date[year], dim_date[month], 1)
