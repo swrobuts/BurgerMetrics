@@ -1,6 +1,6 @@
 // tableau-dashboard-felder.txt — Parameter und Calculated Fields für das Kennzahlen-Dashboard
 // zur Fallstudie BurgerMetrics. Kopiervorlage zu Lab 05 (Befehlskarte B05). Tableau Desktop 2026.2,
-// am 22.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft; die Arbeitsmappe liegt
+// am 22.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft (28 Felder); die Arbeitsmappe liegt
 // unter tableau/BurgerMetrics.twb im Repository.
 //
 // Datenquelle: fact_orders, dim_branch (Branch Id = Branch Id) und fact_reviews
@@ -105,7 +105,21 @@ IF MONTH(MIN([Date])) = MONTH(MAX({ FIXED : MAX(IF YEAR([Date]) = [Jahr] THEN [D
 THEN [Umsatz Tsd Jahr] END
 
 // ---------------------------------------------------------------------------
-// 7) Die führende Filiale — zwei verschachtelte Level-of-Detail-Ausdrücke: innen die
+// 7) Zwei Tabellenberechnungen für das Raster der Small Multiples — acht Filialen in zwei
+//    Reihen zu vier Spalten statt acht Zeilen untereinander. INDEX() zählt die Filialen in
+//    der Sortierung des Blatts (1 bis 8); Spalte ist der Rest der Division durch 4, Zeile der
+//    ganzzahlige Teil. Beide Felder kommen als diskrete (blaue) Pills auf Spalten und Zeilen
+//    vor Monat und Kennzahl; Kontextmenü der Pill → Berechnen per → Branch Name, sonst zählt
+//    INDEX() die Monate. Die Kopfzeilen 0 bis 3 werden ausgeblendet, der Filialname steht als
+//    Beschriftung am Linienanfang (Branch Name auf Beschriftung, Markierungen: Linienenden,
+//    nur Linienanfang).
+// Name: Spalte
+(INDEX() - 1) % 4
+// Name: Zeile
+INT((INDEX() - 1) / 4)
+
+// ---------------------------------------------------------------------------
+// 8) Die führende Filiale — zwei verschachtelte Level-of-Detail-Ausdrücke: innen die
 //    Jahressumme je Filiale, außen das Maximum darüber; der Name der Filiale, deren Summe
 //    dem Maximum gleicht. Für 2025: BM Europastern.
 // Name: Top Filiale
@@ -114,7 +128,7 @@ THEN [Umsatz Tsd Jahr] END
   THEN [Branch Name] END) }
 
 // ---------------------------------------------------------------------------
-// 8) Der Titel als Feld — er rechnet mit, wenn das Jahr wechselt. STR() schreibt
+// 9) Der Titel als Feld — er rechnet mit, wenn das Jahr wechselt. STR() schreibt
 //    Dezimalpunkte („2.99“), REPLACE macht das Komma daraus; das Pluszeichen kommt aus
 //    dem IF, weil STR() keines setzt. Ergebnis für 2025:
 //    „Umsatz 2025: 2,99 Mio. €, +5,4 % zum Vorjahr – BM Europastern liegt vorn“.
@@ -127,7 +141,7 @@ THEN [Umsatz Tsd Jahr] END
   + MAX([Top Filiale]) + " liegt vorn"
 
 // ---------------------------------------------------------------------------
-// 9) Die Abweichungstexte der vier Karten — je Karte ein Feld, das den grünen Satz
+// 10) Die Abweichungstexte der vier Karten — je Karte ein Feld, das den grünen Satz
 //    unter der Zahl liefert. Ohne Vorjahr im Bestand steht der Hinweis statt der Zahl.
 //    Für 2025: „+5,4 % zum Vorjahr“, „+2,4 % zum Vorjahr“, „+2,9 % zum Vorjahr“,
 //    „+0,05 Sterne zum Vorjahr“.
