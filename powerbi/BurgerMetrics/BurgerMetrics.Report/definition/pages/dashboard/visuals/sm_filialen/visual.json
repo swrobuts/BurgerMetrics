@@ -23,11 +23,11 @@
                       "Entity": "dim_date"
                     }
                   },
-                  "Property": "Monatsbeginn"
+                  "Property": "Monatsstufe"
                 }
               },
-              "queryRef": "dim_date.Monatsbeginn",
-              "nativeQueryRef": "Monatsbeginn",
+              "queryRef": "dim_date.Monatsstufe",
+              "nativeQueryRef": "Monatsstufe",
               "active": true
             }
           ]
@@ -550,7 +550,7 @@
         "type": "Advanced"
       },
       {
-        "name": "1b969eed75b6005b663d",
+        "name": "40af6b0a05a366c3c0c8",
         "field": {
           "Column": {
             "Expression": {
@@ -558,7 +558,7 @@
                 "Entity": "dim_date"
               }
             },
-            "Property": "Monatsbeginn"
+            "Property": "Monatsstufe"
           }
         },
         "type": "Categorical"
