@@ -79,8 +79,9 @@ AVG(IF YEAR([Date (Fact Reviews)]) = [Jahr] - 1 THEN [Stars] END)
 
 // ---------------------------------------------------------------------------
 // 4) Richtung als Text — die einzige Farbe des Dashboards liegt auf diesem Feld:
-//    im Blatt „Abweichung je Monat“ auf Farbe, dann „Farben bearbeiten…“ — plus Grün
-//    #2E7D32, minus Rot #A32638. 2025 ist in jedem Monat plus; die Legende wird im
+//    im Blatt „Abweichung je Monat“ auf Farbe, dann „Farben bearbeiten…“ — plus Blau
+//    #4E79A7 (das Blau der Ist-Linie), minus Rot #E15759; Blau-Rot statt Grün-Rot, weil
+//    Rot und Grün für viele schwer zu unterscheiden sind. 2025 ist in jedem Monat plus; die Legende wird im
 //    Dashboard entfernt, die Farbe erklärt sich aus dem Vorzeichen.
 // Name: Δ Umsatz Richtung
 IF [Δ Umsatz %] >= 0 THEN "plus" ELSE "minus" END

@@ -26,7 +26,7 @@ Datenquelle   fact_orders — dim_branch (Branch Id = Branch Id)
               fact_orders — fact_reviews (Order Id = Order Id), Extrakt
 Parameter     Jahr: Ganzzahl, 2025, Liste 2018 bis 2026 (Dropdown im Dashboard)
 Felder        Umsatz, Bestellungen, Bestellwert, Ø Sterne; je Kennzahl Jahr und VJ über
-              IF YEAR([Date]) = [Jahr]; Δ in Prozent und Sternen; Δ Umsatz Richtung;
+              IF YEAR([Date]) = [Jahr]; Δ in Prozent und Sternen; Δ Umsatz Richtung (plus Blau #4E79A7, minus Rot #E15759);
               Umsatz Tsd Jahr/VJ; Umsatz Tsd letzter Monat (roter Punkt); Zeile (Filter
               der Small Multiples); Top Filiale; Titel Dashboard; vier Δ-Texte für die Karten
 Blätter       Filialen Umsatz, Filialen Kennzahlen, Umsatz je Monat, Abweichung je Monat,
