@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "titel_abweichung",
+  "position": {
+    "x": 956,
+    "y": 516,
+    "z": 14,
+    "width": 700,
+    "height": 32,
+    "tabOrder": 14
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Abweichung zum Vorjahr je Monat",
+                    "textStyle": {
+                      "fontSize": "14pt",
+                      "fontWeight": "bold",
+                      "color": "#555148"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}
