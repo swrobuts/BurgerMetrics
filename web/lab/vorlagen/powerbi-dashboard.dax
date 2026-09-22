@@ -32,13 +32,15 @@ Bestellwert VJ = DIVIDE([Umsatz VJ], [Bestellungen VJ])
 
 // ---------------------------------------------------------------------------
 // 3) Farbe als Measure — die einzige Farbe im Dashboard sitzt in der Abweichung:
-//    Grün (#2E7D32) für plus, Rot (#A32638) für minus. Ein Measure, das einen
+//    Blau (#003E6E) für plus, Rot (#A32638) für minus — dieselbe Leitfarbe wie die
+//    Ist-Linie; Blau-Rot statt Grün-Rot, weil Rot und Grün für viele schwer zu
+//    unterscheiden sind. Ein Measure, das einen
 //    Hex-Code liefert, wird in Format → Farbe → fx → Formatstil „Feldwert“ gewählt;
 //    so färbt es Balken und Text, ohne dass eine Regel je Visual gepflegt wird.
-Δ Umsatz Farbe = IF([Δ Umsatz] >= 0, "#2E7D32", "#A32638")
-Δ Bestellungen Farbe = IF([Bestellungen] >= [Bestellungen VJ], "#2E7D32", "#A32638")
-Δ Bestellwert Farbe = IF([Bestellwert] >= [Bestellwert VJ], "#2E7D32", "#A32638")
-Δ Ø Sterne Farbe = IF([Δ Ø Sterne] >= 0, "#2E7D32", "#A32638")
+Δ Umsatz Farbe = IF([Δ Umsatz] >= 0, "#003E6E", "#A32638")
+Δ Bestellungen Farbe = IF([Bestellungen] >= [Bestellungen VJ], "#003E6E", "#A32638")
+Δ Bestellwert Farbe = IF([Bestellwert] >= [Bestellwert VJ], "#003E6E", "#A32638")
+Δ Ø Sterne Farbe = IF([Δ Ø Sterne] >= 0, "#003E6E", "#A32638")
 
 // ---------------------------------------------------------------------------
 // 4) Text unter der Kachel — Zahl und Vorzeichen in einem Satz. FORMAT mit drei

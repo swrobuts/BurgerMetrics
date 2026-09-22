@@ -167,7 +167,5 @@ table dim_branch
 				in
 				  #"Navigation 1"
 
-	changedProperty = Name
-
 	annotation PBI_ResultType = Table
 

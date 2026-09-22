@@ -15,7 +15,7 @@ table fact_reviews
 		displayFolder: Dashboard
 		lineageTag: ee76e73c-7869-4a02-ba26-1caa9a8c0a21
 
-	measure 'Δ Ø Sterne Farbe' = IF([Δ Ø Sterne] >= 0, "#2E7D32", "#A32638")
+	measure 'Δ Ø Sterne Farbe' = IF([Δ Ø Sterne] >= 0, "#003E6E", "#A32638")
 		displayFolder: Dashboard
 		lineageTag: dcd94052-2ce5-46ff-9ee0-cb6596c0b437
 
@@ -123,8 +123,6 @@ table fact_reviews
 				  #"Navigation 1" = Quelle{[Schema = "burgermetrics", Item = "fact_reviews"]}[Data]
 				in
 				  #"Navigation 1"
-
-	changedProperty = Name
 
 	annotation PBI_ResultType = Table
 
