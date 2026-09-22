@@ -1,6 +1,6 @@
 // tableau-dashboard-felder.txt — Parameter und Calculated Fields für das Kennzahlen-Dashboard
 // zur Fallstudie BurgerMetrics. Kopiervorlage zu Lab 05 (Befehlskarte B05). Tableau Desktop 2026.2,
-// am 22.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft (27 Felder); die Arbeitsmappe liegt
+// am 22.09.2026 angelegt und gegen die Datenbank der Fallstudie geprüft (30 Felder); die Arbeitsmappe liegt
 // unter tableau/BurgerMetrics.twb im Repository.
 //
 // Datenquelle: fact_orders, dim_branch (Branch Id = Branch Id) und fact_reviews
@@ -78,13 +78,23 @@ AVG(IF YEAR([Date (Fact Reviews)]) = [Jahr] - 1 THEN [Stars] END)
 [Ø Sterne Jahr] - [Ø Sterne VJ]
 
 // ---------------------------------------------------------------------------
-// 4) Richtung als Text — die einzige Farbe des Dashboards liegt auf diesem Feld:
-//    im Blatt „Abweichung je Monat“ auf Farbe, dann „Farben bearbeiten…“ — plus Blau
-//    #4E79A7 (das Blau der Ist-Linie), minus Rot #E15759; Blau-Rot statt Grün-Rot, weil
-//    Rot und Grün für viele schwer zu unterscheiden sind. 2025 ist in jedem Monat plus; die Legende wird im
-//    Dashboard entfernt, die Farbe erklärt sich aus dem Vorzeichen.
+// 4) Richtung als Text — die einzige Farbe des Dashboards liegt auf diesen vier Feldern:
+//    im Blatt auf Farbe, dann „Farben bearbeiten…“ — plus Blau #4E79A7 (das Blau der
+//    Ist-Linie), minus Rot #E15759; Blau-Rot statt Grün-Rot, weil Rot und Grün für viele
+//    schwer zu unterscheiden sind. Ein Element erscheint erst in der Liste, wenn es im Blatt
+//    vorkommt: für „minus“ vorher den Parameter auf 2020 stellen (Umsatz, Bestellungen) oder
+//    auf 2019 (Sterne). Die Legenden werden im Dashboard entfernt, die Farbe erklärt sich aus
+//    dem Vorzeichen.
+//    „Δ Umsatz Richtung“ liegt im Blatt „Abweichung je Monat“ auf Farbe, die drei anderen
+//    in den Blättern „Karte … Δ“ (Abschnitt 10).
 // Name: Δ Umsatz Richtung
 IF [Δ Umsatz %] >= 0 THEN "plus" ELSE "minus" END
+// Name: Δ Bestellungen Richtung
+IF [Δ Bestellungen %] >= 0 THEN "plus" ELSE "minus" END
+// Name: Δ Bestellwert Richtung
+IF [Δ Bestellwert %] >= 0 THEN "plus" ELSE "minus" END
+// Name: Δ Ø Sterne Richtung
+IF [Δ Ø Sterne] >= 0 THEN "plus" ELSE "minus" END
 
 // ---------------------------------------------------------------------------
 // 5) Tausend Euro für die Diagramme — Linien und Small Multiples zeigen Tsd. €, damit
@@ -139,10 +149,15 @@ INT((INDEX() - 1) / 4)
   + MAX([Top Filiale]) + " liegt vorn"
 
 // ---------------------------------------------------------------------------
-// 10) Die Abweichungstexte der vier Karten — je Karte ein Feld, das den grünen Satz
-//    unter der Zahl liefert. Ohne Vorjahr im Bestand steht der Hinweis statt der Zahl.
+// 10) Die Abweichungstexte der vier Karten — je Karte ein Feld, das die Zeile unter der
+//    Zahl liefert. Ohne Vorjahr im Bestand steht der Hinweis statt der Zahl.
 //    Für 2025: „+5,4 % zum Vorjahr“, „+2,4 % zum Vorjahr“, „+2,9 % zum Vorjahr“,
 //    „+0,05 Sterne zum Vorjahr“.
+//    Jede dieser Zeilen bekommt ein eigenes Blatt („Karte Umsatz Δ“ und die drei anderen):
+//    das Textfeld auf Text, das passende Richtungsfeld aus Abschnitt 4 auf Farbe. Tableau
+//    färbt eine Beschriftung immer ganz — Zahl, Name und Δ-Zeile in einem Blatt bekämen alle
+//    dieselbe Farbe. Im Dashboard liegt das Δ-Blatt unverankert unter seiner Karte
+//    (Reiter Layout: x 24 · 412 · 800 · 1188, y 207, Größe 388 × 34).
 // Name: Δ Umsatz Text
 IF ISNULL([Umsatz VJ]) THEN "kein Vorjahr im Bestand"
 ELSE IF [Δ Umsatz %] >= 0 THEN "+" ELSE "" END
