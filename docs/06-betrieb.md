@@ -16,7 +16,7 @@ BurgerMetrics/
 │                 uebungsblatt.md/.pdf · erp_datenmodell.excalidraw
 ├── db/           aufbau/ · betrieb/ · tests/ · lade_csv.py · materialisieren.py
 │                 skript_ausfuehren.py
-├── notebooks/    00–08 · quellen/ · daten_extern/ · tests/
+├── notebooks/    00–09 · quellen/ · daten_extern/ · tests/
 ├── dash/         Dash-App (wird ausgeführt)
 ├── mcp/          MCP-Server (Betreiberzugang)
 ├── docs/         diese Dokumentation · sechs Prüfberichte

@@ -35,7 +35,7 @@
 <div class="lab-header">
   <div class="lab-num-big">06</div>
   <h1 class="lab-title">Python und Colab</h1>
-  <p class="lab-intro">Die neun Notebooks der Fallstudie lesen dieselbe Datenbank wie Power BI (Lab 04) und Tableau (Lab 05) — mit pandas und SQLAlchemy über das Demo-Konto aus Lab 01, in Google Colab oder lokal. Dieses Lab zeigt, was ein Notebook lauffähig macht: die Runtime und ihr Zustand, die Kopfzellen mit pip, Verbindung und <code>zahl()</code>, <code>read_sql</code> als Weg, auf dem die Datenbank rechnet und Python zeigt, die Dash-App in der letzten Codezelle — und wo eigene Zugangsdaten liegen, wenn nicht im Repository.</p>
+  <p class="lab-intro">Die zehn Notebooks der Fallstudie lesen dieselbe Datenbank wie Power BI (Lab 04) und Tableau (Lab 05) — mit pandas und SQLAlchemy über das Demo-Konto aus Lab 01, in Google Colab oder lokal. Dieses Lab zeigt, was ein Notebook lauffähig macht: die Runtime und ihr Zustand, die Kopfzellen mit pip, Verbindung und <code>zahl()</code>, <code>read_sql</code> als Weg, auf dem die Datenbank rechnet und Python zeigt, die Dash-App in der letzten Codezelle — und wo eigene Zugangsdaten liegen, wenn nicht im Repository.</p>
   <div class="lernziele">
     <span class="lernziel-chip">Runtime · Sitzung</span>
     <span class="lernziel-chip">Verbindungszelle</span>
@@ -51,7 +51,7 @@
   <section class="section-block" id="warum">
     <h2>Von oben nach unten</h2>
     <p>Ein Notebook hält Code, Ausgaben und erklärenden Text in einer Datei (<code>.ipynb</code>) und wird zellenweise ausgeführt. Als Lehrmaterial taugt es nur, wenn es nach einem Neustart der Runtime von oben nach unten fehlerfrei durchläuft und dieselben Ausgaben liefert: Wer es öffnet, hat keine Variablen aus einer früheren Sitzung, sondern nur das, was die Zellen in ihrer Reihenfolge erzeugen. Eine gespeicherte Ausgabe belegt nicht, dass die Zelle darüber noch läuft.</p>
-    <p>Die neun Notebooks der Fallstudie — <code>notebooks/00_zugang_und_daten.ipynb</code> bis <code>08_sentiment_rezensionen.ipynb</code> — sind so gebaut, und <code>notebooks/pruefe_notebooks.sh</code> prüft es: Das Skript führt jedes Notebook mit <code>jupyter nbconvert --execute</code> gegen die Datenbank aus und speichert die Ausgaben in der Datei; läuft eines nicht durch, bricht es ab. Danach sucht <code>quellen/pruefe_ausgaben.py</code> in jedem Notebook nach Fehlerausgaben. Die Notebook-Ausgaben, die dieses Lab zitiert, stammen aus dem gespeicherten Lauf des Notebooks.</p>
+    <p>Die zehn Notebooks der Fallstudie — <code>notebooks/00_zugang_und_daten.ipynb</code> bis <code>09_rezensionen_freigeben.ipynb</code> — sind so gebaut, und <code>notebooks/pruefe_notebooks.sh</code> prüft es: Das Skript führt jedes Notebook mit <code>jupyter nbconvert --execute</code> gegen die Datenbank aus und speichert die Ausgaben in der Datei; läuft eines nicht durch, bricht es ab. Danach sucht <code>quellen/pruefe_ausgaben.py</code> in jedem Notebook nach Fehlerausgaben. Die Notebook-Ausgaben, die dieses Lab zitiert, stammen aus dem gespeicherten Lauf des Notebooks.</p>
     <div class="kette">
       <div class="glied hell"><span class="titel">Titelzelle</span><span class="was">Nummer, Titel, Link „In Colab öffnen“</span></div>
       <span class="pfeil">→</span>
@@ -63,7 +63,7 @@
       <span class="pfeil">→</span>
       <div class="glied hell"><span class="titel">Analyse</span><span class="was">Fragestellung, Daten, Vorgehen, Ergebnis</span></div>
     </div>
-    <p>Vier Kopfzellen, dann die Analyse — in dieser Reihenfolge in allen neun Notebooks. <code>notebooks/quellen/gemeinsam.py</code> schreibt die Kopfzellen beim Bauen hinein (Bauskripte <code>bau_00.py</code> bis <code>bau_08.py</code>, geschrieben mit <code>nbformat</code>); wer ein Notebook gelesen hat, findet sich in den anderen acht zurecht. Notebook 00 (<code>00_zugang_und_daten.ipynb</code>) ist das Beispiel dieses Labs: Verbindung, Schemata und Sichten, CSV per Git LFS, DuckDB, Export für Power BI und Tableau, Grenzen der Rolle, Dash inline.</p>
+    <p>Vier Kopfzellen, dann die Analyse — in dieser Reihenfolge in allen zehn Notebooks. <code>notebooks/quellen/gemeinsam.py</code> schreibt die Kopfzellen beim Bauen hinein (Bauskripte <code>bau_00.py</code> bis <code>bau_09.py</code>, geschrieben mit <code>nbformat</code>); wer ein Notebook gelesen hat, findet sich in den anderen neun zurecht. Notebook 00 (<code>00_zugang_und_daten.ipynb</code>) ist das Beispiel dieses Labs: Verbindung, Schemata und Sichten, CSV per Git LFS, DuckDB, Export für Power BI und Tableau, Grenzen der Rolle, Dash inline.</p>
     <div class="concept-box">
       <h3>Der Prüfsatz</h3>
       <p>Ein Notebook ist fertig, wenn es nach „Runtime → Restart“ und erneutem Ausführen aller Zellen von oben nach unten dieselben Zahlen zeigt wie zuvor. Für die Notebooks der Fallstudie erledigt das <code>pruefe_notebooks.sh</code> (rund 20 Minuten für alle neun); für ein eigenes Notebook ist es ein Handgriff vor jeder Abgabe.</p>
@@ -100,7 +100,7 @@
 
   <section class="section-block" id="verbindung">
     <h2>Die Verbindungszelle</h2>
-    <p>Die zweite Codezelle ist in allen neun Notebooks zeichengleich (<code>VERBINDUNG</code> in <code>gemeinsam.py</code>) — anders als die pip-Zelle, die Notebook 08 um <code>transformers torch</code> erweitert. Sie besteht aus vier Teilen: zwei Importen, der Verbindungszeichenkette mit der Engine und den beiden Ladehelfern <code>lade_sql()</code> und <code>lade_csv()</code>. Quelle ist <code>notebooks/quellen/gemeinsam.py</code>; die Kopiervorlage enthält die Zelle mit Kopfkommentar und Verbindungsprobe.</p>
+    <p>Die zweite Codezelle ist in allen zehn Notebooks zeichengleich (<code>VERBINDUNG</code> in <code>gemeinsam.py</code>) — anders als die pip-Zelle, die Notebook 08 um <code>transformers torch</code> erweitert. Sie besteht aus vier Teilen: zwei Importen, der Verbindungszeichenkette mit der Engine und den beiden Ladehelfern <code>lade_sql()</code> und <code>lade_csv()</code>. Quelle ist <code>notebooks/quellen/gemeinsam.py</code>; die Kopiervorlage enthält die Zelle mit Kopfkommentar und Verbindungsprobe.</p>
     <div data-befehl="B01"></div>
     <div class="vorlagen">
       <a class="vorlage" href="vorlagen/notebook-verbindungszelle.py" download><span class="symbol">📄</span><span><span class="datei">notebook-verbindungszelle.py</span><br><span class="was">Die Verbindungszelle aus B01 mit Kopfkommentar und der Verbindungsprobe aus Notebook 00 — zum Einfügen in eine Colab-Zelle.</span></span></a>
@@ -239,7 +239,7 @@ Dash-App gebaut; zum Starten DASH_STARTEN = True setzen.</div>
   <section class="section-block" id="zusammenfassung">
     <h2>Zusammenfassung</h2>
     <ul>
-      <li>Ein Notebook ist Lehrmaterial, wenn es nach einem Neustart der Runtime von oben nach unten durchläuft; die neun Notebooks der Fallstudie tun das, und <code>notebooks/pruefe_notebooks.sh</code> prüft es mit <code>jupyter nbconvert --execute</code>.</li>
+      <li>Ein Notebook ist Lehrmaterial, wenn es nach einem Neustart der Runtime von oben nach unten durchläuft; die zehn Notebooks der Fallstudie tun das, und <code>notebooks/pruefe_notebooks.sh</code> prüft es mit <code>jupyter nbconvert --execute</code>.</li>
       <li>Notebook und Runtime sind zwei Dinge: Die Datei bleibt, die Sitzung mit Variablen, Importen und Funktionen endet mit „Runtime → Restart“. Nach der pip-Zelle (<code>subprocess.check_call([...])</code>, Ausgabe <code>Pakete bereit.</code>) ist ein Neustart nach frisch installierten Paketen weiterhin sinnvoll — nur rät die Zelle nicht mehr ausdrücklich dazu, weil sie nicht mehr über die %pip-Magic läuft.</li>
       <li>Vier Kopfzellen in jedem Notebook: Titel mit Colab-Link, pip-Zelle, Verbindungszelle (<code>VERBINDUNG</code>, <code>create_engine</code>, <code>lade_sql()</code>, <code>lade_csv()</code>), <code>zahl()</code> — dann die Analyse.</li>
       <li><code>read_sql</code> liefert DataFrames; die Datenbank rechnet, Python zeigt: <code>v_kennzahlen_jahr</code> kommt mit zehn Zeilen in Millisekunden, 2025 mit 136.557 Bestellungen und 2.994.771,13 €; die 2.950.082 Positionen holt niemand nach Colab.</li>

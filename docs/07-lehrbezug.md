@@ -168,7 +168,7 @@ Ergänzende Aufgaben mit Bezug zu diesem Dokument:
 ## 7.7 Datenbasierte Fallstudien: Notebooks, Dash und BM-Lab
 
 Das Modul **Datenbasierte Fallstudien** der THWS Business School nutzt
-denselben Bestand mit dem Demo-Konto `studi_daba`. Neun ausgeführte
+denselben Bestand mit dem Demo-Konto `studi_daba`. Zehn ausgeführte
 Notebooks decken diese Lerngegenstände ab:
 
 | Notebook | Lerngegenstand |
@@ -182,6 +182,7 @@ Notebooks decken diese Lerngegenstände ab:
 | 06 | Zufriedenheit/Klassifikation |
 | 07 | Ausreißer |
 | 08 | Sentiment |
+| 09 | Freigabe von Rezensionen: Klassifikation mit Jev, Fehlerkosten, Schwellen, Holdout |
 
 Die Dash-App `dash/app.py` steht daneben als Beispiel einer eigenständigen
 Anwendung auf der Semantikschicht: vier Karten mit denselben Zahlen wie das
