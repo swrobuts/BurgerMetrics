@@ -59,8 +59,8 @@ export function stimmenNachArtikel(zeilen) {
   return karte;
 }
 
-/** Der gespeicherte Datensatz für die Datenperspektive — ohne inhalt, denn
- *  Besuchertext wird nirgends gerendert. */
+/** Der gespeicherte Datensatz für die Datenperspektive — ohne inhalt: Besuchertext
+ *  erscheint nur in Leseansicht und Kundenstimmen, und erst nach der Freigabe. */
 export function datensatzZeilen(rezension) {
   const wann = rezension.erstellt_am
     ? new Date(rezension.erstellt_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })

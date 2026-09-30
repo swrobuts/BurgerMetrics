@@ -2962,6 +2962,35 @@ body.data-mode .phone-mockup { animation: none; }
 .stimme p { margin: 2px 0 0; }
 .stimme.leer { color: var(--stone-400); }
 @media (max-width: 600px) { .review-box { padding: 28px 20px; } .review-stimmen ul { max-height: 160px; } }
+/* ── Rezensionen lesen: Sternzeile als Knopf, Verteilung, Filter, Liste ─────── */
+.rating-knopf { background: none; border: none; padding: 6px 0; font: inherit; cursor: pointer; text-align: left; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; }
+.rating-knopf:hover:not(:disabled), .rating-knopf:focus-visible { text-decoration-color: currentColor; }
+.rating-knopf:disabled { cursor: default; }
+.review-hinweis { font-size: .8rem; color: var(--stone-600); text-align: center; margin: -8px 0 12px; }
+.lese-kopf { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin: 4px 0 12px; flex-wrap: wrap; }
+.lese-mittel { font-family: var(--font-display); font-size: 2.6rem; line-height: 1; color: var(--gold); }
+.lese-sterne { color: var(--gold); letter-spacing: 1px; }
+.lese-anzahl { color: var(--stone-600); font-size: .9rem; }
+.lese-verteilung { display: grid; gap: 4px; margin-bottom: 8px; }
+.lese-stufe { display: grid; grid-template-columns: 3.2em 1fr 7.5em; align-items: center; gap: 8px; background: none; border: 1px solid transparent; border-radius: var(--radius); padding: 6px 8px; font: inherit; font-size: .85rem; color: var(--stone-600); cursor: pointer; text-align: left; min-height: 40px; }
+.lese-stufe:hover:not(:disabled) { border-color: var(--stone-200); }
+.lese-stufe[aria-pressed="true"] { border-color: var(--gold); background: var(--cream); }
+.lese-stufe:disabled { cursor: default; opacity: .55; }
+.lese-stufe:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.lese-stufe-name { color: var(--gold); font-weight: 600; white-space: nowrap; }
+.lese-balken { height: 8px; background: var(--stone-200); border-radius: 4px; overflow: hidden; }
+.lese-balken-fuellung { display: block; height: 100%; background: var(--gold); }
+.lese-stufe-zahl { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lese-filter { display: flex; justify-content: space-between; align-items: center; font-size: .85rem; color: var(--stone-600); margin: 4px 0 8px; }
+.lese-filter[hidden] { display: none; }
+.lese-alle { background: none; border: none; color: var(--red); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 10px 0; font: inherit; }
+.lese-liste { list-style: none; margin: 8px 0 0; display: grid; gap: 12px; border-top: 1px solid var(--stone-200); padding: 12px 0 0; }
+.lese-daten { display: none; font-family: 'Courier New', monospace; font-size: .72rem; color: var(--stone-400); margin-top: 2px; word-break: break-word; }
+body.data-mode .lese-daten { display: block; }
+.lese-weiter { width: 100%; justify-content: center; margin-top: 12px; background: var(--white); border: 1px solid var(--stone-200); color: var(--charcoal); }
+.lese-weiter[hidden] { display: none; }
+.lese-selbst { width: 100%; justify-content: center; margin-top: 12px; }
+@media (max-width: 600px) { .lese-stufe { grid-template-columns: 2.8em 1fr 6.5em; } .lese-mittel { font-size: 2.2rem; } }
 </style>
 <style>
 /* ============================================
@@ -3692,6 +3721,7 @@ body.data-mode .phone-mockup { animation: none; }
       <div class="data-schema-mini" style="display:block;background:transparent;border:none;padding:0;margin:8px 0;text-align:left;">
         <span class="schema-box">Rezension</span><span class="schema-arrow">→</span>
         <span class="schema-box">wawi.rezension</span><span class="schema-arrow">→</span>
+      <span class="schema-box">Freigabe</span><span class="schema-arrow">→</span>
         <span class="schema-box">ETL</span><span class="schema-arrow">→</span>
         <span class="schema-box schema-box-fact">fact_reviews</span>
       </div>
@@ -3700,7 +3730,7 @@ body.data-mode .phone-mockup { animation: none; }
       <span class="da-metric">stars</span>
       <span class="da-metric">review_text</span>
       <span class="da-metric">source = shop</span><br><br>
-      → 10.000 simulierte Rezensionen liegen bereits in <code>fact_reviews</code> (Sentiment-Analyse). Besuchertexte zeigt der Shop nicht an; die Kundenstimmen kommen aus der Simulation.
+      → 10.000 simulierte Rezensionen liegen bereits in <code>fact_reviews</code> (Sentiment-Analyse). Besuchertexte erscheinen erst nach der Freigabe; bis dahin steht hier nur ihr Status.
     </div>
   </div>
 </section>
@@ -4392,6 +4422,7 @@ body.data-mode .phone-mockup { animation: none; }
     <h3 id="reviewTitle">Bewerten</h3>
     <div class="review-product" id="reviewProduct"></div>
     <div class="review-stand" id="reviewStand"></div>
+    <p class="review-hinweis">Rezensionen werden vor der Veröffentlichung geprüft.</p>
     <form id="reviewForm" onsubmit="submitReview(event)">
       <fieldset class="sterne-wahl" id="sterneWahl">
         <legend>Sterne</legend>
@@ -4416,6 +4447,29 @@ body.data-mode .phone-mockup { animation: none; }
   </div>
 </div>
 
+<!-- ===================== REZENSIONEN LESEN ===================== -->
+<div class="modal-overlay" id="leseModal" role="dialog" aria-modal="true" aria-labelledby="leseTitel">
+  <div class="modal-box review-box lese-box">
+    <button type="button" class="review-close" onclick="closeLesen()" aria-label="Schließen">&times;</button>
+    <h3 id="leseTitel">Rezensionen</h3>
+    <div class="review-product" id="leseProdukt"></div>
+    <div class="lese-kopf">
+      <span class="lese-mittel" id="leseMittel"></span>
+      <span class="lese-sterne" id="leseSterne"></span>
+      <span class="lese-anzahl" id="leseAnzahl"></span>
+    </div>
+    <div class="lese-verteilung" id="leseVerteilung" role="group" aria-label="Nach Sternen filtern"></div>
+    <div class="lese-filter" id="leseFilter" hidden>
+      <span id="leseFilterText"></span>
+      <button type="button" class="lese-alle" onclick="leseFiltern(null)">Alle</button>
+    </div>
+    <ul class="lese-liste" id="leseListe" aria-live="polite"></ul>
+    <div class="review-meldung" id="leseMeldung"></div>
+    <button type="button" class="btn lese-weiter" id="leseWeiter" onclick="leseSeiteLaden()" hidden>Weitere laden</button>
+    <button type="button" class="btn btn-primary lese-selbst" onclick="leseZuBewerten()">Selbst bewerten</button>
+  </div>
+</div>
+
 <!-- ===================== TOAST ===================== -->
 <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastMsg"></span></div>
 
@@ -4430,7 +4484,7 @@ let PRODUCTS = [];   // wird aus v_speisekarte geladen
 
 let BRANCHES = [];   // wird aus v_filialliste geladen
 let BEWERTUNGEN = new Map();   // artikel_id -> Zeile aus wawi.v_rezension_produkt
-let STIMMEN = new Map();       // artikel_id -> bis zu drei Kundenstimmen (nur Simulation)
+let STIMMEN = new Map();       // artikel_id -> bis zu drei freigegebene Kundenstimmen
 
 
 // =============================================================================
@@ -4475,7 +4529,7 @@ function renderMenu(filter) {
         <div class="menu-card-cat">${p.sub}</div>
         <div class="menu-card-name">${p.name}</div>
         <div class="menu-card-rating">
-          <span class="rating-text ${bewertungKlasse(p.id)}" data-rating="${p.id}">${bewertungVon(p.id)}</span>
+          <button type="button" class="rating-text rating-knopf ${bewertungKlasse(p.id)}" data-rating="${p.id}" onclick="openLesen(${p.id})" ${bewertungKlasse(p.id) ? 'disabled' : ''} aria-label="Rezensionen zu ${p.name} lesen">${bewertungVon(p.id)}</button>
           <button type="button" class="bewerten-btn" onclick="openReview(${p.id})" aria-label="${p.name} bewerten">Bewerten</button>
         </div>
         <div class="menu-card-desc">${p.desc}</div>
@@ -4693,7 +4747,7 @@ let reviewProduktId = null;   // der Artikel, der gerade bewertet wird
 let reviewAusloeser = null;   // der Knopf, der das Modal geöffnet hat — bekommt den Fokus zurück
 
 // Öffnet das Formular für einen Artikel: Stand, Filiale aus dem Warenkorb,
-// Kundenstimmen aus der Simulation. Das Formular startet leer.
+// die jüngsten freigegebenen Kundenstimmen. Das Formular startet leer.
 function openReview(artikelId) {
   const produkt = PRODUCTS.find(p => p.id === artikelId);
   if (!produkt) return;
@@ -4765,7 +4819,7 @@ function filialwahlFuellen() {
   if (warenkorb && warenkorb.value) wahl.value = warenkorb.value;
 }
 
-// Kundenstimmen: nur Simulationstexte aus wawi.v_kundenstimmen, immer per
+// Kundenstimmen: freigegebene Texte aus wawi.v_kundenstimmen, immer per
 // textContent — nie innerHTML, weil hier Text aus der Datenbank steht.
 function stimmenAnzeigen(artikelId) {
   const liste = document.getElementById('reviewStimmen');
@@ -4783,7 +4837,7 @@ function stimmenAnzeigen(artikelId) {
     li.className = 'stimme';
     const kopf = document.createElement('div');
     kopf.className = 'stimme-kopf';
-    kopf.textContent = '★'.repeat(s.sterne) + '☆'.repeat(5 - s.sterne) + ' · ' + window.REZENSIONEN.datumText(s.datum);
+    kopf.textContent = window.REZENSIONEN.sterneText(s.sterne) + ' · ' + window.REZENSIONEN.datumText(s.datum);
     const text = document.createElement('p');
     text.textContent = s.inhalt;
     li.appendChild(kopf);
@@ -4818,13 +4872,14 @@ function submitReview(event) {
   reviewMeldung('', 'Wird gespeichert …');
 
   window.rezensionSpeichern(rezension).then(antwort => {
-    reviewMeldung('ok', `Gespeichert als wawi.rezension #${antwort.rezension_id}`);
+    reviewMeldung('ok', 'Danke! Ihre Rezension wird geprüft und erscheint in Kürze.');
     document.getElementById('reviewForm').reset();
     sterneAnzeigen(0);
     reviewZaehler();
     logEvent('REVIEW', 'Rezension gespeichert',
       `INSERT INTO wawi.rezension · #${antwort.rezension_id} · ${'★'.repeat(antwort.sterne)} ${antwort.artikel}`);
     datensatzAnzeigen(antwort.rezension_id);
+    statusBeobachten(antwort.rezension_id);
     // Der neue Stand ist Beiwerk: Scheitert das Nachladen, bleibt die
     // Bestätigung stehen — die Rezension ist gespeichert.
     bewertungenAktualisieren().catch(fehler => console.warn('Bewertungsstand nicht neu geladen:', fehler));
@@ -4845,6 +4900,7 @@ async function bewertungenAktualisieren() {
     const artikelId = Number(el.dataset.rating);
     el.textContent = bewertungVon(artikelId);
     el.classList.toggle('leer', bewertungKlasse(artikelId) === 'leer');
+    el.disabled = bewertungKlasse(artikelId) === 'leer';
   });
   if (reviewProduktId !== null) reviewStandAnzeigen();
 }
@@ -4875,7 +4931,187 @@ async function datensatzAnzeigen(rezensionId) {
 
 document.getElementById('sterneWahl').addEventListener('change', e => sterneAnzeigen(Number(e.target.value)));
 document.getElementById('reviewModal').addEventListener('click', e => { if (e.target.id === 'reviewModal') closeReview(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReview(); });
+document.getElementById('leseModal').addEventListener('click', e => { if (e.target.id === 'leseModal') closeLesen(); });
+// Escape schließt nur ein offenes Rezensionsfenster; sonst sprang der Fokus
+// bei jeder Escape-Taste zum zuletzt benutzten „Bewerten“-Knopf.
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('reviewModal').classList.contains('open')) closeReview();
+  else if (document.getElementById('leseModal').classList.contains('open')) closeLesen();
+});
+
+// =============================================================================
+// REZENSIONEN LESEN — Verteilung, Filter und Liste der freigegebenen Rezensionen
+// =============================================================================
+let leseProduktId = null;   // der Artikel, dessen Rezensionen offen sind
+let leseSterne = null;      // Filter: 1 bis 5 oder null für alle
+let leseSeite = 0;          // zuletzt geladene Seite
+let leseGeladen = 0;        // Zahl der angezeigten Rezensionen
+let leseAusloeser = null;   // bekommt beim Schließen den Fokus zurück
+let statusUhr = null;       // Abfrage des Status der zuletzt gespeicherten Rezension
+
+// Öffnet die Leseansicht eines Artikels: Kopf, Verteilung, erste Seite.
+function openLesen(artikelId) {
+  const produkt = PRODUCTS.find(p => p.id === artikelId);
+  if (!produkt || !window.REZENSIONEN) return;
+  leseProduktId = artikelId;
+  leseSterne = null;
+  leseAusloeser = document.activeElement;
+  document.getElementById('leseProdukt').textContent = produkt.name;
+  document.getElementById('leseFilter').hidden = true;
+  leseKopfAnzeigen();
+  leseVerteilungAnzeigen();
+  leseListeLeeren();
+  document.getElementById('leseModal').classList.add('open');
+  document.querySelector('#leseModal .review-close').focus();
+  leseSeiteLaden();
+  logEvent('REVIEW_READ', `Rezensionen: ${produkt.name}`, 'SELECT … FROM wawi.v_rezensionen_lesen · nur freigegebene');
+}
+
+// Schließt die Leseansicht und gibt den Fokus an die Sternzeile zurück.
+function closeLesen() {
+  document.getElementById('leseModal').classList.remove('open');
+  if (leseAusloeser && typeof leseAusloeser.focus === 'function') leseAusloeser.focus();
+}
+
+// Mittelwert groß, daneben die Sterne und die Zahl der Bewertungen.
+function leseKopfAnzeigen() {
+  const zeile = BEWERTUNGEN.get(leseProduktId);
+  const mittel = zeile && zeile.anzahl ? Number(zeile.sterne_mittel) : 0;
+  document.getElementById('leseMittel').textContent = mittel
+    ? mittel.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+    : '–';
+  document.getElementById('leseSterne').textContent = window.REZENSIONEN.sterneText(mittel);
+  document.getElementById('leseAnzahl').textContent = window.REZENSIONEN.anzahlText(zeile && zeile.anzahl);
+}
+
+// Fünf Zeilen, 5 Sterne oben: Balken, Anzahl und Anteil. Ein Klick filtert.
+function leseVerteilungAnzeigen() {
+  const ziel = document.getElementById('leseVerteilung');
+  ziel.textContent = '';
+  for (const stufe of window.REZENSIONEN.verteilung(BEWERTUNGEN.get(leseProduktId))) {
+    const knopf = document.createElement('button');
+    knopf.type = 'button';
+    knopf.className = 'lese-stufe';
+    knopf.disabled = stufe.anzahl === 0;
+    knopf.setAttribute('aria-pressed', String(leseSterne === stufe.sterne));
+    knopf.setAttribute('aria-label',
+      `${stufe.sterne} ${stufe.sterne === 1 ? 'Stern' : 'Sterne'}: ${stufe.anzahl} Bewertungen — nur diese zeigen`);
+    knopf.onclick = () => leseFiltern(stufe.sterne);
+    const name = document.createElement('span');
+    name.className = 'lese-stufe-name';
+    name.textContent = `${stufe.sterne} ★`;
+    const balken = document.createElement('span');
+    balken.className = 'lese-balken';
+    const fuellung = document.createElement('span');
+    fuellung.className = 'lese-balken-fuellung';
+    fuellung.style.width = `${Math.round(stufe.anteil * 100)}%`;
+    balken.appendChild(fuellung);
+    const zahl = document.createElement('span');
+    zahl.className = 'lese-stufe-zahl';
+    zahl.textContent = `${stufe.anzahl.toLocaleString('de-DE')} · ${window.REZENSIONEN.anteilText(stufe.anteil)}`;
+    knopf.append(name, balken, zahl);
+    ziel.appendChild(knopf);
+  }
+}
+
+// Filtert auf eine Sternzahl (oder alle) und lädt die erste Seite neu.
+function leseFiltern(sterne) {
+  leseSterne = sterne;
+  document.getElementById('leseFilter').hidden = sterne === null;
+  document.getElementById('leseFilterText').textContent = sterne ? `Nur ${sterne} ★` : '';
+  leseVerteilungAnzeigen();
+  leseListeLeeren();
+  leseSeiteLaden();
+}
+
+// Leert Liste, Meldung und Seitenzähler.
+function leseListeLeeren() {
+  document.getElementById('leseListe').textContent = '';
+  leseMeldung('');
+  leseSeite = 0;
+  leseGeladen = 0;
+  document.getElementById('leseWeiter').hidden = true;
+}
+
+// Holt die nächste Seite aus der Datenbank und hängt sie an die Liste.
+async function leseSeiteLaden() {
+  if (!window.rezensionenLesenLaden) { leseMeldung('Keine Verbindung zum operativen System.'); return; }
+  const produkt = leseProduktId, sterne = leseSterne, seite = leseSeite + 1;
+  const weiter = document.getElementById('leseWeiter');
+  weiter.disabled = true;
+  try {
+    const zeilen = await window.rezensionenLesenLaden(produkt, sterne, seite);
+    // Wurden Artikel oder Filter inzwischen gewechselt, gilt diese Antwort nicht mehr.
+    if (produkt !== leseProduktId || sterne !== leseSterne) return;
+    const liste = document.getElementById('leseListe');
+    for (const z of zeilen) liste.appendChild(leseEintrag(z));
+    leseSeite = seite;
+    leseGeladen += zeilen.length;
+    if (!leseGeladen) leseMeldung('Zu diesem Filter gibt es noch keine veröffentlichte Rezension.');
+    const gesamt = window.REZENSIONEN.anzahlFuer(BEWERTUNGEN.get(produkt), sterne);
+    weiter.hidden = !window.REZENSIONEN.weitereLaden(leseGeladen, gesamt, zeilen.length);
+  } catch (fehler) {
+    leseMeldung(fehler.message);
+  } finally {
+    weiter.disabled = false;
+  }
+}
+
+// Ein Eintrag: Sterne und Datum, darunter der Text; im Datenmodus Nummer,
+// Quelle und Status. Nur textContent, weil hier Besuchertext steht.
+function leseEintrag(z) {
+  const li = document.createElement('li');
+  li.className = 'stimme';
+  const kopf = document.createElement('div');
+  kopf.className = 'stimme-kopf';
+  kopf.textContent = window.REZENSIONEN.sterneText(z.sterne) + ' · ' + window.REZENSIONEN.datumText(z.datum);
+  const text = document.createElement('p');
+  text.textContent = z.inhalt;
+  const daten = document.createElement('div');
+  daten.className = 'lese-daten';
+  daten.textContent = `wawi.rezension #${z.rezension_id} · quelle: ${z.quelle} · status: ${z.status}`;
+  li.append(kopf, text, daten);
+  return li;
+}
+
+// Meldung unter der Liste: leer, Hinweis oder Fehler der Datenquelle.
+function leseMeldung(text) {
+  document.getElementById('leseMeldung').textContent = text;
+}
+
+// Wechselt von der Leseansicht zum Formular; der Fokus kehrt später zur Sternzeile zurück.
+function leseZuBewerten() {
+  const ausloeser = leseAusloeser;
+  document.getElementById('leseModal').classList.remove('open');
+  openReview(leseProduktId);
+  reviewAusloeser = ausloeser;
+}
+
+// Fragt im Datenmodus alle zehn Sekunden den Status der eigenen Rezension ab,
+// solange das Formular offen ist und die Prüfung aussteht.
+function statusBeobachten(rezensionId) {
+  clearInterval(statusUhr);
+  statusUhr = setInterval(async () => {
+    const offen = document.getElementById('reviewModal').classList.contains('open');
+    if (!offen || !dataMode || !window.rezensionStatusLaden) { clearInterval(statusUhr); return; }
+    try {
+      const status = await window.rezensionStatusLaden(rezensionId);
+      statusEintragen(status);
+      if (status !== 'offen') clearInterval(statusUhr);
+    } catch (fehler) {
+      console.warn('Status der Rezension:', fehler);
+    }
+  }, 10000);
+}
+
+// Ersetzt im Datensatz der Datenperspektive den Wert der Zeile „status“.
+function statusEintragen(status) {
+  const dl = document.getElementById('daRezension');
+  if (!dl) return;
+  const dt = [...dl.querySelectorAll('dt')].find(e => e.textContent === 'status');
+  if (dt && dt.nextElementSibling) dt.nextElementSibling.textContent = window.REZENSIONEN.statusText(status);
+}
 
 // =============================================================================
 // MAP
@@ -5081,6 +5317,7 @@ const EVENT_CONFIG = {
   VIEW:      { icon: 'ev-icon-view',   emoji: '👁️' },
   REVIEW_OPEN: { icon: 'ev-icon-view', emoji: '📝' },
   REVIEW:      { icon: 'ev-icon-view', emoji: '⭐' },
+  REVIEW_READ: { icon: 'ev-icon-view', emoji: '📖' },
 };
 
 function logEvent(type, title, detail) {
@@ -6072,16 +6309,19 @@ setTimeout(() => {
 // Die Versionsnummer hinter den Modulen bricht den Browser-Cache: Pages liefert
 // Dateien zehn Minuten lang aus dem Cache, und eine neue shop.html mit einer alten
 // datenquelle.js endet in „is not a function“. Wer ein Modul ändert, zählt hier hoch.
-import { QUELLE } from './js/konfiguration.js?v=20260915';
-import { waehleQuelle } from './js/datenquelle.js?v=20260915';
-import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js?v=20260915';
+import { QUELLE } from './js/konfiguration.js?v=20261001';
+import { waehleQuelle } from './js/datenquelle.js?v=20261001';
+import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js?v=20261001';
 import { bewertungText, pruefeEingabe, zaehlerText, datumText, nachArtikel,
-         stimmenNachArtikel, datensatzZeilen } from './js/rezensionen.js?v=20260915';
+         stimmenNachArtikel, datensatzZeilen, SEITENGROESSE, sterneText, anzahlText,
+         verteilung, anteilText, statusText, anzahlFuer, weitereLaden } from './js/rezensionen.js?v=20261001';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;
 // Die Rezensionslogik ebenso — der klassische Block ruft sie über window.REZENSIONEN.
-window.REZENSIONEN = { bewertungText, pruefeEingabe, zaehlerText, datumText, datensatzZeilen };
+window.REZENSIONEN = { bewertungText, pruefeEingabe, zaehlerText, datumText, datensatzZeilen,
+                       sterneText, anzahlText, verteilung, anteilText, statusText, anzahlFuer,
+                       weitereLaden };
 
 // Sitzungskennung, damit eine Uebungsgruppe ihre Bestellungen in
 // wawi.v_bestellung_letzte wiederfindet. Lebt nur in diesem Tab.
@@ -6112,6 +6352,11 @@ try {
   // nicht der Browser.
   window.bewertungenLaden = async () => nachArtikel(await quelle.rezensionenProdukt());
   window.letzteRezensionenLaden = () => quelle.letzteRezensionen();
+  // Die Leseansicht holt seitenweise; die Seitengröße steht in rezensionen.js.
+  window.rezensionenLesenLaden = (artikelId, sterne, seite) =>
+    quelle.rezensionenLesen(artikelId, sterne, seite, SEITENGROESSE);
+  // Der Datenmodus fragt den Status der eigenen Rezension ab, ohne Text.
+  window.rezensionStatusLaden = (rezensionId) => quelle.rezensionStatus(rezensionId);
 
   // Die vier Kennzahlen im Kopfbereich standen als data-count fest im HTML:
   // 8 Filialen, 50 Produkte, 100 Tausend Kunden, 4,8 Sterne. Drei davon
