@@ -837,6 +837,42 @@ body.data-mode .pos-data-annotation{display:block}
   .product-card:hover { box-shadow: none; border-color: var(--border); }
 }
 
+/* === REZENSIONEN (Moderation) === */
+.header-rezensionen{gap:8px;cursor:pointer;font-family:inherit}
+.rz-zahl{background:var(--red);color:#fff;border-radius:10px;font-size:12px;font-weight:800;padding:1px 7px;line-height:18px}
+.rz-zahl[hidden]{display:none}
+.rz-modal{width:760px}
+.rz-kopf-rechts{display:flex;align-items:center;gap:10px}
+.rz-konto{font-size:12px;color:var(--text-light)}
+.rz-abmelden{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;color:var(--text);min-height:32px}
+.rz-abmelden[hidden]{display:none}
+.rz-anmeldung{display:grid;gap:8px;max-width:360px}
+.rz-anmeldung[hidden]{display:none}
+.rz-anmeldung p{font-size:13px;color:var(--text-light)}
+.rz-anmeldung label{font-size:12px;font-weight:700;color:var(--text-light)}
+.rz-anmeldung input,.rz-aktionen input{padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:14px;min-height:44px}
+.rz-knopf-primaer{background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:10px 16px;font-weight:700;cursor:pointer;min-height:44px}
+.rz-knopf-warnung{background:#fff;color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius);padding:10px 16px;font-weight:700;cursor:pointer;min-height:44px}
+.rz-knopf-primaer:disabled,.rz-knopf-warnung:disabled{opacity:.5;cursor:not-allowed}
+.rz-meldung{font-size:13px;color:var(--red);min-height:1.2em}
+.rz-stand{font-size:13px;color:var(--text-light);margin-bottom:4px}
+.rz-stand.warnung{color:var(--red);font-weight:700}
+#rezensionenModal h4{font-size:13px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px}
+.rz-liste{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.rz-eintrag{border:1px solid var(--border);border-radius:10px;padding:12px}
+.rz-eintrag.rz-qs{border-left:4px solid var(--red)}
+.rz-kopf{font-size:12px;color:var(--text-light);margin-bottom:4px}
+.rz-text{font-size:14px;color:var(--dark);margin-bottom:8px;word-break:break-word}
+.rz-gruende{margin:0 0 8px 18px;font-size:12px;color:var(--text)}
+.rz-balken{display:grid;grid-template-columns:9em 1fr 3.5em;gap:4px 8px;align-items:center;font-size:12px;color:var(--text-light);margin-bottom:8px}
+.rz-spur{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden}
+.rz-spur span{display:block;height:100%;background:var(--dark)}
+.rz-aktionen{display:flex;gap:8px;flex-wrap:wrap}
+.rz-aktionen input{flex:1;min-width:160px}
+.rz-klein li{font-size:12px;color:var(--text-light);padding:4px 0;border-bottom:1px solid #f3f4f6}
+.rz-leer{font-size:13px;color:var(--text-light)}
+.rz-ohne-rolle{font-size:14px;color:var(--text)}
+@media (max-width: 599px){.rz-balken{grid-template-columns:7.5em 1fr 3em}}
 </style>
 </head>
 <body>
@@ -856,6 +892,9 @@ body.data-mode .pos-data-annotation{display:block}
       <span style="font-size:11px;color:#94a3b8;margin-left:4px" id="shiftInfo"></span>
     </div>
     <span class="clock" id="hdrClock">00:00:00</span>
+    <button type="button" class="header-dash header-rezensionen" id="rzKnopf" onclick="rezensionenOeffnen()" aria-label="Rezensionen prüfen">
+      <i class="fa-solid fa-comments" aria-hidden="true"></i><span class="dash-text">Rezensionen</span><span class="rz-zahl" id="rzZahl" hidden></span>
+    </button>
     <a href="dashboard.html" class="header-dash" aria-label="Dashboard"><span class="dash-text">Dashboard</span></a>
   </div>
 </div>
@@ -1227,6 +1266,48 @@ body.data-mode .pos-data-annotation{display:block}
           <button onclick="applyCoupon()">Einlösen</button>
         </div>
         <div class="extras-result" id="couponResult"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rezensionen: Moderation und Qualitätssicherung -->
+<div class="modal-overlay" id="rezensionenModal">
+  <div class="modal rz-modal" role="dialog" aria-modal="true" aria-labelledby="rzTitel">
+    <div class="modal-header">
+      <h3 id="rzTitel">Rezensionen</h3>
+      <div class="rz-kopf-rechts">
+        <span class="rz-konto" id="rzKonto"></span>
+        <button type="button" class="rz-abmelden" id="rzAbmelden" onclick="rezensionenAbmelden()" hidden>Abmelden</button>
+        <button class="modal-close" onclick="closeAllModals()" aria-label="Schließen">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <form id="rzAnmeldung" class="rz-anmeldung" onsubmit="rezensionenAnmelden(event)" hidden>
+        <p>Anmeldung mit dem Supabase-Konto. Ohne die Rolle moderation oder qualitaet bleibt der Bereich leer.</p>
+        <label for="rzEmail">E-Mail</label>
+        <input id="rzEmail" type="email" autocomplete="username" required>
+        <label for="rzPasswort">Passwort</label>
+        <input id="rzPasswort" type="password" autocomplete="current-password" required>
+        <button type="submit" class="rz-knopf-primaer">Anmelden</button>
+        <p class="rz-meldung" id="rzAnmeldeMeldung" role="alert"></p>
+      </form>
+      <p class="rz-ohne-rolle" id="rzOhneRolle" hidden>Dieses Konto hat keine Rolle für die Moderation.</p>
+      <div id="rzArbeit" hidden>
+        <p class="rz-stand" id="rzStand"></p>
+        <section id="rzQsBlock" hidden>
+          <h4>Gesundheitsrisiken</h4>
+          <ul class="rz-liste" id="rzQsListe"></ul>
+        </section>
+        <section id="rzModBlock" hidden>
+          <h4>Zurückgehalten</h4>
+          <ul class="rz-liste" id="rzModListe"></ul>
+        </section>
+        <section id="rzEntschiedenBlock" hidden>
+          <h4>Zuletzt entschieden</h4>
+          <ul class="rz-liste rz-klein" id="rzEntschiedenListe"></ul>
+        </section>
+        <p class="rz-meldung" id="rzMeldung" role="status"></p>
       </div>
     </div>
   </div>
@@ -2291,9 +2372,11 @@ window.kasseStarten = function(artikel){
    im Quelltext — mit Preisen, die mit dim_product nicht uebereinstimmten, und
    13 Artikeln, die es im Datenmodell gar nicht gibt — und der Beleg landete
    nirgends. Genau das soll die Fallstudie nicht vorfuehren. */
-import { QUELLE } from './js/konfiguration.js?v=20260915';
-import { waehleQuelle } from './js/datenquelle.js?v=20260915';
-import { bildVon, bildUrl, SCHNELLWAHL } from './js/darstellung.js?v=20260915';
+import { QUELLE } from './js/konfiguration.js?v=20261005';
+import { waehleQuelle } from './js/datenquelle.js?v=20261005';
+import { bildVon, bildUrl, SCHNELLWAHL } from './js/darstellung.js?v=20261005';
+import { nachRisiko, balken, grundText, standText, zahlAmKnopf, sitzungGueltig,
+         zeitText } from './js/moderation.js?v=20261005';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;
@@ -2314,6 +2397,234 @@ const ZAHLUNGSART = { cash: 1, card: 2, credit: 3, mobile: 4, split: 2 };
 // Kategorienamen — hier die Abbildung, an einer Stelle statt in jeder Abfrage.
 const REITER = { 'Burger':'burger', 'Side':'sides', 'Drink':'drinks',
                  'Dessert':'dessert', 'Breakfast':'breakfast', 'Extra':'extras' };
+
+// ===== REZENSIONEN: Moderation und Qualitätssicherung =====
+// Die Kasse bleibt ohne Anmeldung; nur dieser Bereich braucht ein Supabase-Konto
+// mit der Rolle moderation oder qualitaet. Das Token lebt nur in diesem Tab.
+// Rezensionstext, Gründe und Bemerkungen nur per textContent.
+const ANMELDUNG = 'bm-pos-anmeldung';
+
+function moderationEinrichten(quelle) {
+  // Stellt eine Anmeldung aus diesem Tab wieder her, solange sie gilt.
+  let konto = '';
+  try {
+    const gespeichert = JSON.parse(sessionStorage.getItem(ANMELDUNG) || 'null');
+    if (sitzungGueltig(gespeichert) && quelle.sitzungUebernehmen(gespeichert)) konto = gespeichert.email || '';
+  } catch (_) { /* ohne sessionStorage bleibt der Bereich abgemeldet */ }
+
+  // Zeigt genau einen der drei Zustände: anmeldung, ohneRolle, arbeit.
+  function zeigen(zustand) {
+    document.getElementById('rzAnmeldung').hidden = zustand !== 'anmeldung';
+    document.getElementById('rzOhneRolle').hidden = zustand !== 'ohneRolle';
+    document.getElementById('rzArbeit').hidden = zustand !== 'arbeit';
+    document.getElementById('rzAbmelden').hidden = zustand === 'anmeldung';
+    document.getElementById('rzKonto').textContent = zustand === 'anmeldung' ? '' : konto;
+  }
+
+  // Schreibt eine Meldung in das Feld mit dieser ID.
+  function melden(id, text) {
+    document.getElementById(id).textContent = text;
+  }
+
+  // Zahl am Knopf aus v_pruefdienst_stand, auch ohne Anmeldung.
+  async function zahlAktualisieren() {
+    try {
+      const stand = await quelle.pruefdienstStand();
+      const zahl = zahlAmKnopf(stand);
+      const feld = document.getElementById('rzZahl');
+      feld.textContent = String(zahl);
+      feld.hidden = zahl === 0;
+      return stand;
+    } catch (fehler) {
+      console.warn('Stand des Prüfdienstes:', fehler);
+      return null;
+    }
+  }
+
+  // Abgelaufene Anmeldung: zurück zum Formular, mit Hinweis; true, wenn es das war.
+  function abgelaufen(fehler) {
+    if (!/abgelaufen/.test(fehler.message)) return false;
+    try { sessionStorage.removeItem(ANMELDUNG); } catch (_) { /* nichts gespeichert */ }
+    zeigen('anmeldung');
+    melden('rzAnmeldeMeldung', fehler.message);
+    return true;
+  }
+
+  // Lädt Rollen, Stand, QS-Fälle, zurückgehaltene und zuletzt entschiedene Rezensionen.
+  async function laden() {
+    if (!quelle.angemeldet()) { zeigen('anmeldung'); return; }
+    try {
+      const rollen = await quelle.meineRollen();
+      if (!rollen.length) { zeigen('ohneRolle'); return; }
+      zeigen('arbeit');
+      const hinweis = standText(await zahlAktualisieren());
+      const zeile = document.getElementById('rzStand');
+      zeile.textContent = hinweis.text;
+      zeile.classList.toggle('warnung', hinweis.warnung);
+      const moderation = rollen.includes('moderation');
+      const qualitaet = rollen.includes('qualitaet');
+      qsAnzeigen(qualitaet ? await quelle.qsFaelle() : [], qualitaet);
+      moderationAnzeigen(moderation ? nachRisiko(await quelle.moderationListe()) : [], moderation);
+      entschiedenAnzeigen(moderation ? await quelle.entscheidungenLetzte() : [], moderation);
+    } catch (fehler) {
+      if (!abgelaufen(fehler)) melden('rzMeldung', fehler.message);
+    }
+  }
+
+  // Ein Absatz mit Klasse; der Inhalt nur als textContent.
+  function absatz(klasse, text) {
+    const p = document.createElement('p');
+    p.className = klasse;
+    p.textContent = text;
+    return p;
+  }
+
+  // Bemerkungsfeld und Knöpfe unter einem Eintrag; jeder Knopf bekommt die Bemerkung.
+  function aktionen(knoepfe) {
+    const zeile = document.createElement('div');
+    zeile.className = 'rz-aktionen';
+    const bemerkung = document.createElement('input');
+    bemerkung.type = 'text';
+    bemerkung.maxLength = 500;
+    bemerkung.placeholder = 'Bemerkung (optional)';
+    bemerkung.setAttribute('aria-label', 'Bemerkung');
+    zeile.appendChild(bemerkung);
+    for (const [text, klasse, aktion] of knoepfe) {
+      const knopf = document.createElement('button');
+      knopf.type = 'button';
+      knopf.className = klasse;
+      knopf.textContent = text;
+      knopf.onclick = () => ausfuehren(zeile, () => aktion(bemerkung.value.trim()));
+      zeile.appendChild(knopf);
+    }
+    return zeile;
+  }
+
+  // Sperrt alle Knöpfe eines Eintrags, führt die Entscheidung aus und lädt danach neu.
+  async function ausfuehren(zeile, aktion) {
+    const knoepfe = zeile.querySelectorAll('button');
+    knoepfe.forEach(k => { k.disabled = true; });
+    try {
+      await aktion();
+      melden('rzMeldung', '');
+      await laden();
+    } catch (fehler) {
+      if (!abgelaufen(fehler)) melden('rzMeldung', fehler.message);
+      knoepfe.forEach(k => { k.disabled = false; });
+    }
+  }
+
+  // Block „Gesundheitsrisiken“: Fall, Produkt, Filiale, Zeit, Text, Erledigt.
+  function qsAnzeigen(zeilen, sichtbar) {
+    const liste = document.getElementById('rzQsListe');
+    liste.textContent = '';
+    document.getElementById('rzQsBlock').hidden = !sichtbar;
+    if (!zeilen.length) { liste.appendChild(absatz('rz-leer', 'Keine offenen QS-Fälle.')); return; }
+    for (const z of zeilen) {
+      const li = document.createElement('li');
+      li.className = 'rz-eintrag rz-qs';
+      li.appendChild(absatz('rz-kopf',
+        `QS-Fall ${z.qs_fall_id} · ${z.artikel} · ${z.filiale || 'ohne Filiale'} · ${zeitText(z.erstellt_am)}`));
+      li.appendChild(absatz('rz-text', z.inhalt));
+      li.appendChild(aktionen([['Erledigt', 'rz-knopf-primaer', b => quelle.qsFallErledigen(z.qs_fall_id, b)]]));
+      liste.appendChild(li);
+    }
+  }
+
+  // Block „Zurückgehalten“: Gründe mit Erklärung, Balken, Freigeben und Ablehnen.
+  function moderationAnzeigen(zeilen, sichtbar) {
+    const liste = document.getElementById('rzModListe');
+    liste.textContent = '';
+    document.getElementById('rzModBlock').hidden = !sichtbar;
+    if (!zeilen.length) { liste.appendChild(absatz('rz-leer', 'Nichts zurückgehalten.')); return; }
+    for (const z of zeilen) {
+      const li = document.createElement('li');
+      li.className = 'rz-eintrag' + (z.qs_fall ? ' rz-qs' : '');
+      const wartet = z.status === 'offen' ? ' · wartet noch auf den Prüfdienst' : '';
+      li.appendChild(absatz('rz-kopf',
+        `#${z.rezension_id} · ${'★'.repeat(z.sterne)} · ${z.artikel} · ${zeitText(z.erstellt_am)}${wartet}`));
+      li.appendChild(absatz('rz-text', z.inhalt));
+      const gruende = document.createElement('ul');
+      gruende.className = 'rz-gruende';
+      for (const grund of z.gruende || []) {
+        const eintrag = document.createElement('li');
+        eintrag.textContent = grundText(grund);
+        gruende.appendChild(eintrag);
+      }
+      li.appendChild(gruende);
+      li.appendChild(balkenAnzeigen(z));
+      li.appendChild(aktionen([
+        ['Freigeben', 'rz-knopf-primaer', b => quelle.rezensionFreigeben(z.rezension_id, b)],
+        ['Ablehnen', 'rz-knopf-warnung', b => quelle.rezensionAblehnen(z.rezension_id, b)],
+      ]));
+      liste.appendChild(li);
+    }
+  }
+
+  // Sechs schmale Balken mit Prozentwert; ohne Prüfung bleibt der Rahmen leer.
+  function balkenAnzeigen(zeile) {
+    const rahmen = document.createElement('div');
+    rahmen.className = 'rz-balken';
+    for (const b of balken(zeile)) {
+      const name = document.createElement('span');
+      name.textContent = b.name;
+      const spur = document.createElement('span');
+      spur.className = 'rz-spur';
+      const fuellung = document.createElement('span');
+      fuellung.style.width = `${b.prozent}%`;
+      spur.appendChild(fuellung);
+      const wert = document.createElement('span');
+      wert.textContent = `${b.prozent} %`;
+      rahmen.append(name, spur, wert);
+    }
+    return rahmen;
+  }
+
+  // Liste „Zuletzt entschieden“, nur lesend.
+  function entschiedenAnzeigen(zeilen, sichtbar) {
+    const liste = document.getElementById('rzEntschiedenListe');
+    liste.textContent = '';
+    document.getElementById('rzEntschiedenBlock').hidden = !sichtbar || !zeilen.length;
+    for (const z of zeilen) {
+      const li = document.createElement('li');
+      li.textContent = `${zeitText(z.entschieden_am)} · #${z.rezension_id} ${z.entscheidung} · ${z.artikel}`
+        + (z.bemerkung ? ` · ${z.bemerkung}` : '');
+      liste.appendChild(li);
+    }
+  }
+
+  window.rezensionenOeffnen = () => {
+    openModal('rezensionenModal');
+    laden();
+  };
+
+  window.rezensionenAnmelden = async (ereignis) => {
+    ereignis.preventDefault();
+    melden('rzAnmeldeMeldung', '');
+    const email = document.getElementById('rzEmail').value.trim();
+    const passwortFeld = document.getElementById('rzPasswort');
+    try {
+      const sitzung = await quelle.anmelden(email, passwortFeld.value);
+      konto = email;
+      try { sessionStorage.setItem(ANMELDUNG, JSON.stringify({ ...sitzung, email })); } catch (_) { /* nur dieser Aufruf */ }
+      await laden();
+    } catch (fehler) {
+      melden('rzAnmeldeMeldung', fehler.message);
+    } finally {
+      passwortFeld.value = '';
+    }
+  };
+
+  window.rezensionenAbmelden = async () => {
+    await quelle.abmelden();
+    try { sessionStorage.removeItem(ANMELDUNG); } catch (_) { /* nichts gespeichert */ }
+    konto = '';
+    zeigen('anmeldung');
+  };
+
+  zahlAktualisieren();
+  setInterval(zahlAktualisieren, 60000);
+}
 
 const schirm = document.createElement('div');
 schirm.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;'
@@ -2353,6 +2664,7 @@ try {
   }));
   schirm.remove();
   window.kasseStarten(artikel);
+  moderationEinrichten(quelle);
   console.info(`Kasse: ${artikel.length} Artikel aus ${QUELLE.art} (Schema ${QUELLE.schemaWawi}) geladen.`);
 } catch (fehler) {
   schirm.innerHTML = '<div><b style="color:#dc2626">Die Datenquelle antwortet nicht.</b>'
