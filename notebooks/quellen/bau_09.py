@@ -32,7 +32,8 @@ ROH = "https://raw.githubusercontent.com/swrobuts/BurgerMetrics/main"
 LFS = "https://media.githubusercontent.com/media/swrobuts/BurgerMetrics/main"
 MODULE = ["__init__", "fragen", "muster", "regeln", "jev", "testdaten", "auswertung", "umgebung"]
 DATEIEN = [(LFS, "dataset/moderation_testfaelle.csv"), (LFS, "dataset/moderation_holdout.csv"),
-           (LFS, "dataset/moderation_stichprobe.csv"), (ROH, "dataset/cache/moderation_jev.jsonl")]
+           (LFS, "dataset/moderation_holdout_2.csv"), (LFS, "dataset/moderation_stichprobe.csv"),
+           (ROH, "dataset/cache/moderation_jev.jsonl")]
 
 def holen(quelle, pfad, wurzel):
     # Lädt eine Datei des Repos nach wurzel/pfad
@@ -63,7 +64,7 @@ print("Modell:", jev.MODELL, "· Fragen-Stand:", fragen.FRAGEN_STAND,
 md("""
 ## Daten
 
-Drei Dateien, alle in `dataset/`:
+Vier Dateien, alle in `dataset/`:
 
 - `moderation_testfaelle.csv`: 80 Rezensionen mit Soll-Werten für die sechs Fragen, die Muster und
   die Entscheidung. Darunter harte Kritik, die erscheinen soll, Beleidigungen, Namen von
@@ -71,7 +72,9 @@ Drei Dateien, alle in `dataset/`:
   Gesundheitsrisiken und Grenzfälle. Zwölf Fälle beschreiben ein Gesundheitsrisiko: zehn in der
   eigenen Gruppe, zwei unter den Grenzfällen.
 - `moderation_holdout.csv`: 24 weitere Fälle nach denselben Regeln, geschrieben vor der ersten
-  Auswertung und erst im Abschnitt „Holdout“ ausgewertet.
+  Auswertung und mit Fragen-Stand 1 einmal ausgewertet.
+- `moderation_holdout_2.csv`: 24 neue Fälle, geschrieben am 01.10.2026, bevor Jev den
+  Fragen-Stand 2 gesehen hat.
 - `moderation_stichprobe.csv`: 500 simulierte Rezensionen aus `fact_reviews.csv`, 100 je
   Sternzahl. Soll ist für alle „freigeben ohne QS-Fall“.
 
@@ -83,8 +86,10 @@ import pandas as pd
 
 testfaelle = testdaten.lesen(testdaten.DATEIEN["testfaelle"])
 holdout = testdaten.lesen(testdaten.DATEIEN["holdout"])
+holdout_2 = testdaten.lesen(testdaten.DATEIEN["holdout_2"])
 stichprobe = testdaten.lesen(testdaten.DATEIEN["stichprobe"])
-print(f"{len(testfaelle)} Testfälle, {len(holdout)} Holdout-Fälle, {len(stichprobe)} simulierte Rezensionen.")
+print(f"{len(testfaelle)} Testfälle, {len(holdout)} und {len(holdout_2)} Holdout-Fälle, "
+      f"{len(stichprobe)} simulierte Rezensionen.")
 pd.DataFrame(testfaelle).groupby("gruppe").agg(
     faelle=("fall_id", "size"),
     zurueckhalten=("soll_entscheidung", lambda s: int((s == "zurueckgehalten").sum())),
@@ -105,6 +110,9 @@ bekannten Schwächen. Aus Wahrscheinlichkeiten und Mustern entscheiden fünf Reg
 zurückhalten, dazu bei einem Gesundheitsrisiko ein QS-Fall. Ablehnen kann nur ein Mensch.
 
 ### Die Fragen an Jev
+
+Die Tabelle zeigt den Fragen-Stand 2. Wie Stand 1 nach dem Themenbezug fragte und warum er
+abgelöst wurde, steht im Abschnitt „Fragen-Stand 1 und 2“.
 """),
 code("""
 pd.DataFrame([{"Frage": name, "Anweisung": q["instructions"], "ja heißt": q["criteria"]["true"],
@@ -132,10 +140,11 @@ code("""
 cache = jev.Cache(testdaten.WURZEL / "dataset" / "cache" / "moderation_jev.jsonl")
 schluessel = None if NUR_CACHE else jev.api_schluessel()
 
-def mit_antworten(zeilen):
-    # Ergänzt jede Zeile um die Mustertreffer und Jevs Wahrscheinlichkeiten
+def mit_antworten(zeilen, wortlaut=fragen.FRAGEN):
+    # Ergänzt jede Zeile um die Mustertreffer und Jevs Wahrscheinlichkeiten zum gewählten Fragen-Stand
     return [{**z, "muster": muster.treffer(z["text"]),
-             "p": jev.beurteilen(z["text"], z["produkt"], cache=cache, api_key=schluessel).wahrscheinlichkeiten}
+             "p": jev.beurteilen(z["text"], z["produkt"], cache=cache, api_key=schluessel,
+                                 fragen=wortlaut).wahrscheinlichkeiten}
             for z in zeilen]
 
 lauf = mit_antworten(testfaelle)
@@ -213,7 +222,10 @@ md("""
 Welche Schwellen wären auf den Testfällen am günstigsten? Das Gitter probiert 144 Kombinationen;
 die Kosten zählen nach der Tabelle oben. Eine andere Kombination wird nur übernommen, wenn sie
 mindestens 200 € spart oder einen verpassten Gesundheitsfall vermeidet. Kleinere Unterschiede
-auf 80 Fällen wären Zufall.
+auf 80 Fällen wären Zufall. Lockern kann diese Regel auf 31 harmlosen Fällen nie: Weniger strenge
+Schwellen sparen höchstens die Kosten der unnötig zurückgehaltenen Fälle. Für Fragen-Stand 2 war
+deshalb vorab festgelegt, dass die Schwellen bleiben; das Gitter zeigt nur, wie empfindlich die
+Kosten auf sie reagieren.
 """),
 code("""
 ergebnisse = pd.DataFrame(auswertung.schwellen_durchspielen(lauf, auswertung.gitter()))
@@ -222,21 +234,30 @@ print(f"Aktuelle Schwellen: {auswertung.kosten(bewertet)} €; "
 ergebnisse.head(10)
 """),
 md("""
-### Holdout
+### Holdouts
 
-Der Holdout wird genau einmal ausgewertet, mit den Schwellen, die oben feststehen. Was er zeigt,
-ändert die Schwellen nicht mehr; sonst wäre er kein Holdout.
+Ein Holdout wird genau einmal ausgewertet, mit den Schwellen und Fragen, die vorher feststehen.
+Was er zeigt, ändert nichts mehr; sonst wäre er kein Holdout. Der erste Holdout (`H001`–`H024`)
+wurde am 30.09.2026 mit Fragen-Stand 1 ausgewertet und ist damit verbraucht. Für Fragen-Stand 2
+gibt es den zweiten (`Z001`–`Z024`), geschrieben, bevor Jev die neue Frage gesehen hat.
 """),
 code("""
-holdout_bewertet = auswertung.bewerten(mit_antworten(holdout))
-k = auswertung.konfusion_entscheidung(holdout_bewertet)
-qs = auswertung.konfusion_qs(holdout_bewertet)
-print("Entscheidung, positiv heißt zurückhalten:", k)
-print(f"Gesundheitsrisiken als QS-Fall erkannt: {qs['tp']} von {qs['tp'] + qs['fn']}")
-print(f"Fehlerkosten im Holdout: {auswertung.kosten(holdout_bewertet)} €")
-fehler = [{"Fall": z["fall_id"], "Text": z["text"], "Gründe": ", ".join(z["ist_gruende"]),
-           "Fehler": z["fehler"]} for z in holdout_bewertet if z["fehler"]]
-pd.DataFrame(fehler) if fehler else "Keine Fehlentscheidung im Holdout."
+def holdout_zeigen(zeilen, wortlaut, name):
+    # Wertet einen Holdout mit einem Fragen-Stand aus und zeigt Zählungen und Fehlentscheidungen
+    bewertet = auswertung.bewerten(mit_antworten(zeilen, wortlaut))
+    k = auswertung.konfusion_entscheidung(bewertet)
+    qs = auswertung.konfusion_qs(bewertet)
+    print(f"{name}: Entscheidung, positiv heißt zurückhalten: {k}")
+    print(f"{name}: Gesundheitsrisiken als QS-Fall erkannt: {qs['tp']} von {qs['tp'] + qs['fn']}, "
+          f"Fehlerkosten {auswertung.kosten(bewertet)} €")
+    fehler = [{"Fall": z["fall_id"], "Text": z["text"], "Gründe": ", ".join(z["ist_gruende"]),
+               "Fehler": z["fehler"]} for z in bewertet if z["fehler"]]
+    return pd.DataFrame(fehler) if fehler else "Keine Fehlentscheidung."
+
+holdout_zeigen(holdout, fragen.FRAGEN_STAND_1, "Erster Holdout, Stand 1")
+"""),
+code("""
+holdout_zeigen(holdout_2, fragen.FRAGEN, "Zweiter Holdout, Stand 2")
 """),
 md("""
 ### Unnötige Zurückhaltungen in der Simulation
@@ -251,11 +272,78 @@ je_stern = pd.DataFrame([{"Sterne": int(z["gruppe"][-1]),
 je_stern.groupby("Sterne").mean().mul(100).round(1).add_suffix(" in %")
 """),
 code("""
+def ausloeser(p):
+    # Die Werte, die eine Regel auslösen: Themenbezug unter seiner Schwelle, sonst ab der Unsicherheit
+    return ", ".join(f"{frage} {wert:.2f}" for frage, wert in p.items()
+                     if (frage == "themenbezug" and wert < regeln.SCHWELLEN["themenbezug"])
+                     or (frage != "themenbezug" and wert >= regeln.SCHWELLEN["unsicher"]))
+
 gehalten = [{"Fall": z["fall_id"], "Sterne": z["gruppe"][-1], "Text": z["text"],
-             "Gründe": ", ".join(z["ist_gruende"])}
+             "Gründe": ", ".join(z["ist_gruende"]), "Werte": ausloeser(z["p"])}
             for z in stichprobe_bewertet if z["ist_entscheidung"] == "zurueckgehalten"]
 print(f"{len(gehalten)} von {len(stichprobe_bewertet)} simulierten Rezensionen zurückgehalten.")
 pd.DataFrame(gehalten).head(15) if gehalten else "Keine Zurückhaltung."
+"""),
+md("""
+## Fragen-Stand 1 und 2
+
+Mit Stand 1 fragte Jev, ob es in `rezension.text` um einen Besuch, ein Produkt, das Personal oder
+den Service von BurgerMetrics geht. Die simulierten Rezensionen nennen die Kette fast nie; sie
+urteilen über „den Burger“ oder „die Pommes“. Jev kannte nur Text und Produktnamen und erfuhr
+nicht, dass jede Rezension aus dem Shop von BurgerMetrics stammt. Stand 2 sagt es in der Frage.
+Die übrigen fünf Fragen und alle Schwellen blieben gleich.
+
+Bevor Jev Stand 2 sah, stand fest, wann er Stand 1 ablöst: alle zwölf Gesundheitsrisiken der
+Testfälle erkannt, keine problematische Rezension veröffentlicht, höchstens 19 € Fehlerkosten und
+in der Stichprobe weniger als 254 von 500 zurückgehalten; danach der zweite Holdout ohne
+verpasstes Gesundheitsrisiko und ohne veröffentlichte problematische Rezension
+(`docs/moderation_konventionen.md`). Beide Stände liegen im Cache, der Vergleich kostet nichts.
+"""),
+code("""
+pd.DataFrame([{"Stand": stand, "Frage nach dem Themenbezug": wortlaut["themenbezug"]["instructions"]}
+              for stand, wortlaut in (("1", fragen.FRAGEN_STAND_1), ("2", fragen.FRAGEN))])
+"""),
+code("""
+def kennzahlen(zeilen, wortlaut):
+    # Die Zahlen der Ablöse-Kriterien für einen Datensatz und einen Fragen-Stand
+    bewertet = auswertung.bewerten(mit_antworten(zeilen, wortlaut))
+    qs = auswertung.konfusion_qs(bewertet)
+    fehler = [z["fehler"] for z in bewertet]
+    harmlos = sum(z["soll_entscheidung"] == "freigegeben" for z in bewertet)
+    return {"QS erkannt": f"{qs['tp']} von {qs['tp'] + qs['fn']}",
+            "problematisch veröffentlicht": fehler.count("problem_veroeffentlicht"),
+            "harmlos zurückgehalten": f"{fehler.count('unnoetig_zurueckgehalten')} von {harmlos}",
+            "Fehlerkosten in €": auswertung.kosten(bewertet)}
+
+STAENDE = (("1", fragen.FRAGEN_STAND_1), ("2", fragen.FRAGEN))
+pd.DataFrame([{"Daten": name, "Stand": stand, **kennzahlen(zeilen, wortlaut)}
+              for name, zeilen in (("Testfälle", testfaelle), ("Zweiter Holdout", holdout_2),
+                                   ("Stichprobe", stichprobe))
+              for stand, wortlaut in STAENDE])
+"""),
+code("""
+# Wahrscheinlichkeit für den Themenbezug in der Stichprobe: untere Perzentile je Stand
+themenbezug = pd.DataFrame({f"Stand {stand}": [z["p"]["themenbezug"] for z in mit_antworten(stichprobe, wortlaut)]
+                            for stand, wortlaut in STAENDE})
+themenbezug.quantile([0.01, 0.05, 0.1, 0.25, 0.5]).round(2).rename_axis("Perzentil")
+"""),
+code("""
+# Die übrigen fünf Fragen: Wie weit weichen ihre Antworten zwischen den Ständen ab?
+stand_1 = mit_antworten(testfaelle, fragen.FRAGEN_STAND_1)
+pd.Series({frage: max(abs(a["p"][frage] - b["p"][frage]) for a, b in zip(stand_1, lauf))
+           for frage in testdaten.FRAGEN if frage != "themenbezug"}, name="größte Abweichung").round(2).to_frame()
+"""),
+md("""
+Stand 2 erfüllt alle vorab festgelegten Bedingungen. Auf den Testfällen erkennt er weiter 12 von
+12 Gesundheitsrisiken und veröffentlicht keine problematische Rezension; unnötig zurückgehalten
+bleibt einer von 31 harmlosen Fällen, die Fehlerkosten fallen von 19 € auf 1 €. Im zweiten
+Holdout entscheidet Stand 2 alle 24 Fälle richtig; Stand 1 hätte dort 6 von 12 harmlosen Fällen
+zurückgehalten. In der Stichprobe hält Stand 2 noch 9 von 500 Rezensionen zurück statt 254. Das
+1-Prozent-Perzentil der Wahrscheinlichkeit für den Themenbezug steigt dort von 0,38 auf 0,86, der
+Median von 0,80 auf 0,95. Themenfremde Texte und reine Anweisungen hält Stand 2 weiter zurück:
+Kein Testfall mit Soll „nein“ erreicht die Schwelle (`fp` 0 in der Confusion Matrix oben). Die
+übrigen fünf Fragen antworten im geänderten Request fast gleich, aber nicht exakt; die größte
+Abweichung liegt bei 0,07.
 """),
 md("""
 ### Live-Zahlen aus dem Shop
@@ -277,36 +365,31 @@ elif live is not None:
 md("""
 ## Ergebnis
 
-Auf den 80 Testfällen erkennen die Regeln 12 von 12 Gesundheitsrisiken als QS-Fall (Recall 1,0)
-und veröffentlichen keine problematische Rezension. Von 31 harmlosen Fällen halten sie 19 unnötig
-zurück; die Fehlerkosten liegen bei 19 €. Die Schwellen bleiben bei den Startwerten, weil keine
-Kombination mindestens 200 € spart: Die günstigste, mit einem Themenbezug ab 0,6, kostet 7 € und
-vermeidet keinen verpassten Gesundheitsfall. Lockern konnte die Regel auf diesen Testfällen nicht:
-Weniger strenge Schwellen sparen höchstens die 19 € der unnötig zurückgehaltenen Fälle. Im Holdout,
-einmal ausgewertet, erkennen die Regeln 3 von 3 Gesundheitsrisiken, veröffentlichen keine
-problematische Rezension und halten 5 von 9 harmlosen Fällen zurück, 5 € Fehlerkosten. Von 500
-simulierten Rezensionen halten sie 254 zurück (50,8 Prozent), fast immer mit dem Grund „unsicher“:
-Bei 244 davon liegt nur die Wahrscheinlichkeit für den Themenbezug unter 0,8, etwa bei kurzen
-Urteilen über Geschmack, Temperatur oder Portion eines Produkts. Der Median dieser
-Wahrscheinlichkeit liegt in der Stichprobe genau bei 0,8.
+Mit Fragen-Stand 2 erkennen die Regeln auf den 80 Testfällen 12 von 12 Gesundheitsrisiken als
+QS-Fall (Recall 1,0) und veröffentlichen keine problematische Rezension. Von 31 harmlosen Fällen
+halten sie einen unnötig zurück; die Fehlerkosten liegen bei 1 €, mit Stand 1 waren es 19 €. Im
+zweiten Holdout, einmal ausgewertet, entscheiden sie alle 24 Fälle richtig, darunter 3 von 3
+Gesundheitsrisiken. Von 500 simulierten Rezensionen halten sie 9 zurück statt 254. Den Unterschied
+macht ein Satz in der Frage nach dem Themenbezug: Die Rezension stammt aus dem Shop von
+BurgerMetrics. Die Schwellen sind die Startwerte; das Gitter findet keine Kombination unter 1 €.
 """),
 md("""
 ## Was offen bleibt
 
 - Die Soll-Werte hat Claude gesetzt; niemand hat sie unabhängig geprüft. Ein zweites Urteil je
   Fall würde zeigen, wo schon Menschen uneins sind.
-- 80 Testfälle und 24 im Holdout sind wenig. Ein einzelner Fall verschiebt den Recall beim
-  Gesundheitsrisiko um mehrere Prozentpunkte.
+- 80 Testfälle und je 24 Fälle in zwei Holdouts sind wenig. Ein einzelner Fall verschiebt den
+  Recall beim Gesundheitsrisiko um mehrere Prozentpunkte.
 - Jev ist vor allem auf Englisch trainiert; die Fragen sind deutsch. Die Messung gilt für diese
   Fragen, nicht allgemein.
 - Die Fehlerkosten sind Annahmen. Andere Beträge führen zu anderen Schwellen.
 - Echte Besucher schreiben anders als die Testfälle. Die Live-Zahlen zeigen, wie oft der Dienst
   zurückhält; ob er dabei richtig liegt, sieht erst die Moderation im POS.
-- Die Schwelle für den Themenbezug bestimmt die Arbeit der Moderation: Bei 0,8 hält der Dienst
-  die Hälfte der simulierten Rezensionen zurück, bei 0,6 wären es 60 von 500, auf den Testfällen
-  ohne verpassten Gesundheitsfall und ohne veröffentlichte problematische Rezension. Die
-  Kostentabelle setzt eine unnötige Zurückhaltung mit 1 € an; ob das die Arbeit der Moderation
-  trifft, entscheidet der Betrieb, nicht dieses Notebook.
+- Die Frage nach dem Themenbezug wurde nach einem Befund auf Testfällen und Stichprobe
+  umformuliert. Der zweite Holdout bestätigt den neuen Stand, ist mit 24 Fällen aber klein, und
+  auch seine Texte hat Claude geschrieben.
+- Eine geänderte Frage verschiebt die Antworten der anderen leicht (hier bis 0,07). Wer eine
+  Frage ändert, prüft deshalb alle sechs neu.
 """),
 ]
 

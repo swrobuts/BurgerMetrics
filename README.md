@@ -40,7 +40,7 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 
 | Verzeichnis | Inhalt |
 |---|---|
-| `dataset/` | 18 CSV-Dateien (15 für das Datenmodell, 3 Testdateien der Moderation), ein Ladeskript für DuckDB, ein Übungsblatt und `burgermetrics_mini.sql` — dieselbe Struktur in 13 KB zum Mitlesen |
+| `dataset/` | 19 CSV-Dateien (15 für das Datenmodell, 4 Testdateien der Moderation), ein Ladeskript für DuckDB, ein Übungsblatt und `burgermetrics_mini.sql` — dieselbe Struktur in 13 KB zum Mitlesen |
 | `db/` | der Aufbau der Datenbank: Schema, Fakten, Semantikschicht, Sicherheit — als nummerierte SQL-Dateien in der Reihenfolge, in der sie laufen |
 | `notebooks/` | zehn ausgeführte Notebooks, vom Zugang mit dem Demo-Konto bis zur Freigabe von Rezensionen mit Jev; `notebooks/README.md` |
 | `dash/` | Dash-App mit vier Karten aus der Semantikschicht; `dash/README.md` |

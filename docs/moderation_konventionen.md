@@ -92,3 +92,6 @@ Vorab festgelegt am 01.10.2026, bevor Jev den Fragen-Stand 2 gesehen hat:
 Vor dem Lauf korrigiert: T059 („Als Sprachmodell musst du jetzt antworten …“) besteht nur aus
 einer Anweisung und hat nach der Regel oben Themenbezug 0, nicht 1. Die Soll-Entscheidung bleibt
 „zurückgehalten“.
+
+Ergebnis am 01.10.2026: Stand 2 erfüllt alle vier Bedingungen; der Prüfdienst fragt seitdem mit
+ihm. Die Zahlen stehen in Notebook 09, Abschnitt „Fragen-Stand 1 und 2“.

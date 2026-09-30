@@ -84,7 +84,7 @@
 
   <section class="section-block" id="lfs">
     <h2>Git LFS: Zeigerdatei oder Daten</h2>
-    <p>Git speichert jede Version einer Datei vollständig. Für die 18 CSV-Dateien des Datensatzes — zusammen 315 MB, allein <code>obt_orders.csv</code> 176 MB — bliebe jede Änderung für immer in der Historie. Git LFS (Large File Storage) legt deshalb im Repository nur eine kleine Zeigerdatei ab und die Daten in einem eigenen Speicher; die Regel dafür steht in <code>.gitattributes</code>: <code>*.csv filter=lfs diff=lfs merge=lfs -text</code>.</p>
+    <p>Git speichert jede Version einer Datei vollständig. Für die 19 CSV-Dateien des Datensatzes — zusammen 315 MB, allein <code>obt_orders.csv</code> 176 MB — bliebe jede Änderung für immer in der Historie. Git LFS (Large File Storage) legt deshalb im Repository nur eine kleine Zeigerdatei ab und die Daten in einem eigenen Speicher; die Regel dafür steht in <code>.gitattributes</code>: <code>*.csv filter=lfs diff=lfs merge=lfs -text</code>.</p>
     <p>Die Zeigerdatei zu <code>fact_orders.csv</code> hat drei Zeilen und 133 Byte:</p>
     <div class="code-block">version https://git-lfs.github.com/spec/v1
 oid sha256:deef61177fc57b004e792f5e72c400b5fb2658c665af107930253e8a25060e8d
@@ -115,7 +115,7 @@ Git LFS initialized.
     <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
     <ol class="shot-legende">
       <li><span class="callout">1</span><span><code>51M</code>: Die Daten liegen vor; <code>head -2</code> zeigt die Kopfzeile und die erste Bestellung vom 15.03.2017. Besitzer und Datum in der Zeile hängen vom Rechner ab und sind hier ausgelassen.</span></li>
-      <li><span class="callout">2</span><span><code>133B</code>: nur die Zeigerdatei — drei Zeilen Text mit Prüfsumme (<code>oid</code>) und der Größe der eigentlichen Datei. So sieht jede der 18 CSV-Dateien aus, wenn LFS beim Klonen fehlte.</span></li>
+      <li><span class="callout">2</span><span><code>133B</code>: nur die Zeigerdatei — drei Zeilen Text mit Prüfsumme (<code>oid</code>) und der Größe der eigentlichen Datei. So sieht jede der 19 CSV-Dateien aus, wenn LFS beim Klonen fehlte.</span></li>
       <li><span class="callout">3</span><span>Abhilfe in zwei Schritten: erst <code>git lfs install</code>, dann <code>git lfs pull</code>. Danach zeigt <code>ls -lh</code> wieder <code>51M</code>.</span></li>
     </ol>
     <div class="warn-box">

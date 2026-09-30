@@ -42,7 +42,7 @@ Diese Werte sind mit `python dataset/verify_readme.py` nachprüfbar. Das Skript 
 ```
 web/       index.html · pos.html · shop.html · dashboard.html · abgleich.html
            js/ · tests/ · lab/
-dataset/   18 CSV-Dateien (Git LFS) · generate_obt.py · generate_reviews.py
+dataset/   19 CSV-Dateien (Git LFS) · generate_obt.py · generate_reviews.py
            load_duckdb.py · verify_readme.py · wawi_mini.sql
            burgermetrics_mini.sql · wawi_zu_analytisch.sql · README.md
            uebungsblatt.md/.pdf · erp_datenmodell.excalidraw

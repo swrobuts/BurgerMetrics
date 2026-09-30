@@ -183,16 +183,19 @@ Gesundheitsrisiko untergeht?
 **Gewählt:** Jev (`jev-1.13.0`) mit sechs Noul-Fragen, dazu reguläre Ausdrücke für Kontaktdaten und
 Links. Regeln in `bm_jev/regeln.py` geben frei oder halten zurück; ablehnen kann nur ein Mensch im
 POS. Schwellen: Gesundheitsrisiko ab 0,4, Verstoß ab 0,5, unsicher ab 0,2, Themenbezug unter 0,8
-(Startwerte), gemessen in Notebook 09 (Testfälle 19 € Fehlerkosten, Holdout 5 €); die vorab
-festgelegte Regel, Schwellen erst ab 200 € Ersparnis zu ändern, konnte die Startwerte auf 31
-harmlosen Testfällen nur bestätigen. Jev lief einmal über
-Testfälle, Holdout und Stichprobe; die Antworten liegen im Cache, das Notebook braucht keinen
-Schlüssel.
+(Startwerte). Seit dem 01.10.2026 gilt Fragen-Stand 2: Die Frage nach dem Themenbezug sagt, dass
+die Rezension aus dem Online-Shop von BurgerMetrics stammt und bei welchem Produkt sie steht. Mit
+Stand 1 hielten die Regeln 254 von 500 simulierten Rezensionen zurück, weil die Texte die Kette
+fast nie nennen. Gemessen in Notebook 09 mit Stand 2: Testfälle 1 € Fehlerkosten (Stand 1: 19 €),
+zweiter Holdout ohne Fehlentscheidung, Stichprobe 9 von 500 zurückgehalten. Die Bedingungen für die
+Ablöse standen vor dem Lauf fest (`docs/moderation_konventionen.md`); die Regel, Schwellen erst ab
+200 € Ersparnis zu ändern, kann auf 31 harmlosen Testfällen nicht lockern. Jev lief einmal je
+Fragen-Stand über Testfälle, Holdouts und Stichprobe, zusammen für rund 6 Cent; die Antworten
+liegen im Cache, das Notebook braucht keinen Schlüssel.
 
-**Preis:** Die Schwelle für den Themenbezug hält etwa die Hälfte harmloser Rezensionen für die
-Moderation zurück (254 von 500 simulierten; bei 0,6 wären es 60). Dazu Soll-Werte ohne unabhängige
-Prüfung, deutsche Fragen an ein vor allem englisch trainiertes Modell, ein Prüfdienst auf dem VPS mit
-eigenem Schlüssel und Tageslimit.
+**Preis:** Soll-Werte ohne unabhängige Prüfung, deutsche Fragen an ein vor allem englisch
+trainiertes Modell, eine Frage, die nach einem Befund umformuliert und nur an 24 neuen Fällen
+bestätigt ist, ein Prüfdienst auf dem VPS mit eigenem Schlüssel und Tageslimit.
 
 ---
 
@@ -208,7 +211,6 @@ Bekannt, nicht behoben, mit Bewertung:
 | Keine automatisierte Prüfung der Anwendungen | Vor jedem Bibliothekswechsel manuelle Browser-Prüfung nötig |
 | Keine Historisierung (SCD) | Für die Leitfragen ausreichend; als Erweiterungsaufgabe vorgemerkt |
 | Interpretationstexte im Bericht ungeprüft | Geprüft sind die Zahlen, nicht ihre Deutung |
-| Themenbezug unter 0,8 hält etwa die Hälfte harmloser Shop-Rezensionen zurück ([E11](#e11), Notebook 09) | Entscheidung beim Betreiber: Frage nach dem Themenbezug umformulieren oder Schwelle senken; bis dahin mehr Arbeit für die Moderation, veröffentlicht wird nichts Falsches |
 
 ---
 
