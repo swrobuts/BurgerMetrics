@@ -248,3 +248,143 @@ AS $$
 $$;
 REVOKE ALL ON FUNCTION wawi.hat_rolle(text) FROM PUBLIC, anon, studi_daba;
 GRANT EXECUTE ON FUNCTION wawi.hat_rolle(text) TO authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 3 Der Prüfdienst: drei Funktionen, sonst nichts. Sie laufen als postgres;
+--   bm_pruefdienst darf nur sie ausführen.
+-- ---------------------------------------------------------------------------
+
+-- Offene Shop-Rezensionen, älteste zuerst. Nach einem gescheiterten Versuch
+-- wartet eine Rezension fünf Minuten, damit ein kurzer Ausfall von Jev nicht
+-- in drei schnellen Fehlversuchen endet.
+CREATE OR REPLACE FUNCTION wawi.pruefung_offene_holen(p_anzahl integer)
+RETURNS TABLE (rezension_id bigint, artikel text, inhalt text, erstellt_am timestamptz)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = wawi, pg_temp
+AS $$
+  SELECT r.rezension_id, a.name, r.inhalt, r.erstellt_am
+  FROM   wawi.rezension r
+  JOIN   wawi.artikel a ON a.artikel_id = r.artikel_id
+  WHERE  r.status = 'offen'
+  AND    r.quelle = 'shop'
+  AND    NOT EXISTS (SELECT 1 FROM wawi.rezension_pruefung p
+                     WHERE p.rezension_id = r.rezension_id
+                     AND   p.fehler IS NOT NULL
+                     AND   p.geprueft_am > now() - interval '5 minutes')
+  ORDER  BY r.erstellt_am, r.rezension_id
+  LIMIT  least(greatest(p_anzahl, 1), 100);
+$$;
+
+-- Schreibt eine Prüfzeile, setzt den Status und legt bei Bedarf den QS-Fall
+-- an, alles in einer Transaktion. Hat inzwischen ein Mensch entschieden,
+-- bleibt alles, wie es ist. Beim dritten Fehlversuch hält die Funktion die
+-- Rezension selbst zurück.
+CREATE OR REPLACE FUNCTION wawi.pruefung_eintragen(
+  rezension_id         bigint,
+  ergebnis             text    DEFAULT NULL,
+  gruende              text[]  DEFAULT '{}',
+  qs_fall_anlegen      boolean DEFAULT false,
+  wahrscheinlichkeiten jsonb   DEFAULT NULL,
+  muster_treffer       text[]  DEFAULT '{}',
+  jev_angefragt        boolean DEFAULT false,
+  modell               text    DEFAULT NULL,
+  fragen_stand         text    DEFAULT NULL,
+  fragen_fingerabdruck text    DEFAULT NULL,
+  regel_version        text    DEFAULT NULL,
+  input_tokens         integer DEFAULT NULL,
+  fehler               text    DEFAULT NULL)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = wawi, pg_temp
+AS $$
+#variable_conflict use_variable
+DECLARE
+  v_status   text;
+  v_fehler   integer;
+  v_ergebnis text    := ergebnis;
+  v_gruende  text[]  := coalesce(gruende, '{}');
+  v_p        jsonb   := coalesce(wahrscheinlichkeiten, '{}'::jsonb);
+BEGIN
+  SELECT r.status INTO v_status
+  FROM   wawi.rezension r
+  WHERE  r.rezension_id = rezension_id AND r.quelle = 'shop'
+  FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'unbekannte Shop-Rezension: %', rezension_id USING ERRCODE = '23503';
+  END IF;
+  IF v_status <> 'offen' THEN
+    RETURN jsonb_build_object('rezension_id', rezension_id, 'status', v_status, 'uebersprungen', true);
+  END IF;
+
+  IF fehler IS NOT NULL THEN
+    SELECT count(*) INTO v_fehler
+    FROM   wawi.rezension_pruefung p
+    WHERE  p.rezension_id = rezension_id AND p.fehler IS NOT NULL;
+    IF v_fehler >= 2 THEN
+      v_ergebnis := 'zurueckgehalten';
+      v_gruende  := ARRAY['Prüfung nicht möglich'];
+    ELSE
+      v_ergebnis := NULL;
+    END IF;
+  ELSIF v_ergebnis IS NULL OR v_ergebnis NOT IN ('freigegeben', 'zurueckgehalten') THEN
+    RAISE EXCEPTION 'ergebnis muss freigegeben oder zurueckgehalten sein, nicht %', v_ergebnis
+      USING ERRCODE = '22023';
+  END IF;
+  IF v_ergebnis = 'zurueckgehalten' AND cardinality(v_gruende) = 0 THEN
+    RAISE EXCEPTION 'eine zurückgehaltene Rezension braucht einen Grund' USING ERRCODE = '22023';
+  END IF;
+  IF coalesce(qs_fall_anlegen, false) AND v_ergebnis IS DISTINCT FROM 'zurueckgehalten' THEN
+    RAISE EXCEPTION 'ein QS-Fall hält die Rezension immer zurück' USING ERRCODE = '22023';
+  END IF;
+
+  INSERT INTO wawi.rezension_pruefung
+        (rezension_id, modell, fragen_stand, fragen_fingerabdruck, regel_version,
+         p_beleidigung, p_personenbezug, p_werbung, p_themenbezug, p_anweisung,
+         p_gesundheitsrisiko, muster_treffer, jev_angefragt, ergebnis, gruende, qs_fall,
+         input_tokens, fehler)
+  VALUES (rezension_id, modell, fragen_stand, fragen_fingerabdruck, regel_version,
+          (v_p ->> 'beleidigung')::double precision, (v_p ->> 'personenbezug')::double precision,
+          (v_p ->> 'werbung')::double precision, (v_p ->> 'themenbezug')::double precision,
+          (v_p ->> 'anweisung')::double precision, (v_p ->> 'gesundheitsrisiko')::double precision,
+          coalesce(muster_treffer, '{}'), coalesce(jev_angefragt, false), v_ergebnis, v_gruende,
+          coalesce(qs_fall_anlegen, false), input_tokens, left(fehler, 500));
+
+  IF v_ergebnis IS NOT NULL THEN
+    UPDATE wawi.rezension r SET status = v_ergebnis WHERE r.rezension_id = rezension_id;
+  END IF;
+  IF coalesce(qs_fall_anlegen, false) THEN
+    INSERT INTO wawi.qs_fall (rezension_id) VALUES (rezension_id)
+    ON CONFLICT ON CONSTRAINT qs_fall_je_rezension DO NOTHING;
+  END IF;
+  RETURN jsonb_build_object('rezension_id', rezension_id,
+                            'status', coalesce(v_ergebnis, 'offen'),
+                            'uebersprungen', false);
+END $$;
+
+-- Wie viele Anfragen an Jev hat der Prüfdienst heute gestellt (Europe/Berlin)?
+-- Grundlage des Tageslimits; Zeilen ohne Anfrage (Tageslimit) zählen nicht.
+CREATE OR REPLACE FUNCTION wawi.pruefung_heute()
+RETURNS integer
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = wawi, pg_temp
+AS $$
+  SELECT count(*)::int
+  FROM   wawi.rezension_pruefung p
+  WHERE  p.jev_angefragt
+  AND    (p.geprueft_am AT TIME ZONE 'Europe/Berlin')::date
+       = (now() AT TIME ZONE 'Europe/Berlin')::date;
+$$;
+
+REVOKE ALL ON FUNCTION wawi.pruefung_offene_holen(integer), wawi.pruefung_heute(),
+  wawi.pruefung_eintragen(bigint, text, text[], boolean, jsonb, text[], boolean, text, text, text,
+                          text, integer, text)
+  FROM PUBLIC, anon, authenticated, studi_daba;
+GRANT EXECUTE ON FUNCTION wawi.pruefung_offene_holen(integer), wawi.pruefung_heute(),
+  wawi.pruefung_eintragen(bigint, text, text[], boolean, jsonb, text[], boolean, text, text, text,
+                          text, integer, text)
+  TO bm_pruefdienst;

@@ -184,3 +184,142 @@ def test_pruefdienst_rolle_ohne_tabellenrechte(db):
     assert db.fetchone() == (True, False, 3)
     db.execute("SELECT count(*) FROM information_schema.role_table_grants WHERE grantee = 'bm_pruefdienst'")
     assert db.fetchone()[0] == 0
+
+
+P_HARMLOS = {"beleidigung": 0.01, "personenbezug": 0.02, "werbung": 0.01,
+             "themenbezug": 0.97, "anweisung": 0.01, "gesundheitsrisiko": 0.02}
+
+
+def eintragen(cur, rezension_id, ergebnis=None, gruende=(), qs=False, fehlertext=None, jev=True):
+    """Trägt ein Prüfergebnis ein wie der Prüfdienst (Rolle bm_pruefdienst)."""
+    als(cur, "bm_pruefdienst")
+    cur.execute(
+        """SELECT wawi.pruefung_eintragen(
+             rezension_id => %s, ergebnis => %s, gruende => %s::text[], qs_fall_anlegen => %s,
+             wahrscheinlichkeiten => %s::jsonb, muster_treffer => '{}'::text[], jev_angefragt => %s,
+             modell => 'jev-1.13.0', fragen_stand => 'test', fragen_fingerabdruck => 'test',
+             regel_version => 'test', input_tokens => 1000, fehler => %s)""",
+        (rezension_id, ergebnis, list(gruende), qs, json.dumps(P_HARMLOS), jev, fehlertext))
+    antwort = cur.fetchone()[0]
+    zurueck(cur)
+    return antwort
+
+
+def zurueckgehalten(cur, text="Die Bedienung war unmöglich.", gruende=("unsicher",)):
+    """Eine Shop-Rezension, die der Prüfdienst zurückgehalten hat."""
+    rid = shop_rezension(cur, text)
+    eintragen(cur, rid, "zurueckgehalten", gruende)
+    return rid
+
+
+def test_holen_liefert_offene_shop_rezensionen_aelteste_zuerst(db):
+    db.execute("""INSERT INTO wawi.rezension (artikel_id, sterne, inhalt, quelle)
+                  VALUES (1, 5, 'Simulierter Text', 'simulation')""")
+    erste = shop_rezension(db, "Erste Rezension")
+    zweite = shop_rezension(db, "Zweite Rezension")
+    geprueft = shop_rezension(db, "Schon geprüft")
+    eintragen(db, geprueft, "freigegeben")
+    als(db, "bm_pruefdienst")
+    db.execute("SELECT rezension_id, artikel, inhalt FROM wawi.pruefung_offene_holen(10)")
+    assert db.fetchall() == [(erste, "Test", "Erste Rezension"), (zweite, "Test", "Zweite Rezension")]
+    db.execute("SELECT count(*) FROM wawi.pruefung_offene_holen(1)")
+    assert db.fetchone()[0] == 1
+
+
+def test_freigeben_setzt_den_status(db):
+    rid = shop_rezension(db)
+    assert eintragen(db, rid, "freigegeben") == {"rezension_id": rid, "status": "freigegeben",
+                                                 "uebersprungen": False}
+    db.execute("SELECT status FROM wawi.rezension WHERE rezension_id = %s", (rid,))
+    assert db.fetchone()[0] == "freigegeben"
+    db.execute("""SELECT p_themenbezug, jev_angefragt, input_tokens, modell
+                  FROM wawi.rezension_pruefung WHERE rezension_id = %s""", (rid,))
+    assert db.fetchone() == (0.97, True, 1000, "jev-1.13.0")
+
+
+def test_gesundheitsrisiko_legt_qs_fall_an(db):
+    rid = shop_rezension(db, "Mir war nach dem Essen übel.")
+    assert eintragen(db, rid, "zurueckgehalten", ["Gesundheitsrisiko"], qs=True)["status"] == "zurueckgehalten"
+    db.execute("SELECT count(*) FROM wawi.qs_fall WHERE rezension_id = %s AND erledigt_am IS NULL", (rid,))
+    assert db.fetchone()[0] == 1
+    db.execute("SELECT gruende, qs_fall FROM wawi.rezension_pruefung WHERE rezension_id = %s", (rid,))
+    assert db.fetchone() == (["Gesundheitsrisiko"], True)
+
+
+@pytest.mark.parametrize("ergebnis, gruende, qs", [
+    ("freigegeben", [], True),          # QS-Fall ohne Zurückhalten
+    ("zurueckgehalten", [], False),     # Zurückhalten ohne Grund
+    ("abgelehnt", ["Werbung"], False),  # ablehnen darf nur ein Mensch
+    (None, [], False),                  # weder Ergebnis noch Fehler
+])
+def test_ungueltige_eintraege_werden_abgewiesen(db, ergebnis, gruende, qs):
+    rid = shop_rezension(db)
+    als(db, "bm_pruefdienst")
+    sql = ("SELECT wawi.pruefung_eintragen(rezension_id => %s, ergebnis => %s, "
+           "gruende => %s::text[], qs_fall_anlegen => %s)")
+    assert fehler(db, sql, (rid, ergebnis, gruende, qs)) is psycopg2.errors.InvalidParameterValue
+
+
+def test_zweiter_eintrag_wird_uebersprungen(db):
+    rid = zurueckgehalten(db)
+    assert eintragen(db, rid, "freigegeben") == {"rezension_id": rid, "status": "zurueckgehalten",
+                                                 "uebersprungen": True}
+
+
+def test_dritter_fehler_haelt_zurueck(db):
+    rid = shop_rezension(db)
+    assert eintragen(db, rid, fehlertext="Zeitüberschreitung")["status"] == "offen"
+    assert eintragen(db, rid, fehlertext="HTTP 529")["status"] == "offen"
+    assert eintragen(db, rid, fehlertext="HTTP 529")["status"] == "zurueckgehalten"
+    db.execute("""SELECT ergebnis, gruende FROM wawi.rezension_pruefung
+                  WHERE rezension_id = %s ORDER BY pruefung_id DESC LIMIT 1""", (rid,))
+    assert db.fetchone() == ("zurueckgehalten", ["Prüfung nicht möglich"])
+
+
+def test_nach_einem_fehler_fuenf_minuten_pause(db):
+    rid = shop_rezension(db)
+    eintragen(db, rid, fehlertext="Zeitüberschreitung")
+    als(db, "bm_pruefdienst")
+    db.execute("SELECT count(*) FROM wawi.pruefung_offene_holen(10)")
+    assert db.fetchone()[0] == 0
+    zurueck(db)
+    db.execute("""UPDATE wawi.rezension_pruefung SET geprueft_am = geprueft_am - interval '6 minutes'
+                  WHERE rezension_id = %s""", (rid,))
+    als(db, "bm_pruefdienst")
+    db.execute("SELECT count(*) FROM wawi.pruefung_offene_holen(10)")
+    assert db.fetchone()[0] == 1
+
+
+def test_heute_zaehlt_nur_anfragen_an_jev(db):
+    a, b, c = shop_rezension(db), shop_rezension(db), shop_rezension(db)
+    eintragen(db, a, "freigegeben")
+    eintragen(db, b, fehlertext="Zeitüberschreitung")
+    eintragen(db, c, "zurueckgehalten", ["Tageslimit erreicht"], jev=False)
+    als(db, "bm_pruefdienst")
+    db.execute("SELECT wawi.pruefung_heute()")
+    assert db.fetchone()[0] == 2
+
+
+def test_simulation_wird_nie_geprueft(db):
+    db.execute("""INSERT INTO wawi.rezension (artikel_id, sterne, inhalt, quelle)
+                  VALUES (1, 5, 'Simulation', 'simulation') RETURNING rezension_id""")
+    rid = db.fetchone()[0]
+    als(db, "bm_pruefdienst")
+    assert fehler(db, "SELECT wawi.pruefung_eintragen(rezension_id => %s, ergebnis => 'freigegeben')",
+                  (rid,)) is psycopg2.errors.ForeignKeyViolation
+
+
+@pytest.mark.parametrize("rolle", ["anon", "authenticated", "studi_daba"])
+@pytest.mark.parametrize("aufruf", [
+    "SELECT * FROM wawi.pruefung_offene_holen(1)",
+    "SELECT wawi.pruefung_heute()",
+    "SELECT wawi.pruefung_eintragen(rezension_id => 1, ergebnis => 'freigegeben')",
+])
+def test_dienstfunktionen_nur_fuer_den_pruefdienst(db, rolle, aufruf):
+    als(db, rolle)
+    assert fehler(db, aufruf) is psycopg2.errors.InsufficientPrivilege
+
+
+def test_pruefdienst_liest_keine_tabellen(db):
+    als(db, "bm_pruefdienst")
+    assert fehler(db, "SELECT 1 FROM wawi.rezension LIMIT 1") is psycopg2.errors.InsufficientPrivilege
