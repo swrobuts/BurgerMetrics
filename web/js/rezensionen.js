@@ -130,3 +130,9 @@ export function anzahlFuer(zeile, sterne) {
 export function weitereLaden(geladen, gesamt, letzteSeite) {
   return geladen < gesamt && letzteSeite === SEITENGROESSE;
 }
+
+/** Name der Sternzeile für Screenreader: erst der sichtbare Text, dann was ein Klick tut. */
+export function sternzeileName(zeile, produkt) {
+  const sichtbar = bewertungText(zeile);
+  return zeile && zeile.anzahl ? `${sichtbar} – Rezensionen zu ${produkt} lesen` : `${sichtbar} – ${produkt}`;
+}

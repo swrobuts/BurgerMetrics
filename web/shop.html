@@ -4506,6 +4506,11 @@ function bewertungVon(artikelId) {
   return window.REZENSIONEN ? window.REZENSIONEN.bewertungText(BEWERTUNGEN.get(artikelId)) : '';
 }
 
+// Name der Sternzeile für Screenreader; er enthält den sichtbaren Text.
+function sternzeileNameVon(artikelId, name) {
+  return window.REZENSIONEN ? window.REZENSIONEN.sternzeileName(BEWERTUNGEN.get(artikelId), name) : name;
+}
+
 // „leer" färbt die Zeile grau, solange ein Artikel keine Rezension hat.
 function bewertungKlasse(artikelId) {
   const zeile = BEWERTUNGEN.get(artikelId);
@@ -4529,7 +4534,7 @@ function renderMenu(filter) {
         <div class="menu-card-cat">${p.sub}</div>
         <div class="menu-card-name">${p.name}</div>
         <div class="menu-card-rating">
-          <button type="button" class="rating-text rating-knopf ${bewertungKlasse(p.id)}" data-rating="${p.id}" onclick="openLesen(${p.id})" ${bewertungKlasse(p.id) ? 'disabled' : ''} aria-label="Rezensionen zu ${p.name} lesen">${bewertungVon(p.id)}</button>
+          <button type="button" class="rating-text rating-knopf ${bewertungKlasse(p.id)}" data-rating="${p.id}" onclick="openLesen(${p.id})" ${bewertungKlasse(p.id) ? 'disabled' : ''} aria-label="${sternzeileNameVon(p.id, p.name)}">${bewertungVon(p.id)}</button>
           <button type="button" class="bewerten-btn" onclick="openReview(${p.id})" aria-label="${p.name} bewerten">Bewerten</button>
         </div>
         <div class="menu-card-desc">${p.desc}</div>
@@ -4901,6 +4906,8 @@ async function bewertungenAktualisieren() {
     el.textContent = bewertungVon(artikelId);
     el.classList.toggle('leer', bewertungKlasse(artikelId) === 'leer');
     el.disabled = bewertungKlasse(artikelId) === 'leer';
+    const produkt = PRODUCTS.find(p => p.id === artikelId);
+    el.setAttribute('aria-label', sternzeileNameVon(artikelId, produkt ? produkt.name : ''));
   });
   if (reviewProduktId !== null) reviewStandAnzeigen();
 }
@@ -5024,6 +5031,15 @@ function leseFiltern(sterne) {
   leseVerteilungAnzeigen();
   leseListeLeeren();
   leseSeiteLaden();
+  leseStufeFokussieren(sterne);
+}
+
+// Nach einem Filterwechsel steht der Fokus auf der gewählten Stufe, nach „Alle“
+// auf der ersten wählbaren; sonst fiele er aus dem Fenster.
+function leseStufeFokussieren(sterne) {
+  const stufen = [...document.querySelectorAll('#leseVerteilung .lese-stufe')];
+  const ziel = sterne ? stufen[5 - sterne] : stufen.find(k => !k.disabled);
+  if (ziel) ziel.focus();
 }
 
 // Leert Liste, Meldung und Seitenzähler.
@@ -5041,6 +5057,8 @@ async function leseSeiteLaden() {
   if (!window.rezensionenLesenLaden) { leseMeldung('Keine Verbindung zum operativen System.'); return; }
   const anfrage = leseAnfrage, produkt = leseProduktId, sterne = leseSterne, seite = leseSeite + 1;
   const weiter = document.getElementById('leseWeiter');
+  const hatteFokus = document.activeElement === weiter;
+  let erste = null;
   weiter.disabled = true;
   try {
     const zeilen = await window.rezensionenLesenLaden(produkt, sterne, seite);
@@ -5048,7 +5066,11 @@ async function leseSeiteLaden() {
     // oder derselbe noch einmal), gilt diese Antwort nicht mehr.
     if (anfrage !== leseAnfrage) return;
     const liste = document.getElementById('leseListe');
-    for (const z of zeilen) liste.appendChild(leseEintrag(z));
+    for (const z of zeilen) {
+      const eintrag = leseEintrag(z);
+      erste = erste || eintrag;
+      liste.appendChild(eintrag);
+    }
     leseSeite = seite;
     leseGeladen += zeilen.length;
     if (!leseGeladen) leseMeldung('Zu diesem Filter gibt es noch keine veröffentlichte Rezension.');
@@ -5057,8 +5079,19 @@ async function leseSeiteLaden() {
   } catch (fehler) {
     if (anfrage === leseAnfrage) leseMeldung(fehler.message);
   } finally {
-    if (anfrage === leseAnfrage) weiter.disabled = false;
+    if (anfrage === leseAnfrage) {
+      weiter.disabled = false;
+      if (hatteFokus) leseFokusNachLaden(weiter, erste);
+    }
   }
+}
+
+// Nach „Weitere laden“ bleibt der Fokus beim Knopf; ist der verschwunden, geht
+// er zum ersten neuen Eintrag, sonst zu „Selbst bewerten“.
+function leseFokusNachLaden(weiter, erste) {
+  if (!weiter.hidden) { weiter.focus(); return; }
+  if (erste) { erste.tabIndex = -1; erste.focus(); return; }
+  document.querySelector('.lese-selbst').focus();
 }
 
 // Ein Eintrag: Sterne und Datum, darunter der Text; im Datenmodus Nummer,
@@ -5095,17 +5128,20 @@ function leseZuBewerten() {
 // solange das Formular offen ist und die Prüfung aussteht.
 function statusBeobachten(rezensionId) {
   clearInterval(statusUhr);
-  statusUhr = setInterval(async () => {
+  const uhr = setInterval(async () => {
     const offen = document.getElementById('reviewModal').classList.contains('open');
-    if (!offen || !dataMode || !window.rezensionStatusLaden) { clearInterval(statusUhr); return; }
+    if (!offen || !window.rezensionStatusLaden) { clearInterval(uhr); return; }
+    if (!dataMode) return;   // ohne Datenmodus aussetzen, nicht beenden
     try {
       const status = await window.rezensionStatusLaden(rezensionId);
+      if (uhr !== statusUhr) return;   // inzwischen eine neue Rezension gespeichert
       statusEintragen(status);
-      if (status !== 'offen') clearInterval(statusUhr);
+      if (status !== 'offen') clearInterval(uhr);
     } catch (fehler) {
       console.warn('Status der Rezension:', fehler);
     }
   }, 10000);
+  statusUhr = uhr;
 }
 
 // Ersetzt im Datensatz der Datenperspektive den Wert der Zeile „status“.
@@ -6317,14 +6353,15 @@ import { waehleQuelle } from './js/datenquelle.js?v=20261001';
 import { bildVon, bildUrl, BESCHREIBUNGEN, OEFFNUNGSZEITEN, ANFAHRT } from './js/darstellung.js?v=20261001';
 import { bewertungText, pruefeEingabe, zaehlerText, datumText, nachArtikel,
          stimmenNachArtikel, datensatzZeilen, SEITENGROESSE, sterneText, anzahlText,
-         verteilung, anteilText, statusText, anzahlFuer, weitereLaden } from './js/rezensionen.js?v=20261001';
+         verteilung, anteilText, statusText, anzahlFuer, weitereLaden,
+         sternzeileName } from './js/rezensionen.js?v=20261001';
 // renderCard und renderRow liegen im klassischen Skriptblock —
 // dort ist ein Modul-Import nicht sichtbar.
 window.bildUrl = bildUrl;
 // Die Rezensionslogik ebenso — der klassische Block ruft sie über window.REZENSIONEN.
 window.REZENSIONEN = { bewertungText, pruefeEingabe, zaehlerText, datumText, datensatzZeilen,
                        sterneText, anzahlText, verteilung, anteilText, statusText, anzahlFuer,
-                       weitereLaden };
+                       weitereLaden, sternzeileName };
 
 // Sitzungskennung, damit eine Uebungsgruppe ihre Bestellungen in
 // wawi.v_bestellung_letzte wiederfindet. Lebt nur in diesem Tab.

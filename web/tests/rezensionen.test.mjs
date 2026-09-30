@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { bewertungText, pruefeEingabe, zaehlerText, datumText, nachArtikel,
          stimmenNachArtikel, datensatzZeilen, normalisiereText, SEITENGROESSE, sterneText,
          anzahlText, verteilung, anteilText, statusText, anzahlFuer,
-         weitereLaden } from '../js/rezensionen.js';
+         weitereLaden, sternzeileName } from '../js/rezensionen.js';
 
 test('bewertungText: Mittel mit Komma, Anzahl mit Tausenderpunkt, Einzahl', () => {
   assert.equal(bewertungText({ anzahl: 128, sterne_mittel: 4.3 }), '★ 4,3 · 128 Bewertungen');
@@ -128,4 +128,10 @@ test('anzahlFuer und weitereLaden: Filter und volle Seiten', () => {
 test('datensatzZeilen: Status als achte Zeile, in Worten', () => {
   const zeilen = datensatzZeilen({ rezension_id: 1, sterne: 5, im_warehouse: false, status: 'offen' });
   assert.deepEqual(zeilen[7], ['status', 'wird geprüft']);
+});
+
+test('sternzeileName: erst der sichtbare Text, dann was ein Klick tut', () => {
+  assert.equal(sternzeileName({ anzahl: 30, sterne_mittel: 3.6 }, 'Breakfast Burger'),
+               '★ 3,6 · 30 Bewertungen – Rezensionen zu Breakfast Burger lesen');
+  assert.equal(sternzeileName(undefined, 'BBQ Sauce'), 'noch keine Bewertung – BBQ Sauce');
 });
