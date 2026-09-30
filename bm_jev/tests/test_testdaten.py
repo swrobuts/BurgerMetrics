@@ -15,8 +15,10 @@ GRUPPEN = {
     "holdout": {"lob": 3, "kritik": 4, "beleidigung": 2, "personenbezug": 2, "werbung": 2, "kontakt": 2,
                 "themenfremd": 2, "anweisung": 2, "gesundheit": 3, "grenzfall": 2},
     "stichprobe": {f"simulation_{n}": 100 for n in range(1, 6)},
+    "holdout_2": {"lob": 5, "kritik": 5, "grenzfall": 2, "themenfremd": 3, "anweisung": 2, "gesundheit": 3,
+                  "beleidigung": 1, "personenbezug": 1, "werbung": 1, "kontakt": 1},
 }
-PRAEFIX = {"testfaelle": "T", "holdout": "H", "stichprobe": "S"}
+PRAEFIX = {"testfaelle": "T", "holdout": "H", "stichprobe": "S", "holdout_2": "Z"}
 
 
 def produkte():
@@ -27,7 +29,7 @@ def produkte():
 
 @pytest.fixture(scope="module", params=list(testdaten.DATEIEN))
 def datei(request):
-    """Name und Zeilen einer der drei Testdateien."""
+    """Name und Zeilen einer der vier Testdateien."""
     return request.param, testdaten.lesen(testdaten.DATEIEN[request.param])
 
 
@@ -78,6 +80,20 @@ def test_soll_entscheidung_folgt_aus_den_soll_werten(datei):
 def test_holdout_teilt_keinen_text_mit_den_testfaellen():
     testfaelle = {z["text"] for z in testdaten.lesen(testdaten.DATEIEN["testfaelle"])}
     assert not testfaelle & {z["text"] for z in testdaten.lesen(testdaten.DATEIEN["holdout"])}
+
+
+def test_zweiter_holdout_teilt_keinen_text_mit_den_anderen_dateien():
+    zweiter = {z["text"] for z in testdaten.lesen(testdaten.DATEIEN["holdout_2"])}
+    for name in ("testfaelle", "holdout", "stichprobe"):
+        assert not zweiter & {z["text"] for z in testdaten.lesen(testdaten.DATEIEN[name])}, name
+
+
+def test_anweisungen_ohne_weiteren_inhalt_haben_keinen_themenbezug():
+    reine_anweisungen = {"T057", "T059", "H018", "H019", "Z014", "Z015"}
+    for name in ("testfaelle", "holdout", "holdout_2"):
+        for z in testdaten.lesen(testdaten.DATEIEN[name]):
+            if z["fall_id"] in reine_anweisungen:
+                assert z["soll_themenbezug"] == 0, z["fall_id"]
 
 
 def test_stichprobe_ist_harmlos_markiert():

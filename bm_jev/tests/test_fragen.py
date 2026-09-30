@@ -21,3 +21,21 @@ def test_fingerabdruck_folgt_dem_wortlaut(monkeypatch):
     assert fragen.fingerabdruck() == vorher
     monkeypatch.setitem(fragen.FRAGEN["werbung"], "instructions", "Anders gefragt: `rezension.text`?")
     assert fragen.fingerabdruck() != vorher
+
+
+def test_stand_und_fingerabdruck_gehoeren_zusammen():
+    """Ändert sich ein Wort, müssen Stand und erwarteter Fingerabdruck bewusst mitgehen."""
+    assert (fragen.FRAGEN_STAND, fragen.fingerabdruck()) == ("2", "430ea6f880")
+    assert fragen.fingerabdruck(fragen.FRAGEN_STAND_1) == "6a79d0f916"
+
+
+def test_stand_1_unterscheidet_sich_nur_im_themenbezug():
+    assert list(fragen.FRAGEN_STAND_1) == SCHLUESSEL
+    anders = [k for k in SCHLUESSEL if fragen.FRAGEN[k] != fragen.FRAGEN_STAND_1[k]]
+    assert anders == ["themenbezug"]
+
+
+def test_themenbezug_nennt_shop_und_produkt():
+    anweisung = fragen.FRAGEN["themenbezug"]["instructions"]
+    assert "`rezension.produkt`" in anweisung and "Shop von BurgerMetrics" in anweisung
+

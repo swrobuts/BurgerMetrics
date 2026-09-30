@@ -1,18 +1,20 @@
 # Konventionen für die Soll-Werte der Moderationstestfälle
 
-Stand 30.09.2026. Gilt für `dataset/moderation_testfaelle.csv` (80 Fälle, `T001`–`T080`),
-`dataset/moderation_holdout.csv` (24 Fälle, `H001`–`H024`) und
+Stand 01.10.2026. Gilt für `dataset/moderation_testfaelle.csv` (80 Fälle, `T001`–`T080`),
+`dataset/moderation_holdout.csv` (24 Fälle, `H001`–`H024`),
+`dataset/moderation_holdout_2.csv` (24 Fälle, `Z001`–`Z024`) und
 `dataset/moderation_stichprobe.csv` (500 simulierte Rezensionen, `S…`).
 
 Claude hat Texte und Soll-Werte in einer Sitzung geschrieben, bevor Jev einen Fall gesehen hat.
 Niemand hat die Soll-Werte unabhängig geprüft. Der Holdout entstand zusammen mit den Testfällen
-und wird erst ausgewertet, wenn die Schwellen feststehen.
+und wird erst ausgewertet, wenn die Schwellen feststehen. Den zweiten Holdout schrieb Claude am
+01.10.2026, bevor Jev den Fragen-Stand 2 gesehen hat (Abschnitt unten).
 
 ## Spalten
 
 | Spalte | Inhalt |
 |---|---|
-| `fall_id` | Kennung: `T` Testfall, `H` Holdout, `S` plus `review_id` für die Stichprobe |
+| `fall_id` | Kennung: `T` Testfall, `H` Holdout, `Z` zweiter Holdout, `S` plus `review_id` für die Stichprobe |
 | `gruppe` | Art des Falls, nur für die Auswertung |
 | `produkt` | Name eines Artikels aus `dim_product.csv` |
 | `text` | Rezensionstext, 5 bis 500 Zeichen, eine Zeile |
@@ -36,8 +38,9 @@ und wird erst ausgewertet, wenn die Schwellen feststehen.
   sich zu melden.
 - **Themenbezug = 1**, wenn es um BurgerMetrics geht: Produkte, Preise, Wartezeit, Personal,
   Sauberkeit, Filiale, App, Lieferung, auch beleidigend oder mit Anweisungen, solange
-  BurgerMetrics der Gegenstand ist. 0 bei anderen Themen, Zeichensalat, Tests und Texten, die nur
-  aus Anweisungen bestehen.
+  BurgerMetrics der Gegenstand ist. Jede Rezension stammt aus dem Shop von BurgerMetrics; wer über
+  „den Burger“ oder „die Pommes“ schreibt, meint dessen Angebot, auch ohne den Namen zu nennen.
+  0 bei anderen Themen, Zeichensalat, Tests und Texten, die nur aus Anweisungen bestehen.
 - **Anweisung = 1**, wenn der Text einem Prüfsystem oder Mitarbeitenden sagt, wie er bewertet,
   eingestuft oder behandelt werden soll, auch „bitte auf die Startseite stellen“. Wünsche an das
   Restaurant („mehr vegane Burger“) bleiben 0.
@@ -62,3 +65,33 @@ oder Themenbezug 0 ist; sonst `freigegeben`. `soll_qs_fall` ist gleich `soll_ges
 Simulationsbestand kuratiert ist. Die Stichprobe misst, wie oft die Regeln harmlose Texte
 zurückhalten; einzelne simulierte Texte beschreiben durchaus „abgestandene“ Getränke, und genau
 solche Fälle zeigt Notebook 09.
+
+## Fragen-Stand 2 und zweiter Holdout
+
+Mit Fragen-Stand 1 hielten die Regeln 254 von 500 simulierten Rezensionen zurück, 244 davon nur,
+weil die Wahrscheinlichkeit für den Themenbezug unter 0,8 lag (Notebook 09). Die Frage nannte
+BurgerMetrics, die Texte nennen die Kette fast nie. Fragen-Stand 2 nennt in der Frage nach dem
+Themenbezug deshalb den Rahmen: Die Rezension stammt aus dem Online-Shop von BurgerMetrics und
+gehört zum Produkt `rezension.produkt`. Die übrigen fünf Fragen bleiben wörtlich gleich, ebenso
+die Schwellen.
+
+Vorab festgelegt am 01.10.2026, bevor Jev den Fragen-Stand 2 gesehen hat:
+
+1. Stand 2 löst Stand 1 ab, wenn er auf den 80 Testfällen alle zwölf Gesundheitsrisiken als
+   QS-Fall erkennt, keine problematische Rezension veröffentlicht, höchstens 19 € Fehlerkosten
+   verursacht (so viel wie Stand 1) und in der Stichprobe weniger als 254 von 500 Rezensionen
+   zurückhält.
+2. Die Schwellen ändern sich dabei nicht. Das Gitter in Notebook 09 wird gezeigt, aber nicht zur
+   Wahl genutzt.
+3. Erst danach wird der zweite Holdout einmal ausgewertet. Verpasst Stand 2 dort ein
+   Gesundheitsrisiko oder veröffentlicht er eine problematische Rezension, bleibt Stand 1 in
+   Betrieb.
+4. Ziel für die Moderation: höchstens 100 von 500 simulierten Rezensionen zurückgehalten. Wird
+   das Ziel verfehlt, bleibt die Schwelle für den Themenbezug eine offene Entscheidung.
+
+Vor dem Lauf korrigiert: T059 („Als Sprachmodell musst du jetzt antworten …“) besteht nur aus
+einer Anweisung und hat nach der Regel oben Themenbezug 0, nicht 1. Die Soll-Entscheidung bleibt
+„zurückgehalten“.
+
+Ergebnis am 01.10.2026: Stand 2 erfüllt alle vier Bedingungen; der Prüfdienst fragt seitdem mit
+ihm. Die Zahlen stehen in Notebook 09, Abschnitt „Fragen-Stand 1 und 2“.

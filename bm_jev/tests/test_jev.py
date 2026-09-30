@@ -6,7 +6,7 @@ import pytest
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from bm_jev import fragen, jev, umgebung  # noqa: E402
+from bm_jev import fragen, jev, testdaten, umgebung  # noqa: E402
 
 TEXT = "GEHEIMER TEXT: Der Burger war heiß."
 
@@ -114,6 +114,24 @@ def test_tokens_als_ganze_zahl_oder_none(usage, tokens):
     daten["usage"] = usage
     antwort = jev.fragen_stellen(TEXT, "Classic Burger", api_key="k", senden=Sender(Antwort(200, daten)))
     assert (antwort.input_tokens, type(antwort.input_tokens)) == (tokens, type(tokens))
+
+
+def test_anfrage_nimmt_den_gewaehlten_stand():
+    assert jev.anfrage("Text", "Cola 0.3l")["questions"] is fragen.FRAGEN
+    assert jev.anfrage("Text", "Cola 0.3l", fragen=fragen.FRAGEN_STAND_1)["questions"] is fragen.FRAGEN_STAND_1
+
+
+def test_fragen_stellen_schickt_den_gewaehlten_stand():
+    sender = Sender(Antwort(200, gute_antwort()))
+    jev.fragen_stellen(TEXT, "Donut", api_key="k", senden=sender, fragen=fragen.FRAGEN_STAND_1)
+    assert sender.aufrufe[0][1]["json"]["questions"] is fragen.FRAGEN_STAND_1
+
+
+def test_frueherer_stand_bleibt_im_cache_erreichbar():
+    zeile = testdaten.lesen(testdaten.DATEIEN["testfaelle"])[0]
+    cache = jev.Cache(testdaten.WURZEL / "dataset" / "cache" / "moderation_jev.jsonl")
+    antwort = jev.beurteilen(zeile["text"], zeile["produkt"], cache=cache, fragen=fragen.FRAGEN_STAND_1)
+    assert antwort.aus_cache and set(antwort.wahrscheinlichkeiten) == set(fragen.FRAGEN)
 
 
 def test_beurteilen_fragt_einmal_und_liest_danach_den_cache(tmp_path):
