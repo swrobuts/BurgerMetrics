@@ -1,0 +1,123 @@
+"""Eine Rezension an Jev schicken und sechs Wahrscheinlichkeiten zurückbekommen.
+
+Ein Request je Rezension, sechs Noul-Fragen darin, direkt über die HTTP-API von
+TypeSafe (docs.typesafe.ai/api). Der Cache (JSONL) hält jede Antwort fest:
+Dieselbe Rezension mit denselben Fragen kostet nur einmal Tokens, und
+Notebook 09 läuft ohne Schlüssel aus dem Cache.
+"""
+import hashlib
+import json
+import os
+from dataclasses import dataclass
+from pathlib import Path
+
+import requests
+
+from .fragen import FRAGEN
+
+API_URL = "https://api.typesafe.ai/v1/systemone"
+# Feste Version statt "jev-latest": Ergebnisse bleiben vergleichbar, und der
+# Cache passt nur zu genau diesem Modell.
+MODELL = "jev-1.13.0"
+# US-Dollar je eine Million Input-Tokens; Output kostet bei Jev nichts
+# (docs.typesafe.ai/models, Stand 29.09.2026).
+PREIS_INPUT = 0.042
+
+
+@dataclass
+class Antwort:
+    """Jevs Urteil zu einer Rezension, ohne jede Entscheidung."""
+    wahrscheinlichkeiten: dict   # je Frage die Wahrscheinlichkeit für „ja“
+    input_tokens: int | None
+    modell: str
+    aus_cache: bool = False
+
+
+class JevFehler(Exception):
+    """Jev hat nicht oder unvollständig geantwortet. Die Meldung enthält nie Rezensionstext."""
+
+
+class KeinCacheTreffer(LookupError):
+    """Die Antwort liegt nicht im Cache, und ohne Schlüssel wird Jev nicht gefragt."""
+
+
+def state(text, produkt):
+    """Nur was die Fragen brauchen: Rezensionstext und Produktname."""
+    return {"rezension": {"text": text, "produkt": produkt}}
+
+
+def anfrage(text, produkt, modell=MODELL):
+    """Der Körper des Requests: State, Modell und die sechs Fragen."""
+    return {"state": state(text, produkt), "model": modell, "questions": FRAGEN}
+
+
+def schluessel(koerper):
+    """Cache-Schlüssel: Ändert sich Modell, State oder ein Wort einer Frage, entsteht ein neuer."""
+    roh = json.dumps(koerper, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(roh.encode("utf-8")).hexdigest()
+
+
+def api_schluessel():
+    """Der Schlüssel aus der Umgebung oder None; er wird nie ausgegeben."""
+    wert = os.environ.get("TYPESAFE_API_KEY", "").strip()
+    return wert or None
+
+
+def antwort_lesen(daten):
+    """Liest die sechs Wahrscheinlichkeiten und die Tokens aus der JSON-Antwort."""
+    try:
+        p = {frage: float(daten["answers"][frage]["noul"]) for frage in FRAGEN}
+    except (KeyError, TypeError, ValueError) as fehler:
+        raise JevFehler(f"Antwort unvollständig: {type(fehler).__name__}") from None
+    return Antwort(p, daten.get("usage", {}).get("input_tokens"), daten.get("model", ""))
+
+
+def fragen_stellen(text, produkt, *, api_key, modell=MODELL, zeitlimit=20, senden=requests.post):
+    """Ein Request an Jev. Wirft JevFehler bei Netzfehler, Zeitüberschreitung oder HTTP-Fehler."""
+    try:
+        r = senden(API_URL, json=anfrage(text, produkt, modell), timeout=zeitlimit,
+                   headers={"Authorization": f"Bearer {api_key}"})
+    except requests.RequestException as fehler:
+        raise JevFehler(f"keine Verbindung: {type(fehler).__name__}") from None
+    if r.status_code != 200:
+        raise JevFehler(f"HTTP {r.status_code}")
+    return antwort_lesen(r.json())
+
+
+class Cache:
+    """Antworten als JSONL, eine Zeile {"schluessel": …, "antwort": {…}} je Anfrage."""
+
+    def __init__(self, datei):
+        self.datei = Path(datei)
+        self.eintraege = {}
+        if self.datei.exists():
+            for zeile in self.datei.read_text(encoding="utf-8").splitlines():
+                if zeile.strip():
+                    eintrag = json.loads(zeile)
+                    self.eintraege[eintrag["schluessel"]] = eintrag["antwort"]
+
+    def holen(self, schluessel):
+        """Die gespeicherte Antwort zu einem Schlüssel oder None."""
+        return self.eintraege.get(schluessel)
+
+    def ablegen(self, schluessel, antwort):
+        """Hängt eine Antwort an die Datei an; der Rezensionstext kommt nicht hinein."""
+        daten = {"wahrscheinlichkeiten": antwort.wahrscheinlichkeiten,
+                 "input_tokens": antwort.input_tokens, "modell": antwort.modell}
+        self.eintraege[schluessel] = daten
+        self.datei.parent.mkdir(parents=True, exist_ok=True)
+        with self.datei.open("a", encoding="utf-8") as f:
+            f.write(json.dumps({"schluessel": schluessel, "antwort": daten}, ensure_ascii=False) + "\n")
+
+
+def beurteilen(text, produkt, *, cache, api_key=None, modell=MODELL, senden=requests.post):
+    """Erst im Cache nachsehen, dann mit Schlüssel Jev fragen und die Antwort ablegen."""
+    s = schluessel(anfrage(text, produkt, modell))
+    gespeichert = cache.holen(s)
+    if gespeichert is not None:
+        return Antwort(**gespeichert, aus_cache=True)
+    if not api_key:
+        raise KeinCacheTreffer(s[:12])
+    antwort = fragen_stellen(text, produkt, api_key=api_key, modell=modell, senden=senden)
+    cache.ablegen(s, antwort)
+    return antwort
