@@ -669,3 +669,74 @@ GRANT SELECT ON wawi.v_rezensionen_lesen, wawi.v_rezension_status, wawi.v_pruefd
   TO anon, authenticated, studi_daba;
 GRANT SELECT ON wawi.v_moderation, wawi.v_qs_faelle, wawi.v_entscheidungen_letzte TO authenticated;
 GRANT SELECT ON wawi.v_freigabe_statistik TO studi_daba;
+
+-- ---------------------------------------------------------------------------
+-- 6 Probe: Status, Richtlinie und Rechte wie vorgesehen. Bricht mit
+--   EXCEPTION ab, wenn nicht.
+-- ---------------------------------------------------------------------------
+DO $$
+DECLARE
+  v_anzahl bigint;
+  v_objekt text;
+BEGIN
+  SELECT count(*) INTO v_anzahl FROM wawi.rezension
+  WHERE  quelle = 'simulation' AND status <> 'freigegeben';
+  IF v_anzahl > 0 THEN
+    RAISE EXCEPTION '% Simulationszeilen sind nicht freigegeben', v_anzahl;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policy
+                 WHERE polrelid = 'wawi.rezension'::regclass AND polname = 'lesen_freigegeben')
+     OR EXISTS (SELECT 1 FROM pg_policy
+                WHERE polrelid = 'wawi.rezension'::regclass AND polname = 'lesen_alle') THEN
+    RAISE EXCEPTION 'Richtlinie auf wawi.rezension nicht wie vorgesehen';
+  END IF;
+  FOREACH v_objekt IN ARRAY ARRAY['wawi.rezension_pruefung', 'wawi.rezension_entscheidung',
+                                  'wawi.qs_fall', 'wawi.mitarbeiter_rolle'] LOOP
+    IF has_table_privilege('anon', v_objekt, 'SELECT')
+       OR has_table_privilege('authenticated', v_objekt, 'SELECT')
+       OR has_table_privilege('studi_daba', v_objekt, 'SELECT')
+       OR has_table_privilege('bm_pruefdienst', v_objekt, 'SELECT') THEN
+      RAISE EXCEPTION '% ist nicht verschlossen', v_objekt;
+    END IF;
+  END LOOP;
+  FOREACH v_objekt IN ARRAY ARRAY['wawi.v_moderation', 'wawi.v_qs_faelle',
+                                  'wawi.v_entscheidungen_letzte', 'wawi.v_freigabe_statistik'] LOOP
+    IF has_table_privilege('anon', v_objekt, 'SELECT') THEN
+      RAISE EXCEPTION 'anon liest %', v_objekt;
+    END IF;
+  END LOOP;
+  IF NOT has_table_privilege('anon', 'wawi.v_rezensionen_lesen', 'SELECT')
+     OR NOT has_table_privilege('anon', 'wawi.v_pruefdienst_stand', 'SELECT')
+     OR NOT has_table_privilege('studi_daba', 'wawi.v_freigabe_statistik', 'SELECT') THEN
+    RAISE EXCEPTION 'Leserechte der neuen Sichten fehlen';
+  END IF;
+  IF has_function_privilege('anon', 'wawi.api_rezension_freigeben(bigint, text)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'wawi.pruefung_offene_holen(integer)', 'EXECUTE')
+     OR has_function_privilege('authenticated', 'wawi.rezension_entscheiden(bigint, text, text)', 'EXECUTE')
+     OR NOT has_function_privilege('bm_pruefdienst', 'wawi.pruefung_offene_holen(integer)', 'EXECUTE')
+     OR NOT has_function_privilege('authenticated', 'wawi.api_rezension_freigeben(bigint, text)', 'EXECUTE') THEN
+    RAISE EXCEPTION 'Funktionsrechte nicht wie vorgesehen';
+  END IF;
+  RAISE NOTICE 'Freigabe: Status, Prüftabellen, Rollen und Sichten wie vorgesehen.';
+END $$;
+
+NOTIFY pgrst, 'reload schema';
+
+-- Rücknahme (als postgres, in dieser Reihenfolge):
+--   DROP VIEW wawi.v_freigabe_statistik, wawi.v_pruefdienst_stand, wawi.v_entscheidungen_letzte,
+--             wawi.v_qs_faelle, wawi.v_moderation, wawi.v_rezension_status, wawi.v_rezensionen_lesen;
+--   DROP FUNCTION wawi.api_qs_fall_erledigen(bigint, text), wawi.api_rezension_ablehnen(bigint, text),
+--                 wawi.api_rezension_freigeben(bigint, text), wawi.rezension_entscheiden(bigint, text, text),
+--                 wawi.pruefung_heute(), wawi.pruefung_offene_holen(integer),
+--                 wawi.pruefung_eintragen(bigint, text, text[], boolean, jsonb, text[], boolean,
+--                                         text, text, text, text, integer, text),
+--                 wawi.hat_rolle(text);
+--   DROP TABLE wawi.qs_fall, wawi.rezension_entscheidung, wawi.rezension_pruefung, wawi.mitarbeiter_rolle;
+--   REVOKE USAGE ON SCHEMA wawi FROM bm_pruefdienst;
+--   DROP ROLE bm_pruefdienst;   -- vorher den Prüfdienst auf dem VPS anhalten
+--   DROP POLICY lesen_freigegeben ON wawi.rezension;
+--   0021 erneut einspielen (Sichten, stg_fact_reviews, rezension_anlegen, Richtlinie lesen_alle);
+--   DROP TRIGGER rezension_status_vorgabe ON wawi.rezension;
+--   DROP FUNCTION wawi.rezension_status_vorgabe();
+--   ALTER TABLE wawi.rezension DROP CONSTRAINT rezension_simulation_freigegeben,
+--                              DROP CONSTRAINT rezension_status_gueltig, DROP COLUMN status;

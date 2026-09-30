@@ -54,8 +54,11 @@ def zurueck(cur):
     cur.execute("SELECT set_config('request.jwt.claims', '', true)")
 
 
-def fehler(cur, sql, argumente=()):
-    """Führt sql aus und liefert die Fehlerklasse oder None; die Transaktion bleibt benutzbar."""
+def fehler(cur, sql, argumente=None):
+    """Führt sql aus und liefert die Fehlerklasse oder None; die Transaktion bleibt benutzbar.
+
+    Ohne Argumente None statt (): sonst ersetzt psycopg2 %-Platzhalter im SQL-Text.
+    """
     cur.execute("SAVEPOINT probe")
     try:
         cur.execute(sql, argumente)
@@ -541,3 +544,20 @@ def test_uebungsrezensionen_loeschen_raeumt_alles_ab(db):
     for tabelle in ("wawi.rezension_pruefung", "wawi.rezension_entscheidung", "wawi.qs_fall"):
         db.execute(f"SELECT count(*) FROM {tabelle}")
         assert db.fetchone()[0] == 0, tabelle
+
+
+def probe_text():
+    """Abschnitt 6 der Migration ohne den Rest der Markenzeile."""
+    text = (AUFBAU / "0023_rezension_freigabe.sql").read_text()
+    return text.split("-- 6 Probe", 1)[1].split("\n", 1)[1]
+
+
+def test_probe_meldet_ein_offenes_recht(db):
+    probe = probe_text()
+    db.execute("GRANT SELECT ON wawi.qs_fall TO anon")
+    assert fehler(db, probe) is psycopg2.errors.RaiseException
+
+
+def test_probe_laeuft_im_sauberen_stand(db):
+    probe = probe_text()
+    assert fehler(db, probe) is None

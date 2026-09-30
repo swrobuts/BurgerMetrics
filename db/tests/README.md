@@ -22,3 +22,10 @@ Die bestehenden Rechte- und Materialisierungstests laufen ebenfalls.
 und `BM_SECURITY_TEST_CA` starten. **Nur eine leere, wegwerfbare lokale Instanz
 verwenden:** Diese Tests legen Rollen und Schemata an und ändern Instanzrechte.
 Ohne diese Variablen werden die Integrationstests übersprungen.
+
+`test_rezension_freigabe.py` prüft die Freigabe der Rezensionen aus `0023` auf
+derselben Wegwerf-Instanz, in einer eigenen Datenbank `bm_freigabe`
+(`freigabe_cluster.py` baut sie auf): Status und Leserichtlinie, verschlossene
+Prüftabellen, die Dienstfunktionen der Rolle `bm_pruefdienst`, Freigeben,
+Ablehnen und QS-Fälle mit nachgestellter Supabase-Anmeldung, die Sichten und
+die Probe. Nur diese Tests: `bash db/tests/security_local.sh -q -k rezension_freigabe`.

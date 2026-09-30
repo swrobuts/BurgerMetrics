@@ -30,6 +30,8 @@
 -- entfernt vorher den alten Stand:
 --   DELETE FROM wawi.rezension WHERE quelle = 'simulation';
 -- und faehrt dieses Skript danach erneut. etl_probe() zeigt jede Abweichung.
+-- Seit 0023 danach auch 0023_rezension_freigabe.sql erneut ausführen: dieses
+-- Skript setzt Sichten und Richtlinie auf den Stand ohne Freigabe zurück.
 --
 -- Voraussetzung: 0001-0020 sind gelaufen; als postgres ausfuehren.
 -- Objekte: burgermetrics.fact_reviews, burgermetrics.v_rezension_produkt,
