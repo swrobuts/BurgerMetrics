@@ -9,6 +9,7 @@ DATEIEN = {
     "testfaelle": WURZEL / "dataset" / "moderation_testfaelle.csv",
     "holdout": WURZEL / "dataset" / "moderation_holdout.csv",
     "stichprobe": WURZEL / "dataset" / "moderation_stichprobe.csv",
+    "holdout_2": WURZEL / "dataset" / "moderation_holdout_2.csv",
 }
 FRAGEN = ["beleidigung", "personenbezug", "werbung", "themenbezug", "anweisung", "gesundheitsrisiko"]
 SPALTEN = ["fall_id", "gruppe", "produkt", "text", *[f"soll_{frage}" for frage in FRAGEN],
