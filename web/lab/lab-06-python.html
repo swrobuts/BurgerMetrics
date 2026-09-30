@@ -66,7 +66,7 @@
     <p>Vier Kopfzellen, dann die Analyse — in dieser Reihenfolge in allen zehn Notebooks. <code>notebooks/quellen/gemeinsam.py</code> schreibt die Kopfzellen beim Bauen hinein (Bauskripte <code>bau_00.py</code> bis <code>bau_09.py</code>, geschrieben mit <code>nbformat</code>); wer ein Notebook gelesen hat, findet sich in den anderen neun zurecht. Notebook 00 (<code>00_zugang_und_daten.ipynb</code>) ist das Beispiel dieses Labs: Verbindung, Schemata und Sichten, CSV per Git LFS, DuckDB, Export für Power BI und Tableau, Grenzen der Rolle, Dash inline.</p>
     <div class="concept-box">
       <h3>Der Prüfsatz</h3>
-      <p>Ein Notebook ist fertig, wenn es nach „Runtime → Restart“ und erneutem Ausführen aller Zellen von oben nach unten dieselben Zahlen zeigt wie zuvor. Für die Notebooks der Fallstudie erledigt das <code>pruefe_notebooks.sh</code> (rund 20 Minuten für alle neun); für ein eigenes Notebook ist es ein Handgriff vor jeder Abgabe.</p>
+      <p>Ein Notebook ist fertig, wenn es nach „Runtime → Restart“ und erneutem Ausführen aller Zellen von oben nach unten dieselben Zahlen zeigt wie zuvor. Für die Notebooks der Fallstudie erledigt das <code>pruefe_notebooks.sh</code> (rund 20 Minuten für alle zehn); für ein eigenes Notebook ist es ein Handgriff vor jeder Abgabe.</p>
     </div>
     <div class="auswahl-hinweis">
       <p><strong>Hinweis.</strong> Bei den hier gezeigten Werkzeugen handelt es sich um eine Auswahl — sie ist weder als Empfehlung noch als Werbung zu verstehen. Colab steht hier, weil jedes Notebook der Fallstudie einen Colab-Link im Kopf trägt und dort ohne Installation läuft. Dieselben Dateien laufen lokal in Jupyter (<code>python3 -m pip install -r notebooks/requirements.txt</code>, dann <code>jupyter lab notebooks/</code>) und in jeder anderen Jupyter-Umgebung; gemeinsam ist ihnen das Format <code>.ipynb</code>.</p>
@@ -90,7 +90,7 @@
     </div>
     <p class="shot-hinweis">Nachbildung der Oberfläche, Stand 09/2026 — Beschriftungen wie im Original.</p>
     <ol class="shot-legende">
-      <li><span class="callout">1</span><span>Die pip-Zelle: in Colab einmal je Sitzung, lokal durch <code>notebooks/requirements.txt</code> ersetzt. Die Paketliste ist in acht Notebooks dieselbe; Notebook 08 ergänzt <code>transformers torch</code>.</span></li>
+      <li><span class="callout">1</span><span>Die pip-Zelle: in Colab einmal je Sitzung, lokal durch <code>notebooks/requirements.txt</code> ersetzt. Die Paketliste ist in neun Notebooks dieselbe; Notebook 08 ergänzt <code>transformers torch</code>.</span></li>
       <li><span class="callout">2</span><span>Die Ausgabe nach der Installation: <code>Pakete bereit.</code> Ein Hinweis auf einen Neustart erscheint nicht mehr automatisch; nach frisch installierten Paketen ist ein Neustart der Runtime trotzdem sinnvoll, bevor es weitergeht.</span></li>
       <li><span class="callout">3</span><span>Die Verbindungszeichenkette mit dem Demo-Konto — die fünf Angaben aus Lab 01 in einer Zeile.</span></li>
       <li><span class="callout">4</span><span><code>lade_sql()</code> und <code>lade_csv()</code>: die beiden Ladehelfer, je Notebook definiert (B01).</span></li>

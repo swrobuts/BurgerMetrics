@@ -17,7 +17,7 @@ und wird erst ausgewertet, wenn die Schwellen feststehen.
 | `produkt` | Name eines Artikels aus `dim_product.csv` |
 | `text` | Rezensionstext, 5 bis 500 Zeichen, eine Zeile |
 | `soll_beleidigung` … `soll_gesundheitsrisiko` | 1 = ja, 0 = nein, je Frage |
-| `soll_muster` | gefundene Musterarten (`E-Mail`, `Telefonnummer`, `Link`), mit `|` getrennt, leer ohne Treffer |
+| `soll_muster` | gefundene Musterarten (`E-Mail`, `Telefonnummer`, `Link`), mit `\|` getrennt, leer ohne Treffer |
 | `soll_entscheidung` | `freigegeben` oder `zurueckgehalten` |
 | `soll_qs_fall` | 1, wenn ein Gesundheitsrisiko beschrieben ist |
 

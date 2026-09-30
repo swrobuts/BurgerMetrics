@@ -183,12 +183,16 @@ Gesundheitsrisiko untergeht?
 **Gewählt:** Jev (`jev-1.13.0`) mit sechs Noul-Fragen, dazu reguläre Ausdrücke für Kontaktdaten und
 Links. Regeln in `bm_jev/regeln.py` geben frei oder halten zurück; ablehnen kann nur ein Mensch im
 POS. Schwellen: Gesundheitsrisiko ab 0,4, Verstoß ab 0,5, unsicher ab 0,2, Themenbezug unter 0,8
-(Startwerte), geprüft in Notebook 09 (Testfälle 19 € Fehlerkosten, Holdout 5 €). Jev lief einmal über
+(Startwerte), gemessen in Notebook 09 (Testfälle 19 € Fehlerkosten, Holdout 5 €); die vorab
+festgelegte Regel, Schwellen erst ab 200 € Ersparnis zu ändern, konnte die Startwerte auf 31
+harmlosen Testfällen nur bestätigen. Jev lief einmal über
 Testfälle, Holdout und Stichprobe; die Antworten liegen im Cache, das Notebook braucht keinen
 Schlüssel.
 
-**Preis:** Soll-Werte ohne unabhängige Prüfung, deutsche Fragen an ein vor allem englisch trainiertes
-Modell, ein Prüfdienst auf dem VPS mit eigenem Schlüssel und Tageslimit.
+**Preis:** Die Schwelle für den Themenbezug hält etwa die Hälfte harmloser Rezensionen für die
+Moderation zurück (254 von 500 simulierten; bei 0,6 wären es 60). Dazu Soll-Werte ohne unabhängige
+Prüfung, deutsche Fragen an ein vor allem englisch trainiertes Modell, ein Prüfdienst auf dem VPS mit
+eigenem Schlüssel und Tageslimit.
 
 ---
 
@@ -204,6 +208,7 @@ Bekannt, nicht behoben, mit Bewertung:
 | Keine automatisierte Prüfung der Anwendungen | Vor jedem Bibliothekswechsel manuelle Browser-Prüfung nötig |
 | Keine Historisierung (SCD) | Für die Leitfragen ausreichend; als Erweiterungsaufgabe vorgemerkt |
 | Interpretationstexte im Bericht ungeprüft | Geprüft sind die Zahlen, nicht ihre Deutung |
+| Themenbezug unter 0,8 hält etwa die Hälfte harmloser Shop-Rezensionen zurück ([E11](#e11), Notebook 09) | Entscheidung beim Betreiber: Frage nach dem Themenbezug umformulieren oder Schwelle senken; bis dahin mehr Arbeit für die Moderation, veröffentlicht wird nichts Falsches |
 
 ---
 

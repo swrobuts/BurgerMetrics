@@ -41,15 +41,17 @@ def holen(quelle, pfad, wurzel):
     urllib.request.urlretrieve(f"{quelle}/{pfad}", ziel)
 
 WURZEL = Path("..").resolve()
+QUELLE = "aus dem Repo"
 if not (WURZEL / "bm_jev").exists():
     WURZEL = Path("bm_jev_projekt").resolve()
+    QUELLE = "von GitHub geladen"
     for modul in MODULE:
         holen(ROH, f"bm_jev/{modul}.py", WURZEL)
     for quelle, pfad in DATEIEN:
         holen(quelle, pfad, WURZEL)
 sys.path.insert(0, str(WURZEL))
 from bm_jev import auswertung, fragen, jev, muster, regeln, testdaten
-print("Paket bm_jev aus", WURZEL)
+print("Paket bm_jev", QUELLE)
 """),
 code("""
 # NUR_CACHE = True liest nur gespeicherte Antworten und verbraucht keine Tokens.
@@ -65,8 +67,9 @@ Drei Dateien, alle in `dataset/`:
 
 - `moderation_testfaelle.csv`: 80 Rezensionen mit Soll-Werten für die sechs Fragen, die Muster und
   die Entscheidung. Darunter harte Kritik, die erscheinen soll, Beleidigungen, Namen von
-  Mitarbeitenden, Werbung, Kontaktdaten, Themenfremdes, Anweisungen an das Prüfsystem, zehn
-  Gesundheitsrisiken und Grenzfälle.
+  Mitarbeitenden, Werbung, Kontaktdaten, Themenfremdes, Anweisungen an das Prüfsystem,
+  Gesundheitsrisiken und Grenzfälle. Zwölf Fälle beschreiben ein Gesundheitsrisiko: zehn in der
+  eigenen Gruppe, zwei unter den Grenzfällen.
 - `moderation_holdout.csv`: 24 weitere Fälle nach denselben Regeln, geschrieben vor der ersten
   Auswertung und erst im Abschnitt „Holdout“ ausgewertet.
 - `moderation_stichprobe.csv`: 500 simulierte Rezensionen aus `fact_reviews.csv`, 100 je
@@ -275,15 +278,17 @@ md("""
 ## Ergebnis
 
 Auf den 80 Testfällen erkennen die Regeln 12 von 12 Gesundheitsrisiken als QS-Fall (Recall 1,0)
-und veröffentlichen keine problematische Rezension. 19 harmlose Fälle halten sie unnötig zurück;
-die Fehlerkosten liegen bei 19 €. Die Schwellen bleiben bei den Startwerten, weil keine Kombination
-mindestens 200 € spart: Die günstigste, mit einem Themenbezug ab 0,6, kostet 7 € und vermeidet
-keinen verpassten Gesundheitsfall. Im Holdout, einmal ausgewertet, erkennen die Regeln 3 von 3
-Gesundheitsrisiken, veröffentlichen keine problematische Rezension und kommen auf 5 €
-Fehlerkosten. Von 500 simulierten Rezensionen halten sie 254 zurück (50,8 Prozent), fast immer
-mit dem Grund „unsicher“: Bei 244 davon liegt nur die Wahrscheinlichkeit für den Themenbezug
-unter 0,8, etwa bei kurzen Urteilen über Geschmack, Temperatur oder Portion eines Produkts. Der
-Median dieser Wahrscheinlichkeit liegt in der Stichprobe genau bei 0,8.
+und veröffentlichen keine problematische Rezension. Von 31 harmlosen Fällen halten sie 19 unnötig
+zurück; die Fehlerkosten liegen bei 19 €. Die Schwellen bleiben bei den Startwerten, weil keine
+Kombination mindestens 200 € spart: Die günstigste, mit einem Themenbezug ab 0,6, kostet 7 € und
+vermeidet keinen verpassten Gesundheitsfall. Lockern konnte die Regel auf diesen Testfällen nicht:
+Weniger strenge Schwellen sparen höchstens die 19 € der unnötig zurückgehaltenen Fälle. Im Holdout,
+einmal ausgewertet, erkennen die Regeln 3 von 3 Gesundheitsrisiken, veröffentlichen keine
+problematische Rezension und halten 5 von 9 harmlosen Fällen zurück, 5 € Fehlerkosten. Von 500
+simulierten Rezensionen halten sie 254 zurück (50,8 Prozent), fast immer mit dem Grund „unsicher“:
+Bei 244 davon liegt nur die Wahrscheinlichkeit für den Themenbezug unter 0,8, etwa bei kurzen
+Urteilen über Geschmack, Temperatur oder Portion eines Produkts. Der Median dieser
+Wahrscheinlichkeit liegt in der Stichprobe genau bei 0,8.
 """),
 md("""
 ## Was offen bleibt
