@@ -26,6 +26,8 @@ Ohne diese Variablen werden die Integrationstests übersprungen.
 `test_rezension_freigabe.py` prüft die Freigabe der Rezensionen aus `0023` auf
 derselben Wegwerf-Instanz, in einer eigenen Datenbank `bm_freigabe`
 (`freigabe_cluster.py` baut sie auf): Status und Leserichtlinie, verschlossene
-Prüftabellen, die Dienstfunktionen der Rolle `bm_pruefdienst`, Freigeben,
-Ablehnen und QS-Fälle mit nachgestellter Supabase-Anmeldung, die Sichten und
-die Probe. Nur diese Tests: `bash db/tests/security_local.sh -q -k rezension_freigabe`.
+Prüftabellen im Schema `wawi_intern`, die Dienstfunktionen der Rolle
+`bm_pruefdienst`, Freigeben, Ablehnen und QS-Fälle mit nachgestellter
+Supabase-Anmeldung, die Sichten, die Probe `freigabe_pruefen()` gegen sechzehn
+Rechtefehler und `freigabe_rechte()` als Reparatur, erneute Läufe von `0018`
+und `0020`, die Sperre in `0021` und `db/betrieb/rezensionen_bestand_kopieren.sql`. Nur diese Tests: `bash db/tests/security_local.sh -q -k rezension_freigabe`.

@@ -39,13 +39,14 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `aufbau/0018_wawi_sichten_und_schreiben.sql` | `v_speisekarte`, `v_filialliste`, `v_bestellung_letzte` und die Schreibfunktion `bestellung_anlegen()`; Rechte |
 | `aufbau/0019_wawi_zu_burgermetrics.sql` | ETL `wawi` → `burgermetrics`: stg-Sichten, `uebernahme_aus_wawi()`, `etl_probe()`, `uebungsbestellungen_loeschen()` |
 | `aufbau/0020_demo_rolle.sql` | Rolle `studi_daba` (Kennwort `thws`): nur lesen, beide Schemata, zehn Minuten je Abfrage — als `supabase_admin` ausführen |
-| `aufbau/0021_rezensionen.sql` | Rezensionen: `wawi.rezension`, `fact_reviews`, Schreibweg `rezension_anlegen()` für den Shop, ETL und Probe erweitert — zweimal ausführen, dazwischen `lade_csv.py --nur fact_reviews` |
+| `aufbau/0021_rezensionen.sql` | Rezensionen: `wawi.rezension`, `fact_reviews`, Schreibweg `rezension_anlegen()` für den Shop, ETL und Probe erweitert — zweimal ausführen, dazwischen `lade_csv.py --nur fact_reviews`; nach `0023` bricht es ab, den Bestand lädt dann `betrieb/rezensionen_bestand_kopieren.sql` |
 | `aufbau/0022_bestellquote.sql` | atomare Bestellquote für bestehende Installationen; Signatur, Eigentümer und Grants der RPC bleiben erhalten |
-| `aufbau/0023_rezension_freigabe.sql` | Freigabe der Shop-Rezensionen: Status in `wawi.rezension`, Prüftabellen, Rolle `bm_pruefdienst`, Rollen `moderation` und `qualitaet`, Sichten für Shop und POS — nach jedem erneuten Lauf von `0021` wiederholen |
+| `aufbau/0023_rezension_freigabe.sql` | Freigabe der Shop-Rezensionen: Status in `wawi.rezension`, Prüf- und Entscheidungstabellen im Schema `wawi_intern`, Rolle `bm_pruefdienst`, Rollen `moderation` und `qualitaet`, Sichten für Shop und POS; `wawi.freigabe_rechte()` setzt Zeilenschutz und Rechte, `0018` und `0020` rufen sie an ihrem Ende auf |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 | `skript_ausfuehren.py` | führt ein Aufbauskript als `postgres` in einer Transaktion aus und zeigt die NOTICE-Meldungen |
 | `betrieb/studi_daba_verwaltung.sql` | einmalig als `supabase_admin`: `postgres` darf die Einstellungen von `studi_daba` ändern, danach geht `ALTER ROLE studi_daba SET ...` über den MCP-Server |
 | `betrieb/studi_daba_lesend.sql` | verpflichtend vor Freigabe der Studierendenanmeldung: entfernt effektive Schreibwege einschließlich `PUBLIC`, Funktionen, Sequenzen, TEMP und Zugängen zu anderen Datenbanken; als `supabase_admin` in einer Transaktion ausführen |
+| `betrieb/rezensionen_bestand_kopieren.sql` | seit `0023` statt des zweiten Laufs von `0021`: kopiert den Simulationsbestand nach einem Neuladen von `fact_reviews.csv` erneut nach `wawi.rezension`; Ablauf im Kopf der Datei |
 
 ```bash
 cp .env.example .env      # und Zugangsdaten eintragen
@@ -57,6 +58,7 @@ python3 db/materialisieren.py                                    # v_rezension_p
 ```
 
 Die SQL-Dateien sind idempotent: Sie laufen zweimal hintereinander fehlerfrei.
+Ausnahme: `0021` bricht ab, sobald `0023` eingespielt ist.
 
 ## Sicherheitsupdate: TLS, MCP-Leserolle und Bestellquote
 
@@ -206,11 +208,17 @@ nur `pruefung_offene_holen()`, `pruefung_eintragen()` und `pruefung_heute()`)
 und Menschen mit den Rollen `moderation` und `qualitaet` im POS
 (`api_rezension_freigeben()`, `api_rezension_ablehnen()`,
 `api_qs_fall_erledigen()`); ablehnen kann nur ein Mensch. Die Rollen stehen in
-`wawi.mitarbeiter_rolle` und hängen am Supabase-Konto. `stg_fact_reviews` und
+`wawi_intern.mitarbeiter_rolle` und hängen am Supabase-Konto. `stg_fact_reviews` und
 damit `fact_reviews` nehmen nur freigegebene Rezensionen auf. `studi_daba`
 liest wie `anon` nur freigegebene Texte und zusätzlich die Zählung
-`v_freigabe_statistik`; die Prüf- und Entscheidungstabellen bleiben allen
-außer `postgres` verschlossen. Das prüft die Probe am Ende von `0023`.
+`v_freigabe_statistik`. Auf die drei Arbeitslisten der Moderation hat es SELECT,
+eine Abfrage endet aber mit `permission denied for function hat_rolle`: Sie
+verlangt eine Anmeldung mit Rolle. Die Prüf- und Entscheidungstabellen liegen im
+Schema `wawi_intern`, das die API nicht kennt, und bleiben allen außer
+`postgres` verschlossen. Zeilenschutz und Rechte setzt `wawi.freigabe_rechte()`
+an einer Stelle, `wawi.freigabe_pruefen()` prüft sie und bricht bei jeder
+Abweichung ab. `0018` und `0020` rufen `freigabe_rechte()` an ihrem Ende auf,
+damit ihre schemaweiten Grants nichts öffnen; `0021` bricht nach `0023` ab.
 
 Nach jeder Änderung an Sichten oder Funktionen braucht PostgREST einen Neustart
 (`docker compose restart rest` auf dem Server), sonst kennt es die neuen Objekte
@@ -427,7 +435,7 @@ alten Stand. `etl_probe()` ist der Gleichheitsbeweis aus
 Belege: die symmetrische Differenz von `stg_fact_orders` gegen `fact_orders`
 und von `stg_fact_order_items` gegen `fact_order_items` und von `stg_fact_reviews` gegen `fact_reviews`.
 
-**Was `anon` darf:** beide Schemata lesen (in `wawi.rezension` nur freigegebene Zeilen, die Prüf- und Entscheidungstabellen aus `0023` gar nicht) und die beiden Schreibfunktionen
+**Was `anon` darf:** beide Schemata lesen (in `wawi.rezension` nur freigegebene Zeilen, das Schema `wawi_intern` aus `0023` gar nicht) und die beiden Schreibfunktionen
 `bestellung_anlegen()` und `rezension_anlegen()` aufrufen. Kein `INSERT` auf eine
 Tabelle, kein Aufruf der vier Betriebsfunktionen (`uebernahme_aus_wawi()`,
 `etl_probe()`, `uebungsbestellungen_loeschen()`, `uebungsrezensionen_loeschen()`).

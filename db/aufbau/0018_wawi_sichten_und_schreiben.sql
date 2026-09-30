@@ -334,3 +334,13 @@ BEGIN
                    r.relname);
   END LOOP;
 END $$;
+
+-- Seit 0023: Die Freigabe der Rezensionen setzt Zeilenschutz und Rechte nach
+-- den schemaweiten Grants oben neu; sonst öffnete ein erneuter Lauf dieses
+-- Skripts ungeprüfte Rezensionen.
+DO $$
+BEGIN
+  IF to_regprocedure('wawi.freigabe_rechte()') IS NOT NULL THEN
+    PERFORM wawi.freigabe_rechte();
+  END IF;
+END $$;

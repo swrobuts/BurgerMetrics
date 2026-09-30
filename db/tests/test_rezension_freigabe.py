@@ -117,8 +117,8 @@ def test_tabelle_zeigt_nur_freigegebene(db, rolle):
     assert db.fetchone()[0] == 1
 
 
-NEUE_TABELLEN = ["wawi.rezension_pruefung", "wawi.rezension_entscheidung",
-                 "wawi.qs_fall", "wawi.mitarbeiter_rolle"]
+NEUE_TABELLEN = ["wawi_intern.rezension_pruefung", "wawi_intern.rezension_entscheidung",
+                 "wawi_intern.qs_fall", "wawi_intern.mitarbeiter_rolle"]
 
 
 def konto(cur, *rollen):
@@ -127,7 +127,7 @@ def konto(cur, *rollen):
     kennung = str(uuid.uuid4())
     cur.execute("INSERT INTO auth.users (id) VALUES (%s)", (kennung,))
     for rolle in rollen:
-        cur.execute("INSERT INTO wawi.mitarbeiter_rolle (konto, rolle) VALUES (%s, %s)", (kennung, rolle))
+        cur.execute("INSERT INTO wawi_intern.mitarbeiter_rolle (konto, rolle) VALUES (%s, %s)", (kennung, rolle))
     return kennung
 
 
@@ -136,16 +136,6 @@ def konto(cur, *rollen):
 def test_neue_tabellen_sind_verschlossen(db, rolle, tabelle):
     als(db, rolle)
     assert fehler(db, f"SELECT 1 FROM {tabelle} LIMIT 1") is psycopg2.errors.InsufficientPrivilege
-
-
-def test_zeilenschutz_haelt_auch_nach_erneutem_lauf_von_0018(db):
-    # 0018 vergibt SELECT auf alle Tabellen in wawi. Ohne Richtlinie bleiben die Zeilen trotzdem unsichtbar.
-    rid = shop_rezension(db)
-    db.execute("INSERT INTO wawi.rezension_pruefung (rezension_id, fehler) VALUES (%s, 'Test')", (rid,))
-    db.execute("GRANT SELECT ON wawi.rezension_pruefung TO anon")
-    als(db, "anon")
-    db.execute("SELECT count(*) FROM wawi.rezension_pruefung")
-    assert db.fetchone()[0] == 0
 
 
 def test_hat_rolle_liest_das_angemeldete_konto(db):
@@ -171,14 +161,14 @@ def test_hat_rolle_nur_fuer_angemeldete(db, rolle):
 def test_unbekannte_rolle_wird_abgewiesen(db):
     kennung = str(uuid.uuid4())
     db.execute("INSERT INTO auth.users (id) VALUES (%s)", (kennung,))
-    assert fehler(db, "INSERT INTO wawi.mitarbeiter_rolle (konto, rolle) VALUES (%s, 'admin')", (kennung,)) \
+    assert fehler(db, "INSERT INTO wawi_intern.mitarbeiter_rolle (konto, rolle) VALUES (%s, 'admin')", (kennung,)) \
         is psycopg2.errors.CheckViolation
 
 
 def test_rollen_verschwinden_mit_dem_konto(db):
     kennung = konto(db, "moderation", "qualitaet")
     db.execute("DELETE FROM auth.users WHERE id = %s", (kennung,))
-    db.execute("SELECT count(*) FROM wawi.mitarbeiter_rolle WHERE konto = %s", (kennung,))
+    db.execute("SELECT count(*) FROM wawi_intern.mitarbeiter_rolle WHERE konto = %s", (kennung,))
     assert db.fetchone()[0] == 0
 
 
@@ -236,16 +226,16 @@ def test_freigeben_setzt_den_status(db):
     db.execute("SELECT status FROM wawi.rezension WHERE rezension_id = %s", (rid,))
     assert db.fetchone()[0] == "freigegeben"
     db.execute("""SELECT p_themenbezug, jev_angefragt, input_tokens, modell
-                  FROM wawi.rezension_pruefung WHERE rezension_id = %s""", (rid,))
+                  FROM wawi_intern.rezension_pruefung WHERE rezension_id = %s""", (rid,))
     assert db.fetchone() == (0.97, True, 1000, "jev-1.13.0")
 
 
 def test_gesundheitsrisiko_legt_qs_fall_an(db):
     rid = shop_rezension(db, "Mir war nach dem Essen übel.")
     assert eintragen(db, rid, "zurueckgehalten", ["Gesundheitsrisiko"], qs=True)["status"] == "zurueckgehalten"
-    db.execute("SELECT count(*) FROM wawi.qs_fall WHERE rezension_id = %s AND erledigt_am IS NULL", (rid,))
+    db.execute("SELECT count(*) FROM wawi_intern.qs_fall WHERE rezension_id = %s AND erledigt_am IS NULL", (rid,))
     assert db.fetchone()[0] == 1
-    db.execute("SELECT gruende, qs_fall FROM wawi.rezension_pruefung WHERE rezension_id = %s", (rid,))
+    db.execute("SELECT gruende, qs_fall FROM wawi_intern.rezension_pruefung WHERE rezension_id = %s", (rid,))
     assert db.fetchone() == (["Gesundheitsrisiko"], True)
 
 
@@ -274,7 +264,7 @@ def test_dritter_fehler_haelt_zurueck(db):
     assert eintragen(db, rid, fehlertext="Zeitüberschreitung")["status"] == "offen"
     assert eintragen(db, rid, fehlertext="HTTP 529")["status"] == "offen"
     assert eintragen(db, rid, fehlertext="HTTP 529")["status"] == "zurueckgehalten"
-    db.execute("""SELECT ergebnis, gruende FROM wawi.rezension_pruefung
+    db.execute("""SELECT ergebnis, gruende FROM wawi_intern.rezension_pruefung
                   WHERE rezension_id = %s ORDER BY pruefung_id DESC LIMIT 1""", (rid,))
     assert db.fetchone() == ("zurueckgehalten", ["Prüfung nicht möglich"])
 
@@ -286,7 +276,7 @@ def test_nach_einem_fehler_fuenf_minuten_pause(db):
     db.execute("SELECT count(*) FROM wawi.pruefung_offene_holen(10)")
     assert db.fetchone()[0] == 0
     zurueck(db)
-    db.execute("""UPDATE wawi.rezension_pruefung SET geprueft_am = geprueft_am - interval '6 minutes'
+    db.execute("""UPDATE wawi_intern.rezension_pruefung SET geprueft_am = geprueft_am - interval '6 minutes'
                   WHERE rezension_id = %s""", (rid,))
     als(db, "bm_pruefdienst")
     db.execute("SELECT count(*) FROM wawi.pruefung_offene_holen(10)")
@@ -345,7 +335,7 @@ def test_freigeben_macht_die_rezension_oeffentlich(db):
     db.execute("SELECT wawi.api_rezension_freigeben(%s, '  geprüft  ')", (rid,))
     assert db.fetchone()[0] == {"rezension_id": rid, "status": "freigegeben"}
     zurueck(db)
-    db.execute("SELECT entscheidung, konto, bemerkung FROM wawi.rezension_entscheidung WHERE rezension_id = %s", (rid,))
+    db.execute("SELECT entscheidung, konto, bemerkung FROM wawi_intern.rezension_entscheidung WHERE rezension_id = %s", (rid,))
     assert db.fetchone() == ("freigegeben", kennung, "geprüft")
     als(db, "anon")
     db.execute("SELECT inhalt FROM wawi.rezension WHERE rezension_id = %s", (rid,))
@@ -396,7 +386,7 @@ def test_menschliche_entscheidung_bleibt(db):
 def test_qs_fall_erledigen_braucht_die_rolle_qualitaet(db):
     rid = shop_rezension(db, "Im Salat war ein Stück Plastik.")
     eintragen(db, rid, "zurueckgehalten", ["Gesundheitsrisiko"], qs=True)
-    db.execute("SELECT qs_fall_id FROM wawi.qs_fall WHERE rezension_id = %s", (rid,))
+    db.execute("SELECT qs_fall_id FROM wawi_intern.qs_fall WHERE rezension_id = %s", (rid,))
     fall = db.fetchone()[0]
     als(db, "authenticated", konto(db, "moderation"))
     assert fehler(db, "SELECT wawi.api_qs_fall_erledigen(%s)", (fall,)) is psycopg2.errors.InsufficientPrivilege
@@ -418,7 +408,7 @@ def test_rollen_gehen_mit_dem_konto_entscheidungen_bleiben(db):
     db.execute("SELECT wawi.api_rezension_ablehnen(%s)", (rid,))
     zurueck(db)
     db.execute("DELETE FROM auth.users WHERE id = %s", (kennung,))
-    db.execute("SELECT count(*) FROM wawi.rezension_entscheidung WHERE konto = %s", (kennung,))
+    db.execute("SELECT count(*) FROM wawi_intern.rezension_entscheidung WHERE konto = %s", (kennung,))
     assert db.fetchone()[0] == 1
 
 
@@ -541,23 +531,118 @@ def test_uebungsrezensionen_loeschen_raeumt_alles_ab(db):
     db.execute("SELECT wawi.api_rezension_ablehnen(%s)", (rid,))
     zurueck(db)
     db.execute("SELECT * FROM wawi.uebungsrezensionen_loeschen()")
-    for tabelle in ("wawi.rezension_pruefung", "wawi.rezension_entscheidung", "wawi.qs_fall"):
+    for tabelle in ("wawi_intern.rezension_pruefung", "wawi_intern.rezension_entscheidung", "wawi_intern.qs_fall"):
         db.execute(f"SELECT count(*) FROM {tabelle}")
         assert db.fetchone()[0] == 0, tabelle
 
 
-def probe_text():
-    """Abschnitt 6 der Migration ohne den Rest der Markenzeile."""
-    text = (AUFBAU / "0023_rezension_freigabe.sql").read_text()
-    return text.split("-- 6 Probe", 1)[1].split("\n", 1)[1]
+INTERNE_TABELLEN = ["wawi_intern.rezension_pruefung", "wawi_intern.rezension_entscheidung",
+                    "wawi_intern.qs_fall", "wawi_intern.mitarbeiter_rolle"]
+
+EINTRAGEN = ("wawi.pruefung_eintragen(bigint, text, text[], boolean, jsonb, text[], boolean, "
+             "text, text, text, text, integer, text)")
+
+# Rechtefehler, die die Probe erkennen und freigabe_rechte() reparieren muss.
+REGRESSIONEN = [
+    f"GRANT EXECUTE ON FUNCTION {EINTRAGEN} TO anon",
+    "GRANT EXECUTE ON FUNCTION wawi.api_rezension_ablehnen(bigint, text) TO anon",
+    "GRANT EXECUTE ON FUNCTION wawi.api_qs_fall_erledigen(bigint, text) TO bm_pruefdienst",
+    "GRANT EXECUTE ON FUNCTION wawi.hat_rolle(text) TO anon",
+    "CREATE POLICY offen ON wawi_intern.qs_fall FOR SELECT USING (true)",
+    "CREATE POLICY zweite ON wawi.rezension FOR SELECT USING (true)",
+    "ALTER TABLE wawi_intern.mitarbeiter_rolle DISABLE ROW LEVEL SECURITY",
+    "GRANT SELECT ON wawi.v_freigabe_statistik TO authenticated",
+    "GRANT SELECT ON wawi.v_moderation TO anon",
+    "GRANT UPDATE ON wawi.rezension TO anon",
+    "GRANT TRUNCATE ON wawi_intern.qs_fall TO anon",
+    "GRANT USAGE ON SCHEMA wawi_intern TO studi_daba",
+    "GRANT SELECT ON wawi_intern.rezension_pruefung TO authenticated",
+    "GRANT INSERT ON wawi.v_rezensionen_lesen TO anon",
+    "REVOKE SELECT ON wawi.v_rezensionen_lesen FROM anon",
+    "GRANT SELECT ON wawi.rezension TO bm_pruefdienst",
+]
 
 
-def test_probe_meldet_ein_offenes_recht(db):
-    probe = probe_text()
-    db.execute("GRANT SELECT ON wawi.qs_fall TO anon")
-    assert fehler(db, probe) is psycopg2.errors.RaiseException
+def test_erneuter_lauf_von_0018_und_0020_oeffnet_nichts(db):
+    shop_rezension(db, "GEHEIM noch offen")
+    zurueckgehalten(db, "GEHEIM zurückgehalten")
+    for skript in ("0018_wawi_sichten_und_schreiben.sql", "0020_demo_rolle.sql"):
+        db.execute((AUFBAU / skript).read_text())
+    for rolle in ("anon", "authenticated", "studi_daba"):
+        als(db, rolle)
+        db.execute("SELECT count(*) FROM wawi.rezension WHERE inhalt LIKE 'GEHEIM%'")
+        assert db.fetchone()[0] == 0, rolle
+        for tabelle in INTERNE_TABELLEN:
+            assert fehler(db, f"SELECT 1 FROM {tabelle} LIMIT 1") is psycopg2.errors.InsufficientPrivilege, \
+                (rolle, tabelle)
+    zurueck(db)
+    assert fehler(db, "SELECT wawi.freigabe_pruefen()") is None
 
 
-def test_probe_laeuft_im_sauberen_stand(db):
-    probe = probe_text()
-    assert fehler(db, probe) is None
+def test_studi_daba_liest_alle_lehrobjekte(db):
+    # Dieselbe Bedingung wie am Ende von 0020 und von db/betrieb/studi_daba_lesend.sql.
+    db.execute("""SELECT count(*), count(*) FILTER (WHERE has_table_privilege('studi_daba', c.oid, 'SELECT'))
+                  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+                  WHERE n.nspname IN ('burgermetrics', 'wawi') AND c.relkind IN ('r', 'p', 'v', 'm', 'f')""")
+    alle, lesbar = db.fetchone()
+    assert alle == lesbar
+
+
+def test_moderationssichten_bleiben_fuer_studi_daba_zu(db):
+    zurueckgehalten(db)
+    als(db, "studi_daba")
+    for sicht in ("wawi.v_moderation", "wawi.v_qs_faelle", "wawi.v_entscheidungen_letzte"):
+        assert fehler(db, f"SELECT 1 FROM {sicht}") is psycopg2.errors.InsufficientPrivilege, sicht
+
+
+def test_0021_bricht_nach_0023_ab(db):
+    assert fehler(db, (AUFBAU / "0021_rezensionen.sql").read_text()) is psycopg2.errors.RaiseException
+
+
+def test_bestandskopie_gibt_den_bestand_frei(db):
+    db.execute("INSERT INTO burgermetrics.dim_date (date_id, date) VALUES (20260101, DATE '2026-01-01')")
+    db.execute("INSERT INTO burgermetrics.dim_product (product_id, product_name, category) VALUES (1, 'Test', 'Burger')")
+    db.execute("""INSERT INTO burgermetrics.fact_reviews (review_id, date, time, product_id, stars, review_text, source)
+                  VALUES (900001, DATE '2026-01-01', TIME '12:00', 1, 5, 'Simuliert und kuratiert', 'simulation')""")
+    db.execute((AUFBAU.parent / "betrieb" / "rezensionen_bestand_kopieren.sql").read_text())
+    db.execute("SELECT status, quelle, inhalt FROM wawi.rezension WHERE rezension_id = 900001")
+    assert db.fetchone() == ("freigegeben", "simulation", "Simuliert und kuratiert")
+
+
+def test_probe_im_sauberen_stand(db):
+    assert fehler(db, "SELECT wawi.freigabe_pruefen()") is None
+
+
+@pytest.mark.parametrize("regression", REGRESSIONEN)
+def test_probe_erkennt_jede_regression(db, regression):
+    db.execute(regression)
+    assert fehler(db, "SELECT wawi.freigabe_pruefen()") is psycopg2.errors.RaiseException
+
+
+@pytest.mark.parametrize("regression", REGRESSIONEN)
+def test_freigabe_rechte_repariert_jede_regression(db, regression):
+    db.execute(regression)
+    db.execute("SELECT wawi.freigabe_rechte()")
+    assert fehler(db, "SELECT wawi.freigabe_pruefen()") is None
+
+
+@pytest.mark.parametrize("rolle", ["anon", "authenticated", "studi_daba", "bm_pruefdienst"])
+def test_freigabe_funktionen_nur_fuer_postgres(db, rolle):
+    als(db, rolle)
+    assert fehler(db, "SELECT wawi.freigabe_rechte()") is psycopg2.errors.InsufficientPrivilege
+    assert fehler(db, "SELECT wawi.freigabe_pruefen()") is psycopg2.errors.InsufficientPrivilege
+
+
+def test_migration_wartet_hoechstens_fuenf_sekunden_auf_sperren(db):
+    db.execute((AUFBAU / "0023_rezension_freigabe.sql").read_text())
+    db.execute("SHOW lock_timeout")
+    assert db.fetchone()[0] == "5s"
+
+
+def test_betriebsskript_studi_daba_lesend_laeuft_nach_0023(db):
+    # Das Skript läuft sonst nur in der Datenbank postgres; hier dieselben Schritte in bm_freigabe.
+    skript = (AUFBAU.parent / "betrieb" / "studi_daba_lesend.sql").read_text()
+    schutz = "IF current_database() <> 'postgres'"
+    assert skript.count(schutz) == 1
+    db.execute(skript.replace(schutz, "IF current_database() <> current_database()"))
+    assert fehler(db, "SELECT wawi.freigabe_pruefen()") is None
