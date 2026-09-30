@@ -95,6 +95,8 @@ Die Daten entstehen nicht nur auf dem Bildschirm. Bei jeder Zahlung schreibt die
 
 Damit schließt sich der Kreis zum Datenmodell: Die Granularität aus [Kapitel 2](02-datenmodell.md#24-granularität-die-wichtigste-entscheidung) wird an der Kasse sichtbar, wo sie entsteht — und der Weg von dort ins Auswertungsmodell ist der ETL-Schritt aus `db/aufbau/0019`, nicht mehr eine Behauptung.
 
+**Rezensionen.** Der Knopf „Rezensionen“ in der Kopfleiste zeigt, wie viele Rezensionen zurückgehalten sind und wie viele QS-Fälle offen sind (`v_pruefdienst_stand`, ohne Anmeldung). Der Bereich dahinter braucht ein Supabase-Konto mit der Rolle `moderation` oder `qualitaet` (`wawi_intern.mitarbeiter_rolle`); die Anmeldung geht an den Anmeldedienst von Supabase, das Token lebt im `sessionStorage` des Tabs und gilt eine Stunde. Die Moderation sieht die zurückgehaltenen Rezensionen mit Gründen und Jevs Wahrscheinlichkeiten und entscheidet über `api_rezension_freigeben()` und `api_rezension_ablehnen()`; die Qualitätssicherung schließt Hinweise auf Gesundheitsrisiken mit `api_qs_fall_erledigen()`. Wartet eine offene Rezension fünf Minuten oder länger, warnt die Statuszeile, dass der Prüfdienst womöglich steht. Die Logik steht in `web/js/moderation.js`; Kasse und Manager-PIN sind davon unberührt.
+
 ---
 
 ## 5.5 Online-Shop
