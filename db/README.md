@@ -41,6 +41,7 @@ hier nicht als Behauptung, sondern als Funktion (`0019`).
 | `aufbau/0020_demo_rolle.sql` | Rolle `studi_daba` (Kennwort `thws`): nur lesen, beide Schemata, zehn Minuten je Abfrage — als `supabase_admin` ausführen |
 | `aufbau/0021_rezensionen.sql` | Rezensionen: `wawi.rezension`, `fact_reviews`, Schreibweg `rezension_anlegen()` für den Shop, ETL und Probe erweitert — zweimal ausführen, dazwischen `lade_csv.py --nur fact_reviews` |
 | `aufbau/0022_bestellquote.sql` | atomare Bestellquote für bestehende Installationen; Signatur, Eigentümer und Grants der RPC bleiben erhalten |
+| `aufbau/0023_rezension_freigabe.sql` | Freigabe der Shop-Rezensionen: Status in `wawi.rezension`, Prüftabellen, Rolle `bm_pruefdienst`, Rollen `moderation` und `qualitaet`, Sichten für Shop und POS — nach jedem erneuten Lauf von `0021` wiederholen |
 | `materialisieren.py` | wandelt die Sichten in materialisierte Sichten um; `--neu` frischt nur auf |
 | `skript_ausfuehren.py` | führt ein Aufbauskript als `postgres` in einer Transaktion aus und zeigt die NOTICE-Meldungen |
 | `betrieb/studi_daba_verwaltung.sql` | einmalig als `supabase_admin`: `postgres` darf die Einstellungen von `studi_daba` ändern, danach geht `ALTER ROLE studi_daba SET ...` über den MCP-Server |
@@ -195,11 +196,21 @@ Schemata mit denselben Kennungen; `uebernahme_aus_wawi()` trägt Shop-Rezensione
 nach `fact_reviews`, `etl_probe()` vergleicht beide Seiten, und
 `uebungsrezensionen_loeschen()` räumt die Übungsrezensionen wieder ab.
 
-Öffentlich sichtbar sind nur Aggregate (`v_rezension_produkt`) und die drei
-jüngsten Simulationstexte je Artikel (`v_kundenstimmen`). Was Besucher schreiben,
-erscheint nirgends auf einer Seite — nur in `v_rezension_letzte` für die
-Übungsgruppe. `studi_daba` liest alles, schreibt nichts und darf die Funktion nicht
-aufrufen; das prüft die Probe am Ende von `0021`.
+Seit `0023` hat jede Rezension einen Status: `offen`, `freigegeben`,
+`zurueckgehalten` oder `abgelehnt`. Der Simulationsbestand ist freigegeben,
+Shop-Rezensionen beginnen offen. Öffentlich lesbar sind nur freigegebene, in
+den Sichten und über die Richtlinie `lesen_freigegeben` auch in der Tabelle
+selbst; `v_rezension_letzte` zeigt Status und Datensatz, den Text aber erst
+nach der Freigabe. Den Status setzen der Prüfdienst (Rolle `bm_pruefdienst`,
+nur `pruefung_offene_holen()`, `pruefung_eintragen()` und `pruefung_heute()`)
+und Menschen mit den Rollen `moderation` und `qualitaet` im POS
+(`api_rezension_freigeben()`, `api_rezension_ablehnen()`,
+`api_qs_fall_erledigen()`); ablehnen kann nur ein Mensch. Die Rollen stehen in
+`wawi.mitarbeiter_rolle` und hängen am Supabase-Konto. `stg_fact_reviews` und
+damit `fact_reviews` nehmen nur freigegebene Rezensionen auf. `studi_daba`
+liest wie `anon` nur freigegebene Texte und zusätzlich die Zählung
+`v_freigabe_statistik`; die Prüf- und Entscheidungstabellen bleiben allen
+außer `postgres` verschlossen. Das prüft die Probe am Ende von `0023`.
 
 Nach jeder Änderung an Sichten oder Funktionen braucht PostgREST einen Neustart
 (`docker compose restart rest` auf dem Server), sonst kennt es die neuen Objekte
@@ -416,7 +427,7 @@ alten Stand. `etl_probe()` ist der Gleichheitsbeweis aus
 Belege: die symmetrische Differenz von `stg_fact_orders` gegen `fact_orders`
 und von `stg_fact_order_items` gegen `fact_order_items` und von `stg_fact_reviews` gegen `fact_reviews`.
 
-**Was `anon` darf:** beide Schemata lesen und die beiden Schreibfunktionen
+**Was `anon` darf:** beide Schemata lesen (in `wawi.rezension` nur freigegebene Zeilen, die Prüf- und Entscheidungstabellen aus `0023` gar nicht) und die beiden Schreibfunktionen
 `bestellung_anlegen()` und `rezension_anlegen()` aufrufen. Kein `INSERT` auf eine
 Tabelle, kein Aufruf der vier Betriebsfunktionen (`uebernahme_aus_wawi()`,
 `etl_probe()`, `uebungsbestellungen_loeschen()`, `uebungsrezensionen_loeschen()`).
