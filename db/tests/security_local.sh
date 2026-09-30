@@ -37,4 +37,5 @@ test_port="$(docker port "$container" 5432/tcp | awk -F: '{print $NF}')"
 export BM_SECURITY_TEST_DSN="host=localhost port=$test_port dbname=postgres user=postgres password=local-security-test"
 export BM_SECURITY_TEST_CA="$test_dir/server.crt"
 cd "$root_dir"
-"$test_python" -m pytest db/tests/test_security_boundaries.py db/tests/test_materialisieren.py "$@"
+"$test_python" -m pytest db/tests/test_security_boundaries.py db/tests/test_materialisieren.py \
+  db/tests/test_rezension_freigabe.py "$@"
