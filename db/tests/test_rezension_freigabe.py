@@ -112,3 +112,75 @@ def test_tabelle_zeigt_nur_freigegebene(db, rolle):
     als(db, rolle)
     db.execute("SELECT count(*) FROM wawi.rezension WHERE rezension_id = %s", (rid,))
     assert db.fetchone()[0] == 1
+
+
+NEUE_TABELLEN = ["wawi.rezension_pruefung", "wawi.rezension_entscheidung",
+                 "wawi.qs_fall", "wawi.mitarbeiter_rolle"]
+
+
+def konto(cur, *rollen):
+    """Legt als postgres ein Supabase-Konto mit Rollen an; es lebt nur bis zum Ende des Tests."""
+    zurueck(cur)  # wird oft als Argument von als() ausgewertet, während noch eine andere Rolle gilt
+    kennung = str(uuid.uuid4())
+    cur.execute("INSERT INTO auth.users (id) VALUES (%s)", (kennung,))
+    for rolle in rollen:
+        cur.execute("INSERT INTO wawi.mitarbeiter_rolle (konto, rolle) VALUES (%s, %s)", (kennung, rolle))
+    return kennung
+
+
+@pytest.mark.parametrize("rolle", ["anon", "authenticated", "studi_daba", "bm_pruefdienst"])
+@pytest.mark.parametrize("tabelle", NEUE_TABELLEN)
+def test_neue_tabellen_sind_verschlossen(db, rolle, tabelle):
+    als(db, rolle)
+    assert fehler(db, f"SELECT 1 FROM {tabelle} LIMIT 1") is psycopg2.errors.InsufficientPrivilege
+
+
+def test_zeilenschutz_haelt_auch_nach_erneutem_lauf_von_0018(db):
+    # 0018 vergibt SELECT auf alle Tabellen in wawi. Ohne Richtlinie bleiben die Zeilen trotzdem unsichtbar.
+    rid = shop_rezension(db)
+    db.execute("INSERT INTO wawi.rezension_pruefung (rezension_id, fehler) VALUES (%s, 'Test')", (rid,))
+    db.execute("GRANT SELECT ON wawi.rezension_pruefung TO anon")
+    als(db, "anon")
+    db.execute("SELECT count(*) FROM wawi.rezension_pruefung")
+    assert db.fetchone()[0] == 0
+
+
+def test_hat_rolle_liest_das_angemeldete_konto(db):
+    moderation = konto(db, "moderation")
+    ohne = konto(db)
+    als(db, "authenticated", moderation)
+    db.execute("SELECT wawi.hat_rolle('moderation'), wawi.hat_rolle('qualitaet')")
+    assert db.fetchone() == (True, False)
+    als(db, "authenticated", ohne)
+    db.execute("SELECT wawi.hat_rolle('moderation')")
+    assert db.fetchone()[0] is False
+    als(db, "authenticated")
+    db.execute("SELECT wawi.hat_rolle('moderation')")
+    assert db.fetchone()[0] is False
+
+
+@pytest.mark.parametrize("rolle", ["anon", "studi_daba", "bm_pruefdienst"])
+def test_hat_rolle_nur_fuer_angemeldete(db, rolle):
+    als(db, rolle)
+    assert fehler(db, "SELECT wawi.hat_rolle('moderation')") is psycopg2.errors.InsufficientPrivilege
+
+
+def test_unbekannte_rolle_wird_abgewiesen(db):
+    kennung = str(uuid.uuid4())
+    db.execute("INSERT INTO auth.users (id) VALUES (%s)", (kennung,))
+    assert fehler(db, "INSERT INTO wawi.mitarbeiter_rolle (konto, rolle) VALUES (%s, 'admin')", (kennung,)) \
+        is psycopg2.errors.CheckViolation
+
+
+def test_rollen_verschwinden_mit_dem_konto(db):
+    kennung = konto(db, "moderation", "qualitaet")
+    db.execute("DELETE FROM auth.users WHERE id = %s", (kennung,))
+    db.execute("SELECT count(*) FROM wawi.mitarbeiter_rolle WHERE konto = %s", (kennung,))
+    assert db.fetchone()[0] == 0
+
+
+def test_pruefdienst_rolle_ohne_tabellenrechte(db):
+    db.execute("SELECT rolcanlogin, rolinherit, rolconnlimit FROM pg_roles WHERE rolname = 'bm_pruefdienst'")
+    assert db.fetchone() == (True, False, 3)
+    db.execute("SELECT count(*) FROM information_schema.role_table_grants WHERE grantee = 'bm_pruefdienst'")
+    assert db.fetchone()[0] == 0
