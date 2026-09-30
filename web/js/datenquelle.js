@@ -97,6 +97,32 @@ export class Datenquelle {
   /** Status einer Shop-Rezension ohne Text: 'offen', 'freigegeben',
    *  'zurueckgehalten', 'abgelehnt' — oder null, wenn es sie nicht gibt. */
   rezensionStatus(rezensionId) { throw new Error('nicht umgesetzt'); }
+  /** Anmeldung mit einem Supabase-Konto für die Moderation im POS.
+   *  @returns {Promise<object>} token, gueltigBis (Millisekunden) */
+  anmelden(email, passwort) { throw new Error('nicht umgesetzt'); }
+  /** Übernimmt eine gespeicherte Anmeldung, wenn sie noch gilt; true bei Erfolg. */
+  sitzungUebernehmen(sitzung) { throw new Error('nicht umgesetzt'); }
+  /** Gilt die Anmeldung noch? */
+  angemeldet() { throw new Error('nicht umgesetzt'); }
+  /** Meldet ab und vergisst das Token. */
+  abmelden() { throw new Error('nicht umgesetzt'); }
+  /** Rollen des angemeldeten Kontos: 'moderation', 'qualitaet' oder keine. */
+  meineRollen() { throw new Error('nicht umgesetzt'); }
+  /** Zurückgehaltene und lange offene Shop-Rezensionen mit Jevs Wahrscheinlichkeiten (Rolle moderation). */
+  moderationListe() { throw new Error('nicht umgesetzt'); }
+  /** Offene QS-Fälle mit Text (Rolle qualitaet). */
+  qsFaelle() { throw new Error('nicht umgesetzt'); }
+  /** Die letzten 20 Entscheidungen (Rolle moderation). */
+  entscheidungenLetzte() { throw new Error('nicht umgesetzt'); }
+  /** Stand des Prüfdienstes ohne Texte, auch ohne Anmeldung: letzte_pruefung, offen,
+   *  aelteste_offene_min, zurueckgehalten, qs_offen. */
+  pruefdienstStand() { throw new Error('nicht umgesetzt'); }
+  /** Gibt eine Shop-Rezension frei (Rolle moderation). */
+  rezensionFreigeben(rezensionId, bemerkung) { throw new Error('nicht umgesetzt'); }
+  /** Lehnt eine Shop-Rezension ab (Rolle moderation). */
+  rezensionAblehnen(rezensionId, bemerkung) { throw new Error('nicht umgesetzt'); }
+  /** Schließt einen QS-Fall (Rolle qualitaet). */
+  qsFallErledigen(qsFallId, bemerkung) { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden, bestellungen, umsatz, umsatzanteil_pct */
   alterUmsatz() { throw new Error('nicht umgesetzt'); }
   /** eine Zeile: bestellungen, aus_heimatbezirk, anteil_pct, filialbezirke, wohnbezirke */
@@ -164,6 +190,7 @@ export class PostgrestQuelle extends Datenquelle {
     this.schema = schema;
     this.schemaWawi = schemaWawi;
     this.zwischenspeicher = new Map();
+    this.sitzung = null;   // Anmeldung für die Moderation: token, gueltigBis
   }
 
   async hole(sicht, abfrage = '', { schema = this.schema, frisch = false, seitenweise = false } = {}) {
@@ -180,7 +207,7 @@ export class PostgrestQuelle extends Datenquelle {
       const antwort = await fetch(`${this.url}/rest/v1/${sicht}?${parameter}`, {
         headers: {
           apikey: this.schluessel,
-          Authorization: `Bearer ${this.schluessel}`,
+          Authorization: `Bearer ${this.ausweis()}`,
           'Accept-Profile': schema,
           ...(seitenweise ? { Prefer: 'count=exact' } : {}),
         },
@@ -221,7 +248,7 @@ export class PostgrestQuelle extends Datenquelle {
       method: 'POST',
       headers: {
         apikey: this.schluessel,
-        Authorization: `Bearer ${this.schluessel}`,
+        Authorization: `Bearer ${this.ausweis()}`,
         'Content-Profile': schema,
         'Content-Type': 'application/json',
       },
@@ -234,6 +261,67 @@ export class PostgrestQuelle extends Datenquelle {
       throw new Error(`${funktion}: HTTP ${antwort.status} — ${meldung}`);
     }
     return antwort.json();
+  }
+
+  /** Das Token für Authorization: die Anmeldung, solange sie gilt, sonst der öffentliche Schlüssel. */
+  ausweis() {
+    return this.angemeldet() ? this.sitzung.token : this.schluessel;
+  }
+
+  angemeldet() {
+    return Boolean(this.sitzung && Date.now() < this.sitzung.gueltigBis);
+  }
+
+  /** Anmeldung beim Anmeldedienst von Supabase; das Passwort geht nur in diesen Request. */
+  async anmelden(email, passwort) {
+    const antwort = await fetch(`${this.url}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { apikey: this.schluessel, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: passwort }),
+    });
+    if (antwort.status === 400 || antwort.status === 401) throw new Error('E-Mail oder Passwort stimmen nicht.');
+    if (!antwort.ok) throw new Error(`anmelden: HTTP ${antwort.status}`);
+    const daten = await antwort.json();
+    // Eine Minute vor dem Ablauf gilt die Anmeldung schon als abgelaufen.
+    this.sitzung = { token: daten.access_token,
+                     gueltigBis: Date.now() + ((Number(daten.expires_in) || 3600) - 60) * 1000 };
+    return this.sitzung;
+  }
+
+  sitzungUebernehmen(sitzung) {
+    const gueltig = Boolean(sitzung && sitzung.token && Date.now() < Number(sitzung.gueltigBis));
+    this.sitzung = gueltig ? { token: sitzung.token, gueltigBis: Number(sitzung.gueltigBis) } : null;
+    return gueltig;
+  }
+
+  /** Meldet beim Anmeldedienst ab; das Token ist danach vergessen, auch wenn der Dienst nicht antwortet. */
+  async abmelden() {
+    if (this.angemeldet()) {
+      try {
+        await fetch(`${this.url}/auth/v1/logout`, {
+          method: 'POST', headers: { apikey: this.schluessel, Authorization: `Bearer ${this.sitzung.token}` } });
+      } catch (_) { /* abgemeldet wird trotzdem */ }
+    }
+    this.sitzung = null;
+    this.zwischenspeicher.clear();
+  }
+
+  /** Führt einen Aufruf nur mit gültiger Anmeldung aus; HTTP 401 heißt: abgelaufen. */
+  async mitAnmeldung(aufruf) {
+    const abgelaufen = new Error('Die Anmeldung ist abgelaufen. Bitte neu anmelden.');
+    if (!this.angemeldet()) {
+      this.sitzung = null;
+      throw abgelaufen;
+    }
+    try {
+      return await aufruf();
+    } catch (fehler) {
+      if (/HTTP 401/.test(fehler.message)) {
+        this.sitzung = null;
+        throw abgelaufen;
+      }
+      throw fehler;
+    }
   }
 
   kennzahlenJahr()     { return this.hole('v_kennzahlen_jahr', 'order=jahr'); }
@@ -270,6 +358,34 @@ export class PostgrestQuelle extends Datenquelle {
     const [zeile] = await this.hole('v_rezension_status', `rezension_id=eq.${Number(rezensionId)}`,
       { schema: this.schemaWawi, frisch: true });
     return zeile ? zeile.status : null;
+  }
+  meineRollen() {
+    return this.mitAnmeldung(async () => {
+      const rollen = [];
+      for (const rolle of ['moderation', 'qualitaet']) {
+        if (await this.rufe('hat_rolle', { p_rolle: rolle })) rollen.push(rolle);
+      }
+      return rollen;
+    });
+  }
+  moderationListe()      { return this.mitAnmeldung(() => this.hole('v_moderation', '', { schema: this.schemaWawi, frisch: true })); }
+  qsFaelle()             { return this.mitAnmeldung(() => this.hole('v_qs_faelle', '', { schema: this.schemaWawi, frisch: true })); }
+  entscheidungenLetzte() { return this.mitAnmeldung(() => this.hole('v_entscheidungen_letzte', '', { schema: this.schemaWawi, frisch: true })); }
+  async pruefdienstStand() {
+    const [zeile] = await this.hole('v_pruefdienst_stand', '', { schema: this.schemaWawi, frisch: true });
+    return zeile || null;
+  }
+  rezensionFreigeben(rezensionId, bemerkung) {
+    return this.mitAnmeldung(() => this.rufe('api_rezension_freigeben',
+      { rezension_id: Number(rezensionId), bemerkung: bemerkung || null }));
+  }
+  rezensionAblehnen(rezensionId, bemerkung) {
+    return this.mitAnmeldung(() => this.rufe('api_rezension_ablehnen',
+      { rezension_id: Number(rezensionId), bemerkung: bemerkung || null }));
+  }
+  qsFallErledigen(qsFallId, bemerkung) {
+    return this.mitAnmeldung(() => this.rufe('api_qs_fall_erledigen',
+      { qs_fall_id: Number(qsFallId), bemerkung: bemerkung || null }));
   }
   alterUmsatz()        { return this.hole('v_alter_umsatz', 'order=umsatz.desc'); }
   heimatbezirk()       { return this.hole('v_heimatbezirk', ''); }
