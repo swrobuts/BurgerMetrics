@@ -4947,6 +4947,7 @@ let leseProduktId = null;   // der Artikel, dessen Rezensionen offen sind
 let leseSterne = null;      // Filter: 1 bis 5 oder null für alle
 let leseSeite = 0;          // zuletzt geladene Seite
 let leseGeladen = 0;        // Zahl der angezeigten Rezensionen
+let leseAnfrage = 0;        // zählt Neuanfänge der Liste; ältere Antworten gelten nicht
 let leseAusloeser = null;   // bekommt beim Schließen den Fokus zurück
 let statusUhr = null;       // Abfrage des Status der zuletzt gespeicherten Rezension
 
@@ -5029,6 +5030,7 @@ function leseFiltern(sterne) {
 function leseListeLeeren() {
   document.getElementById('leseListe').textContent = '';
   leseMeldung('');
+  leseAnfrage++;
   leseSeite = 0;
   leseGeladen = 0;
   document.getElementById('leseWeiter').hidden = true;
@@ -5037,13 +5039,14 @@ function leseListeLeeren() {
 // Holt die nächste Seite aus der Datenbank und hängt sie an die Liste.
 async function leseSeiteLaden() {
   if (!window.rezensionenLesenLaden) { leseMeldung('Keine Verbindung zum operativen System.'); return; }
-  const produkt = leseProduktId, sterne = leseSterne, seite = leseSeite + 1;
+  const anfrage = leseAnfrage, produkt = leseProduktId, sterne = leseSterne, seite = leseSeite + 1;
   const weiter = document.getElementById('leseWeiter');
   weiter.disabled = true;
   try {
     const zeilen = await window.rezensionenLesenLaden(produkt, sterne, seite);
-    // Wurden Artikel oder Filter inzwischen gewechselt, gilt diese Antwort nicht mehr.
-    if (produkt !== leseProduktId || sterne !== leseSterne) return;
+    // Wurde die Liste inzwischen neu begonnen (anderer Artikel, anderer Filter
+    // oder derselbe noch einmal), gilt diese Antwort nicht mehr.
+    if (anfrage !== leseAnfrage) return;
     const liste = document.getElementById('leseListe');
     for (const z of zeilen) liste.appendChild(leseEintrag(z));
     leseSeite = seite;
@@ -5052,9 +5055,9 @@ async function leseSeiteLaden() {
     const gesamt = window.REZENSIONEN.anzahlFuer(BEWERTUNGEN.get(produkt), sterne);
     weiter.hidden = !window.REZENSIONEN.weitereLaden(leseGeladen, gesamt, zeilen.length);
   } catch (fehler) {
-    leseMeldung(fehler.message);
+    if (anfrage === leseAnfrage) leseMeldung(fehler.message);
   } finally {
-    weiter.disabled = false;
+    if (anfrage === leseAnfrage) weiter.disabled = false;
   }
 }
 
