@@ -55,3 +55,31 @@ test('Eine leere Wetter-Sicht liefert eine leere Liste', async t => {
   assert.deepEqual(await quelle().wetterTage(), []);
   assert.equal(mock.mock.callCount(), 1);
 });
+
+test('rezensionenLesen: Filter, Sortierung und Seite als PostgREST-Abfrage', async t => {
+  const aufrufe = [];
+  t.mock.method(globalThis, 'fetch', async (url, optionen) => {
+    aufrufe.push({ url: new URL(url), kopf: optionen.headers });
+    return antwort([]);
+  });
+  await quelle().rezensionenLesen(7, 4, 2);
+  await quelle().rezensionenLesen(7, null, 1, 5);
+  const [erste, zweite] = aufrufe;
+  assert.equal(erste.url.pathname, '/rest/v1/v_rezensionen_lesen');
+  assert.equal(erste.url.searchParams.get('artikel_id'), 'eq.7');
+  assert.equal(erste.url.searchParams.get('sterne'), 'eq.4');
+  assert.equal(erste.url.searchParams.get('order'), 'erstellt_am.desc,rezension_id.desc');
+  assert.equal(erste.url.searchParams.get('limit'), '10');
+  assert.equal(erste.url.searchParams.get('offset'), '10');
+  assert.equal(erste.kopf['Accept-Profile'], 'wawi');
+  assert.equal(zweite.url.searchParams.get('sterne'), null);
+  assert.equal(zweite.url.searchParams.get('limit'), '5');
+  assert.equal(zweite.url.searchParams.get('offset'), '0');
+});
+
+test('rezensionStatus: Status der Zeile oder null', async t => {
+  const antworten = [[{ rezension_id: 5, status: 'offen' }], []];
+  t.mock.method(globalThis, 'fetch', async () => antwort(antworten.shift()));
+  assert.equal(await quelle().rezensionStatus(5), 'offen');
+  assert.equal(await quelle().rezensionStatus(6), null);
+});
