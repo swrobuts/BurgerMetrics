@@ -323,3 +323,110 @@ def test_dienstfunktionen_nur_fuer_den_pruefdienst(db, rolle, aufruf):
 def test_pruefdienst_liest_keine_tabellen(db):
     als(db, "bm_pruefdienst")
     assert fehler(db, "SELECT 1 FROM wawi.rezension LIMIT 1") is psycopg2.errors.InsufficientPrivilege
+
+
+def test_freigeben_braucht_die_rolle_moderation(db):
+    rid = zurueckgehalten(db)
+    als(db, "authenticated", konto(db))
+    assert fehler(db, "SELECT wawi.api_rezension_freigeben(%s)", (rid,)) is psycopg2.errors.InsufficientPrivilege
+    als(db, "authenticated", konto(db, "qualitaet"))
+    assert fehler(db, "SELECT wawi.api_rezension_freigeben(%s)", (rid,)) is psycopg2.errors.InsufficientPrivilege
+    als(db, "anon")
+    assert fehler(db, "SELECT wawi.api_rezension_freigeben(%s)", (rid,)) is psycopg2.errors.InsufficientPrivilege
+
+
+def test_freigeben_macht_die_rezension_oeffentlich(db):
+    rid = zurueckgehalten(db, "Der Service war super, danke!")
+    kennung = konto(db, "moderation")
+    als(db, "authenticated", kennung)
+    db.execute("SELECT wawi.api_rezension_freigeben(%s, '  geprüft  ')", (rid,))
+    assert db.fetchone()[0] == {"rezension_id": rid, "status": "freigegeben"}
+    zurueck(db)
+    db.execute("SELECT entscheidung, konto, bemerkung FROM wawi.rezension_entscheidung WHERE rezension_id = %s", (rid,))
+    assert db.fetchone() == ("freigegeben", kennung, "geprüft")
+    als(db, "anon")
+    db.execute("SELECT inhalt FROM wawi.rezension WHERE rezension_id = %s", (rid,))
+    assert db.fetchone()[0] == "Der Service war super, danke!"
+
+
+def test_ablehnen_und_keine_zweite_entscheidung(db):
+    rid = zurueckgehalten(db)
+    als(db, "authenticated", konto(db, "moderation"))
+    db.execute("SELECT wawi.api_rezension_ablehnen(%s)", (rid,))
+    assert db.fetchone()[0] == {"rezension_id": rid, "status": "abgelehnt"}
+    assert fehler(db, "SELECT wawi.api_rezension_freigeben(%s)", (rid,)) \
+        is psycopg2.errors.ObjectNotInPrerequisiteState
+
+
+def test_offene_rezension_laesst_sich_direkt_entscheiden(db):
+    # Fällt der Prüfdienst aus, entscheidet ein Mensch auch über offene Rezensionen.
+    rid = shop_rezension(db)
+    als(db, "authenticated", konto(db, "moderation"))
+    db.execute("SELECT wawi.api_rezension_freigeben(%s)", (rid,))
+    assert db.fetchone()[0]["status"] == "freigegeben"
+
+
+def test_simulation_laesst_sich_nicht_entscheiden(db):
+    db.execute("""INSERT INTO wawi.rezension (artikel_id, sterne, inhalt, quelle)
+                  VALUES (1, 5, 'Simulation', 'simulation') RETURNING rezension_id""")
+    rid = db.fetchone()[0]
+    als(db, "authenticated", konto(db, "moderation"))
+    assert fehler(db, "SELECT wawi.api_rezension_ablehnen(%s)", (rid,)) is psycopg2.errors.ForeignKeyViolation
+
+
+def test_bemerkung_hoechstens_500_zeichen(db):
+    rid = zurueckgehalten(db)
+    als(db, "authenticated", konto(db, "moderation"))
+    assert fehler(db, "SELECT wawi.api_rezension_freigeben(%s, %s)", (rid, "x" * 501)) \
+        is psycopg2.errors.InvalidParameterValue
+
+
+def test_menschliche_entscheidung_bleibt(db):
+    rid = shop_rezension(db)
+    als(db, "authenticated", konto(db, "moderation"))
+    db.execute("SELECT wawi.api_rezension_ablehnen(%s, 'Werbung')", (rid,))
+    zurueck(db)
+    assert eintragen(db, rid, "freigegeben") == {"rezension_id": rid, "status": "abgelehnt",
+                                                 "uebersprungen": True}
+
+
+def test_qs_fall_erledigen_braucht_die_rolle_qualitaet(db):
+    rid = shop_rezension(db, "Im Salat war ein Stück Plastik.")
+    eintragen(db, rid, "zurueckgehalten", ["Gesundheitsrisiko"], qs=True)
+    db.execute("SELECT qs_fall_id FROM wawi.qs_fall WHERE rezension_id = %s", (rid,))
+    fall = db.fetchone()[0]
+    als(db, "authenticated", konto(db, "moderation"))
+    assert fehler(db, "SELECT wawi.api_qs_fall_erledigen(%s)", (fall,)) is psycopg2.errors.InsufficientPrivilege
+    als(db, "authenticated", konto(db, "qualitaet"))
+    db.execute("SELECT wawi.api_qs_fall_erledigen(%s, 'Filiale informiert')", (fall,))
+    assert db.fetchone()[0]["qs_fall_id"] == fall
+    assert fehler(db, "SELECT wawi.api_qs_fall_erledigen(%s)", (fall,)) \
+        is psycopg2.errors.ObjectNotInPrerequisiteState
+    zurueck(db)
+    # Den QS-Fall zu erledigen gibt die Rezension nicht frei.
+    db.execute("SELECT status FROM wawi.rezension WHERE rezension_id = %s", (rid,))
+    assert db.fetchone()[0] == "zurueckgehalten"
+
+
+def test_rollen_gehen_mit_dem_konto_entscheidungen_bleiben(db):
+    rid = shop_rezension(db)
+    kennung = konto(db, "moderation")
+    als(db, "authenticated", kennung)
+    db.execute("SELECT wawi.api_rezension_ablehnen(%s)", (rid,))
+    zurueck(db)
+    db.execute("DELETE FROM auth.users WHERE id = %s", (kennung,))
+    db.execute("SELECT count(*) FROM wawi.rezension_entscheidung WHERE konto = %s", (kennung,))
+    assert db.fetchone()[0] == 1
+
+
+@pytest.mark.parametrize("rolle", ["authenticated", "bm_pruefdienst", "anon"])
+def test_hilfsfunktion_ist_nicht_aufrufbar(db, rolle):
+    als(db, rolle, konto(db, "moderation") if rolle == "authenticated" else None)
+    assert fehler(db, "SELECT wawi.rezension_entscheiden(1, 'freigegeben', NULL)") \
+        is psycopg2.errors.InsufficientPrivilege
+
+
+def test_pruefdienst_darf_nicht_entscheiden(db):
+    als(db, "bm_pruefdienst")
+    assert fehler(db, "SELECT wawi.api_rezension_freigeben(1)") is psycopg2.errors.InsufficientPrivilege
+    assert fehler(db, "SELECT wawi.api_qs_fall_erledigen(1)") is psycopg2.errors.InsufficientPrivilege

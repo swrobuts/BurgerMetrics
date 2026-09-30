@@ -388,3 +388,112 @@ GRANT EXECUTE ON FUNCTION wawi.pruefung_offene_holen(integer), wawi.pruefung_heu
   wawi.pruefung_eintragen(bigint, text, text[], boolean, jsonb, text[], boolean, text, text, text,
                           text, integer, text)
   TO bm_pruefdienst;
+
+-- ---------------------------------------------------------------------------
+-- 4 Entscheidungen von Menschen. Nur angemeldete Konten mit Rolle; ablehnen
+--   kann nur ein Mensch.
+-- ---------------------------------------------------------------------------
+
+-- Gemeinsamer Weg für Freigeben und Ablehnen: Rolle prüfen, Zustand prüfen,
+-- Entscheidung festhalten, Status setzen. Nicht direkt aufrufbar.
+CREATE OR REPLACE FUNCTION wawi.rezension_entscheiden(rezension_id bigint, entscheidung text, bemerkung text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = wawi, pg_temp
+AS $$
+#variable_conflict use_variable
+DECLARE
+  v_konto  uuid := auth.uid();
+  v_status text;
+BEGIN
+  IF v_konto IS NULL OR NOT wawi.hat_rolle('moderation') THEN
+    RAISE EXCEPTION 'keine Berechtigung: die Rolle moderation fehlt' USING ERRCODE = '42501';
+  END IF;
+  IF bemerkung IS NOT NULL AND char_length(bemerkung) > 500 THEN
+    RAISE EXCEPTION 'die Bemerkung darf höchstens 500 Zeichen lang sein' USING ERRCODE = '22023';
+  END IF;
+  SELECT r.status INTO v_status
+  FROM   wawi.rezension r
+  WHERE  r.rezension_id = rezension_id AND r.quelle = 'shop'
+  FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'unbekannte Shop-Rezension: %', rezension_id USING ERRCODE = '23503';
+  END IF;
+  IF v_status NOT IN ('offen', 'zurueckgehalten') THEN
+    RAISE EXCEPTION 'über die Rezension % ist schon entschieden (%)', rezension_id, v_status
+      USING ERRCODE = '55000';
+  END IF;
+  INSERT INTO wawi.rezension_entscheidung (rezension_id, entscheidung, konto, bemerkung)
+  VALUES (rezension_id, entscheidung, v_konto, nullif(btrim(bemerkung), ''));
+  UPDATE wawi.rezension r SET status = entscheidung WHERE r.rezension_id = rezension_id;
+  RETURN jsonb_build_object('rezension_id', rezension_id, 'status', entscheidung);
+END $$;
+
+-- Gibt eine offene oder zurückgehaltene Shop-Rezension frei (Rolle moderation).
+CREATE OR REPLACE FUNCTION wawi.api_rezension_freigeben(rezension_id bigint, bemerkung text DEFAULT NULL)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = wawi, pg_temp
+AS $$
+#variable_conflict use_variable
+BEGIN
+  RETURN wawi.rezension_entscheiden(rezension_id, 'freigegeben', bemerkung);
+END $$;
+
+-- Lehnt eine offene oder zurückgehaltene Shop-Rezension ab (Rolle moderation).
+CREATE OR REPLACE FUNCTION wawi.api_rezension_ablehnen(rezension_id bigint, bemerkung text DEFAULT NULL)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = wawi, pg_temp
+AS $$
+#variable_conflict use_variable
+BEGIN
+  RETURN wawi.rezension_entscheiden(rezension_id, 'abgelehnt', bemerkung);
+END $$;
+
+-- Schließt einen QS-Fall (Rolle qualitaet). Die Rezension selbst bleibt,
+-- wie sie ist; über sie entscheidet die Moderation.
+CREATE OR REPLACE FUNCTION wawi.api_qs_fall_erledigen(qs_fall_id bigint, bemerkung text DEFAULT NULL)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = wawi, pg_temp
+AS $$
+#variable_conflict use_variable
+DECLARE
+  v_konto    uuid := auth.uid();
+  v_erledigt timestamptz;
+  v_jetzt    timestamptz := now();
+BEGIN
+  IF v_konto IS NULL OR NOT wawi.hat_rolle('qualitaet') THEN
+    RAISE EXCEPTION 'keine Berechtigung: die Rolle qualitaet fehlt' USING ERRCODE = '42501';
+  END IF;
+  IF bemerkung IS NOT NULL AND char_length(bemerkung) > 500 THEN
+    RAISE EXCEPTION 'die Bemerkung darf höchstens 500 Zeichen lang sein' USING ERRCODE = '22023';
+  END IF;
+  SELECT q.erledigt_am INTO v_erledigt
+  FROM   wawi.qs_fall q
+  WHERE  q.qs_fall_id = qs_fall_id
+  FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'unbekannter QS-Fall: %', qs_fall_id USING ERRCODE = '23503';
+  END IF;
+  IF v_erledigt IS NOT NULL THEN
+    RAISE EXCEPTION 'der QS-Fall % ist schon erledigt', qs_fall_id USING ERRCODE = '55000';
+  END IF;
+  UPDATE wawi.qs_fall q
+  SET    erledigt_am = v_jetzt, konto = v_konto, bemerkung = nullif(btrim(bemerkung), '')
+  WHERE  q.qs_fall_id = qs_fall_id;
+  RETURN jsonb_build_object('qs_fall_id', qs_fall_id, 'erledigt_am', v_jetzt);
+END $$;
+
+REVOKE ALL ON FUNCTION wawi.rezension_entscheiden(bigint, text, text),
+  wawi.api_rezension_freigeben(bigint, text), wawi.api_rezension_ablehnen(bigint, text),
+  wawi.api_qs_fall_erledigen(bigint, text)
+  FROM PUBLIC, anon, authenticated, studi_daba, bm_pruefdienst;
+GRANT EXECUTE ON FUNCTION wawi.api_rezension_freigeben(bigint, text),
+  wawi.api_rezension_ablehnen(bigint, text), wawi.api_qs_fall_erledigen(bigint, text)
+  TO authenticated;
