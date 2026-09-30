@@ -501,7 +501,7 @@ def test_gesundheitsrisiko_legt_qs_fall_an(betreiber, dienst_verbindung):
     rid = anlegen(betreiber, "Im Salat war ein Stück Plastik.")
     dienst.eine_runde(dienst_verbindung, anfrage_mit({"gesundheitsrisiko": 0.9}), EINSTELLUNGEN)
     with betreiber.cursor() as cur:
-        cur.execute("SELECT count(*) FROM wawi.qs_fall WHERE rezension_id = %s", (rid,))
+        cur.execute("SELECT count(*) FROM wawi_intern.qs_fall WHERE rezension_id = %s", (rid,))
         assert cur.fetchone()[0] == 1
     betreiber.commit()
 
@@ -513,7 +513,7 @@ def test_drei_fehlversuche_halten_zurueck(betreiber, dienst_verbindung):
         dienst.eine_runde(dienst_verbindung, ausfall, EINSTELLUNGEN)
         # Die Pause von fünf Minuten nach einem Fehler vorspulen
         with betreiber.cursor() as cur:
-            cur.execute("""UPDATE wawi.rezension_pruefung SET geprueft_am = geprueft_am - interval '6 minutes'
+            cur.execute("""UPDATE wawi_intern.rezension_pruefung SET geprueft_am = geprueft_am - interval '6 minutes'
                            WHERE rezension_id = %s""", (rid,))
         betreiber.commit()
     assert status(betreiber, rid) == "zurueckgehalten"
@@ -778,7 +778,7 @@ ssh vps "cd $ziel && docker compose up -d --build && docker compose ps --format 
 ```markdown
 # Prüfdienst
 
-Prüft neue Shop-Rezensionen mit Jev und trägt das Ergebnis in `wawi.rezension_pruefung` ein
+Prüft neue Shop-Rezensionen mit Jev und trägt das Ergebnis in `wawi_intern.rezension_pruefung` ein
 (Spezifikation `docs/superpowers/specs/2026-09-30-rezensionen-jev-freigabe-design.md`, Abschnitt 6).
 Läuft als Container `bm-pruefdienst` auf dem VPS in `/opt/bm-pruefdienst`, im Docker-Netz
 `root_default`, als Datenbankrolle `bm_pruefdienst` mit genau drei Funktionen.
@@ -935,9 +935,9 @@ ids = {art: int(i) for art, i in (z.split() for z in open(os.environ["ABNAHME"])
 con = verbinde(); cur = con.cursor()
 for art, rid in ids.items():
     cur.execute("""SELECT r.status, p.gruende, p.qs_fall,
-                          (SELECT count(*) FROM wawi.qs_fall q WHERE q.rezension_id = r.rezension_id)
+                          (SELECT count(*) FROM wawi_intern.qs_fall q WHERE q.rezension_id = r.rezension_id)
                    FROM wawi.rezension r
-                   LEFT JOIN LATERAL (SELECT * FROM wawi.rezension_pruefung x WHERE x.rezension_id = r.rezension_id
+                   LEFT JOIN LATERAL (SELECT * FROM wawi_intern.rezension_pruefung x WHERE x.rezension_id = r.rezension_id
                                       ORDER BY x.pruefung_id DESC LIMIT 1) p ON true
                    WHERE r.rezension_id = %s""", (rid,))
     print(art, rid, cur.fetchone())

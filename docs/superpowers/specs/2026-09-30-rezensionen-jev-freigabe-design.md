@@ -126,20 +126,23 @@ Rücknahme, Aufruf wie `0021` über `db/skript_ausfuehren.py`.
 
 ### 5.1 Tabellen
 
+Die vier neuen Tabellen liegen im Schema `wawi_intern`, das die API nicht kennt (Nachtrag nach
+der Prüfung von Phase A, siehe 5.3).
+
 - `wawi.rezension`: neue Spalte `status text NOT NULL DEFAULT 'offen'`, Werte `offen`,
   `freigegeben`, `zurueckgehalten`, `abgelehnt`; Prüfregel: `quelle = 'simulation'` ⇒
   `status = 'freigegeben'`. Einmalige Umstellung der 10.000 simulierten Zeilen; Shop-Rezensionen,
   die es bei der Migration schon gibt (Stand 30.09.2026: keine), starten als `offen`. Neuer
   Index `(artikel_id, status, erstellt_am DESC)`.
-- `wawi.rezension_pruefung`: eine Zeile je Prüflauf — `rezension_id` (FK, ON DELETE CASCADE),
+- `wawi_intern.rezension_pruefung`: eine Zeile je Prüflauf — `rezension_id` (FK, ON DELETE CASCADE),
   `geprueft_am`, `modell`, `fragen_stand`, `fragen_fingerabdruck`, `regel_version`, die sechs
   Wahrscheinlichkeiten, `muster_treffer text[]`, `ergebnis`, `gruende text[]`, `qs_fall boolean`,
   `input_tokens`, `fehler text`.
-- `wawi.rezension_entscheidung`: `rezension_id` (FK, CASCADE), `entscheidung`
+- `wawi_intern.rezension_entscheidung`: `rezension_id` (FK, CASCADE), `entscheidung`
   (`freigegeben`/`abgelehnt`), `entschieden_am`, `konto uuid` (aus `auth.uid()`), `bemerkung`.
-- `wawi.qs_fall`: `rezension_id` (FK, CASCADE), `angelegt_am`, `erledigt_am`, `konto`,
+- `wawi_intern.qs_fall`: `rezension_id` (FK, CASCADE), `angelegt_am`, `erledigt_am`, `konto`,
   `bemerkung`.
-- `wawi.mitarbeiter_rolle`: `konto uuid` (FK auf `auth.users`), `rolle` (`moderation`,
+- `wawi_intern.mitarbeiter_rolle`: `konto uuid` (FK auf `auth.users`), `rolle` (`moderation`,
   `qualitaet`); Primärschlüssel aus beiden.
 
 ### 5.2 Funktionen
@@ -176,9 +179,14 @@ Zwei Befunde aus dem Bestand bestimmen diesen Abschnitt:
   Richtlinie durch `lesen_freigegeben` mit `USING (status = 'freigegeben')`. Sichten und
   Funktionen gehören wie die Tabelle `postgres` und lesen deshalb weiter alle Zeilen.
 - Seit `0018` und `0020` erhalten neue Tabellen und Sichten im Schema `wawi` automatisch
-  `SELECT` für `anon`, `authenticated` und `studi_daba`. Die Migration entzieht dieses Recht auf
-  jedem neuen Objekt und vergibt danach nur, was unten steht. Die vier neuen Tabellen bekommen
-  Row Level Security ohne Richtlinie.
+  `SELECT` für `anon`, `authenticated` und `studi_daba`, und ein erneuter Lauf der beiden
+  Skripte stellt diese Rechte und `lesen_alle` wieder her. Die vier neuen Tabellen liegen deshalb
+  im Schema `wawi_intern`, das diese Grants nicht erreichen, mit Row Level Security ohne
+  Richtlinie. Zeilenschutz und Rechte setzt `wawi.freigabe_rechte()` an einer Stelle,
+  `wawi.freigabe_pruefen()` prüft sie und bricht bei jeder Abweichung ab; `0018` und `0020`
+  rufen `freigabe_rechte()` an ihrem Ende auf. `0021` bricht nach `0023` ab, den Bestand lädt
+  dann `db/betrieb/rezensionen_bestand_kopieren.sql` neu (Nachtrag nach der Prüfung von
+  Phase A).
 
 Danach gilt:
 
@@ -196,7 +204,10 @@ Danach gilt:
   SCRAM-Hash, damit kein Klartext ins Serverprotokoll gelangt, und schreibt es per SSH in die
   `.env` auf dem VPS; ausgegeben wird es nie.
 - `studi_daba`: liest dieselben Sichten wie `anon`, auf `wawi.rezension` nur freigegebene
-  Zeilen, zusätzlich `v_freigabe_statistik`; die neuen Tabellen bleiben verschlossen.
+  Zeilen, zusätzlich `v_freigabe_statistik`; die neuen Tabellen bleiben verschlossen. Auf
+  `v_moderation`, `v_qs_faelle` und `v_entscheidungen_letzte` behält es `SELECT`, damit alles in
+  `wawi` lesbar bleibt (`0020`); Abfragen scheitern an `hat_rolle()`, das nur `authenticated`
+  ausführen darf.
 - Rollen für Konten vergibt Claude mit einer INSERT-Anweisung als `postgres` über die Konto-ID.
   Weder Konto-ID noch E-Mail-Adresse kommen ins Repo; der Weg steht als Kommentar in der
   Migration.

@@ -46,6 +46,7 @@
 | `web/tests/datenquelle_rezensionen.test.mjs` (ändern) | Integrationstests der neuen Methoden gegen PostgREST |
 | `web/shop.html` (ändern) | Sternzeile als Knopf, Modal „Rezensionen“, Hinweis und Bestätigung im Formular, Status im Datenmodus, Escape-Fix, Brücken im Modulblock, CSS |
 | `docs/05-anwendungen.md` (ändern) | Absatz „Bewerten“ nachgezogen |
+| `web/lab/lab-08-extern.html`, `web/lab/data/uebungen/lab-08.json` (ändern) | Lab-Texte zur neuen Bestätigung im Shop |
 
 Stellen in `shop.html` werden über ihren Wortlaut gefunden. Zeilennummern in diesem Plan gelten für Stand `dec4521` und verschieben sich.
 
@@ -783,6 +784,7 @@ git commit -m "Freigabe B: Leseansicht im Shop, Hinweis auf die Prüfung, Status
 
 **Files:**
 - Modify: `docs/05-anwendungen.md`
+- Modify: `web/lab/lab-08-extern.html`, `web/lab/data/uebungen/lab-08.json`
 
 **Interfaces:**
 - Consumes: den fertigen Shop, lokal ausgeliefert; die Produktionsdatenbank.
@@ -834,15 +836,22 @@ Expected: `gelöscht: [(<ID>,)]`. Den HTTP-Server beenden.
 
 - [ ] **Step 5: `docs/05-anwendungen.md` nachziehen**
 
-Im Absatz, der mit „**Bewerten.**“ beginnt, den Satz „Im Shop sichtbar sind nur Aggregate (`v_rezension_produkt`) und die drei jüngsten Simulationstexte je Artikel (`v_kundenstimmen`); ein Besuchertext erscheint auf keiner Seite.“ ersetzen durch:
+Im Absatz, der mit „**Bewerten.**“ beginnt, den Satz aus Phase A „Im Shop sichtbar sind nur freigegebene Rezensionen (`0023`): Aggregate (`v_rezension_produkt`) und die drei jüngsten Texte je Artikel (`v_kundenstimmen`), aus dem Bestand und aus dem Shop; ein Besuchertext erscheint erst, wenn der Prüfdienst oder die Moderation ihn freigegeben hat.“ ersetzen durch:
 
-„Ein Klick auf die Sternzeile öffnet die Leseansicht: Mittelwert, Verteilung der Sterne mit Filter (`v_rezension_produkt`) und die freigegebenen Rezensionen, zehn je Seite (`v_rezensionen_lesen`). Besuchertexte erscheinen erst nach der Freigabe (Status in `wawi.rezension`, siehe `db/README.md`); bis dahin zeigt der Datenmodus nur ihren Status (`v_rezension_status`).“
+„Im Shop sichtbar sind nur freigegebene Rezensionen (`0023`): Aggregate (`v_rezension_produkt`), die drei jüngsten Texte je Artikel (`v_kundenstimmen`) und in der Leseansicht alle, zehn je Seite (`v_rezensionen_lesen`). Die Leseansicht öffnet ein Klick auf die Sternzeile, mit Mittelwert und Verteilung der Sterne als Filter. Ein Besuchertext erscheint erst, wenn der Prüfdienst oder die Moderation ihn freigegeben hat; bis dahin zeigt der Datenmodus nur seinen Status (`v_rezension_status`).“
+
+In `web/lab/lab-08-extern.html` den Satz „Erfolgreich meldet der Shop wörtlich <code>Gespeichert als wawi.rezension #…</code> mit der neuen Nummer.“ ersetzen durch „Erfolgreich meldet der Shop wörtlich <code>Danke! Ihre Rezension wird geprüft und erscheint in Kürze.</code>; Nummer und Status des neuen Datensatzes zeigt der Datenmodus (DATA VIEW).“
+
+In `web/lab/data/uebungen/lab-08.json` (Übung W08-04, zweiter Schritt) den Text „… gesendet — die Meldung nennt die neue Nummer (<code>Gespeichert als wawi.rezension #…</code>).“ ersetzen durch „Sterne gewählt, einen Text mit 5 bis 500 Zeichen geschrieben, Filiale gewählt, gesendet — die Meldung lautet <code>Danke! Ihre Rezension wird geprüft und erscheint in Kürze.</code>; Nummer und Status zeigt der Datenmodus (DATA VIEW).“
+
+Run: `cd web/lab && node tools/verify.mjs | tail -1`
+Expected: `… Zusicherungen, 0 Fehler.`
 
 - [ ] **Step 6: Commit, Push, PR**
 
 ```bash
-git -c core.fileMode=false add docs/05-anwendungen.md
-git commit -m "Freigabe B: Doku der Leseansicht" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git -c core.fileMode=false add docs/05-anwendungen.md web/lab/lab-08-extern.html web/lab/data/uebungen/lab-08.json
+git commit -m "Freigabe B: Doku der Leseansicht und Lab-Texte zur Bestätigung" -m "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 git push origin bm-analyse
 gh pr create --repo swrobuts/BurgerMetrics --base main --head bm-analyse \
   --title "Freigabe B: Rezensionen im Shop lesen" \

@@ -883,7 +883,7 @@ git commit -m "Freigabe E: Bereich Rezensionen im POS mit Anmeldung, QS-Fällen 
 **Files:** keine Änderungen im Repo.
 
 **Interfaces:**
-- Consumes: `velocity.mitarbeiter` (Spalten `vorname`, `nachname`, `auth_uid`); `wawi.mitarbeiter_rolle`.
+- Consumes: `velocity.mitarbeiter` (Spalten `vorname`, `nachname`, `auth_uid`); `wawi_intern.mitarbeiter_rolle`.
 - Produces: Roberts Konto mit den Rollen `moderation` und `qualitaet`.
 
 - [ ] **Step 1: Konto finden, ohne ID oder E-Mail auszugeben**
@@ -915,14 +915,14 @@ import sys
 sys.path.insert(0, "db")
 from skript_ausfuehren import verbinde
 con = verbinde(); cur = con.cursor()
-cur.execute("""INSERT INTO wawi.mitarbeiter_rolle (konto, rolle)
+cur.execute("""INSERT INTO wawi_intern.mitarbeiter_rolle (konto, rolle)
                SELECT m.auth_uid, r.rolle
                FROM   velocity.mitarbeiter m
                CROSS  JOIN (VALUES ('moderation'), ('qualitaet')) AS r(rolle)
                WHERE  m.nachname = 'Butscher' AND m.auth_uid IS NOT NULL
                ON CONFLICT DO NOTHING""")
 print("neu vergeben:", cur.rowcount)
-cur.execute("SELECT rolle FROM wawi.mitarbeiter_rolle ORDER BY rolle")
+cur.execute("SELECT rolle FROM wawi_intern.mitarbeiter_rolle ORDER BY rolle")
 print([z[0] for z in cur.fetchall()])
 con.commit(); con.close()
 PY
@@ -983,12 +983,12 @@ Im Browserbereich (Claude klickt, Robert sieht zu):
 2. **Ablehnen:** Bei der Werbung „Ablehnen“. Der Eintrag verschwindet aus „Zurückgehalten“ und erscheint unter „Zuletzt entschieden“ mit „abgelehnt · … · Abnahme“.
 3. **Doppelklick:** Beim Personenbezug zweimal schnell auf „Freigeben“ (`computer` mit `double_click`). Genau eine Entscheidung, keine Fehlermeldung „schon entschieden“ im Meldungsfeld.
 4. **Erledigen:** Beim QS-Fall „Erledigt“. Der Block „Gesundheitsrisiken“ zeigt „Keine offenen QS-Fälle.“; die Rezension selbst bleibt unter „Zurückgehalten“, weil nur die Moderation über sie entscheidet.
-5. Stand in der Datenbank lesen (als `postgres`, wie Plan D, Task 5, Step 2): `werbung` `abgelehnt`, `personenbezug` `freigegeben`, `gesundheit` `zurueckgehalten`, QS-Fall mit `erledigt_am`; `wawi.rezension_entscheidung` hat genau eine Zeile je entschiedener Rezension.
+5. Stand in der Datenbank lesen (als `postgres`, wie Plan D, Task 5, Step 2): `werbung` `abgelehnt`, `personenbezug` `freigegeben`, `gesundheit` `zurueckgehalten`, QS-Fall mit `erledigt_am`; `wawi_intern.rezension_entscheidung` hat genau eine Zeile je entschiedener Rezension.
 6. Im Shop (`https://swrobuts.github.io/BurgerMetrics/shop.html`, Classic Burger, Leseansicht) steht der freigegebene Text „Abnahme E: Kassiererin Anna …“, die beiden anderen nicht. Die Freigabe durch einen Menschen wirkt also sofort. Den Text danach gleich aufräumen (Step 7).
 
 - [ ] **Step 6: Nur qualitaet, dann ohne Rolle**
 
-Roberts Rolle `moderation` kurz entziehen (`DELETE FROM wawi.mitarbeiter_rolle WHERE rolle = 'moderation' AND konto = (SELECT auth_uid FROM velocity.mitarbeiter WHERE nachname = 'Butscher')`), Bereich neu öffnen: nur der Block „Gesundheitsrisiken“ ist sichtbar. Dann auch `qualitaet` entziehen: „Dieses Konto hat keine Rolle für die Moderation.“ Beide Rollen wieder vergeben (Task 4, Step 3) und prüfen: Arbeitsbereich wieder da.
+Roberts Rolle `moderation` kurz entziehen (`DELETE FROM wawi_intern.mitarbeiter_rolle WHERE rolle = 'moderation' AND konto = (SELECT auth_uid FROM velocity.mitarbeiter WHERE nachname = 'Butscher')`), Bereich neu öffnen: nur der Block „Gesundheitsrisiken“ ist sichtbar. Dann auch `qualitaet` entziehen: „Dieses Konto hat keine Rolle für die Moderation.“ Beide Rollen wieder vergeben (Task 4, Step 3) und prüfen: Arbeitsbereich wieder da.
 
 - [ ] **Step 7: Abmelden und aufräumen**
 
@@ -1006,7 +1006,7 @@ Roberts Rolle `moderation` kurz entziehen (`DELETE FROM wawi.mitarbeiter_rolle W
 Am Ende von Abschnitt „## 5.4 POS-Terminal“ (vor der Zeile `## 5.5 Online-Shop`) einfügen:
 
 ```markdown
-**Rezensionen.** Der Knopf „Rezensionen“ in der Kopfleiste zeigt, wie viele Rezensionen zurückgehalten sind und wie viele QS-Fälle offen sind (`v_pruefdienst_stand`, ohne Anmeldung). Der Bereich dahinter braucht ein Supabase-Konto mit der Rolle `moderation` oder `qualitaet` (`wawi.mitarbeiter_rolle`); die Anmeldung geht an den Anmeldedienst von Supabase, das Token lebt im `sessionStorage` des Tabs und gilt eine Stunde. Die Moderation sieht die zurückgehaltenen Rezensionen mit Gründen und Jevs Wahrscheinlichkeiten und entscheidet über `api_rezension_freigeben()` und `api_rezension_ablehnen()`; die Qualitätssicherung schließt Hinweise auf Gesundheitsrisiken mit `api_qs_fall_erledigen()`. Wartet eine offene Rezension länger als fünf Minuten, warnt die Statuszeile, dass der Prüfdienst womöglich steht. Die Logik steht in `web/js/moderation.js`; Kasse und Manager-PIN sind davon unberührt.
+**Rezensionen.** Der Knopf „Rezensionen“ in der Kopfleiste zeigt, wie viele Rezensionen zurückgehalten sind und wie viele QS-Fälle offen sind (`v_pruefdienst_stand`, ohne Anmeldung). Der Bereich dahinter braucht ein Supabase-Konto mit der Rolle `moderation` oder `qualitaet` (`wawi_intern.mitarbeiter_rolle`); die Anmeldung geht an den Anmeldedienst von Supabase, das Token lebt im `sessionStorage` des Tabs und gilt eine Stunde. Die Moderation sieht die zurückgehaltenen Rezensionen mit Gründen und Jevs Wahrscheinlichkeiten und entscheidet über `api_rezension_freigeben()` und `api_rezension_ablehnen()`; die Qualitätssicherung schließt Hinweise auf Gesundheitsrisiken mit `api_qs_fall_erledigen()`. Wartet eine offene Rezension länger als fünf Minuten, warnt die Statuszeile, dass der Prüfdienst womöglich steht. Die Logik steht in `web/js/moderation.js`; Kasse und Manager-PIN sind davon unberührt.
 ```
 
 - [ ] **Step 2: Tests, Commit, Push, PR**

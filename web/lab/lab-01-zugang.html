@@ -181,6 +181,7 @@
           <li>eine Abfrage läuft höchstens 10 Minuten (<code>statement_timeout</code>)</li>
           <li>eine offene Transaktion läuft höchstens 5 Minuten leer (<code>idle_in_transaction_session_timeout</code>)</li>
           <li>höchstens 20 gleichzeitige Sitzungen</li>
+          <li>in <code>wawi.rezension</code> nur freigegebene Rezensionen; die Arbeitslisten der Moderation (<code>v_moderation</code>, <code>v_qs_faelle</code>, <code>v_entscheidungen_letzte</code>) enden mit <code>permission denied for function hat_rolle</code>, weil sie eine Anmeldung im POS verlangen</li>
         </ul>
       </div>
       <div class="karte">
