@@ -61,6 +61,24 @@ def ohne_jev_zurueckhalten(rezension):
             "regel_version": regeln.REGEL_VERSION}
 
 
+def als_fehlversuch(felder, fehler):
+    """Felder eines Fehlversuchs: ohne Ergebnis und Werte, mit dem Fehlercode der Datenbank."""
+    code = getattr(fehler, "pgcode", None) or type(fehler).__name__
+    basis = {k: felder[k] for k in ("muster_treffer", "jev_angefragt", "fragen_stand",
+                                    "fragen_fingerabdruck", "regel_version") if k in felder}
+    return {**basis, "modell": jev.MODELL, "fehler": f"Eintrag abgelehnt {code}"}
+
+
+def sicher_eintragen(verbindung, db, rezension_id, felder):
+    """Trägt ein; lehnt die Datenbank die Werte ab, zählt der Versuch wie ein Fehler von Jev."""
+    try:
+        return db.eintragen(verbindung, rezension_id, **felder), felder
+    except (psycopg2.DataError, psycopg2.IntegrityError, psycopg2.ProgrammingError) as fehler:
+        verbindung.rollback()
+        felder = als_fehlversuch(felder, fehler)
+        return db.eintragen(verbindung, rezension_id, **felder), felder
+
+
 def eine_runde(verbindung, anfrage, einstellungen, db=datenbank):
     """Prüft einen Stapel offener Rezensionen und liefert die Zahl der Einträge."""
     angefragt = db.heute_angefragt(verbindung)
@@ -72,7 +90,7 @@ def eine_runde(verbindung, anfrage, einstellungen, db=datenbank):
         else:
             felder = rezension_pruefen(rezension, anfrage)
             angefragt += 1
-        antwort = db.eintragen(verbindung, rezension.rezension_id, **felder)
+        antwort, felder = sicher_eintragen(verbindung, db, rezension.rezension_id, felder)
         eintraege += 1
         log.info("rezension=%s status=%s gruende=%s fehler=%s dauer=%.1fs", rezension.rezension_id,
                  antwort["status"], ",".join(felder.get("gruende", [])) or "-",

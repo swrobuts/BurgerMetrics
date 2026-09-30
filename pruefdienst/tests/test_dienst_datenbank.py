@@ -117,6 +117,29 @@ def test_drei_fehlversuche_halten_zurueck(betreiber, dienst_verbindung):
     assert status(betreiber, rid) == "zurueckgehalten"
 
 
+@pytest.mark.parametrize("werte, tokens, code", [
+    ({"werbung": 1.2}, 900, "23514"),
+    ({"werbung": float("nan")}, 900, "22P02"),
+    ({}, 900.5, "42883"),
+])
+def test_abgelehnte_werte_zaehlen_als_fehlversuch(betreiber, dienst_verbindung, werte, tokens, code):
+    kaputt = anlegen(betreiber, "Die Pommes waren salzig.")
+    danach = anlegen(betreiber, "Der Shake war kalt und gut.")
+
+    def anfrage(text, produkt):
+        if "salzig" in text:
+            return jev.Antwort({**HARMLOS, **werte}, tokens, "jev-1.13.0")
+        return jev.Antwort(HARMLOS, 900, "jev-1.13.0")
+    assert dienst.eine_runde(dienst_verbindung, anfrage, EINSTELLUNGEN) == 2
+    assert (status(betreiber, kaputt), status(betreiber, danach)) == ("offen", "freigegeben")
+    with betreiber.cursor() as cur:
+        cur.execute("SELECT fehler, jev_angefragt FROM wawi_intern.rezension_pruefung WHERE rezension_id = %s",
+                    (kaputt,))
+        assert cur.fetchall() == [(f"Eintrag abgelehnt {code}", True)]
+    betreiber.commit()
+    assert datenbank.heute_angefragt(dienst_verbindung) == 2
+
+
 def test_pruefdienst_sieht_keine_tabellen(dienst_verbindung):
     with dienst_verbindung.cursor() as cur:
         with pytest.raises(psycopg2.errors.InsufficientPrivilege):

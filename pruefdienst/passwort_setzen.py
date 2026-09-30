@@ -4,8 +4,8 @@
 Das Passwort entsteht hier und geht zuerst per SSH über stdin nach
 /opt/bm-pruefdienst/.env.db (Modus 600), dann als SCRAM-Hash an die Datenbank.
 Die Datenbank protokolliert DDL mit; der Klartext erscheint dort deshalb nie.
-Ausgegeben wird er auch hier nicht. Ein zweiter Lauf ersetzt das Passwort; der
-Dienst braucht danach einen Neustart (deploy.sh).
+Ausgegeben wird er auch hier nicht. Ein zweiter Lauf ersetzt das Passwort; danach
+muss deploy.sh den Container neu erstellen, docker compose restart reicht nicht.
 
     python3 pruefdienst/passwort_setzen.py
 """

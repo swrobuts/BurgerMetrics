@@ -19,7 +19,7 @@ dem VPS (`.env.db`, `.env.jev`) haben Modus 600 und stehen in keinem Repo.
 
 ```bash
 ssh vps 'docker logs --tail 50 bm-pruefdienst'                     # Protokoll, ohne Texte
-ssh vps 'cd /opt/bm-pruefdienst && docker compose restart'          # Neustart
+ssh vps 'cd /opt/bm-pruefdienst && docker compose restart'          # Neustart, ohne neue Umgebungsdateien
 ssh vps 'cd /opt/bm-pruefdienst && docker compose down'             # anhalten
 ```
 
@@ -30,6 +30,21 @@ Rezensionen mit dem Grund „Tageslimit erreicht“ zurück, ohne Jev zu fragen.
 Fällt Jev aus, bleibt eine Rezension offen und wird nach fünf Minuten erneut versucht; nach dem
 dritten Fehlversuch hält die Datenbank sie mit „Prüfung nicht möglich“ zurück. Im POS erscheinen
 offene Rezensionen, die länger als fünf Minuten warten, mit einem Hinweis.
+
+## Passwort und Schlüssel tauschen
+
+`docker compose restart` liest `.env.db`, `.env.jev` und `docker-compose.yml` nicht neu ein. Jede
+Änderung daran wirkt erst, wenn `deploy.sh` den Container mit `docker compose up -d` neu erstellt.
+
+- **Passwort:** `python3 pruefdienst/passwort_setzen.py`, gleich danach `bash pruefdienst/deploy.sh`.
+  Ein bloßer Neustart meldet den Dienst mit dem alten Passwort an; er scheitert dann in jeder Runde
+  (`Datenbank: OperationalError` im Protokoll). Bricht `passwort_setzen.py` ab, nachdem es
+  `.env.db` geschrieben hat, das Skript noch einmal laufen lassen.
+- **Jev-Schlüssel:** den neuen Schlüssel in die `.env` im Repo-Stamm schreiben,
+  `bash pruefdienst/deploy.sh`, im Protokoll prüfen, dass keine Zeile mit `fehler=HTTP 401`
+  erscheint, und erst dann den alten Schlüssel bei TypeSafe sperren. Solange der Dienst mit einem
+  gesperrten Schlüssel läuft, scheitert jede Prüfung; nach drei Fehlversuchen hält die Datenbank
+  die Rezension mit „Prüfung nicht möglich“ für die Moderation zurück.
 
 ## Tests
 

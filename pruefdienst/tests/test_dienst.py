@@ -25,9 +25,10 @@ class Rezension:
 
 
 class Datenbank:
-    """Nachbau von bm_jev.datenbank im Speicher."""
-    def __init__(self, offene, angefragt=0, fehler=None):
+    """Nachbau von bm_jev.datenbank im Speicher; lehnt auf Wunsch Ergebnisse einzelner IDs ab."""
+    def __init__(self, offene, angefragt=0, fehler=None, ablehnen=(), ablehnung=None):
         self.offene, self.angefragt, self.fehler = list(offene), angefragt, fehler
+        self.ablehnen, self.ablehnung = set(ablehnen), ablehnung or psycopg2.DataError("abgelehnt")
         self.eintraege = []
 
     def heute_angefragt(self, verbindung):
@@ -39,9 +40,20 @@ class Datenbank:
         return self.offene[:anzahl]
 
     def eintragen(self, verbindung, rezension_id, **felder):
+        if rezension_id in self.ablehnen and "fehler" not in felder:
+            raise self.ablehnung
         self.eintraege.append((rezension_id, felder))
         return {"rezension_id": rezension_id, "status": felder.get("ergebnis") or "offen",
                 "uebersprungen": False}
+
+
+class Verbindung:
+    """Nachbau einer Verbindung; zählt die Rollbacks."""
+    def __init__(self):
+        self.rollbacks = 0
+
+    def rollback(self):
+        self.rollbacks += 1
 
 
 def anfrage_mit(p=None, fehler=None):
@@ -112,6 +124,26 @@ def test_runde_nach_datenbankfehler():
     db = Datenbank([], fehler=psycopg2.OperationalError("weg"))
     with pytest.raises(psycopg2.OperationalError):
         dienst.eine_runde(None, anfrage_mit(), EINSTELLUNGEN, db)
+
+
+def test_abgelehnter_eintrag_zaehlt_als_fehlversuch_und_die_runde_geht_weiter():
+    db = Datenbank([Rezension(10, "Donut", "Erster Text."), Rezension(11, "Donut", "Zweiter Text.")],
+                   ablehnen={10})
+    verbindung = Verbindung()
+    assert dienst.eine_runde(verbindung, anfrage_mit(), EINSTELLUNGEN, db) == 2
+    assert verbindung.rollbacks == 1
+    (erste_id, erste), (zweite_id, zweite) = db.eintraege
+    assert erste_id == 10 and erste["fehler"] == "Eintrag abgelehnt DataError"
+    assert erste["jev_angefragt"] is True and "ergebnis" not in erste and "wahrscheinlichkeiten" not in erste
+    assert erste["modell"] == jev.MODELL and erste["regel_version"]
+    assert zweite_id == 11 and zweite["ergebnis"] == "freigegeben"
+
+
+def test_verbindungsfehler_beim_eintragen_bricht_die_runde_ab():
+    db = Datenbank([Rezension(12, "Donut", "Text.")], ablehnen={12},
+                   ablehnung=psycopg2.OperationalError("weg"))
+    with pytest.raises(psycopg2.OperationalError):
+        dienst.eine_runde(Verbindung(), anfrage_mit(), EINSTELLUNGEN, db)
 
 
 def test_protokoll_ohne_text(caplog):
