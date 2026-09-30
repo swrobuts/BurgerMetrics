@@ -47,9 +47,9 @@ def state(text, produkt):
     return {"rezension": {"text": text, "produkt": produkt}}
 
 
-def anfrage(text, produkt, modell=MODELL):
-    """Der Körper des Requests: State, Modell und die sechs Fragen."""
-    return {"state": state(text, produkt), "model": modell, "questions": FRAGEN}
+def anfrage(text, produkt, modell=MODELL, fragen=FRAGEN):
+    """Der Körper des Requests: State, Modell und die sechs Fragen des gewählten Stands."""
+    return {"state": state(text, produkt), "model": modell, "questions": fragen}
 
 
 def schluessel(koerper):
@@ -91,10 +91,11 @@ def antwort_lesen(daten):
     return Antwort(p, tokens_lesen(daten), daten.get("model") or "")
 
 
-def fragen_stellen(text, produkt, *, api_key, modell=MODELL, zeitlimit=20, senden=requests.post):
+def fragen_stellen(text, produkt, *, api_key, modell=MODELL, zeitlimit=20, senden=requests.post,
+                   fragen=FRAGEN):
     """Ein Request an Jev. Wirft JevFehler bei Netzfehler, Zeitüberschreitung, HTTP-Fehler oder kaputter Antwort."""
     try:
-        r = senden(API_URL, json=anfrage(text, produkt, modell), timeout=zeitlimit,
+        r = senden(API_URL, json=anfrage(text, produkt, modell, fragen), timeout=zeitlimit,
                    headers={"Authorization": f"Bearer {api_key}"})
     except requests.RequestException as fehler:
         raise JevFehler(f"keine Verbindung: {type(fehler).__name__}") from None
@@ -133,14 +134,14 @@ class Cache:
             f.write(json.dumps({"schluessel": schluessel, "antwort": daten}, ensure_ascii=False) + "\n")
 
 
-def beurteilen(text, produkt, *, cache, api_key=None, modell=MODELL, senden=requests.post):
+def beurteilen(text, produkt, *, cache, api_key=None, modell=MODELL, senden=requests.post, fragen=FRAGEN):
     """Erst im Cache nachsehen, dann mit Schlüssel Jev fragen und die Antwort ablegen."""
-    s = schluessel(anfrage(text, produkt, modell))
+    s = schluessel(anfrage(text, produkt, modell, fragen))
     gespeichert = cache.holen(s)
     if gespeichert is not None:
         return Antwort(**gespeichert, aus_cache=True)
     if not api_key:
         raise KeinCacheTreffer(s[:12])
-    antwort = fragen_stellen(text, produkt, api_key=api_key, modell=modell, senden=senden)
+    antwort = fragen_stellen(text, produkt, api_key=api_key, modell=modell, senden=senden, fragen=fragen)
     cache.ablegen(s, antwort)
     return antwort
