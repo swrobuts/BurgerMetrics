@@ -430,3 +430,114 @@ def test_pruefdienst_darf_nicht_entscheiden(db):
     als(db, "bm_pruefdienst")
     assert fehler(db, "SELECT wawi.api_rezension_freigeben(1)") is psycopg2.errors.InsufficientPrivilege
     assert fehler(db, "SELECT wawi.api_qs_fall_erledigen(1)") is psycopg2.errors.InsufficientPrivilege
+
+
+@pytest.mark.parametrize("rolle", ["anon", "studi_daba"])
+def test_oeffentliche_sichten_zeigen_nur_freigegebene_texte(db, rolle):
+    offen = shop_rezension(db, "GEHEIM offen")
+    halten = zurueckgehalten(db, "GEHEIM zurückgehalten")
+    frei = shop_rezension(db, "Sichtbar und lecker")
+    eintragen(db, frei, "freigegeben")
+    als(db, rolle)
+    for sicht, spalte in [("wawi.v_rezensionen_lesen", "inhalt"), ("wawi.v_kundenstimmen", "inhalt"),
+                          ("wawi.v_rezension_letzte", "inhalt"), ("wawi.stg_fact_reviews", "review_text")]:
+        db.execute(f"SELECT count(*) FROM {sicht} WHERE {spalte} LIKE 'GEHEIM%'")
+        assert db.fetchone()[0] == 0, sicht
+    db.execute("SELECT inhalt, status FROM wawi.v_rezensionen_lesen WHERE rezension_id = %s", (frei,))
+    assert db.fetchone() == ("Sichtbar und lecker", "freigegeben")
+    db.execute("SELECT status, inhalt FROM wawi.v_rezension_letzte WHERE rezension_id = %s", (offen,))
+    assert db.fetchone() == ("offen", None)
+    db.execute("SELECT status FROM wawi.v_rezension_status WHERE rezension_id = %s", (halten,))
+    assert db.fetchone()[0] == "zurueckgehalten"
+
+
+def test_kundenstimmen_zeigen_auch_freigegebene_besuchertexte(db):
+    rid = shop_rezension(db, "Schneller Service, gerne wieder.")
+    eintragen(db, rid, "freigegeben")
+    als(db, "anon")
+    db.execute("SELECT inhalt FROM wawi.v_kundenstimmen WHERE rezension_id = %s", (rid,))
+    assert db.fetchone()[0] == "Schneller Service, gerne wieder."
+
+
+def test_verteilung_summiert_sich_zur_anzahl(db):
+    for sterne in (5, 5, 4, 1):
+        rid = shop_rezension(db, sterne=sterne)
+        eintragen(db, rid, "freigegeben")
+    shop_rezension(db, sterne=3)  # offen, zählt nicht
+    als(db, "anon")
+    db.execute("""SELECT anzahl, anzahl_1, anzahl_2, anzahl_3, anzahl_4, anzahl_5, sterne_mittel
+                  FROM wawi.v_rezension_produkt WHERE artikel_id = 1""")
+    assert db.fetchone() == (4, 1, 0, 0, 1, 2, Decimal("3.8"))
+
+
+def test_moderationssicht_nur_mit_rolle(db):
+    halten = zurueckgehalten(db)
+    alt = shop_rezension(db, "wartet schon lange")
+    db.execute("UPDATE wawi.rezension SET erstellt_am = erstellt_am - interval '6 minutes' WHERE rezension_id = %s", (alt,))
+    shop_rezension(db, "gerade geschrieben")
+    als(db, "authenticated", konto(db))
+    db.execute("SELECT count(*) FROM wawi.v_moderation")
+    assert db.fetchone()[0] == 0
+    als(db, "authenticated", konto(db, "moderation"))
+    db.execute("SELECT rezension_id, gruende FROM wawi.v_moderation ORDER BY rezension_id")
+    assert db.fetchall() == [(halten, ["unsicher"]), (alt, None)]
+    als(db, "anon")
+    assert fehler(db, "SELECT 1 FROM wawi.v_moderation") is psycopg2.errors.InsufficientPrivilege
+
+
+def test_qs_sicht_nur_mit_rolle_qualitaet(db):
+    rid = shop_rezension(db, "Ich habe eine Nussallergie und bekam Ausschlag.")
+    eintragen(db, rid, "zurueckgehalten", ["Gesundheitsrisiko"], qs=True)
+    als(db, "authenticated", konto(db, "moderation"))
+    db.execute("SELECT count(*) FROM wawi.v_qs_faelle")
+    assert db.fetchone()[0] == 0
+    als(db, "authenticated", konto(db, "qualitaet"))
+    db.execute("SELECT rezension_id, inhalt, status FROM wawi.v_qs_faelle")
+    assert db.fetchall() == [(rid, "Ich habe eine Nussallergie und bekam Ausschlag.", "zurueckgehalten")]
+
+
+def test_entscheidungen_letzte_hoechstens_zwanzig(db):
+    kennung = konto(db, "moderation")
+    for _ in range(21):
+        rid = shop_rezension(db)
+        als(db, "authenticated", kennung)
+        db.execute("SELECT wawi.api_rezension_freigeben(%s)", (rid,))
+        zurueck(db)
+    als(db, "authenticated", kennung)
+    db.execute("SELECT count(*) FROM wawi.v_entscheidungen_letzte")
+    assert db.fetchone()[0] == 20
+
+
+def test_pruefdienst_stand_ohne_anmeldung(db):
+    rid = shop_rezension(db)
+    db.execute("UPDATE wawi.rezension SET erstellt_am = now() - interval '7 minutes' WHERE rezension_id = %s", (rid,))
+    zurueckgehalten(db)
+    qs = shop_rezension(db, "Das Fleisch war innen roh.")
+    eintragen(db, qs, "zurueckgehalten", ["Gesundheitsrisiko"], qs=True)
+    als(db, "anon")
+    db.execute("SELECT offen, aelteste_offene_min, zurueckgehalten, qs_offen FROM wawi.v_pruefdienst_stand")
+    assert db.fetchone() == (1, 7, 2, 1)
+
+
+def test_freigabe_statistik_nur_fuer_studi_daba(db):
+    shop_rezension(db)
+    frei = shop_rezension(db)
+    eintragen(db, frei, "freigegeben")
+    als(db, "studi_daba")
+    db.execute("SELECT status, anzahl FROM wawi.v_freigabe_statistik ORDER BY status")
+    assert db.fetchall() == [("freigegeben", 1), ("offen", 1)]
+    for rolle in ("anon", "authenticated"):
+        als(db, rolle)
+        assert fehler(db, "SELECT 1 FROM wawi.v_freigabe_statistik") is psycopg2.errors.InsufficientPrivilege
+
+
+def test_uebungsrezensionen_loeschen_raeumt_alles_ab(db):
+    rid = shop_rezension(db, "Im Burger war ein Haar.")
+    eintragen(db, rid, "zurueckgehalten", ["Gesundheitsrisiko"], qs=True)
+    als(db, "authenticated", konto(db, "moderation"))
+    db.execute("SELECT wawi.api_rezension_ablehnen(%s)", (rid,))
+    zurueck(db)
+    db.execute("SELECT * FROM wawi.uebungsrezensionen_loeschen()")
+    for tabelle in ("wawi.rezension_pruefung", "wawi.rezension_entscheidung", "wawi.qs_fall"):
+        db.execute(f"SELECT count(*) FROM {tabelle}")
+        assert db.fetchone()[0] == 0, tabelle

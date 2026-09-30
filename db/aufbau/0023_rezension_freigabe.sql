@@ -497,3 +497,175 @@ REVOKE ALL ON FUNCTION wawi.rezension_entscheiden(bigint, text, text),
 GRANT EXECUTE ON FUNCTION wawi.api_rezension_freigeben(bigint, text),
   wawi.api_rezension_ablehnen(bigint, text), wawi.api_qs_fall_erledigen(bigint, text)
   TO authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 5 Sichten. Bestehende Sichten werden mit CREATE OR REPLACE geändert; neue
+--   Spalten stehen hinten, Rechte bleiben erhalten. Neue Sichten bekommen
+--   ausdrücklich nur die Rechte aus der Spezifikation (Abschnitt 5.3).
+-- ---------------------------------------------------------------------------
+
+-- ETL: nur freigegebene Rezensionen gehen ins Warehouse. etl_probe()
+-- vergleicht über dieselbe Sicht.
+CREATE OR REPLACE VIEW wawi.stg_fact_reviews AS
+SELECT r.rezension_id                                          AS review_id,
+       (r.erstellt_am AT TIME ZONE 'Europe/Berlin')::date       AS date,
+       date_trunc('second', r.erstellt_am AT TIME ZONE 'Europe/Berlin')::time AS time,
+       r.kunde_id                                              AS customer_id,
+       r.artikel_id                                            AS product_id,
+       r.filiale_id                                            AS branch_id,
+       r.bestellung_id                                         AS order_id,
+       r.sterne                                                AS stars,
+       r.inhalt                                                AS review_text,
+       r.quelle                                                AS source
+FROM   wawi.rezension r
+WHERE  r.status = 'freigegeben';
+
+-- Bewertungsstand je Artikel mit Verteilung der Sterne, nur freigegebene.
+CREATE OR REPLACE VIEW wawi.v_rezension_produkt AS
+SELECT a.artikel_id,
+       a.name,
+       count(r.rezension_id)::int                                   AS anzahl,
+       round(avg(r.sterne), 1)                                      AS sterne_mittel,
+       max((r.erstellt_am AT TIME ZONE 'Europe/Berlin')::date)      AS letzte,
+       (count(r.rezension_id) FILTER (WHERE r.sterne = 1))::int      AS anzahl_1,
+       (count(r.rezension_id) FILTER (WHERE r.sterne = 2))::int      AS anzahl_2,
+       (count(r.rezension_id) FILTER (WHERE r.sterne = 3))::int      AS anzahl_3,
+       (count(r.rezension_id) FILTER (WHERE r.sterne = 4))::int      AS anzahl_4,
+       (count(r.rezension_id) FILTER (WHERE r.sterne = 5))::int      AS anzahl_5
+FROM   wawi.artikel a
+LEFT JOIN wawi.rezension r ON r.artikel_id = a.artikel_id AND r.status = 'freigegeben'
+GROUP  BY a.artikel_id, a.name
+ORDER  BY a.artikel_id;
+COMMENT ON VIEW wawi.v_rezension_produkt IS
+  'Je Artikel: Anzahl, mittlere Sterne und Verteilung der freigegebenen Rezensionen.';
+
+-- Die drei jüngsten freigegebenen Rezensionen je Artikel, beide Quellen.
+CREATE OR REPLACE VIEW wawi.v_kundenstimmen AS
+SELECT s.artikel_id, s.rezension_id, s.sterne, s.inhalt,
+       (s.erstellt_am AT TIME ZONE 'Europe/Berlin')::date AS datum
+FROM  (SELECT r.*,
+              row_number() OVER (PARTITION BY r.artikel_id
+                                 ORDER BY r.erstellt_am DESC, r.rezension_id DESC) AS rang
+       FROM   wawi.rezension r
+       WHERE  r.status = 'freigegeben') s
+WHERE  s.rang <= 3
+ORDER  BY s.artikel_id, s.rang;
+COMMENT ON VIEW wawi.v_kundenstimmen IS
+  'Die drei jüngsten freigegebenen Rezensionen je Artikel, aus Simulation und Shop.';
+
+-- Die 50 jüngsten Shop-Rezensionen mit Status; den Text erst nach der Freigabe.
+CREATE OR REPLACE VIEW wawi.v_rezension_letzte AS
+SELECT r.rezension_id,
+       r.sitzung,
+       a.name                              AS artikel,
+       f.name                              AS filiale,
+       r.sterne,
+       CASE WHEN r.status = 'freigegeben' THEN r.inhalt END AS inhalt,
+       r.erstellt_am,
+       EXISTS (SELECT 1 FROM burgermetrics.fact_reviews x
+               WHERE x.review_id = r.rezension_id) AS im_warehouse,
+       r.status
+FROM   wawi.rezension r
+JOIN   wawi.artikel a ON a.artikel_id = r.artikel_id
+LEFT JOIN wawi.filiale f ON f.filiale_id = r.filiale_id
+WHERE  r.quelle = 'shop'
+ORDER  BY r.erstellt_am DESC
+LIMIT  50;
+COMMENT ON VIEW wawi.v_rezension_letzte IS
+  'Die 50 jüngsten Übungsrezensionen aus dem Shop mit Status; inhalt nur, wenn freigegeben.';
+
+-- Leseansicht im Shop: freigegebene Rezensionen, gefiltert und seitenweise
+-- über PostgREST (artikel_id, sterne, order, limit, offset).
+CREATE OR REPLACE VIEW wawi.v_rezensionen_lesen AS
+SELECT r.artikel_id,
+       r.rezension_id,
+       r.sterne,
+       r.inhalt,
+       (r.erstellt_am AT TIME ZONE 'Europe/Berlin')::date AS datum,
+       r.erstellt_am,
+       r.quelle,
+       r.status
+FROM   wawi.rezension r
+WHERE  r.status = 'freigegeben';
+COMMENT ON VIEW wawi.v_rezensionen_lesen IS
+  'Freigegebene Rezensionen für die Leseansicht im Shop.';
+
+-- Status jeder Shop-Rezension ohne Text, für den Datenmodus des Shops.
+CREATE OR REPLACE VIEW wawi.v_rezension_status AS
+SELECT r.rezension_id, r.status
+FROM   wawi.rezension r
+WHERE  r.quelle = 'shop';
+
+-- Arbeitsliste der Moderation: zurückgehaltene Rezensionen und offene, die
+-- länger als fünf Minuten warten, mit der jüngsten Prüfung.
+CREATE OR REPLACE VIEW wawi.v_moderation AS
+SELECT r.rezension_id, r.status, a.name AS artikel, f.name AS filiale, r.sterne, r.inhalt,
+       r.erstellt_am, p.geprueft_am, p.gruende, p.qs_fall, p.muster_treffer, p.fehler,
+       p.p_beleidigung, p.p_personenbezug, p.p_werbung, p.p_themenbezug, p.p_anweisung,
+       p.p_gesundheitsrisiko
+FROM   wawi.rezension r
+JOIN   wawi.artikel a ON a.artikel_id = r.artikel_id
+LEFT JOIN wawi.filiale f ON f.filiale_id = r.filiale_id
+LEFT JOIN LATERAL (SELECT x.* FROM wawi.rezension_pruefung x
+                   WHERE x.rezension_id = r.rezension_id
+                   ORDER BY x.geprueft_am DESC, x.pruefung_id DESC
+                   LIMIT 1) p ON true
+WHERE  wawi.hat_rolle('moderation')
+AND    r.quelle = 'shop'
+AND   (r.status = 'zurueckgehalten'
+       OR (r.status = 'offen' AND r.erstellt_am < now() - interval '5 minutes'))
+ORDER  BY r.erstellt_am;
+
+-- Offene QS-Fälle mit Text, nur für die Qualitätssicherung.
+CREATE OR REPLACE VIEW wawi.v_qs_faelle AS
+SELECT q.qs_fall_id, q.rezension_id, q.angelegt_am, a.name AS artikel, f.name AS filiale,
+       r.sterne, r.inhalt, r.erstellt_am, r.status, p.p_gesundheitsrisiko
+FROM   wawi.qs_fall q
+JOIN   wawi.rezension r ON r.rezension_id = q.rezension_id
+JOIN   wawi.artikel a ON a.artikel_id = r.artikel_id
+LEFT JOIN wawi.filiale f ON f.filiale_id = r.filiale_id
+LEFT JOIN LATERAL (SELECT x.p_gesundheitsrisiko FROM wawi.rezension_pruefung x
+                   WHERE x.rezension_id = r.rezension_id
+                   ORDER BY x.geprueft_am DESC, x.pruefung_id DESC
+                   LIMIT 1) p ON true
+WHERE  wawi.hat_rolle('qualitaet')
+AND    q.erledigt_am IS NULL
+ORDER  BY q.angelegt_am;
+
+-- Die letzten 20 Entscheidungen, zum Nachsehen im POS.
+CREATE OR REPLACE VIEW wawi.v_entscheidungen_letzte AS
+SELECT e.entscheidung_id, e.rezension_id, e.entscheidung, e.entschieden_am, e.bemerkung,
+       a.name AS artikel, r.sterne, r.inhalt
+FROM   wawi.rezension_entscheidung e
+JOIN   wawi.rezension r ON r.rezension_id = e.rezension_id
+JOIN   wawi.artikel a ON a.artikel_id = r.artikel_id
+WHERE  wawi.hat_rolle('moderation')
+ORDER  BY e.entschieden_am DESC, e.entscheidung_id DESC
+LIMIT  20;
+
+-- Zustand des Prüfdienstes ohne Texte, auch ohne Anmeldung lesbar.
+CREATE OR REPLACE VIEW wawi.v_pruefdienst_stand AS
+SELECT (SELECT max(p.geprueft_am) FROM wawi.rezension_pruefung p)                  AS letzte_pruefung,
+       (SELECT count(*)::int FROM wawi.rezension r
+        WHERE r.status = 'offen' AND r.quelle = 'shop')                            AS offen,
+       (SELECT floor(extract(epoch FROM now() - min(r.erstellt_am)) / 60)::int
+        FROM wawi.rezension r WHERE r.status = 'offen' AND r.quelle = 'shop')       AS aelteste_offene_min,
+       (SELECT count(*)::int FROM wawi.rezension r WHERE r.status = 'zurueckgehalten') AS zurueckgehalten,
+       (SELECT count(*)::int FROM wawi.qs_fall q WHERE q.erledigt_am IS NULL)      AS qs_offen;
+
+-- Shop-Rezensionen je Tag und Status, ohne Texte; für Notebook 09.
+CREATE OR REPLACE VIEW wawi.v_freigabe_statistik AS
+SELECT (r.erstellt_am AT TIME ZONE 'Europe/Berlin')::date AS tag, r.status, count(*)::int AS anzahl
+FROM   wawi.rezension r
+WHERE  r.quelle = 'shop'
+GROUP  BY 1, 2
+ORDER  BY 1, 2;
+
+REVOKE ALL ON wawi.v_rezensionen_lesen, wawi.v_rezension_status, wawi.v_moderation,
+              wawi.v_qs_faelle, wawi.v_entscheidungen_letzte, wawi.v_pruefdienst_stand,
+              wawi.v_freigabe_statistik
+  FROM PUBLIC, anon, authenticated, studi_daba;
+GRANT SELECT ON wawi.v_rezensionen_lesen, wawi.v_rezension_status, wawi.v_pruefdienst_stand
+  TO anon, authenticated, studi_daba;
+GRANT SELECT ON wawi.v_moderation, wawi.v_qs_faelle, wawi.v_entscheidungen_letzte TO authenticated;
+GRANT SELECT ON wawi.v_freigabe_statistik TO studi_daba;
