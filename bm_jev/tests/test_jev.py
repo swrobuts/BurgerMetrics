@@ -88,6 +88,34 @@ def test_unvollstaendige_antwort_wird_jevfehler():
         jev.fragen_stellen(TEXT, "Classic Burger", api_key="k", senden=Sender(Antwort(200, daten)))
 
 
+class KeinJson(Antwort):
+    """HTTP 200, aber der Körper ist kein JSON, etwa eine HTML-Fehlerseite."""
+    def json(self):
+        raise requests.exceptions.JSONDecodeError("Expecting value", "<html>", 0)
+
+
+def test_antwort_ohne_json_wird_jevfehler():
+    with pytest.raises(jev.JevFehler, match="Antwort kein JSON"):
+        jev.fragen_stellen(TEXT, "Classic Burger", api_key="k", senden=Sender(KeinJson(200)))
+
+
+@pytest.mark.parametrize("wert", [float("nan"), float("inf"), -0.1, 1.2, True, "0.5", None])
+def test_keine_wahrscheinlichkeit_wird_jevfehler(wert):
+    with pytest.raises(jev.JevFehler, match="Antwort unvollständig"):
+        jev.fragen_stellen(TEXT, "Classic Burger", api_key="k", senden=Sender(Antwort(200, gute_antwort(wert))))
+
+
+@pytest.mark.parametrize("usage, tokens", [
+    (None, None), ({}, None), ({"input_tokens": 980.0}, 980), ({"input_tokens": "viele"}, None),
+    (["980"], None),
+])
+def test_tokens_als_ganze_zahl_oder_none(usage, tokens):
+    daten = gute_antwort()
+    daten["usage"] = usage
+    antwort = jev.fragen_stellen(TEXT, "Classic Burger", api_key="k", senden=Sender(Antwort(200, daten)))
+    assert (antwort.input_tokens, type(antwort.input_tokens)) == (tokens, type(tokens))
+
+
 def test_beurteilen_fragt_einmal_und_liest_danach_den_cache(tmp_path):
     datei = tmp_path / "cache.jsonl"
     sender = Sender(Antwort(200, gute_antwort(0.3)))

@@ -7,6 +7,7 @@ Notebook 09 läuft ohne Schlüssel aus dem Cache.
 """
 import hashlib
 import json
+import math
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -63,17 +64,35 @@ def api_schluessel():
     return wert or None
 
 
+def wahrscheinlichkeit(wert):
+    """Eine Zahl von 0 bis 1; alles andere (Text, NaN, 1.2) ist keine gültige Antwort."""
+    if isinstance(wert, bool) or not isinstance(wert, (int, float)):
+        raise TypeError("keine Zahl")
+    if not math.isfinite(wert) or not 0 <= wert <= 1:
+        raise ValueError("nicht zwischen 0 und 1")
+    return float(wert)
+
+
+def tokens_lesen(daten):
+    """Die Input-Tokens als ganze Zahl; None, wenn die Antwort keine brauchbare Zahl nennt."""
+    usage = daten.get("usage")
+    wert = usage.get("input_tokens") if isinstance(usage, dict) else None
+    if isinstance(wert, bool) or not isinstance(wert, (int, float)) or not math.isfinite(wert):
+        return None
+    return int(wert)
+
+
 def antwort_lesen(daten):
     """Liest die sechs Wahrscheinlichkeiten und die Tokens aus der JSON-Antwort."""
     try:
-        p = {frage: float(daten["answers"][frage]["noul"]) for frage in FRAGEN}
+        p = {frage: wahrscheinlichkeit(daten["answers"][frage]["noul"]) for frage in FRAGEN}
     except (KeyError, TypeError, ValueError) as fehler:
         raise JevFehler(f"Antwort unvollständig: {type(fehler).__name__}") from None
-    return Antwort(p, daten.get("usage", {}).get("input_tokens"), daten.get("model", ""))
+    return Antwort(p, tokens_lesen(daten), daten.get("model") or "")
 
 
 def fragen_stellen(text, produkt, *, api_key, modell=MODELL, zeitlimit=20, senden=requests.post):
-    """Ein Request an Jev. Wirft JevFehler bei Netzfehler, Zeitüberschreitung oder HTTP-Fehler."""
+    """Ein Request an Jev. Wirft JevFehler bei Netzfehler, Zeitüberschreitung, HTTP-Fehler oder kaputter Antwort."""
     try:
         r = senden(API_URL, json=anfrage(text, produkt, modell), timeout=zeitlimit,
                    headers={"Authorization": f"Bearer {api_key}"})
@@ -81,7 +100,11 @@ def fragen_stellen(text, produkt, *, api_key, modell=MODELL, zeitlimit=20, sende
         raise JevFehler(f"keine Verbindung: {type(fehler).__name__}") from None
     if r.status_code != 200:
         raise JevFehler(f"HTTP {r.status_code}")
-    return antwort_lesen(r.json())
+    try:
+        daten = r.json()
+    except ValueError:
+        raise JevFehler("Antwort kein JSON") from None
+    return antwort_lesen(daten)
 
 
 class Cache:

@@ -7,11 +7,16 @@ import re
 
 MUSTER = {
     "E-Mail": re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)*\.[a-z]{2,}", re.IGNORECASE),
-    # Deutsche Nummern: +49, 0049 oder 0, dann Vorwahl und mindestens vier Ziffern.
-    "Telefonnummer": re.compile(r"(?<!\d)(\+49|0049|0)[\s/-]*\d{2,5}([\s/-]*\d){4,10}(?!\d)"),
-    # Adressen mit http, www oder einer gängigen Endung; nicht der Teil nach @.
-    "Link": re.compile(r"(https?://|www\.)\S+|(?<![@\w.-])[\w-]+\.(de|com|net|org|io|shop|info)\b(/\S*)?",
-                       re.IGNORECASE),
+    # Nummern aus Deutschland, Österreich und der Schweiz: +49, 0049, +43, +41 oder 0,
+    # dann Vorwahl (auch in Klammern, auch mit „(0)“) und mindestens vier Ziffern.
+    "Telefonnummer": re.compile(
+        r"(?<![\d.,])((\+|00)(49|43|41)[\s/.-]*(\(0\)[\s/.-]*)?|\(?0)\d{2,5}\)?([\s/.-]*\d){4,10}(?!\d)"),
+    # Adressen mit http, www oder einer gängigen Endung, auch mit Unterdomänen
+    # wie shop.beispiel.de; nicht der Teil nach @.
+    "Link": re.compile(
+        r"(https?://|www\.)\S+"
+        r"|(?<![@\w.-])[\w-]+(\.[\w-]+)*\.(de|at|ch|eu|com|net|org|io|co|me|ly|app|shop|info)\b(/\S*)?",
+        re.IGNORECASE),
 }
 
 
