@@ -50,6 +50,8 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 | `tableau/` | die Tableau-Arbeitsmappe zu Lab 05: Datenquelle, Parameter, 27 Calculated Fields, elf Blätter und das Kennzahlen-Dashboard als `.twb`, ohne Daten; `tableau/README.md` |
 | `docs/` | die ausführliche Dokumentation zu Modell, Kennzahlen und Betrieb |
 | `mcp/` | ein MCP-Server über beide Schemata für den Betreiber — Claude Desktop oder Claude Code als Fenster auf die Datenbank |
+| `pruefdienst/` | Prüfdienst für Shop-Rezensionen: prüft neue Rezensionen mit Jev, einem System-One-Modell von TypeSafe, und gibt sie frei oder hält sie für die Moderation im POS zurück; läuft als Container auf dem VPS, Betrieb in `pruefdienst/README.md` |
+| `bm_jev/` | Paket für Prüfdienst und Notebook 09: Fragen an Jev, Muster für Kontaktdaten und Links, Regeln mit Schwellen, Aufruf mit Cache, Auswertung; Fragen und Schwellen geprüft in Notebook 09 |
 
 ---
 
