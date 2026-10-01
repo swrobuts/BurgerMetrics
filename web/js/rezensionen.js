@@ -59,8 +59,8 @@ export function stimmenNachArtikel(zeilen) {
   return karte;
 }
 
-/** Der gespeicherte Datensatz für die Datenperspektive — ohne inhalt, denn
- *  Besuchertext wird nirgends gerendert. */
+/** Der gespeicherte Datensatz für die Datenperspektive — ohne inhalt: Besuchertext
+ *  erscheint nur in Leseansicht und Kundenstimmen, und erst nach der Freigabe. */
 export function datensatzZeilen(rezension) {
   const wann = rezension.erstellt_am
     ? new Date(rezension.erstellt_am).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })
@@ -73,5 +73,66 @@ export function datensatzZeilen(rezension) {
     ['erstellt_am', wann],
     ['sitzung', String(rezension.sitzung ?? '')],
     ['im_warehouse', rezension.im_warehouse ? 'ja' : 'nein — erst nach dem ETL-Lauf'],
+    ['status', statusText(rezension.status)],
   ];
+}
+
+/** So viele Rezensionen holt die Leseansicht auf einmal. */
+export const SEITENGROESSE = 10;
+
+/** Sterne als Zeichen: 4 → „★★★★☆“. Werte außerhalb 0 bis 5 werden begrenzt. */
+export function sterneText(sterne) {
+  const zahl = Math.min(5, Math.max(0, Math.round(Number(sterne) || 0)));
+  return '★'.repeat(zahl) + '☆'.repeat(5 - zahl);
+}
+
+/** Zahl der Bewertungen in Worten: „1 Bewertung“, „1.234 Bewertungen“. */
+export function anzahlText(anzahl) {
+  const zahl = Number(anzahl) || 0;
+  if (!zahl) return 'noch keine Bewertung';
+  return `${zahl.toLocaleString('de-DE')} ${zahl === 1 ? 'Bewertung' : 'Bewertungen'}`;
+}
+
+/** Verteilung der Sterne aus einer Zeile von v_rezension_produkt, 5 Sterne zuerst.
+ *  anteil liegt zwischen 0 und 1 und ist 0, solange es keine Rezension gibt. */
+export function verteilung(zeile) {
+  const gesamt = Number(zeile?.anzahl) || 0;
+  return [5, 4, 3, 2, 1].map(sterne => {
+    const anzahl = Number(zeile?.[`anzahl_${sterne}`]) || 0;
+    return { sterne, anzahl, anteil: gesamt ? anzahl / gesamt : 0 };
+  });
+}
+
+/** Ein Anteil als ganze Prozent: 0,384 → „38 %“. */
+export function anteilText(anteil) {
+  return `${Math.round((Number(anteil) || 0) * 100)} %`;
+}
+
+/** Der Status einer Shop-Rezension in Worten, für den Datenmodus. */
+export function statusText(status) {
+  const worte = {
+    offen: 'wird geprüft',
+    freigegeben: 'veröffentlicht',
+    zurueckgehalten: 'zurückgehalten, wartet auf die Moderation',
+    abgelehnt: 'abgelehnt',
+  };
+  return worte[status] || 'unbekannt';
+}
+
+/** Wie viele freigegebene Rezensionen passen zum Filter? Ohne Filter alle. */
+export function anzahlFuer(zeile, sterne) {
+  if (!zeile) return 0;
+  return Number(sterne ? zeile[`anzahl_${sterne}`] : zeile.anzahl) || 0;
+}
+
+/** Soll „Weitere laden“ erscheinen? Nur wenn der Stand mehr kennt und die
+ *  letzte Seite voll war — sonst sind die Zahlen vom Laden der Seite veraltet. */
+export function weitereLaden(geladen, gesamt, letzteSeite) {
+  return geladen < gesamt && letzteSeite === SEITENGROESSE;
+}
+
+/** Name der Sternzeile für Screenreader: erst der sichtbare Text, dann was ein Klick tut. */
+export function sternzeileName(zeile, produkt) {
+  const sichtbar = bewertungText(zeile);
+  return zeile && zeile.anzahl ? `${sichtbar} – Rezensionen zu ${produkt} lesen` : `${sichtbar} – ${produkt}`;
 }

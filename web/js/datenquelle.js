@@ -70,13 +70,12 @@ export class Datenquelle {
    *  positionen, brutto_gesamt, rabatt_betrag, netto_gesamt, erfasst_am,
    *  im_warehouse */
   letzteBestellungen() { throw new Error('nicht umgesetzt'); }
-  /** Bewertungsstand je Artikel (operatives Schema, über alle Quellen):
-   *  artikel_id, name, anzahl, sterne_mittel (eine Nachkommastelle, null ohne
-   *  Rezension), letzte (Datum der jüngsten Rezension) — immer frisch geholt,
-   *  weil sich der Stand nach jeder gespeicherten Rezension ändert. */
+  /** Bewertungsstand je Artikel, nur freigegebene Rezensionen: artikel_id, name,
+   *  anzahl, sterne_mittel (eine Nachkommastelle, null ohne Rezension), letzte
+   *  (Datum der jüngsten), anzahl_1 bis anzahl_5 — immer frisch geholt. */
   rezensionenProdukt() { throw new Error('nicht umgesetzt'); }
-  /** Die drei jüngsten Simulationstexte je Artikel — das Einzige, was der Shop
-   *  an Rezensionstext zeigt: artikel_id, rezension_id, sterne, inhalt, datum */
+  /** Die drei jüngsten freigegebenen Rezensionen je Artikel, aus Simulation und
+   *  Shop: artikel_id, rezension_id, sterne, inhalt, datum */
   kundenstimmen() { throw new Error('nicht umgesetzt'); }
   /**
    * Eine Rezension im operativen System anlegen — der zweite Schreibweg.
@@ -87,9 +86,17 @@ export class Datenquelle {
    */
   rezensionAnlegen(rezension) { throw new Error('nicht umgesetzt'); }
   /** Die 50 jüngsten Shop-Rezensionen: rezension_id, sitzung, artikel, filiale,
-   *  sterne, inhalt, erstellt_am, im_warehouse. inhalt ist Besuchertext und
-   *  wird auf keiner Seite gerendert. */
+   *  sterne, inhalt, erstellt_am, im_warehouse, status. inhalt ist Besuchertext,
+   *  nur bei freigegebenen gefüllt und wird auf keiner Seite gerendert. */
   letzteRezensionen() { throw new Error('nicht umgesetzt'); }
+  /** Freigegebene Rezensionen eines Artikels für die Leseansicht, neueste
+   *  zuerst: artikel_id, rezension_id, sterne, inhalt, datum, erstellt_am,
+   *  quelle, status. sterne filtert auf eine Sternzahl (1–5), null zeigt alle;
+   *  seite zählt ab 1, groesse Rezensionen je Seite. */
+  rezensionenLesen(artikelId, sterne, seite, groesse) { throw new Error('nicht umgesetzt'); }
+  /** Status einer Shop-Rezension ohne Text: 'offen', 'freigegeben',
+   *  'zurueckgehalten', 'abgelehnt' — oder null, wenn es sie nicht gibt. */
+  rezensionStatus(rezensionId) { throw new Error('nicht umgesetzt'); }
   /** je Altersgruppe: altersgruppe, kunden, bestellungen, umsatz, umsatzanteil_pct */
   alterUmsatz() { throw new Error('nicht umgesetzt'); }
   /** eine Zeile: bestellungen, aus_heimatbezirk, anteil_pct, filialbezirke, wohnbezirke */
@@ -249,6 +256,21 @@ export class PostgrestQuelle extends Datenquelle {
   kundenstimmen()      { return this.hole('v_kundenstimmen', 'order=artikel_id,rezension_id.desc', { schema: this.schemaWawi }); }
   rezensionAnlegen(r)  { return this.rufe('rezension_anlegen', r); }
   letzteRezensionen()  { return this.hole('v_rezension_letzte', '', { schema: this.schemaWawi, frisch: true }); }
+  rezensionenLesen(artikelId, sterne = null, seite = 1, groesse = 10) {
+    const abfrage = new URLSearchParams({
+      artikel_id: `eq.${Number(artikelId)}`,
+      order: 'erstellt_am.desc,rezension_id.desc',
+      limit: String(groesse),
+      offset: String((Math.max(1, Number(seite)) - 1) * groesse),
+    });
+    if (sterne) abfrage.set('sterne', `eq.${Number(sterne)}`);
+    return this.hole('v_rezensionen_lesen', abfrage.toString(), { schema: this.schemaWawi, frisch: true });
+  }
+  async rezensionStatus(rezensionId) {
+    const [zeile] = await this.hole('v_rezension_status', `rezension_id=eq.${Number(rezensionId)}`,
+      { schema: this.schemaWawi, frisch: true });
+    return zeile ? zeile.status : null;
+  }
   alterUmsatz()        { return this.hole('v_alter_umsatz', 'order=umsatz.desc'); }
   heimatbezirk()       { return this.hole('v_heimatbezirk', ''); }
   kundenLoyalty()      { return this.hole('v_kunde_loyalty', ''); }

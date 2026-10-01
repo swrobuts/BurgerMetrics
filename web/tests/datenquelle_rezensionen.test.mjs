@@ -89,3 +89,29 @@ test('pruefdienstStand ist ohne Anmeldung lesbar und ohne Text', async () => {
   assert.deepEqual(Object.keys(zeile).sort(),
     ['aelteste_offene_min', 'letzte_pruefung', 'offen', 'qs_offen', 'zurueckgehalten']);
 });
+
+test('rezensionenProdukt: die Verteilung ergibt zusammen die Anzahl', async () => {
+  const zeilen = await quelle.rezensionenProdukt();
+  for (const z of zeilen) {
+    const summe = [1, 2, 3, 4, 5].reduce((s, n) => s + z[`anzahl_${n}`], 0);
+    assert.equal(summe, z.anzahl, `Artikel ${z.artikel_id}`);
+  }
+});
+
+test('rezensionenLesen: zehn freigegebene, neueste zuerst, Seiten und Filter', async () => {
+  const stand = (await quelle.rezensionenProdukt()).find(z => z.anzahl > 20);
+  const seite1 = await quelle.rezensionenLesen(stand.artikel_id, null, 1);
+  assert.equal(seite1.length, 10);
+  assert.ok(seite1.every(z => z.status === 'freigegeben' && z.artikel_id === stand.artikel_id));
+  for (let i = 1; i < seite1.length; i++) {
+    assert.ok(Date.parse(seite1[i - 1].erstellt_am) >= Date.parse(seite1[i].erstellt_am));
+  }
+  const seite2 = await quelle.rezensionenLesen(stand.artikel_id, null, 2);
+  assert.ok(!seite2.some(z => seite1.some(y => y.rezension_id === z.rezension_id)));
+  const fuenf = await quelle.rezensionenLesen(stand.artikel_id, 5, 1);
+  assert.ok(fuenf.length > 0 && fuenf.every(z => z.sterne === 5));
+});
+
+test('rezensionStatus: eine unbekannte Rezension ergibt null', async () => {
+  assert.equal(await quelle.rezensionStatus(2147483647), null);
+});
