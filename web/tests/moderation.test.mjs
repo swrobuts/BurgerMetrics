@@ -41,6 +41,8 @@ test('standText warnt ab fünf Minuten Wartezeit', () => {
   assert.equal(lang.warnung, true);
   assert.match(lang.text, /seit 7 Minuten/);
   assert.equal(standText(null).warnung, true);
+  assert.equal(standText({ offen: 0, aelteste_offene_min: null, zurueckgehalten: 3, qs_offen: 1 }).text,
+               '0 offen · 3 zurückgehalten · 1 QS-Fall');
 });
 
 test('zahlAmKnopf und sitzungGueltig', () => {
