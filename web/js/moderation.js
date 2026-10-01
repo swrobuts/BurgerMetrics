@@ -59,7 +59,8 @@ export function balken(zeile) {
 /** Die Statuszeile aus v_pruefdienst_stand; warnt, wenn eine Rezension fünf Minuten oder länger wartet. */
 export function standText(stand) {
   if (!stand) return { text: 'Stand des Prüfdienstes unbekannt.', warnung: true };
-  const text = `${stand.offen} offen · ${stand.zurueckgehalten} zurückgehalten · ${stand.qs_offen} QS-Fälle`;
+  const qs = Number(stand.qs_offen) === 1 ? 'QS-Fall' : 'QS-Fälle';
+  const text = `${stand.offen} offen · ${stand.zurueckgehalten} zurückgehalten · ${stand.qs_offen} ${qs}`;
   const minuten = Number(stand.aelteste_offene_min) || 0;
   if (stand.offen > 0 && minuten >= 5) {
     return { text: `${text} · Die älteste offene Rezension wartet seit ${minuten} Minuten; läuft der Prüfdienst?`,
