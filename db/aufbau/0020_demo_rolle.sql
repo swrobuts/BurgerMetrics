@@ -128,6 +128,16 @@ BEGIN
   RAISE NOTICE 'studi_daba liest % Objekte in burgermetrics und wawi, schreibt keines', v_lesbar;
 END $$;
 
+-- Seit 0023: Die Freigabe der Rezensionen setzt Zeilenschutz und Rechte nach
+-- den schemaweiten Grants oben neu; sonst öffnete ein erneuter Lauf dieses
+-- Skripts ungeprüfte Rezensionen.
+DO $$
+BEGIN
+  IF to_regprocedure('wawi.freigabe_rechte()') IS NOT NULL THEN
+    PERFORM wawi.freigabe_rechte();
+  END IF;
+END $$;
+
 -- Ruecknahme:
 --   REVOKE ALL ON ALL TABLES IN SCHEMA burgermetrics, wawi FROM studi_daba;
 --   REVOKE ALL ON ALL SEQUENCES IN SCHEMA burgermetrics, wawi FROM studi_daba;

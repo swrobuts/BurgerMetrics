@@ -139,7 +139,7 @@
         "de": "<p>Das Schema muss davorstehen (Lab 01); <code>WHERE anzahl > 0</code> lässt Produkte ohne Rezension weg.</p>"
       },
       "rueckmeldung": {
-        "de": "Dieselbe Sicht füllt die vierte Karte der Dash-App. Im Bestand hat sie 57 Zeilen mit 10.000 Rezensionen — und jede Shop-Rezension kommt nach dem nächsten ETL-Lauf hinzu."
+        "de": "Dieselbe Sicht füllt die vierte Karte der Dash-App. Im Bestand hat sie 57 Zeilen mit 10.000 Rezensionen — und jede freigegebene Shop-Rezension kommt nach dem nächsten ETL-Lauf hinzu."
       }
     },
     {
@@ -164,12 +164,12 @@
         },
         {
           "text": {
-            "de": "Der Ø am Produkt hat sich sofort geändert (die Sicht <code>wawi.v_rezension_produkt</code> rechnet live)."
+            "de": "Der Ø am Produkt ändert sich, sobald die Rezension freigegeben ist (die Sicht <code>wawi.v_rezension_produkt</code> rechnet live, zählt aber nur freigegebene Rezensionen)."
           }
         },
         {
           "text": {
-            "de": "In der Datenbank: <code>SELECT * FROM wawi.v_rezension_letzte ORDER BY erstellt_am DESC LIMIT 3;</code> zeigt die Rezension (die Sicht führt nur Rezensionen aus dem Shop)."
+            "de": "In der Datenbank: <code>SELECT * FROM wawi.v_rezension_letzte ORDER BY erstellt_am DESC LIMIT 3;</code> zeigt die Rezension mit ihrem Status, den Text erst nach der Freigabe (die Sicht führt nur Rezensionen aus dem Shop)."
           }
         },
         {
@@ -184,7 +184,7 @@
         }
       ],
       "rueckmeldung": {
-        "de": "Der Weg Shop → wawi.rezension → Sicht ist derselbe wie bei Bestellungen. Übungsrezensionen räumt der Betreiber mit uebungsrezensionen_loeschen() weg; der kuratierte Bestand bleibt unverändert."
+        "de": "Der Weg Shop → wawi.rezension → Sicht ist derselbe wie bei Bestellungen, mit einem Schritt mehr: der Freigabe. Übungsrezensionen räumt der Betreiber mit uebungsrezensionen_loeschen() weg; der kuratierte Bestand bleibt unverändert."
       }
     },
     {

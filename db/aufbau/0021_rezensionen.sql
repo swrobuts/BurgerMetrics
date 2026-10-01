@@ -30,6 +30,9 @@
 -- entfernt vorher den alten Stand:
 --   DELETE FROM wawi.rezension WHERE quelle = 'simulation';
 -- und faehrt dieses Skript danach erneut. etl_probe() zeigt jede Abweichung.
+-- Seit 0023 bricht dieses Skript gleich am Anfang ab, weil es Sichten und
+-- Richtlinie auf den Stand ohne Freigabe zurücksetzen würde. Den Bestand lädt
+-- dann db/betrieb/rezensionen_bestand_kopieren.sql neu (Ablauf dort).
 --
 -- Voraussetzung: 0001-0020 sind gelaufen; als postgres ausfuehren.
 -- Objekte: burgermetrics.fact_reviews, burgermetrics.v_rezension_produkt,
@@ -41,6 +44,16 @@
 -- Ruecknahme: siehe Ende der Datei.
 -- Idempotent: ja — die Bestandskopie laeuft nur, wenn wawi.rezension noch
 --             keine Simulationszeilen hat.
+
+-- Seit 0023 nicht mehr ausführen: Die Spalte status zeigt, dass die Freigabe
+-- eingespielt ist, deren Sichten und Richtlinie dieses Skript überschriebe.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'wawi' AND table_name = 'rezension' AND column_name = 'status') THEN
+    RAISE EXCEPTION '0023 ist eingespielt: 0021 nicht erneut ausführen, Neuladen über db/betrieb/rezensionen_bestand_kopieren.sql';
+  END IF;
+END $$;
 
 SET search_path TO wawi, burgermetrics;
 
