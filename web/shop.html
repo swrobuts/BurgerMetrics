@@ -220,27 +220,6 @@ ul { list-style: none; }
 .nav-order-btn::after { display: none; }
 .nav-order-btn:hover { background: var(--red-light) !important; color: var(--white) !important; }
 
-.nav-pos-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: .78rem;
-  font-weight: 600;
-  letter-spacing: .3px;
-  color: var(--stone-400) !important;
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.12);
-  transition: all .25s !important;
-}
-.nav-pos-btn::after { display: none !important; }
-.nav-pos-btn:hover {
-  background: rgba(255,255,255,.14) !important;
-  color: var(--white) !important;
-  border-color: rgba(255,255,255,.25);
-}
-
 .cart-count {
   background: var(--gold);
   color: var(--white);
@@ -3470,9 +3449,6 @@ body.data-mode .lese-daten { display: block; }
       <a href="#menu">Speisekarte</a>
       <a href="#locations">Filialen</a>
       <a href="#about">Über Uns</a>
-      <a href="pos.html" class="nav-pos-btn" title="POS-Kassensystem öffnen">
-        <i class="fa-solid fa-cash-register"></i> POS
-      </a>
       <a href="#" class="nav-order-btn" onclick="openCart(); return false;">
         <i class="fa-solid fa-bag-shopping"></i> Bestellen
         <span class="cart-count" id="navCartCount">0</span>
