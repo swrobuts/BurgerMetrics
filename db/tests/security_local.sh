@@ -38,4 +38,4 @@ export BM_SECURITY_TEST_DSN="host=localhost port=$test_port dbname=postgres user
 export BM_SECURITY_TEST_CA="$test_dir/server.crt"
 cd "$root_dir"
 "$test_python" -m pytest db/tests/test_security_boundaries.py db/tests/test_materialisieren.py \
-  db/tests/test_rezension_freigabe.py "$@"
+  db/tests/test_rezension_freigabe.py pruefdienst/tests/test_dienst_datenbank.py "$@"

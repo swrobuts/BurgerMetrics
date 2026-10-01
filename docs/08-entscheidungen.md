@@ -160,9 +160,42 @@ Der gemeinsame Nenner: In allen vier Fällen lief etwas **erfolgreich durch** un
 | Reine Zufallstexte | Kein Zusammenhang zur Zufriedenheit, für eine Sentiment-Analyse ungeeignet |
 | Generator mit Bausteinen, Texte anschließend geglättet | Sterne hängen an der Bestellung, die Texte sind sprachlich geglättet |
 
-**Gewählt:** Generator `dataset/generate_reviews.py`, Sterne aus Zufriedenheit und Bestelldauer der Bestellung; die Texte wurden anschließend in Claude Code sprachlich geglättet. Der Ladeweg führt wie bei den übrigen Fakten über `dataset/fact_reviews.csv` (Git LFS) mit `source = 'simulation'`. Im Shop sichtbar sind nur Aggregate (`v_rezension_produkt`) und die drei jüngsten Simulationstexte je Artikel (`v_kundenstimmen`); ein Besuchertext aus dem Shop erscheint auf keiner Seite. Die Übernahme nach `fact_reviews` bleibt wie bei Bestellungen ein bewusster manueller Aufruf.
+**Gewählt:** Generator `dataset/generate_reviews.py`, Sterne aus Zufriedenheit und Bestelldauer der Bestellung; die Texte wurden anschließend in Claude Code sprachlich geglättet. Der Ladeweg führt wie bei den übrigen Fakten über `dataset/fact_reviews.csv` (Git LFS) mit `source = 'simulation'`. Im Shop sichtbar sind nur Aggregate (`v_rezension_produkt`) und die drei jüngsten Simulationstexte je Artikel (`v_kundenstimmen`); ein Besuchertext aus dem Shop erscheint auf keiner Seite (seit Oktober 2026 nach der Freigabe doch, siehe [E11](#e11)). Die Übernahme nach `fact_reviews` bleibt wie bei Bestellungen ein bewusster manueller Aufruf.
 
 **Preis:** Synthetische Texte, an denen ein Sentiment-Modell zu gut abschneidet (Notebook 08: TF-IDF 100 %), und ein zweiter Schreibweg neben `bestellung_anlegen()`, der ebenfalls eine Bremse braucht. Die Rechte dazu sind in [`docs/validierung-nur-lesezugang-2026-09-15.md`](validierung-nur-lesezugang-2026-09-15.md) geprüft.
+
+---
+
+## E11 — Shop-Rezensionen mit Jev freigeben (Oktober 2026) {#e11}
+
+**Frage:** Wie erscheinen Rezensionen, die Besucher im Shop schreiben, ohne dass Beleidigungen,
+Namen, Werbung oder Kontaktdaten öffentlich werden und ohne dass ein Hinweis auf ein
+Gesundheitsrisiko untergeht?
+
+**Erwogen:**
+
+| Option | Einschätzung |
+|---|---|
+| Alles von Hand freigeben | Sicher, aber jede Rezension wartet auf einen Menschen |
+| Ein Sprachmodell entscheiden lassen | Entscheidung nicht nachvollziehbar, Kosten je Aufruf höher |
+| Jev beantwortet sechs Fragen, Regeln im Code entscheiden | Wahrscheinlichkeiten statt Urteil, Schwellen prüfbar, Cent-Beträge |
+
+**Gewählt:** Jev (`jev-1.13.0`) mit sechs Noul-Fragen, dazu reguläre Ausdrücke für Kontaktdaten und
+Links. Regeln in `bm_jev/regeln.py` geben frei oder halten zurück; ablehnen kann nur ein Mensch im
+POS. Schwellen: Gesundheitsrisiko ab 0,4, Verstoß ab 0,5, unsicher ab 0,2, Themenbezug unter 0,8
+(Startwerte). Seit dem 01.10.2026 gilt Fragen-Stand 2: Die Frage nach dem Themenbezug sagt, dass
+die Rezension aus dem Online-Shop von BurgerMetrics stammt und bei welchem Produkt sie steht. Mit
+Stand 1 hielten die Regeln 254 von 500 simulierten Rezensionen zurück, weil die Texte die Kette
+fast nie nennen. Gemessen in Notebook 09 mit Stand 2: Testfälle 1 € Fehlerkosten (Stand 1: 19 €),
+zweiter Holdout ohne Fehlentscheidung, Stichprobe 9 von 500 zurückgehalten. Die Bedingungen für die
+Ablöse standen vor dem Lauf fest (`docs/moderation_konventionen.md`); die Regel, Schwellen erst ab
+200 € Ersparnis zu ändern, kann auf 31 harmlosen Testfällen nicht lockern. Jev lief einmal je
+Fragen-Stand über Testfälle, Holdouts und Stichprobe, zusammen für rund 6 Cent; die Antworten
+liegen im Cache, das Notebook braucht keinen Schlüssel.
+
+**Preis:** Soll-Werte ohne unabhängige Prüfung, deutsche Fragen an ein vor allem englisch
+trainiertes Modell, eine Frage, die nach einem Befund umformuliert und nur an 24 neuen Fällen
+bestätigt ist, ein Prüfdienst auf dem VPS mit eigenem Schlüssel und Tageslimit.
 
 ---
 

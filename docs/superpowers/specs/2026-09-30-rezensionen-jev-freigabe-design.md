@@ -91,6 +91,11 @@ Rezensionstext und der Produktname. Sterne, Filiale und Zeitpunkt bleiben drauß
 Wortlaut und Kriterien stehen in `bm_jev/fragen.py`; jede Änderung ist ein neuer Fragen-Stand
 mit eigenem Fingerabdruck, alte Stände bleiben erhalten.
 
+Nachtrag 01.10.2026: Fragen-Stand 2 nennt in der Frage nach dem Themenbezug den Rahmen, den der
+State nicht trägt: Die Rezension stammt aus dem Online-Shop von BurgerMetrics und steht beim
+Produkt `rezension.produkt`. Mit Stand 1 hielten die Regeln die Hälfte harmloser Rezensionen
+zurück, weil die Texte die Kette fast nie nennen (Notebook 09). Der State bleibt Text und Produkt.
+
 ### 4.3 Muster
 
 Vor dem Modell sucht der Code mit regulären Ausdrücken nach E-Mail-Adressen, Telefonnummern und

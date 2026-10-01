@@ -1,0 +1,28 @@
+# Prüfdienst BurgerMetrics — läuft auf dem VPS in /opt/bm-pruefdienst.
+# Datenbank über das Docker-Netz des Supabase-Stacks (root_default, supabase-db:5432).
+# Keine Ports nach außen.
+services:
+  bm-pruefdienst:
+    build:
+      context: .
+      dockerfile: pruefdienst/Dockerfile
+    container_name: bm-pruefdienst
+    restart: unless-stopped
+    env_file:
+      - .env.db    # DATABASE_URL der Rolle bm_pruefdienst, geschrieben von passwort_setzen.py
+      - .env.jev   # TYPESAFE_API_KEY, geschrieben von deploy.sh
+    environment:
+      BM_PRUEF_STAPEL: "20"
+      BM_PRUEF_INTERVALL: "30"
+      BM_JEV_TAGESLIMIT: "300"
+    networks:
+      - root_default
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+networks:
+  root_default:
+    external: true
