@@ -1,6 +1,6 @@
 # Notebooks zur Fallstudie BurgerMetrics
 
-Neun Notebooks, jedes für sich lauffähig — in Google Colab (Link am Kopf jedes Notebooks)
+Zehn Notebooks, jedes für sich lauffähig — in Google Colab (Link am Kopf jedes Notebooks)
 oder lokal. Alle lesen die Datenbank mit dem Demo-Konto `studi_daba` (nur lesend) und
 brauchen kein Geheimnis.
 
@@ -21,6 +21,7 @@ prüft auch die interaktive Oberfläche und die Aktualisierung externer Quellen.
 | `06_zufriedenheit_erklaeren` | Entscheidungsbaum und Random Forest auf `satisfaction_score` |
 | `07_ausreisser_tagesumsatz` | z-Score, IQR, Isolation Forest; Treffer erklären |
 | `08_sentiment_rezensionen` | Wortliste, TF-IDF + logistische Regression, deutsches BERT-Modell, Sentiment gegen Kanal und Produkt |
+| `09_rezensionen_freigeben` | Freigabe von Shop-Rezensionen mit Jev: sechs Fragen, Muster, Regeln mit Fehlerkosten, Confusion Matrices, Schwellen-Gitter, Holdout, Stichprobe der Simulation; läuft ohne Schlüssel aus dem Cache |
 
 ## Lokal ausführen
 

@@ -85,7 +85,7 @@
         { "begriff": { "de": "jahre = lade_sql(\"SELECT … FROM v_kennzahlen_jahr\")" }, "ziel": "analyse" },
         { "begriff": { "de": "con.register(\"dim_branch\", fuer_duckdb(filialen))" }, "ziel": "analyse" }
       ],
-      "rueckmeldung": { "de": "Vier Kopfzellen, dann die Analyse — wer ein Notebook gelesen hat, findet sich in allen neun zurecht." } },
+      "rueckmeldung": { "de": "Vier Kopfzellen, dann die Analyse — wer ein Notebook gelesen hat, findet sich in allen zehn zurecht." } },
 
     { "id": "W06-04", "typ": "reihenfolge",
       "titel": { "de": "Ein Notebook von oben nach unten" },

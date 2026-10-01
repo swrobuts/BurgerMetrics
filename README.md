@@ -40,9 +40,9 @@ Klonen. Dann `git lfs install` nachholen und `git lfs pull` ausführen.
 
 | Verzeichnis | Inhalt |
 |---|---|
-| `dataset/` | die 15 CSV-Dateien, ein Ladeskript für DuckDB, ein Übungsblatt und `burgermetrics_mini.sql` — dieselbe Struktur in 13 KB zum Mitlesen |
+| `dataset/` | 19 CSV-Dateien (15 für das Datenmodell, 4 Testdateien der Moderation), ein Ladeskript für DuckDB, ein Übungsblatt und `burgermetrics_mini.sql` — dieselbe Struktur in 13 KB zum Mitlesen |
 | `db/` | der Aufbau der Datenbank: Schema, Fakten, Semantikschicht, Sicherheit — als nummerierte SQL-Dateien in der Reihenfolge, in der sie laufen |
-| `notebooks/` | neun ausgeführte Notebooks, vom Zugang mit dem Demo-Konto bis zur Sentiment-Analyse; `notebooks/README.md` |
+| `notebooks/` | zehn ausgeführte Notebooks, vom Zugang mit dem Demo-Konto bis zur Freigabe von Rezensionen mit Jev; `notebooks/README.md` |
 | `dash/` | Dash-App mit vier Karten aus der Semantikschicht; `dash/README.md` |
 | `web/` | Online-Shop, Kassensystem, BI-Dashboard und unter `web/lab/` die Lernumgebung BM-Lab |
 | `web/lab/` | Lernumgebung BM-Lab: acht Labs mit 41 Übungen im Browser, PostgreSQL per PGlite; `web/lab/README.md` |
@@ -90,10 +90,10 @@ eigene PostgreSQL-Instanz und tragen deren Adresse in
 
 ### Notebooks und Dash
 
-Neun ausgeführte Notebooks (`notebooks/00` bis `08`) behandeln Zugang und
+Zehn ausgeführte Notebooks (`notebooks/00` bis `09`) behandeln Zugang und
 Daten, das analytische Datenmodell, RFM und Kundensegmente, Warenkorb,
-Nachfrageprognose, Wetter und Ereignisse, Zufriedenheit, Ausreißer und
-Sentiment. Jedes läuft mit dem Demo-Konto `studi_daba` lokal oder in Google
+Nachfrageprognose, Wetter und Ereignisse, Zufriedenheit, Ausreißer,
+Sentiment und die Freigabe von Rezensionen mit Jev. Jedes läuft mit dem Demo-Konto `studi_daba` lokal oder in Google
 Colab (`notebooks/README.md`). Große Tabellen liest jedes Notebook aus der
 Datenbank; `lade_csv()` dient nur den Dimensionen, um das Bandbreitenbudget
 von Git LFS zu schonen. Die Dash-App `dash/app.py` zeigt vier Karten aus der

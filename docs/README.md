@@ -42,13 +42,13 @@ Diese Werte sind mit `python dataset/verify_readme.py` nachprüfbar. Das Skript 
 ```
 web/       index.html · pos.html · shop.html · dashboard.html · abgleich.html
            js/ · tests/ · lab/
-dataset/   15 CSV-Dateien (Git LFS) · generate_obt.py · generate_reviews.py
+dataset/   19 CSV-Dateien (Git LFS) · generate_obt.py · generate_reviews.py
            load_duckdb.py · verify_readme.py · wawi_mini.sql
            burgermetrics_mini.sql · wawi_zu_analytisch.sql · README.md
            uebungsblatt.md/.pdf · erp_datenmodell.excalidraw
 db/        aufbau/ · betrieb/ · tests/ · lade_csv.py · materialisieren.py
            skript_ausfuehren.py
-notebooks/ 00–08 · quellen/ · daten_extern/ · tests/
+notebooks/ 00–09 · quellen/ · daten_extern/ · tests/
 dash/      Dash-App (wird ausgeführt)
 mcp/       MCP-Server (Betreiberzugang)
 docs/      diese Dokumentation · sechs Prüfberichte

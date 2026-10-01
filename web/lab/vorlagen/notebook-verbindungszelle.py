@@ -1,9 +1,9 @@
 # notebook-verbindungszelle.py — die Verbindungszelle der Fallstudien-Notebooks
 #
 # Quelle: notebooks/quellen/gemeinsam.py (VERBINDUNG). Dieselbe Zelle steht in jedem der
-# neun Notebooks als zweite Codezelle, direkt unter der pip-Zelle:
+# zehn Notebooks als zweite Codezelle, direkt unter der pip-Zelle:
 #     import subprocess, sys; pakete = [...]; subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', *pakete])
-#     (in acht Notebooks dieselbe Liste; Notebook 08 ergänzt transformers torch)
+#     (in neun Notebooks dieselbe Liste; Notebook 08 ergänzt transformers torch)
 # In Colab: den Inhalt dieser Datei in eine Codezelle einfügen und ausführen.
 # Lokal genügt notebooks/requirements.txt.
 #
