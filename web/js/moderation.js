@@ -85,3 +85,11 @@ export function zeitText(iso) {
   return new Date(iso).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit',
                                                  month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
+
+/** Eine Fehlermeldung für die Moderation: Netzfehler auf Deutsch, sonst ohne „funktion: HTTP 500 —“. */
+export function fehlerText(fehler) {
+  const text = String((fehler && fehler.message) || fehler || '');
+  if (fehler instanceof TypeError && /fetch|network|load failed/i.test(text)) return 'Keine Verbindung zur Datenbank.';
+  const meldung = text.replace(/^[\w.]+: HTTP \d+ — /, '');
+  return meldung.charAt(0).toUpperCase() + meldung.slice(1);
+}

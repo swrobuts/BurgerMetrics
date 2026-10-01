@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FRAGEN, grundText, risikoWert, nachRisiko, balken, standText, zahlAmKnopf,
-         sitzungGueltig, zeitText } from '../js/moderation.js';
+         sitzungGueltig, zeitText, fehlerText } from '../js/moderation.js';
 
 const zeile = (werte = {}) => ({
   p_gesundheitsrisiko: 0.01, p_beleidigung: 0.01, p_personenbezug: 0.01, p_werbung: 0.01,
@@ -54,4 +54,13 @@ test('zahlAmKnopf und sitzungGueltig', () => {
 test('zeitText: Tag, Monat und Uhrzeit in Berlin', () => {
   assert.equal(zeitText('2026-10-01T12:05:00+00:00'), '01.10., 14:05');
   assert.equal(zeitText(null), '');
+});
+
+test('fehlerText: ohne Funktionsname und HTTP-Code, Netzfehler auf Deutsch', () => {
+  assert.equal(fehlerText(new Error('api_rezension_freigeben: HTTP 500 — über die Rezension 7 ist schon entschieden (freigegeben)')),
+               'Über die Rezension 7 ist schon entschieden (freigegeben)');
+  assert.equal(fehlerText(new TypeError('Failed to fetch')), 'Keine Verbindung zur Datenbank.');
+  assert.equal(fehlerText(new TypeError('NetworkError when attempting to fetch resource.')), 'Keine Verbindung zur Datenbank.');
+  assert.equal(fehlerText(new TypeError('Load failed')), 'Keine Verbindung zur Datenbank.');
+  assert.equal(fehlerText(new Error('E-Mail oder Passwort stimmen nicht.')), 'E-Mail oder Passwort stimmen nicht.');
 });

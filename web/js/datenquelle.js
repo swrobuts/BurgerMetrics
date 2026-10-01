@@ -15,8 +15,16 @@
  * Artikelstamm und das Anlegen einer Bestellung. Beides geht gegen das
  * operative Schema wawi (db/aufbau/0016 bis 0019), nicht gegen das
  * Auswertungsmodell — das Warehouse wird aus dem operativen System beladen,
- * nicht umgekehrt.
+ * nicht umgekehrt. Der Bereich „Rezensionen“ der Kasse meldet sich dazu an;
+ * nur seine Aufrufe (mitAnmeldung) tragen das Token, alle anderen den
+ * öffentlichen Schlüssel.
  */
+
+/** Der Fehlertext einer PostgREST-Antwort: das Feld message, sonst der rohe Text. */
+async function meldungLesen(antwort) {
+  const text = await antwort.text();
+  try { return JSON.parse(text).message || text; } catch (_) { return text; }
+}
 
 /** Basisklasse: beschreibt den Vertrag und dokumentiert jede Frage. */
 export class Datenquelle {
@@ -193,7 +201,7 @@ export class PostgrestQuelle extends Datenquelle {
     this.sitzung = null;   // Anmeldung für die Moderation: token, gueltigBis
   }
 
-  async hole(sicht, abfrage = '', { schema = this.schema, frisch = false, seitenweise = false } = {}) {
+  async hole(sicht, abfrage = '', { schema = this.schema, frisch = false, seitenweise = false, token = this.schluessel } = {}) {
     const schluessel = schema + '.' + sicht + '?' + abfrage + (seitenweise ? '#alle' : '');
     if (!frisch && this.zwischenspeicher.has(schluessel)) return this.zwischenspeicher.get(schluessel);
     const daten = [];
@@ -207,13 +215,13 @@ export class PostgrestQuelle extends Datenquelle {
       const antwort = await fetch(`${this.url}/rest/v1/${sicht}?${parameter}`, {
         headers: {
           apikey: this.schluessel,
-          Authorization: `Bearer ${this.ausweis()}`,
+          Authorization: `Bearer ${token}`,
           'Accept-Profile': schema,
           ...(seitenweise ? { Prefer: 'count=exact' } : {}),
         },
       });
       if (!antwort.ok) {
-        throw new Error(`${sicht}: HTTP ${antwort.status} — ${await antwort.text()}`);
+        throw new Error(`${sicht}: HTTP ${antwort.status} — ${await meldungLesen(antwort)}`);
       }
       // PostgreSQL-Zahlen sind bereits JSON-Zahlen. Numerischen Text (etwa
       // PLZ, Artikelname oder Rezension) unverändert lassen.
@@ -241,14 +249,15 @@ export class PostgrestQuelle extends Datenquelle {
   /**
    * Ruft eine Datenbankfunktion auf (PostgREST: POST /rpc/<name>). Der
    * Header Content-Profile waehlt das Schema; die Argumente gehen als JSON
-   * mit den Parameternamen der Funktion.
+   * mit den Parameternamen der Funktion. Das Token einer Anmeldung geht nur
+   * mit, wenn der Aufruf es ausdrücklich übergibt (siehe mitAnmeldung).
    */
-  async rufe(funktion, argumente, { schema = this.schemaWawi } = {}) {
+  async rufe(funktion, argumente, { schema = this.schemaWawi, token = this.schluessel } = {}) {
     const antwort = await fetch(`${this.url}/rest/v1/rpc/${funktion}`, {
       method: 'POST',
       headers: {
         apikey: this.schluessel,
-        Authorization: `Bearer ${this.ausweis()}`,
+        Authorization: `Bearer ${token}`,
         'Content-Profile': schema,
         'Content-Type': 'application/json',
       },
@@ -256,16 +265,9 @@ export class PostgrestQuelle extends Datenquelle {
     });
     if (!antwort.ok) {
       // PostgREST verpackt RAISE EXCEPTION als {message, details, hint, code}.
-      let meldung = await antwort.text();
-      try { meldung = JSON.parse(meldung).message || meldung; } catch (_) { /* Text bleibt */ }
-      throw new Error(`${funktion}: HTTP ${antwort.status} — ${meldung}`);
+      throw new Error(`${funktion}: HTTP ${antwort.status} — ${await meldungLesen(antwort)}`);
     }
     return antwort.json();
-  }
-
-  /** Das Token für Authorization: die Anmeldung, solange sie gilt, sonst der öffentliche Schlüssel. */
-  ausweis() {
-    return this.angemeldet() ? this.sitzung.token : this.schluessel;
   }
 
   angemeldet() {
@@ -280,7 +282,8 @@ export class PostgrestQuelle extends Datenquelle {
       body: JSON.stringify({ email, password: passwort }),
     });
     if (antwort.status === 400 || antwort.status === 401) throw new Error('E-Mail oder Passwort stimmen nicht.');
-    if (!antwort.ok) throw new Error(`anmelden: HTTP ${antwort.status}`);
+    if (antwort.status === 429) throw new Error('Zu viele Anmeldeversuche. Bitte eine Minute warten.');
+    if (!antwort.ok) throw new Error(`Der Anmeldedienst antwortet nicht (HTTP ${antwort.status}).`);
     const daten = await antwort.json();
     // Eine Minute vor dem Ablauf gilt die Anmeldung schon als abgelaufen.
     this.sitzung = { token: daten.access_token,
@@ -294,19 +297,19 @@ export class PostgrestQuelle extends Datenquelle {
     return gueltig;
   }
 
-  /** Meldet beim Anmeldedienst ab; das Token ist danach vergessen, auch wenn der Dienst nicht antwortet. */
-  async abmelden() {
-    if (this.angemeldet()) {
-      try {
-        await fetch(`${this.url}/auth/v1/logout`, {
-          method: 'POST', headers: { apikey: this.schluessel, Authorization: `Bearer ${this.sitzung.token}` } });
-      } catch (_) { /* abgemeldet wird trotzdem */ }
-    }
+  /** Meldet ab: erst hier (Token vergessen), dann nur diese Sitzung beim Anmeldedienst, ohne zu warten. */
+  abmelden() {
+    const token = this.angemeldet() ? this.sitzung.token : null;
     this.sitzung = null;
     this.zwischenspeicher.clear();
+    if (token) {
+      fetch(`${this.url}/auth/v1/logout?scope=local`, {
+        method: 'POST', headers: { apikey: this.schluessel, Authorization: `Bearer ${token}` } })
+        .catch(() => { /* abgemeldet ist schon, auch ohne Antwort */ });
+    }
   }
 
-  /** Führt einen Aufruf nur mit gültiger Anmeldung aus; HTTP 401 heißt: abgelaufen. */
+  /** Führt einen Aufruf nur mit gültiger Anmeldung aus und gibt ihm das Token; HTTP 401 heißt: abgelaufen. */
   async mitAnmeldung(aufruf) {
     const abgelaufen = new Error('Die Anmeldung ist abgelaufen. Bitte neu anmelden.');
     if (!this.angemeldet()) {
@@ -314,7 +317,7 @@ export class PostgrestQuelle extends Datenquelle {
       throw abgelaufen;
     }
     try {
-      return await aufruf();
+      return await aufruf(this.sitzung.token);
     } catch (fehler) {
       if (/HTTP 401/.test(fehler.message)) {
         this.sitzung = null;
@@ -360,32 +363,32 @@ export class PostgrestQuelle extends Datenquelle {
     return zeile ? zeile.status : null;
   }
   meineRollen() {
-    return this.mitAnmeldung(async () => {
+    return this.mitAnmeldung(async token => {
       const rollen = [];
       for (const rolle of ['moderation', 'qualitaet']) {
-        if (await this.rufe('hat_rolle', { p_rolle: rolle })) rollen.push(rolle);
+        if (await this.rufe('hat_rolle', { p_rolle: rolle }, { token })) rollen.push(rolle);
       }
       return rollen;
     });
   }
-  moderationListe()      { return this.mitAnmeldung(() => this.hole('v_moderation', '', { schema: this.schemaWawi, frisch: true })); }
-  qsFaelle()             { return this.mitAnmeldung(() => this.hole('v_qs_faelle', '', { schema: this.schemaWawi, frisch: true })); }
-  entscheidungenLetzte() { return this.mitAnmeldung(() => this.hole('v_entscheidungen_letzte', '', { schema: this.schemaWawi, frisch: true })); }
+  moderationListe()      { return this.mitAnmeldung(token => this.hole('v_moderation', '', { schema: this.schemaWawi, frisch: true, token })); }
+  qsFaelle()             { return this.mitAnmeldung(token => this.hole('v_qs_faelle', '', { schema: this.schemaWawi, frisch: true, token })); }
+  entscheidungenLetzte() { return this.mitAnmeldung(token => this.hole('v_entscheidungen_letzte', '', { schema: this.schemaWawi, frisch: true, token })); }
   async pruefdienstStand() {
     const [zeile] = await this.hole('v_pruefdienst_stand', '', { schema: this.schemaWawi, frisch: true });
     return zeile || null;
   }
   rezensionFreigeben(rezensionId, bemerkung) {
-    return this.mitAnmeldung(() => this.rufe('api_rezension_freigeben',
-      { rezension_id: Number(rezensionId), bemerkung: bemerkung || null }));
+    return this.mitAnmeldung(token => this.rufe('api_rezension_freigeben',
+      { rezension_id: Number(rezensionId), bemerkung: bemerkung || null }, { token }));
   }
   rezensionAblehnen(rezensionId, bemerkung) {
-    return this.mitAnmeldung(() => this.rufe('api_rezension_ablehnen',
-      { rezension_id: Number(rezensionId), bemerkung: bemerkung || null }));
+    return this.mitAnmeldung(token => this.rufe('api_rezension_ablehnen',
+      { rezension_id: Number(rezensionId), bemerkung: bemerkung || null }, { token }));
   }
   qsFallErledigen(qsFallId, bemerkung) {
-    return this.mitAnmeldung(() => this.rufe('api_qs_fall_erledigen',
-      { qs_fall_id: Number(qsFallId), bemerkung: bemerkung || null }));
+    return this.mitAnmeldung(token => this.rufe('api_qs_fall_erledigen',
+      { qs_fall_id: Number(qsFallId), bemerkung: bemerkung || null }, { token }));
   }
   alterUmsatz()        { return this.hole('v_alter_umsatz', 'order=umsatz.desc'); }
   heimatbezirk()       { return this.hole('v_heimatbezirk', ''); }

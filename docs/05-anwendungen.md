@@ -95,7 +95,7 @@ Die Daten entstehen nicht nur auf dem Bildschirm. Bei jeder Zahlung schreibt die
 
 Damit schließt sich der Kreis zum Datenmodell: Die Granularität aus [Kapitel 2](02-datenmodell.md#24-granularität-die-wichtigste-entscheidung) wird an der Kasse sichtbar, wo sie entsteht — und der Weg von dort ins Auswertungsmodell ist der ETL-Schritt aus `db/aufbau/0019`, nicht mehr eine Behauptung.
 
-**Rezensionen.** Der Knopf „Rezensionen“ in der Kopfleiste zeigt, wie viele Rezensionen zurückgehalten sind und wie viele QS-Fälle offen sind (`v_pruefdienst_stand`, ohne Anmeldung). Der Bereich dahinter braucht ein Supabase-Konto mit der Rolle `moderation` oder `qualitaet` (`wawi_intern.mitarbeiter_rolle`); die Anmeldung geht an den Anmeldedienst von Supabase, das Token lebt im `sessionStorage` des Tabs und gilt eine Stunde. Die Moderation sieht die zurückgehaltenen Rezensionen mit Gründen und Jevs Wahrscheinlichkeiten und entscheidet über `api_rezension_freigeben()` und `api_rezension_ablehnen()`; die Qualitätssicherung schließt Hinweise auf Gesundheitsrisiken mit `api_qs_fall_erledigen()`. Wartet eine offene Rezension fünf Minuten oder länger, warnt die Statuszeile, dass der Prüfdienst womöglich steht. Die Logik steht in `web/js/moderation.js`; Kasse und Manager-PIN sind davon unberührt.
+**Rezensionen.** Der Knopf „Rezensionen“ in der Kopfleiste zählt zurückgehaltene Rezensionen und offene QS-Fälle zusammen (`v_pruefdienst_stand`, ohne Anmeldung); unter 1280 px zeigt er nur Symbol und Zahl. Der Bereich dahinter braucht ein Supabase-Konto mit der Rolle `moderation` oder `qualitaet` (`wawi_intern.mitarbeiter_rolle`); die Anmeldung geht an den Anmeldedienst von Supabase, das Token lebt im `sessionStorage` des Tabs und gilt eine Stunde. Die Moderation sieht die zurückgehaltenen Rezensionen mit Gründen und Jevs Wahrscheinlichkeiten und entscheidet über `api_rezension_freigeben()` und `api_rezension_ablehnen()`; die Qualitätssicherung schließt Hinweise auf Gesundheitsrisiken mit `api_qs_fall_erledigen()`. Wartet eine offene Rezension fünf Minuten oder länger, warnt die Statuszeile, dass der Prüfdienst womöglich steht. Abmelden wirkt sofort und beendet nur diese Sitzung; läuft die Anmeldung ab, meldet die Kasse innerhalb einer Minute ab. Die Logik steht in `web/js/moderation.js`. Kasse und Manager-PIN sind davon unberührt: Nur die Aufrufe der Moderation tragen das Token, Bestellungen gehen weiter mit dem öffentlichen Schlüssel.
 
 ---
 
@@ -116,16 +116,18 @@ Die Filialkarte nutzt **Leaflet 1.9.4** mit den acht Geokoordinaten aus `dim_bra
 Alle Bibliotheken werden zur Laufzeit von öffentlichen CDNs geladen, jeweils auf eine exakte Version festgelegt:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
+        integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 ```
 
 Daraus folgen zwei Eigenschaften, die man kennen sollte:
 
 **Die Anwendungen brauchen eine Internetverbindung.** Ohne sie fehlen Diagramme, Symbole und Karte. Das steht in einem gewissen Widerspruch zum Anspruch „läuft per Doppelklick" und wäre durch lokale Kopien der Bibliotheken auflösbar.
 
-**Es gibt keine Subresource Integrity.** Die Einbindungen tragen kein `integrity`-Attribut. Ein verändertes Auslieferungspaket auf dem CDN würde ungeprüft ausgeführt. Für ein Lehrprojekt ohne Anmeldung und ohne personenbezogene Daten ist das Risiko begrenzt, es ist aber eine echte Lücke — und selbst ein lohnendes Unterrichtsthema.
+**Skripte tragen Subresource Integrity.** Seit es im POS eine Anmeldung gibt, liegt im `sessionStorage` eines Tabs ein Token, und jede Seite derselben Herkunft könnte es lesen, auch das Dashboard mit Chart.js und der Shop mit Leaflet. Deshalb tragen alle fremden Skripte ein `integrity`-Attribut mit dem SHA-384-Hash der festgelegten Version; ein verändertes Paket auf dem CDN führt der Browser nicht aus. Stylesheets (Google Fonts, Font Awesome, Leaflet-CSS) bleiben ohne Hash: Sie können kein Token lesen, und Google Fonts liefert je Browser eine andere Datei. Ein neues Skript oder ein Versionswechsel braucht einen neuen Hash.
 
 ---
 

@@ -159,3 +159,49 @@ test('abmelden ruft logout und vergisst das Token', async t => {
   assert.deepEqual(pfade, ['/auth/v1/logout']);
   assert.equal(q.angemeldet(), false);
 });
+
+test('angemeldet: nur die Moderation trägt das Token, Kasse und Stand den öffentlichen Schlüssel', async t => {
+  const kopf = [];
+  t.mock.method(globalThis, 'fetch', async (url, optionen) => {
+    kopf.push([new URL(url).pathname, optionen.headers.Authorization]);
+    return antwort([]);
+  });
+  const q = quelle();
+  q.sitzungUebernehmen({ token: 'nutzer-token', gueltigBis: Date.now() + 60000 });
+  await q.bestellungAnlegen({});
+  await q.pruefdienstStand();
+  await q.moderationListe();
+  await q.rezensionFreigeben(7, '');
+  assert.deepEqual(kopf, [
+    ['/rest/v1/rpc/bestellung_anlegen', 'Bearer test'],
+    ['/rest/v1/v_pruefdienst_stand', 'Bearer test'],
+    ['/rest/v1/v_moderation', 'Bearer nutzer-token'],
+    ['/rest/v1/rpc/api_rezension_freigeben', 'Bearer nutzer-token'],
+  ]);
+});
+
+test('abmelden vergisst das Token sofort und meldet nur diese Sitzung ab', async t => {
+  const aufrufe = [];
+  t.mock.method(globalThis, 'fetch', (url, optionen) => {
+    aufrufe.push([String(url), optionen.headers.Authorization]);
+    return new Promise(() => {});   // der Anmeldedienst antwortet nicht
+  });
+  const q = quelle();
+  q.sitzungUebernehmen({ token: 't', gueltigBis: Date.now() + 60000 });
+  q.abmelden();
+  assert.equal(q.angemeldet(), false);
+  assert.deepEqual(aufrufe, [['https://example.invalid/auth/v1/logout?scope=local', 'Bearer t']]);
+});
+
+test('Ladefehler einer Sicht nennen die Meldung der Datenbank, nicht das JSON', async t => {
+  t.mock.method(globalThis, 'fetch', async () =>
+    new Response('{"code":"PGRST205","message":"Could not find the table"}', { status: 404 }));
+  await assert.rejects(quelle().pruefdienstStand(), { message: 'v_pruefdienst_stand: HTTP 404 — Could not find the table' });
+});
+
+test('anmelden: zu viele Versuche und Störungen ergeben verständliche Meldungen', async t => {
+  t.mock.method(globalThis, 'fetch', async () => new Response('{}', { status: 429 }));
+  await assert.rejects(quelle().anmelden('a@example.org', 'x'), /Zu viele Anmeldeversuche/);
+  t.mock.method(globalThis, 'fetch', async () => new Response('{}', { status: 503 }));
+  await assert.rejects(quelle().anmelden('a@example.org', 'x'), /Der Anmeldedienst antwortet nicht \(HTTP 503\)/);
+});
