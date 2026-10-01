@@ -115,3 +115,14 @@ test('rezensionenLesen: zehn freigegebene, neueste zuerst, Seiten und Filter', a
 test('rezensionStatus: eine unbekannte Rezension ergibt null', async () => {
   assert.equal(await quelle.rezensionStatus(2147483647), null);
 });
+
+test('pruefdienstStand: ohne Anmeldung lesbar', async () => {
+  const stand = await quelle.pruefdienstStand();
+  for (const feld of ['offen', 'zurueckgehalten', 'qs_offen']) assert.equal(typeof stand[feld], 'number');
+});
+
+test('Moderation: ohne Anmeldung abgewiesen, noch vor dem Server', async () => {
+  const frisch = waehleQuelle(QUELLE);
+  await assert.rejects(frisch.moderationListe(), /abgelaufen/);
+  await assert.rejects(frisch.rezensionFreigeben(1), /abgelaufen/);
+});

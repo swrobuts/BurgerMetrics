@@ -206,7 +206,7 @@ Bekannt, nicht behoben, mit Bewertung:
 | Punkt | Bewertung |
 |---|---|
 | `dashboard.html` verlinkt auf keine andere Seite; keine Unterseite führt zurück zum Einstieg | Betrifft die Bedienbarkeit, nicht die Fachlichkeit |
-| Keine Subresource Integrity bei den CDN-Einbindungen | Echte Lücke; Risiko begrenzt, da keine Anmeldung und keine personenbezogenen Daten |
+| Subresource Integrity nur für Skripte, nicht für Stylesheets der CDNs | Seit Oktober 2026 tragen die fremden Skripte einen Hash (Token der Moderation im `sessionStorage`); Stylesheets können kein Token lesen, Google Fonts liefert je Browser andere Dateien |
 | Anwendungen brauchen Internetzugang | Steht im Widerspruch zu „läuft per Doppelklick"; durch lokale Bibliothekskopien auflösbar |
 | Keine automatisierte Prüfung der Anwendungen | Vor jedem Bibliothekswechsel manuelle Browser-Prüfung nötig |
 | Keine Historisierung (SCD) | Für die Leitfragen ausreichend; als Erweiterungsaufgabe vorgemerkt |

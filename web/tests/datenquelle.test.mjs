@@ -83,3 +83,125 @@ test('rezensionStatus: Status der Zeile oder null', async t => {
   assert.equal(await quelle().rezensionStatus(5), 'offen');
   assert.equal(await quelle().rezensionStatus(6), null);
 });
+
+test('anmelden: Token aus der Antwort, danach als Authorization', async t => {
+  const aufrufe = [];
+  t.mock.method(globalThis, 'fetch', async (url, optionen) => {
+    aufrufe.push({ url: String(url), optionen });
+    if (String(url).includes('/auth/v1/token')) return antwort({ access_token: 'nutzer-token', expires_in: 3600 });
+    return antwort([{ rezension_id: 1 }]);
+  });
+  const q = quelle();
+  const sitzung = await q.anmelden('a@example.org', 'geheim');
+  assert.equal(sitzung.token, 'nutzer-token');
+  assert.ok(sitzung.gueltigBis > Date.now() + 3400 * 1000);
+  assert.equal(new URL(aufrufe[0].url).searchParams.get('grant_type'), 'password');
+  assert.deepEqual(JSON.parse(aufrufe[0].optionen.body), { email: 'a@example.org', password: 'geheim' });
+  await q.moderationListe();
+  assert.equal(aufrufe[1].optionen.headers.Authorization, 'Bearer nutzer-token');
+  assert.equal(aufrufe[1].optionen.headers.apikey, 'test');
+});
+
+test('anmelden: falsches Passwort ergibt eine verständliche Meldung', async t => {
+  t.mock.method(globalThis, 'fetch', async () => new Response('{"error":"invalid_grant"}', { status: 400 }));
+  await assert.rejects(quelle().anmelden('a@example.org', 'falsch'), /E-Mail oder Passwort stimmen nicht/);
+});
+
+test('ohne Anmeldung: Moderation abgewiesen, Stand lesbar', async t => {
+  t.mock.method(globalThis, 'fetch', async () => antwort([{ offen: 0, zurueckgehalten: 2, qs_offen: 1 }]));
+  const q = quelle();
+  await assert.rejects(q.moderationListe(), /abgelaufen/);
+  await assert.rejects(q.rezensionFreigeben(1), /abgelaufen/);
+  assert.deepEqual(await q.pruefdienstStand(), { offen: 0, zurueckgehalten: 2, qs_offen: 1 });
+});
+
+test('abgelaufene Sitzung wird nicht übernommen, 401 meldet ab', async t => {
+  const q = quelle();
+  assert.equal(q.sitzungUebernehmen({ token: 'alt', gueltigBis: Date.now() - 1 }), false);
+  assert.equal(q.sitzungUebernehmen({ token: 'neu', gueltigBis: Date.now() + 60000 }), true);
+  t.mock.method(globalThis, 'fetch', async () => new Response('{"message":"JWT expired"}', { status: 401 }));
+  await assert.rejects(q.qsFaelle(), /abgelaufen/);
+  assert.equal(q.angemeldet(), false);
+});
+
+test('Entscheidungen gehen mit Nummer und Bemerkung an die RPC', async t => {
+  const aufrufe = [];
+  t.mock.method(globalThis, 'fetch', async (url, optionen) => {
+    aufrufe.push([new URL(url).pathname, JSON.parse(optionen.body)]);
+    return antwort({ status: 'ok' });
+  });
+  const q = quelle();
+  q.sitzungUebernehmen({ token: 't', gueltigBis: Date.now() + 60000 });
+  await q.rezensionFreigeben('7', '');
+  await q.rezensionAblehnen(8, 'Werbung');
+  await q.qsFallErledigen(3, 'Filiale informiert');
+  assert.deepEqual(aufrufe, [
+    ['/rest/v1/rpc/api_rezension_freigeben', { rezension_id: 7, bemerkung: null }],
+    ['/rest/v1/rpc/api_rezension_ablehnen', { rezension_id: 8, bemerkung: 'Werbung' }],
+    ['/rest/v1/rpc/api_qs_fall_erledigen', { qs_fall_id: 3, bemerkung: 'Filiale informiert' }],
+  ]);
+});
+
+test('meineRollen fragt hat_rolle je Rolle', async t => {
+  t.mock.method(globalThis, 'fetch', async (url, optionen) =>
+    antwort(JSON.parse(optionen.body).p_rolle === 'qualitaet'));
+  const q = quelle();
+  q.sitzungUebernehmen({ token: 't', gueltigBis: Date.now() + 60000 });
+  assert.deepEqual(await q.meineRollen(), ['qualitaet']);
+});
+
+test('abmelden ruft logout und vergisst das Token', async t => {
+  const pfade = [];
+  t.mock.method(globalThis, 'fetch', async url => { pfade.push(new URL(url).pathname); return new Response(null, { status: 204 }); });
+  const q = quelle();
+  q.sitzungUebernehmen({ token: 't', gueltigBis: Date.now() + 60000 });
+  await q.abmelden();
+  assert.deepEqual(pfade, ['/auth/v1/logout']);
+  assert.equal(q.angemeldet(), false);
+});
+
+test('angemeldet: nur die Moderation trägt das Token, Kasse und Stand den öffentlichen Schlüssel', async t => {
+  const kopf = [];
+  t.mock.method(globalThis, 'fetch', async (url, optionen) => {
+    kopf.push([new URL(url).pathname, optionen.headers.Authorization]);
+    return antwort([]);
+  });
+  const q = quelle();
+  q.sitzungUebernehmen({ token: 'nutzer-token', gueltigBis: Date.now() + 60000 });
+  await q.bestellungAnlegen({});
+  await q.pruefdienstStand();
+  await q.moderationListe();
+  await q.rezensionFreigeben(7, '');
+  assert.deepEqual(kopf, [
+    ['/rest/v1/rpc/bestellung_anlegen', 'Bearer test'],
+    ['/rest/v1/v_pruefdienst_stand', 'Bearer test'],
+    ['/rest/v1/v_moderation', 'Bearer nutzer-token'],
+    ['/rest/v1/rpc/api_rezension_freigeben', 'Bearer nutzer-token'],
+  ]);
+});
+
+test('abmelden vergisst das Token sofort und meldet nur diese Sitzung ab', async t => {
+  const aufrufe = [];
+  t.mock.method(globalThis, 'fetch', (url, optionen) => {
+    aufrufe.push([String(url), optionen.headers.Authorization]);
+    return new Promise(() => {});   // der Anmeldedienst antwortet nicht
+  });
+  const q = quelle();
+  q.sitzungUebernehmen({ token: 't', gueltigBis: Date.now() + 60000 });
+  q.abmelden();
+  assert.equal(q.angemeldet(), false);
+  assert.deepEqual(aufrufe, [['https://example.invalid/auth/v1/logout?scope=local', 'Bearer t']]);
+});
+
+test('Ladefehler einer Sicht nennen die Meldung der Datenbank, nicht das JSON', async t => {
+  t.mock.method(globalThis, 'fetch', async () =>
+    new Response('{"code":"PGRST205","message":"Could not find the table"}', { status: 404 }));
+  await assert.rejects(quelle().pruefdienstStand(), { message: 'v_pruefdienst_stand: HTTP 404 — Could not find the table' });
+});
+
+test('anmelden: zu viele Versuche und Störungen ergeben verständliche Meldungen', async t => {
+  t.mock.method(globalThis, 'fetch', async () => new Response('{}', { status: 429 }));
+  await assert.rejects(quelle().anmelden('a@example.org', 'x'), /Zu viele Anmeldeversuche/);
+  t.mock.method(globalThis, 'fetch', async () => new Response('{}', { status: 503 }));
+  await assert.rejects(quelle().anmelden('a@example.org', 'x'), /Der Anmeldedienst antwortet nicht \(HTTP 503\)/);
+});
